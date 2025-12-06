@@ -1,0 +1,95 @@
+/* iOS Safari-specific fixes for navigation */
+
+/* Prevent iOS from applying default touch behaviors */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Ensure proper scrolling on iOS */
+.mobile-scroll-container {
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+/* Ensure buttons are tappable on iOS */
+button, a, [role="button"] {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Fix for iOS Safari fixed positioning */
+@supports (-webkit-touch-callout: none) {
+  .ios-fixed-header {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+/* Prevent text selection on iOS when tapping UI elements */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Ensure proper touch targets for iOS */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Fix iOS Safari viewport height issues */
+@supports (-webkit-touch-callout: none) {
+  .full-height-mobile {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Fix for Sheet/Dialog z-index on iOS */
+[data-radix-portal] {
+  z-index: 9999;
+}
+
+/* Ensure overlay is clickable on iOS */
+[data-radix-dialog-overlay] {
+  cursor: pointer;
+  touch-action: auto;
+}
+
+/* iOS Safe Area Support for Navigation */
+@supports (padding-top: env(safe-area-inset-top)) {
+  .ios-safe-area-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  
+  .ios-safe-area-top > * {
+    padding-top: 0; /* Reset for children */
+  }
+}
+
+/* Force navigation to be visible on iOS Safari */
+@supports (-webkit-touch-callout: none) {
+  header, nav {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+    -webkit-perspective: 1000;
+    perspective: 1000;
+  }
+}
+
+/* Ensure sticky positioning works on all iOS Safari versions */
+@supports (-webkit-overflow-scrolling: touch) {
+  .sticky {
+    position: -webkit-sticky;
+    position: sticky;
+  }
+}
+
+/* Fix for iOS preventing navigation from being hidden behind notch */
+@media (max-width: 768px) {
+  header[class*="sticky"], nav[class*="sticky"], nav[class*="fixed"], header[class*="fixed"] {
+    padding-top: max(env(safe-area-inset-top), 0px);
+  }
+}

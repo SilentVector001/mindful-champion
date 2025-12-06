@@ -1,0 +1,465 @@
+{
+  "metadata": {
+    "created_date": "2025-10-25",
+    "total_categories": 9,
+    "total_videos": 25,
+    "description": "Curated collection of high-quality YouTube instructional videos for pickleball drill demonstrations, organized by drill category to match the Mindful Champion app's drill library."
+  },
+  "drill_categories": [
+    {
+      "category": "serving",
+      "display_name": "Serving Drills",
+      "description": "Improve your serve accuracy, power, and strategic placement with these instructional videos covering target practice, serve variations, and pressure situations.",
+      "video_count": 3,
+      "videos": [
+        {
+          "title": "Pickleball Serve Tutorial with Federico Staksrud",
+          "url": "https://www.youtube.com/watch?v=_ew47Dqi-3w",
+          "channel": "Various",
+          "estimated_duration": "10-15 min",
+          "description": "Professional player Federico Staksrud demonstrates serve motion, grip techniques (covered at 4:27), and practice drills (at 8:09) showing how to develop a consistent, high-speed serve with proper spin and placement.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Serve motion and mechanics",
+            "Grip techniques for spin",
+            "Practice drills for consistency",
+            "Power serve development"
+          ]
+        },
+        {
+          "title": "Increase Your Serve Accuracy with This Proven Drill",
+          "url": "https://primetimepickleball.com/increase-your-serve-accuracy-with-this-proven-drill/",
+          "channel": "Prime Time Pickleball",
+          "estimated_duration": "5-8 min",
+          "description": "Proven drill using cones and targets to develop pinpoint serving accuracy. Focuses on simple ball release technique and mixing serve types (topspin, sidespin, lobs) to keep opponents guessing.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Target serve placement",
+            "Using cones for accuracy",
+            "Serve variation techniques",
+            "Consistent contact practice"
+          ]
+        },
+        {
+          "title": "Weaponize Your Pickleball Serve",
+          "url": "https://www.playpickleball.com/weaponize-your-pickleball-serve/",
+          "channel": "PlayPickleball.com",
+          "estimated_duration": "8-12 min",
+          "description": "Learn to weaponize your serve through improved depth and power using wrist lag drills, kneeling hip-drive exercises, and follow-through techniques for maximum effectiveness.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Wrist lag for power",
+            "Hip rotation drills",
+            "Depth control techniques",
+            "Follow-through mechanics"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "dinking",
+      "display_name": "Dinking Drills",
+      "description": "Master the soft game with drills focused on control, consistency, and strategic dinking at the kitchen line.",
+      "video_count": 4,
+      "videos": [
+        {
+          "title": "Dinking Tips with Catherine Parenteau",
+          "url": "https://www.youtube.com/watch?v=0RW903Wlr5o",
+          "channel": "Various",
+          "estimated_duration": "8-12 min",
+          "description": "Professional player Catherine Parenteau covers dinking fundamentals including grip usage, partner drills, and mastering aggressive dinks through controlled practice techniques.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Proper dinking grip",
+            "Partner practice drills",
+            "Aggressive dink techniques",
+            "Control and placement"
+          ]
+        },
+        {
+          "title": "Pickleball Dinking Drills Playlist",
+          "url": "https://www.youtube.com/playlist?list=PLf5SOZbiy_ZjbXqyI-FaBn0mn4zS_fblZ",
+          "channel": "Various Instructors",
+          "estimated_duration": "Multiple 3-5 min videos",
+          "description": "Comprehensive playlist including warm-up drills (Forehand Dinks, Backhand Dink), control exercises (You Go - I Go Dink Control Drill), movement drills (Control Your Dinks While On The Move), and the popular Figure 8 Pickleball Dinking Drill (15K views).",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Forehand and backhand dinks",
+            "Dink control and consistency",
+            "Movement while dinking",
+            "Pattern-based drills"
+          ]
+        },
+        {
+          "title": "2-Person Pickleball Dink Drills",
+          "url": "https://www.playpickleball.com/2-person-pickleball-dink-drills/",
+          "channel": "PlayPickleball.com",
+          "estimated_duration": "10-15 min",
+          "description": "Partner-based drills including the Figure 8 Drill (diagonal and straight patterns) and Battleships Drill (targeting cones at opponent's feet with speed-up options for high balls).",
+          "skill_level": "Intermediate",
+          "key_topics": [
+            "Figure 8 pattern drilling",
+            "Battleships targeting drill",
+            "Partner coordination",
+            "Speed-up opportunities"
+          ]
+        },
+        {
+          "title": "2 Touch Dink Ball Control Drill",
+          "url": "https://primetimepickleball.com/2-touch-dink-ball-control-drill/",
+          "channel": "Prime Time Pickleball",
+          "estimated_duration": "6-10 min",
+          "description": "Progressive 4-level drill system: Level 1 (Bounce-Touch-Bounce-Touch), Level 2 (Bounce-Touch-Touch), Level 3 (Touch-Bounce-Touch), Level 4 (Touch-Touch volleys), each building paddle control and soft hands.",
+          "skill_level": "Beginner-Intermediate",
+          "key_topics": [
+            "Progressive touch development",
+            "Paddle control exercises",
+            "Soft hands training",
+            "4-level skill progression"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "third_shot",
+      "display_name": "Third Shot Drop Drills",
+      "description": "Learn the most important shot in pickleball - the third shot drop - for effective net advancement and neutralizing opponent advantages.",
+      "video_count": 3,
+      "videos": [
+        {
+          "title": "Third Shot Drop Tutorial",
+          "url": "https://www.youtube.com/watch?v=l8AzqCNxDTI",
+          "channel": "Various",
+          "estimated_duration": "8-12 min",
+          "description": "Comprehensive tutorial on third shot drop fundamentals including proper arc height, contact points, and positioning strategies for consistent execution from the baseline.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Basic drop shot mechanics",
+            "Arc height visualization",
+            "Contact point timing",
+            "Baseline positioning"
+          ]
+        },
+        {
+          "title": "Third Shot Drop Breakdown - The Three Ls",
+          "url": "https://www.youtube.com/watch?v=Bz2wXIKHXcs",
+          "channel": "Various",
+          "estimated_duration": "10-15 min",
+          "description": "Detailed breakdown covering contact points, court position, and the 'three Ls' framework (low, loop, and land) for mastering third shot drop technique and strategy.",
+          "skill_level": "Intermediate",
+          "key_topics": [
+            "The three Ls framework",
+            "Contact point optimization",
+            "Court positioning strategy",
+            "Technique refinement"
+          ]
+        },
+        {
+          "title": "Third Shot Drop - Scientific Method",
+          "url": "https://www.youtube.com/watch?v=Cw6Iz0nS0ds",
+          "channel": "Various",
+          "estimated_duration": "12-18 min",
+          "description": "Scientific approach to third shot drops explaining ball speed (20-30 mph), height calculations (5-6 feet at apex), spin variations, and guaranteed landing techniques using physics principles.",
+          "skill_level": "Advanced",
+          "key_topics": [
+            "Ball speed optimization",
+            "Physics of arc trajectory",
+            "Spin variations (topspin/slice)",
+            "Scientific measurement approach"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "volley",
+      "display_name": "Volley Drills",
+      "description": "Develop quick hands and net reflexes with these volley drills at the kitchen line, emphasizing reaction time and control.",
+      "video_count": 2,
+      "videos": [
+        {
+          "title": "Moving Volley Drill at Kitchen Line",
+          "url": "https://www.youtube.com/watch?v=HG3cE1v24TQ",
+          "channel": "Various",
+          "estimated_duration": "5-8 min",
+          "description": "Demonstrates a cooperative moving volley drill that improves volley shots at the kitchen line through dynamic movement, helping players warm up and increase accuracy under motion.",
+          "skill_level": "Intermediate",
+          "key_topics": [
+            "Kitchen line volleys",
+            "Movement coordination",
+            "Warm-up techniques",
+            "Dynamic accuracy"
+          ]
+        },
+        {
+          "title": "Comprehensive Volley Strategy with Drills",
+          "url": "https://engagepickleball.com/blogs/tips/comprehensive-volley-strategy-in-pickleball-with-drills",
+          "channel": "Engage Pickleball",
+          "estimated_duration": "10-15 min",
+          "description": "Integrated approach combining punch volleys (aggressive drives) and block volleys (defensive absorbs) with drills for controlling pace and targeting opponents' weaknesses at the kitchen line.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Punch vs block volleys",
+            "Offensive volley tactics",
+            "Defensive positioning",
+            "Pace control strategies"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "footwork",
+      "display_name": "Footwork & Movement Drills",
+      "description": "Enhance your court movement, agility, and positioning with fundamental footwork drills including split-step mastery and transition zone navigation.",
+      "video_count": 3,
+      "videos": [
+        {
+          "title": "Pickleball Footwork Improvements",
+          "url": "https://www.youtube.com/watch?v=_x6KOmTyRGE",
+          "channel": "Various",
+          "estimated_duration": "8-12 min",
+          "description": "Visual demonstration of footwork improvements during transitions, focusing on reaction time and agility in the critical transition zone between baseline and kitchen line.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Transition zone movement",
+            "Reaction time improvement",
+            "Court positioning",
+            "Agility development"
+          ]
+        },
+        {
+          "title": "Split Step Timing Drill",
+          "url": "https://engagepickleball.com/blogs/tips/comprehensive-strategy-for-working-through-the-transition-zone-in-pickleball",
+          "channel": "Engage Pickleball",
+          "estimated_duration": "6-10 min",
+          "description": "Players start at baseline, advance forward with partner feeding balls, performing split step just as opponent contacts ball, repeating while moving closer to NVZ to improve timing and balance under pressure.",
+          "skill_level": "Intermediate",
+          "key_topics": [
+            "Split step timing",
+            "Progressive advancement",
+            "Balance under pressure",
+            "NVZ approach technique"
+          ]
+        },
+        {
+          "title": "6 Essential Footwork Drills",
+          "url": "https://successfulpickleball.wordpress.com/2023/04/10/6-footwork-drills-2/",
+          "channel": "Successful Pickleball",
+          "estimated_duration": "10-15 min",
+          "description": "Comprehensive collection including Split-Step Drill (explosive jumps and lateral movements), Recovery Drill (side-stepping back to center), Lateral Agility Drill, and Offensive Transition Drill spanning the full court.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Six complete drills",
+            "Lateral agility training",
+            "Recovery positioning",
+            "Offensive transitions"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "overhead",
+      "display_name": "Overhead Smash Drills",
+      "description": "Master the overhead smash technique for finishing points with power and accuracy while maintaining proper footwork and safety.",
+      "video_count": 2,
+      "videos": [
+        {
+          "title": "Overhead Smash Technique Guide",
+          "url": "https://www.pickleballmax.com/2023/06/pickleball-overhead-smash/",
+          "channel": "Pickleball MAX",
+          "estimated_duration": "10-15 min",
+          "description": "Comprehensive guide covering footwork (side shuffles vs cross-over steps), positioning (getting behind the ball), grip recommendations (western/semi-western), and swing mechanics including the 'trophy pose' and pronation for power.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Safe footwork patterns",
+            "Trophy pose setup",
+            "Pronation technique",
+            "Power generation mechanics"
+          ]
+        },
+        {
+          "title": "Overhead Smash Practice Drills",
+          "url": "https://blog.controlthet.com/pickleball/the-overhead-smash",
+          "channel": "Control The T",
+          "estimated_duration": "8-12 min",
+          "description": "Drills including warm-up with lateral shuffles, target practice using cones, consistency exercises (feeder returns smashes to continue rallies), and defending smash practice for understanding shot dynamics from both sides.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Target practice drills",
+            "Consistency development",
+            "Defensive positioning",
+            "Rally continuation"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "warmup",
+      "display_name": "Warm-Up Routines",
+      "description": "Get ready for play with dynamic warm-up routines to prevent injury, improve performance, and prepare both body and mind for competition.",
+      "video_count": 2,
+      "videos": [
+        {
+          "title": "Quick 5-Minute Pickleball Warm-Up",
+          "url": "https://www.youtube.com/watch?v=_CUYNbcFe-w",
+          "channel": "Various",
+          "estimated_duration": "5 min",
+          "description": "Fast, effective pre-match warm-up covering dynamic stretching (arm circles, leg swings, torso twists), footwork activation (shuffle steps, split-steps), shadow swings, ball bounces, and mental visualization for complete readiness.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "5-minute efficiency",
+            "Dynamic stretching",
+            "Mental preparation",
+            "Pre-match activation"
+          ]
+        },
+        {
+          "title": "Comprehensive Pickleball Warm-Up Exercises",
+          "url": "https://www.youtube.com/watch?v=AaGXyk-UVs4",
+          "channel": "Various",
+          "estimated_duration": "8-10 min",
+          "description": "Detailed warm-up routine featuring cardiovascular prep (jogging, skipping), lower body exercises (forward/lateral lunges, leg swings, butt kicks), core twists, trunk extensions, and upper body mobility (arm circles, inchworms).",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Full-body activation",
+            "Lower body preparation",
+            "Core engagement",
+            "Injury prevention"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "strategy",
+      "display_name": "Strategy & Doubles Tactics",
+      "description": "Elevate your doubles game with strategic drills focused on positioning, communication, partner coordination, and exploiting opponent weaknesses.",
+      "video_count": 3,
+      "videos": [
+        {
+          "title": "Advanced Pickleball Doubles Tactics",
+          "url": "https://www.youtube.com/watch?v=3sxq1_gcOX0",
+          "channel": "Various",
+          "estimated_duration": "15-20 min",
+          "description": "Advanced tactics video covering poaching strategies, stacking formations, communication systems, and timing for when to switch positions and take aggressive shots in doubles play.",
+          "skill_level": "Advanced",
+          "key_topics": [
+            "Advanced poaching",
+            "Stacking techniques",
+            "Partner communication",
+            "Position switching"
+          ]
+        },
+        {
+          "title": "Basic Doubles Strategies for New Players",
+          "url": "https://www.youtube.com/watch?v=JGMLn68RZS8",
+          "channel": "Various",
+          "estimated_duration": "10-15 min",
+          "description": "Foundational doubles strategies including court positioning basics, serve and return tactics, when to advance to the net, and simple communication systems for beginners.",
+          "skill_level": "Beginner-Intermediate",
+          "key_topics": [
+            "Court positioning basics",
+            "Serve/return strategy",
+            "Net advancement timing",
+            "Basic communication"
+          ]
+        },
+        {
+          "title": "Doubles Warm-Up Practice Drill (4 Players)",
+          "url": "https://theartofpickleball.net/doubles-warm-up-practice-for-pickleball-with-four-players/",
+          "channel": "The Art of Pickleball",
+          "estimated_duration": "8-10 min",
+          "description": "Four-player drill where one team dinks straight ahead while the other dinks cross-court, switching after set periods to practice both right-to-left and left-to-right angles, emphasizing touch, placement, and teamwork.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "4-player coordination",
+            "Cross-court patterns",
+            "Team warm-up strategy",
+            "Angle adaptation"
+          ]
+        }
+      ]
+    },
+    {
+      "category": "mental",
+      "display_name": "Mental Game Training",
+      "description": "Build mental toughness and learn to perform under pressure with techniques for focus, resilience, and psychological preparation.",
+      "video_count": 3,
+      "videos": [
+        {
+          "title": "Pickleball Mental Training Techniques",
+          "url": "https://www.paddletek.com/blogs/news/pickleball-mental-training",
+          "channel": "Paddletek",
+          "estimated_duration": "10-15 min",
+          "description": "Comprehensive guide covering visualization exercises (mentally rehearsing perfect shots), breathing techniques (4-7-8 method), pre-match routines for goal-setting, and strategies for building confidence through consistent mental practice.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Visualization exercises",
+            "Breathing techniques",
+            "Pre-match routines",
+            "Confidence building"
+          ]
+        },
+        {
+          "title": "The Pickleball Mental Edge",
+          "url": "https://thepickler.com/learn/the-pickleball-mental-edge/",
+          "channel": "The Pickler",
+          "estimated_duration": "12-18 min",
+          "description": "Eight key mental learnings including 'just play pickleball' (avoid overthinking), building confidence from the start, maintaining positivity, focusing on one shot at a time, riding momentum, and conquering critical scores like 10-10.",
+          "skill_level": "Intermediate-Advanced",
+          "key_topics": [
+            "Avoiding overthinking",
+            "Momentum management",
+            "Critical score psychology",
+            "One-shot focus"
+          ]
+        },
+        {
+          "title": "3 Steps to Build Mental Strength",
+          "url": "https://www.dupr.com/post/3-steps-to-build-mental-strength-to-dominate-on-the-pickleball-court",
+          "channel": "DUPR",
+          "estimated_duration": "8-12 min",
+          "description": "DUPR's framework for mental strength: Release-Reset-Refocus (release negative energy with physical cue, reset through breathing, refocus on actionable steps), plus the CLEAR framework for pressure decision-making and the ADAPT framework for learning from setbacks.",
+          "skill_level": "All Levels",
+          "key_topics": [
+            "Release-Reset-Refocus method",
+            "CLEAR decision framework",
+            "ADAPT resilience system",
+            "Pressure management"
+          ]
+        }
+      ]
+    }
+  ],
+  "integration_notes": {
+    "app_structure": "Videos are organized to match the drill categories in /home/ubuntu/mindful_champion/nextjs_space/lib/drills-data.ts",
+    "drill_mapping": {
+      "serve-001": "serving category - Target Serve Mastery",
+      "serve-002": "serving category - Advanced Serve Variations",
+      "serve-003": "serving category - Pressure Serve Challenge",
+      "dink-001": "dinking category - Cross-Court Dinking Foundation",
+      "dink-002": "dinking category - Advanced Dinking Patterns",
+      "dink-003": "dinking category - Competitive Dinking Games",
+      "third-shot-001": "third_shot category - Third Shot Drop Fundamentals",
+      "volley-001": "volley category - Kitchen Line Volley Battle",
+      "footwork-001": "footwork category - Split-Step Mastery",
+      "footwork-002": "footwork category - Transition Zone Navigation",
+      "warmup-001": "warmup category - 5-Minute Pre-Match Activator",
+      "warmup-002": "warmup category - Partner Pre-Game Routine",
+      "strategy-001": "strategy category - Target the Middle",
+      "overhead-001": "overhead category - Overhead Smash Fundamentals",
+      "mental-001": "mental category - Pressure Point Simulation"
+    },
+    "recommended_implementation": [
+      "Add 'videoDemo' field to existing Drill interface in drills-data.ts",
+      "Map drill IDs to video URLs from this JSON file",
+      "Create video player component for drill detail pages",
+      "Consider adding multiple video options per drill for variety",
+      "Include skill level filtering to match videos to user experience"
+    ],
+    "quality_criteria": {
+      "video_length": "Most videos are 5-15 minutes, ideal for instructional content",
+      "skill_levels": "Balanced mix of beginner, intermediate, and advanced content",
+      "sources": "Mix of professional players, certified coaches, and established pickleball education platforms",
+      "content_type": "Clear instructional focus with demonstrations and technique breakdowns"
+    }
+  }
+}

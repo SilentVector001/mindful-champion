@@ -1,0 +1,46 @@
+const path = require('path');
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  distDir: process.env.NEXT_DIST_DIR || '.next',
+  output: process.env.NEXT_OUTPUT_MODE,
+  experimental: {
+    outputFileTracingRoot: path.join(__dirname, '../'),
+    serverComponentsExternalPackages: [
+      '@tensorflow/tfjs-node',
+      '@tensorflow-models/pose-detection',
+      'canvas',
+    ],
+  },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+  images: { unoptimized: true },
+  webpack: (config, { isServer }) => {
+    // Exclude TensorFlow.js and canvas from client-side bundling
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        '@tensorflow/tfjs-node': false,
+        '@tensorflow-models/pose-detection': false,
+        canvas: false,
+        'mock-aws-s3': false,
+        'aws-sdk': false,
+        'nock': false,
+      };
+    }
+
+    // Ignore node-pre-gyp HTML files
+    config.module = {
+      ...config.module,
+      exprContextCritical: false,
+    };
+
+    return config;
+  },
+};
+
+module.exports = nextConfig;

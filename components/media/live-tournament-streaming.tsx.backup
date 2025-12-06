@@ -1,0 +1,864 @@
+
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  PlayCircle,
+  Activity,
+  Users,
+  MapPin,
+  Clock,
+  Trophy,
+  Circle,
+  Maximize2,
+  Volume2,
+  VolumeX,
+  Pause,
+  Play,
+  RotateCcw,
+  Settings,
+  Heart,
+  Share2,
+  Tv,
+  Radio,
+  Eye,
+  Calendar,
+  ChevronRight,
+  Loader2,
+  AlertCircle,
+  Star,
+  TrendingUp,
+  Zap
+} from 'lucide-react';
+
+interface TournamentMatch {
+  id: string;
+  matchNumber?: string;
+  courtNumber?: string;
+  round?: string;
+  category?: string;
+  team1Player1: string;
+  team1Player2?: string;
+  team2Player1: string;
+  team2Player2?: string;
+  team1Score?: string;
+  team2Score?: string;
+  status: string;
+  isLive: boolean;
+  streamUrl?: string;
+  scheduledTime?: Date;
+  courtLocation?: string;
+}
+
+interface LiveTournament {
+  id: string;
+  name: string;
+  shortName?: string;
+  description?: string;
+  eventDate: Date;
+  organizationName: string;
+  location: string;
+  city?: string;
+  state?: string;
+  venue?: string;
+  logoUrl?: string;
+  broadcastPlatform?: string;
+  streamUrl?: string;
+  embedCode?: string;
+  isLive: boolean;
+  hasLiveScores: boolean;
+  websiteUrl?: string;
+  featured: boolean;
+  viewerCount?: number;
+  matches?: TournamentMatch[];
+}
+
+interface StreamMetadata {
+  streamId: string;
+  title: string;
+  description?: string;
+  platform: string;
+  isLive: boolean;
+  viewerCount: number;
+  thumbnailUrl?: string;
+  quality: string;
+  chatEnabled: boolean;
+  fullscreenEnabled: boolean;
+  seekable: boolean;
+}
+
+export function LiveTournamentStreaming() {
+  const [liveTournaments, setLiveTournaments] = useState<LiveTournament[]>([]);
+  const [upcomingTournaments, setUpcomingTournaments] = useState<LiveTournament[]>([]);
+  const [liveScores, setLiveScores] = useState<any[]>([]);
+  const [selectedTournament, setSelectedTournament] = useState<LiveTournament | null>(null);
+  const [streamMetadata, setStreamMetadata] = useState<StreamMetadata | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isBookmarked, setIsBookmarked] = useState(false);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  useEffect(() => {
+    fetchInitialData();
+    startAutoRefresh();
+
+    return () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (selectedTournament?.streamUrl) {
+      fetchStreamMetadata(selectedTournament.streamUrl, selectedTournament.broadcastPlatform);
+    }
+  }, [selectedTournament]);
+
+  const fetchInitialData = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const [liveRes, upcomingRes, scoresRes] = await Promise.all([
+        fetch('/api/media-hub/live-tournaments?live=true'),
+        fetch('/api/media-hub/live-tournaments?upcoming=true&limit=6'),
+        fetch('/api/media-hub/live-scores?limit=20')
+      ]);
+
+      if (!liveRes.ok || !upcomingRes.ok || !scoresRes.ok) {
+        throw new Error('Failed to fetch tournament data');
+      }
+
+      const [liveData, upcomingData, scoresData] = await Promise.all([
+        liveRes.json(),
+        upcomingRes.json(),
+        scoresRes.json()
+      ]);
+
+      if (liveData.success) {
+        setLiveTournaments(liveData.events);
+        // Auto-select first live tournament
+        if (liveData.events.length > 0) {
+          setSelectedTournament(liveData.events[0]);
+        }
+      }
+
+      if (upcomingData.success) {
+        setUpcomingTournaments(upcomingData.events);
+      }
+
+      if (scoresData.success) {
+        setLiveScores(scoresData.matches);
+      }
+
+    } catch (error) {
+      console.error('Error fetching tournament data:', error);
+      setError('Failed to load tournament data. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchStreamMetadata = async (streamUrl: string, platform?: string) => {
+    try {
+      const params = new URLSearchParams();
+      params.append('streamUrl', streamUrl);
+      if (platform) params.append('platform', platform.toLowerCase());
+
+      const response = await fetch(`/api/media-hub/stream-metadata?${params}`);
+      const data = await response.json();
+
+      if (data.success) {
+        setStreamMetadata(data.metadata);
+      }
+    } catch (error) {
+      console.error('Error fetching stream metadata:', error);
+    }
+  };
+
+  const startAutoRefresh = () => {
+    const interval = setInterval(async () => {
+      try {
+        // Refresh live scores every 30 seconds
+        const scoresRes = await fetch('/api/media-hub/live-scores?limit=20');
+        const scoresData = await scoresRes.json();
+        
+        if (scoresData.success) {
+          setLiveScores(scoresData.matches);
+        }
+
+        // Refresh live tournaments every 2 minutes
+        const liveRes = await fetch('/api/media-hub/live-tournaments?live=true');
+        const liveData = await liveRes.json();
+        
+        if (liveData.success) {
+          setLiveTournaments(liveData.events);
+        }
+      } catch (error) {
+        console.error('Error refreshing data:', error);
+      }
+    }, 30000); // 30 seconds
+
+    setRefreshInterval(interval);
+  };
+
+  const handleTournamentSelect = (tournament: LiveTournament) => {
+    setSelectedTournament(tournament);
+    
+    // Track viewing engagement
+    if (tournament.streamUrl) {
+      fetch('/api/media-hub/live-tournaments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'watch', 
+          eventId: tournament.id,
+          matchId: tournament.matches?.[0]?.id 
+        })
+      }).catch(console.error);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!selectedTournament) return;
+
+    try {
+      const response = await fetch('/api/media-hub/live-tournaments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          action: 'bookmark', 
+          eventId: selectedTournament.id 
+        })
+      });
+
+      if (response.ok) {
+        setIsBookmarked(!isBookmarked);
+      }
+    } catch (error) {
+      console.error('Error bookmarking tournament:', error);
+    }
+  };
+
+  const handleShare = async () => {
+    if (!selectedTournament) return;
+
+    if (navigator.share) {
+      await navigator.share({
+        title: selectedTournament.name,
+        text: `Watch ${selectedTournament.name} live on Mindful Champion!`,
+        url: window.location.href
+      });
+    } else {
+      // Fallback: copy to clipboard
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
+
+  const formatViewerCount = (count?: number) => {
+    if (!count) return '0';
+    if (count < 1000) return count.toString();
+    if (count < 10000) return `${(count / 1000).toFixed(1)}K`;
+    return `${Math.floor(count / 1000)}K`;
+  };
+
+  const getDaysUntil = (date: Date) => {
+    const now = new Date();
+    const eventDate = new Date(date);
+    const diffTime = eventDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  if (loading) {
+    return <LiveStreamingSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-red-50 to-gray-100 p-8">
+        <div className="max-w-4xl mx-auto text-center py-16">
+          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{error}</h1>
+          <Button onClick={fetchInitialData} className="bg-champion-green hover:bg-champion-green/90">
+            <RotateCcw className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const hasLiveContent = liveTournaments.length > 0;
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Hero Section with Live Status */}
+      <div className="bg-gradient-to-r from-champion-green via-champion-blue to-champion-gold p-1">
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+              <div>
+                <div className="flex items-center gap-3 mb-2">
+                  <Tv className="w-8 h-8 text-champion-green" />
+                  <h1 className="text-3xl font-bold text-gray-900">Live Tournament Center</h1>
+                </div>
+                <p className="text-gray-600">
+                  Watch live pro pickleball tournaments with embedded players, real-time scores, and comprehensive match data
+                </p>
+              </div>
+              
+              {hasLiveContent && (
+                <motion.div
+                  initial={{ scale: 0.9 }}
+                  animate={{ scale: 1 }}
+                  className="flex items-center gap-4 bg-red-50 px-6 py-4 rounded-xl border-2 border-red-200"
+                >
+                  <div className="relative">
+                    <Circle className="w-4 h-4 text-red-500 fill-current animate-pulse" />
+                    <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75"></div>
+                  </div>
+                  <div>
+                    <div className="text-lg font-bold text-red-600">LIVE NOW</div>
+                    <div className="text-sm text-gray-600">
+                      {liveTournaments.length} Tournament{liveTournaments.length > 1 ? 's' : ''} • 
+                      {liveScores.filter(m => m.isLive).length} Active Matches
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Tabs defaultValue="live" className="space-y-8">
+          <TabsList className="grid w-full grid-cols-3 lg:w-auto lg:grid-cols-4">
+            <TabsTrigger value="live" className="flex items-center gap-2">
+              <Activity className="w-4 h-4" />
+              Live Now ({liveTournaments.length})
+            </TabsTrigger>
+            <TabsTrigger value="scores" className="flex items-center gap-2">
+              <Trophy className="w-4 h-4" />
+              Live Scores ({liveScores.filter(m => m.isLive).length})
+            </TabsTrigger>
+            <TabsTrigger value="upcoming" className="flex items-center gap-2">
+              <Calendar className="w-4 h-4" />
+              Upcoming ({upcomingTournaments.length})
+            </TabsTrigger>
+            <TabsTrigger value="featured" className="flex items-center gap-2">
+              <Star className="w-4 h-4" />
+              Featured
+            </TabsTrigger>
+          </TabsList>
+
+          {/* Live Tournaments Tab */}
+          <TabsContent value="live" className="space-y-8">
+            {hasLiveContent ? (
+              <div className="grid lg:grid-cols-3 gap-8">
+                {/* Main Video Player */}
+                <div className="lg:col-span-2 space-y-6">
+                  {selectedTournament && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                    >
+                      <Card className="shadow-xl border-2 border-red-200">
+                        <CardHeader className="bg-gradient-to-r from-red-50 to-orange-50 border-b">
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <CardTitle className="flex items-center gap-2 text-xl">
+                                <Circle className="w-3 h-3 text-red-500 fill-current animate-pulse" />
+                                {selectedTournament.name}
+                              </CardTitle>
+                              <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
+                                <span className="flex items-center gap-1">
+                                  <Trophy className="w-4 h-4" />
+                                  {selectedTournament.organizationName}
+                                </span>
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {selectedTournament.location}
+                                </span>
+                                {selectedTournament.broadcastPlatform && (
+                                  <Badge variant="outline" className="bg-blue-50">
+                                    <Tv className="w-3 h-3 mr-1" />
+                                    {selectedTournament.broadcastPlatform}
+                                  </Badge>
+                                )}
+                                {streamMetadata?.viewerCount && (
+                                  <span className="flex items-center gap-1 text-red-600">
+                                    <Eye className="w-4 h-4" />
+                                    {formatViewerCount(streamMetadata.viewerCount)} watching
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center gap-2">
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleBookmark}
+                                className={isBookmarked ? 'text-red-500 border-red-200' : ''}
+                              >
+                                <Heart className={`w-4 h-4 ${isBookmarked ? 'fill-current' : ''}`} />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={handleShare}
+                              >
+                                <Share2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </div>
+                        </CardHeader>
+                        
+                        <CardContent className="p-0">
+                          {selectedTournament.streamUrl ? (
+                            <div className="relative aspect-video bg-black rounded-b-lg overflow-hidden">
+                              <iframe
+                                ref={iframeRef}
+                                src={selectedTournament.streamUrl}
+                                width="100%"
+                                height="100%"
+                                frameBorder="0"
+                                allowFullScreen
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                className="w-full h-full"
+                                title={selectedTournament.name}
+                              />
+                              
+                              {/* Overlay Controls (shown on hover) */}
+                              <div className="absolute inset-0 bg-black/20 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                                <div className="flex items-center gap-4 bg-black/60 rounded-lg px-4 py-2">
+                                  {streamMetadata?.quality && (
+                                    <Badge className="bg-white/20 text-white">
+                                      {streamMetadata.quality}
+                                    </Badge>
+                                  )}
+                                  {streamMetadata?.isLive && (
+                                    <Badge className="bg-red-500 text-white">
+                                      <Circle className="w-2 h-2 mr-1 fill-current animate-pulse" />
+                                      LIVE
+                                    </Badge>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="aspect-video bg-gray-900 rounded-b-lg flex items-center justify-center">
+                              <div className="text-center text-white">
+                                <PlayCircle className="w-16 h-16 mx-auto mb-4 opacity-50" />
+                                <p className="text-lg">Stream currently unavailable</p>
+                                <p className="text-sm opacity-75">Check back later for live coverage</p>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Tournament Description */}
+                          {selectedTournament.description && (
+                            <div className="p-6 border-t">
+                              <p className="text-gray-600">{selectedTournament.description}</p>
+                            </div>
+                          )}
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  )}
+                </div>
+
+                {/* Tournament Selector & Live Matches */}
+                <div className="space-y-6">
+                  {/* Tournament Selector */}
+                  <Card className="shadow-md">
+                    <CardHeader>
+                      <CardTitle className="text-lg">Live Tournaments</CardTitle>
+                    </CardHeader>
+                    <CardContent className="p-4 space-y-3">
+                      {liveTournaments.map((tournament) => (
+                        <motion.div
+                          key={tournament.id}
+                          whileHover={{ scale: 1.02 }}
+                          onClick={() => handleTournamentSelect(tournament)}
+                          className={`cursor-pointer rounded-lg p-4 transition-all border-2 ${
+                            selectedTournament?.id === tournament.id
+                              ? 'border-champion-green bg-champion-green/5'
+                              : 'border-gray-200 hover:border-champion-green/50 bg-gray-50 hover:bg-white'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 line-clamp-1">
+                                {tournament.shortName || tournament.name}
+                              </h3>
+                              <p className="text-xs text-gray-500 mt-1">{tournament.organizationName}</p>
+                              <div className="flex items-center gap-3 text-xs text-gray-600 mt-2">
+                                <span className="flex items-center gap-1">
+                                  <MapPin className="w-3 h-3" />
+                                  {tournament.city}, {tournament.state}
+                                </span>
+                                {tournament.viewerCount && (
+                                  <span className="flex items-center gap-1 text-red-600">
+                                    <Eye className="w-3 h-3" />
+                                    {formatViewerCount(tournament.viewerCount)}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Badge className="bg-red-500 text-white flex-shrink-0 ml-2">
+                              <Circle className="w-2 h-2 mr-1 fill-current animate-pulse" />
+                              LIVE
+                            </Badge>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </CardContent>
+                  </Card>
+
+                  {/* Live Matches */}
+                  {selectedTournament?.matches && selectedTournament.matches.length > 0 && (
+                    <Card className="shadow-md">
+                      <CardHeader>
+                        <CardTitle className="text-lg">Court Updates</CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-4 space-y-3">
+                        {selectedTournament.matches.map((match) => (
+                          <div
+                            key={match.id}
+                            className={`bg-white rounded-lg p-3 border-2 ${
+                              match.isLive ? 'border-red-200' : 'border-gray-200'
+                            }`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-xs font-medium text-gray-500">
+                                {match.courtNumber}
+                              </span>
+                              {match.isLive && (
+                                <Badge className="text-xs bg-red-500 text-white">
+                                  <Circle className="w-2 h-2 mr-1 fill-current animate-pulse" />
+                                  LIVE
+                                </Badge>
+                              )}
+                            </div>
+                            <div className="text-xs text-gray-600 mb-2">{match.category}</div>
+                            <div className="space-y-1">
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">
+                                  {match.team1Player1}
+                                  {match.team1Player2 && ` / ${match.team1Player2}`}
+                                </span>
+                                <span className="text-sm font-bold">{match.team1Score}</span>
+                              </div>
+                              <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium">
+                                  {match.team2Player1}
+                                  {match.team2Player2 && ` / ${match.team2Player2}`}
+                                </span>
+                                <span className="text-sm font-bold">{match.team2Score}</span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-16">
+                <Tv className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">No Live Tournaments</h2>
+                <p className="text-gray-600 mb-6">
+                  There are currently no live tournaments streaming. Check back later or explore upcoming events.
+                </p>
+                <Button onClick={fetchInitialData} variant="outline">
+                  <RotateCcw className="w-4 h-4 mr-2" />
+                  Refresh
+                </Button>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Live Scores Tab */}
+          <TabsContent value="scores" className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              {liveScores.filter(match => match.isLive).map((match) => (
+                <motion.div
+                  key={match.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                >
+                  <Card className="shadow-lg border-2 border-red-200">
+                    <CardHeader className="pb-3 bg-gradient-to-r from-red-50 to-orange-50 border-b">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <CardTitle className="text-lg">{match.event?.shortName || match.event?.name}</CardTitle>
+                          <p className="text-sm text-gray-600">{match.round}</p>
+                        </div>
+                        <Badge className="bg-red-500 text-white">
+                          <Circle className="w-2 h-2 mr-1 fill-current animate-pulse" />
+                          LIVE
+                        </Badge>
+                      </div>
+                    </CardHeader>
+                    <CardContent className="p-4">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">
+                            {match.team1Player1}
+                            {match.team1Player2 && ` / ${match.team1Player2}`}
+                          </span>
+                          <span className="font-bold text-lg">{match.team1Score}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium">
+                            {match.team2Player1}
+                            {match.team2Player2 && ` / ${match.team2Player2}`}
+                          </span>
+                          <span className="font-bold text-lg">{match.team2Score}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between pt-3 border-t text-sm text-gray-600">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {match.courtLocation}
+                          </span>
+                          {match.event?.broadcastPlatform && (
+                            <span className="flex items-center gap-1">
+                              <Tv className="w-3 h-3" />
+                              {match.event.broadcastPlatform}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+            
+            {liveScores.filter(match => match.isLive).length === 0 && (
+              <div className="text-center py-16">
+                <Trophy className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">No Live Matches</h2>
+                <p className="text-gray-600">No matches are currently in progress.</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Upcoming Tournaments Tab */}
+          <TabsContent value="upcoming" className="space-y-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingTournaments.map((tournament) => {
+                const daysUntil = getDaysUntil(tournament.eventDate);
+                return (
+                  <motion.div
+                    key={tournament.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ scale: 1.02, y: -4 }}
+                  >
+                    <Card className="h-full shadow-lg hover:shadow-xl transition-all">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <CardTitle className="line-clamp-2">{tournament.name}</CardTitle>
+                            <p className="text-sm text-gray-600 mt-1">{tournament.organizationName}</p>
+                          </div>
+                          {daysUntil >= 0 && (
+                            <Badge className="bg-champion-gold/10 text-champion-gold border-champion-gold/20 flex-shrink-0 ml-2">
+                              {daysUntil}d
+                            </Badge>
+                          )}
+                        </div>
+                      </CardHeader>
+                      
+                      <CardContent className="space-y-4">
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4" />
+                            <span>
+                              {new Date(tournament.eventDate).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                                year: 'numeric',
+                              })}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <MapPin className="w-4 h-4" />
+                            <span>{tournament.location}</span>
+                          </div>
+                          {tournament.broadcastPlatform && (
+                            <div className="flex items-center gap-2">
+                              <Tv className="w-4 h-4" />
+                              <span>{tournament.broadcastPlatform}</span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        {tournament.description && (
+                          <p className="text-sm text-gray-600 line-clamp-3">{tournament.description}</p>
+                        )}
+                        
+                        {tournament.websiteUrl && (
+                          <Button 
+                            asChild 
+                            variant="outline" 
+                            size="sm" 
+                            className="w-full"
+                          >
+                            <a href={tournament.websiteUrl} target="_blank" rel="noopener noreferrer">
+                              View Details
+                              <ChevronRight className="w-4 h-4 ml-2" />
+                            </a>
+                          </Button>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </TabsContent>
+
+          {/* Featured Tab */}
+          <TabsContent value="featured" className="space-y-6">
+            <div className="grid lg:grid-cols-2 gap-8">
+              {/* Featured Live Stream */}
+              {liveTournaments.find(t => t.featured) && (
+                <Card className="shadow-xl border-2 border-champion-gold/30">
+                  <CardHeader className="bg-gradient-to-r from-champion-gold/10 to-champion-blue/10 border-b">
+                    <CardTitle className="flex items-center gap-2">
+                      <Star className="w-5 h-5 text-champion-gold" />
+                      Featured Tournament
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-6">
+                    {/* Featured tournament content */}
+                    <div className="text-center">
+                      <Tv className="w-16 h-16 text-champion-gold mx-auto mb-4" />
+                      <h3 className="text-xl font-bold mb-2">Premium Live Coverage</h3>
+                      <p className="text-gray-600">Exclusive featured tournaments coming soon</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Tournament Analytics */}
+              <Card className="shadow-xl">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-champion-blue" />
+                    Tournament Stats
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-champion-green">{liveTournaments.length}</div>
+                      <div className="text-sm text-gray-600">Live Now</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-champion-blue">{upcomingTournaments.length}</div>
+                      <div className="text-sm text-gray-600">This Month</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-champion-gold">
+                        {liveScores.filter(m => m.isLive).length}
+                      </div>
+                      <div className="text-sm text-gray-600">Active Matches</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl font-bold text-red-600">
+                        {liveTournaments.reduce((total, t) => total + (t.viewerCount || 0), 0) > 1000 
+                          ? `${Math.floor(liveTournaments.reduce((total, t) => total + (t.viewerCount || 0), 0) / 1000)}K`
+                          : liveTournaments.reduce((total, t) => total + (t.viewerCount || 0), 0)
+                        }
+                      </div>
+                      <div className="text-sm text-gray-600">Total Viewers</div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+function LiveStreamingSkeleton() {
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="bg-gradient-to-r from-champion-green via-champion-blue to-champion-gold p-1">
+        <div className="bg-white">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <Skeleton className="h-8 w-80 mb-2" />
+                <Skeleton className="h-5 w-96" />
+              </div>
+              <Skeleton className="h-16 w-48 rounded-xl" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <Skeleton className="h-12 w-full mb-8" />
+        
+        <div className="grid lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-6 w-64" />
+                <Skeleton className="h-4 w-80" />
+              </CardHeader>
+              <CardContent className="p-0">
+                <Skeleton className="aspect-video w-full" />
+              </CardContent>
+            </Card>
+          </div>
+          
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-32" />
+              </CardHeader>
+              <CardContent>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-20 w-full mb-3" />
+                ))}
+              </CardContent>
+            </Card>
+            
+            <Card>
+              <CardHeader>
+                <Skeleton className="h-5 w-28" />
+              </CardHeader>
+              <CardContent>
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <Skeleton key={i} className="h-16 w-full mb-3" />
+                ))}
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}

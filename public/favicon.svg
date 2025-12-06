@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">
+  <defs>
+    <linearGradient id="mcGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00D084;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0066FF;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFB800;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#00D084;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="256" height="256" fill="#1A1D29"/>
+  
+  <!-- Subtle circuit pattern background -->
+  <path d="M20 50 L60 50 L60 90 M80 30 L120 30 L120 70 M140 60 L180 60 L180 100 M200 40 L240 40" 
+        stroke="#00D084" stroke-width="1" opacity="0.15" fill="none"/>
+  <path d="M30 150 L70 150 L70 190 M90 130 L130 130 L130 170 M150 160 L190 160 L190 200 M210 140 L250 140" 
+        stroke="#0066FF" stroke-width="1" opacity="0.1" fill="none"/>
+  
+  <!-- Main MC lettermark with paddle silhouette -->
+  <g transform="translate(128,128)">
+    <!-- Paddle shape background -->
+    <ellipse cx="0" cy="10" rx="45" ry="55" fill="url(#mcGrad)" opacity="0.2"/>
+    <rect x="-8" y="60" width="16" height="35" rx="8" fill="url(#mcGrad)" opacity="0.2"/>
+    
+    <!-- Letter M -->
+    <path d="M -50 -40 L -50 40 L -40 40 L -40 -5 L -25 25 L -15 25 L 0 -5 L 0 40 L 10 40 L 10 -40 L -5 -40 L -20 0 L -35 -40 Z" 
+          fill="url(#mcGrad)"/>
+    
+    <!-- Letter C -->
+    <path d="M 25 -20 Q 45 -40 70 -20 L 65 -10 Q 50 -25 35 -10 L 35 30 Q 50 45 65 30 L 70 40 Q 45 60 25 40 Q 15 30 15 10 Q 15 -10 25 -20 Z" 
+          fill="url(#mcGrad)"/>
+    
+    <!-- Accent elements -->
+    <circle cx="-35" cy="-50" r="3" fill="#FFB800"/>
+    <circle cx="45" cy="-50" r="3" fill="#FFB800"/>
+    <circle cx="0" cy="75" r="4" fill="url(#accentGrad)"/>
+    
+    <!-- Tech accent lines -->
+    <path d="M -60 45 L -45 45 M 45 45 L 60 45" stroke="#0066FF" stroke-width="2" opacity="0.7"/>
+    <path d="M -10 -55 L 10 -55" stroke="#FFB800" stroke-width="2" opacity="0.8"/>
+  </g>
+  
+  <!-- Corner accents -->
+  <circle cx="30" cy="30" r="2" fill="#00D084" opacity="0.6"/>
+  <circle cx="226" cy="30" r="2" fill="#FFB800" opacity="0.6"/>
+  <circle cx="30" cy="226" r="2" fill="#0066FF" opacity="0.6"/>
+  <circle cx="226" cy="226" r="2" fill="#00D084" opacity="0.6"/>
+</svg>
