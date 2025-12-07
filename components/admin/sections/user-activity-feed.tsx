@@ -130,7 +130,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 Platform Activity Feed
               </CardTitle>
               <CardDescription className="mt-1 text-sm">
-                Real-time user activities • Last 24 hours
+                Real-time user activities • Last 7 days
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -243,8 +243,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 </p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
                   {filter === 'all' 
-                    ? 'No user activities recorded in the last 24 hours. The activity feed will automatically update as users interact with the platform.'
-                    : 'No activities of this type in the last 24 hours. Try a different filter or check back later.'}
+                    ? 'No user activities recorded in the last 7 days. The activity feed will automatically update as users interact with the platform.'
+                    : 'No activities of this type in the last 7 days. Try a different filter or check back later.'}
                 </p>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-4">
                   <p className="text-xs text-blue-700 font-medium mb-2">💡 Activity Feed Tips:</p>

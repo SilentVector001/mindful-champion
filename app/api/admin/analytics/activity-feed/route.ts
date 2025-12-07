@@ -12,14 +12,16 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get activity data from the last 24 hours
-    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
+    // Get activity data from the last 7 days (extended from 24 hours for better visibility)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+    
+    console.log('[Activity Feed] Fetching activities since:', sevenDaysAgo.toISOString())
 
     // Fetch various activities
     const [recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments] = await Promise.all([
       // Recent signups
       prisma.user.findMany({
-        where: { createdAt: { gte: oneDayAgo } },
+        where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         select: {
@@ -35,7 +37,7 @@ export async function GET(request: NextRequest) {
 
       // Recent video uploads
       prisma.videoAnalysis.findMany({
-        where: { uploadedAt: { gte: oneDayAgo } },
+        where: { uploadedAt: { gte: sevenDaysAgo } },
         orderBy: { uploadedAt: 'desc' },
         take: 20,
         include: {
@@ -53,7 +55,7 @@ export async function GET(request: NextRequest) {
 
       // Recent matches
       prisma.match.findMany({
-        where: { createdAt: { gte: oneDayAgo } },
+        where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
@@ -71,7 +73,7 @@ export async function GET(request: NextRequest) {
 
       // Recent goals
       prisma.goal.findMany({
-        where: { createdAt: { gte: oneDayAgo } },
+        where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
@@ -89,7 +91,7 @@ export async function GET(request: NextRequest) {
 
       // Recent coach conversations
       prisma.aIConversation.findMany({
-        where: { createdAt: { gte: oneDayAgo } },
+        where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
@@ -107,7 +109,7 @@ export async function GET(request: NextRequest) {
 
       // Recent payments/subscriptions
       prisma.payment.findMany({
-        where: { createdAt: { gte: oneDayAgo } },
+        where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
@@ -212,15 +214,33 @@ export async function GET(request: NextRequest) {
     // Take top 50
     const topActivities = activities.slice(0, 50)
 
+    console.log('[Activity Feed] Summary:')
+    console.log('  - Signups:', recentSignups.length)
+    console.log('  - Videos:', recentVideos.length)
+    console.log('  - Matches:', recentMatches.length)
+    console.log('  - Goals:', recentGoals.length)
+    console.log('  - Chats:', recentChats.length)
+    console.log('  - Payments:', recentPayments.length)
+    console.log('  - Total activities:', activities.length)
+    console.log('  - Returning:', topActivities.length, 'activities')
+
     return NextResponse.json({
       success: true,
       activities: topActivities,
-      total: activities.length
+      total: activities.length,
+      breakdown: {
+        signups: recentSignups.length,
+        videos: recentVideos.length,
+        matches: recentMatches.length,
+        goals: recentGoals.length,
+        chats: recentChats.length,
+        payments: recentPayments.length
+      }
     })
   } catch (error) {
-    console.error('Error fetching activity feed:', error)
+    console.error('[Activity Feed] Error fetching activity feed:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch activity feed' },
+      { error: 'Failed to fetch activity feed', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
