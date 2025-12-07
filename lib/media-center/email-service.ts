@@ -2,7 +2,9 @@
 import { getResendClient } from '@/lib/email/resend-client';
 import { sendWelcomeEmail as sendWelcomeEmailViaNodemailer } from '@/lib/email';
 import { prisma } from '@/lib/db';
-import { EmailNotificationType } from '@prisma/client';
+
+// Define type locally to avoid Prisma client generation issues
+type EmailNotificationType = 'VIDEO_ANALYSIS_COMPLETE' | 'WELCOME' | 'SUBSCRIPTION_RENEWAL' | 'ACHIEVEMENT_UNLOCKED' | 'MATCH_REMINDER' | 'TRAINING_REMINDER' | 'SYSTEM_UPDATE' | 'CUSTOM' | 'TRIAL_EXPIRATION' | 'TRIAL_WARNING_7_DAYS' | 'TRIAL_WARNING_3_DAYS' | 'TRIAL_WARNING_1_DAY';
 
 // Initialize Resend client
 const resend = getResendClient();

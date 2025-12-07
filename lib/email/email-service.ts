@@ -1,6 +1,9 @@
 import { sendEmail as sendGmailEmail, EmailType } from './gmail-service';
 import { prisma } from '@/lib/db';
-import { EmailStatus, EmailNotificationType } from '@prisma/client';
+
+// Define types locally to avoid Prisma client generation issues
+type EmailStatus = 'PENDING' | 'SENDING' | 'SENT' | 'DELIVERED' | 'OPENED' | 'CLICKED' | 'BOUNCED' | 'FAILED' | 'UNSUBSCRIBED';
+type EmailNotificationType = 'VIDEO_ANALYSIS_COMPLETE' | 'WELCOME' | 'SUBSCRIPTION_RENEWAL' | 'ACHIEVEMENT_UNLOCKED' | 'MATCH_REMINDER' | 'TRAINING_REMINDER' | 'SYSTEM_UPDATE' | 'CUSTOM' | 'TRIAL_EXPIRATION' | 'TRIAL_WARNING_7_DAYS' | 'TRIAL_WARNING_3_DAYS' | 'TRIAL_WARNING_1_DAY';
 
 interface SendEmailResult {
   success: boolean;
