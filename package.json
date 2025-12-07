@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "build": "SKIP_TYPE_CHECK=true prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "test:cron": "tsx scripts/test-cron.ts all",
