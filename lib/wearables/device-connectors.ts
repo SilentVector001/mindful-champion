@@ -25,7 +25,7 @@ export interface SyncResult {
  * Note: Requires native iOS app integration
  */
 export const AppleHealthConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.APPLE_WATCH,
+  deviceType: 'APPLE_WATCH',
   authUrl: 'https://developer.apple.com/documentation/healthkit',
   scopes: [
     'HKQuantityTypeIdentifierHeartRate',
@@ -41,7 +41,7 @@ export const AppleHealthConnector: DeviceConnector = {
  * Fitbit connector
  */
 export const FitbitConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.FITBIT,
+  deviceType: 'FITBIT',
   authUrl: 'https://www.fitbit.com/oauth2/authorize',
   scopes: [
     'activity',
@@ -59,7 +59,7 @@ export const FitbitConnector: DeviceConnector = {
  * Garmin connector
  */
 export const GarminConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.GARMIN,
+  deviceType: 'GARMIN',
   authUrl: 'https://connect.garmin.com/oauthConfirm',
   scopes: ['activities', 'wellness'],
   clientId: process.env.GARMIN_CLIENT_ID,
@@ -70,7 +70,7 @@ export const GarminConnector: DeviceConnector = {
  * Whoop connector
  */
 export const WhoopConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.WHOOP,
+  deviceType: 'WHOOP',
   authUrl: 'https://api.prod.whoop.com/oauth/oauth2/auth',
   scopes: ['read:recovery', 'read:cycles', 'read:sleep', 'read:workout'],
   clientId: process.env.WHOOP_CLIENT_ID,
@@ -81,7 +81,7 @@ export const WhoopConnector: DeviceConnector = {
  * Google Fit connector
  */
 export const GoogleFitConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.GOOGLE_FIT,
+  deviceType: 'GOOGLE_FIT',
   authUrl: 'https://accounts.google.com/o/oauth2/v2/auth',
   scopes: [
     'https://www.googleapis.com/auth/fitness.activity.read',
@@ -96,7 +96,7 @@ export const GoogleFitConnector: DeviceConnector = {
  * Samsung Health connector
  */
 export const SamsungHealthConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.SAMSUNG_HEALTH,
+  deviceType: 'SAMSUNG_HEALTH',
   authUrl: 'https://eu.account.samsung.com/accounts/v1/STWS/signIn',
   scopes: ['com.samsung.health.heart_rate', 'com.samsung.health.steps'],
   clientId: process.env.SAMSUNG_HEALTH_CLIENT_ID,
@@ -107,7 +107,7 @@ export const SamsungHealthConnector: DeviceConnector = {
  * Oura Ring connector
  */
 export const OuraConnector: DeviceConnector = {
-  deviceType: WearableDeviceType.OURA_RING,
+  deviceType: 'OURA',
   authUrl: 'https://cloud.ouraring.com/oauth/authorize',
   scopes: ['daily', 'heartrate', 'workout', 'session'],
   clientId: process.env.OURA_CLIENT_ID,
@@ -118,17 +118,17 @@ export const OuraConnector: DeviceConnector = {
  * Get connector configuration by device type
  */
 export function getConnectorConfig(deviceType: WearableDeviceType): DeviceConnector | null {
-  const connectors: Record<WearableDeviceType, DeviceConnector> = {
-    [WearableDeviceType.APPLE_WATCH]: AppleHealthConnector,
-    [WearableDeviceType.FITBIT]: FitbitConnector,
-    [WearableDeviceType.GARMIN]: GarminConnector,
-    [WearableDeviceType.WHOOP]: WhoopConnector,
-    [WearableDeviceType.GOOGLE_FIT]: GoogleFitConnector,
-    [WearableDeviceType.SAMSUNG_HEALTH]: SamsungHealthConnector,
-    [WearableDeviceType.OURA_RING]: OuraConnector,
-    [WearableDeviceType.POLAR]: AppleHealthConnector, // Uses HealthKit on iOS
-    [WearableDeviceType.SUUNTO]: AppleHealthConnector, // Uses HealthKit on iOS
-    [WearableDeviceType.OTHER]: AppleHealthConnector,
+  const connectors: Record<string, DeviceConnector> = {
+    'APPLE_WATCH': AppleHealthConnector,
+    'FITBIT': FitbitConnector,
+    'GARMIN': GarminConnector,
+    'WHOOP': WhoopConnector,
+    'GOOGLE_FIT': GoogleFitConnector,
+    'SAMSUNG_HEALTH': SamsungHealthConnector,
+    'OURA': OuraConnector,
+    'POLAR': AppleHealthConnector, // Uses HealthKit on iOS
+    'SUUNTO': AppleHealthConnector, // Uses HealthKit on iOS
+    'OTHER': AppleHealthConnector,
   };
 
   return connectors[deviceType] || null;
@@ -160,52 +160,52 @@ export function buildAuthUrl(deviceType: WearableDeviceType, state: string): str
 export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: string): HealthDataType | null {
   // Fitbit mappings
   const fitbitMappings: Record<string, HealthDataType> = {
-    'activities-heart': HealthDataType.HEART_RATE,
-    'activities-steps': HealthDataType.STEPS,
-    'activities-distance': HealthDataType.DISTANCE,
-    'activities-calories': HealthDataType.CALORIES_BURNED,
-    'activities-minutesVeryActive': HealthDataType.ACTIVE_MINUTES,
-    'sleep-minutesAsleep': HealthDataType.SLEEP_DURATION,
+    'activities-heart': 'HEART_RATE',
+    'activities-steps': 'STEPS',
+    'activities-distance': 'DISTANCE',
+    'activities-calories': 'CALORIES'_BURNED,
+    'activities-minutesVeryActive': 'ACTIVE_MINUTES',
+    'sleep-minutesAsleep': 'SLEEP',
   };
 
   // Garmin mappings
   const garminMappings: Record<string, HealthDataType> = {
-    'heartRate': HealthDataType.HEART_RATE,
-    'steps': HealthDataType.STEPS,
-    'distance': HealthDataType.DISTANCE,
-    'calories': HealthDataType.CALORIES_BURNED,
-    'sleepSeconds': HealthDataType.SLEEP_DURATION,
+    'heartRate': 'HEART_RATE',
+    'steps': 'STEPS',
+    'distance': 'DISTANCE',
+    'calories': 'CALORIES'_BURNED,
+    'sleepSeconds': 'SLEEP',
   };
 
   // Whoop mappings
   const whoopMappings: Record<string, HealthDataType> = {
-    'recovery_score': HealthDataType.RECOVERY_SCORE,
-    'hrv': HealthDataType.HEART_RATE_VARIABILITY,
-    'resting_heart_rate': HealthDataType.RESTING_HEART_RATE,
-    'sleep_performance': HealthDataType.SLEEP_QUALITY,
+    'recovery_score': 'RECOVERY_SCORE',
+    'hrv': 'HEART_RATE'_VARIABILITY,
+    'resting_heart_rate': 'RESTING_HEART_RATE',
+    'sleep_performance': 'SLEEP_QUALITY',
   };
 
   // Select appropriate mapping based on device type
   let mappings: Record<string, HealthDataType> = {};
   
   switch (deviceType) {
-    case WearableDeviceType.FITBIT:
+    case 'FITBIT':
       mappings = fitbitMappings;
       break;
-    case WearableDeviceType.GARMIN:
+    case 'GARMIN':
       mappings = garminMappings;
       break;
-    case WearableDeviceType.WHOOP:
+    case 'WHOOP':
       mappings = whoopMappings;
       break;
     default:
       // Generic mappings
       mappings = {
-        heartRate: HealthDataType.HEART_RATE,
-        steps: HealthDataType.STEPS,
-        distance: HealthDataType.DISTANCE,
-        calories: HealthDataType.CALORIES_BURNED,
-        sleep: HealthDataType.SLEEP_DURATION,
+        heartRate: 'HEART_RATE',
+        steps: 'STEPS',
+        distance: 'DISTANCE',
+        calories: 'CALORIES'_BURNED,
+        sleep: 'SLEEP',
       };
   }
 

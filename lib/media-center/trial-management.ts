@@ -43,7 +43,7 @@ export class TrialManagement {
       await prisma.user.update({
         where: { id: userId },
         data: {
-          subscriptionTier: SubscriptionTier.TRIAL,
+          subscriptionTier: 'TRIAL',
           trialStartDate,
           trialEndDate,
           isTrialActive: true,
@@ -69,7 +69,7 @@ export class TrialManagement {
       // Find users with expired trials
       const expiredTrialUsers = await prisma.user.findMany({
         where: {
-          subscriptionTier: SubscriptionTier.TRIAL,
+          subscriptionTier: 'TRIAL',
           isTrialActive: true,
           trialEndDate: {
             lte: now
@@ -172,7 +172,7 @@ export class TrialManagement {
     try {
       return await prisma.user.findMany({
         where: {
-          subscriptionTier: SubscriptionTier.TRIAL,
+          subscriptionTier: 'TRIAL',
           isTrialActive: true
         },
         select: {
@@ -203,7 +203,7 @@ export class TrialManagement {
       // Find users whose trials end tomorrow
       const usersEndingTrial = await prisma.user.findMany({
         where: {
-          subscriptionTier: SubscriptionTier.TRIAL,
+          subscriptionTier: 'TRIAL',
           isTrialActive: true,
           trialEndDate: {
             gte: new Date(),

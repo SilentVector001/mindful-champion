@@ -91,7 +91,7 @@ export const emailService = {
           subject,
           htmlContent,
           textContent: textContent || null,
-          status: EmailStatus.PENDING,
+          status: 'PENDING',
           metadata: metadata || null,
         },
       });
@@ -121,7 +121,7 @@ export const emailService = {
       await prisma.emailNotification.update({
         where: { id: emailNotification.id },
         data: {
-          status: EmailStatus.SENT,
+          status: 'SENT',
           sentAt: new Date(),
           resendEmailId: result.messageId || null,
         },
@@ -134,7 +134,7 @@ export const emailService = {
           data: {
             emailNotificationSent: true,
             emailNotificationSentAt: new Date(),
-            emailNotificationStatus: EmailStatus.SENT,
+            emailNotificationStatus: 'SENT',
           },
         });
       }
@@ -150,7 +150,7 @@ export const emailService = {
           where: {
             userId: params.userId,
             recipientEmail: params.recipientEmail,
-            status: EmailStatus.PENDING,
+            status: 'PENDING',
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -159,7 +159,7 @@ export const emailService = {
           await prisma.emailNotification.update({
             where: { id: failedNotification.id },
             data: {
-              status: EmailStatus.FAILED,
+              status: 'FAILED',
               failedAt: new Date(),
               error: error.message || 'Unknown error',
             },
@@ -171,7 +171,7 @@ export const emailService = {
           await prisma.videoAnalysis.update({
             where: { id: params.videoAnalysisId },
             data: {
-              emailNotificationStatus: EmailStatus.FAILED,
+              emailNotificationStatus: 'FAILED',
               emailNotificationError: error.message || 'Unknown error',
             },
           });
@@ -215,7 +215,7 @@ export const emailService = {
         data: {
           retryCount: notification.retryCount + 1,
           lastRetryAt: new Date(),
-          status: EmailStatus.SENDING,
+          status: 'SENDING',
         },
       });
 
@@ -244,7 +244,7 @@ export const emailService = {
       await prisma.emailNotification.update({
         where: { id: emailNotificationId },
         data: {
-          status: EmailStatus.SENT,
+          status: 'SENT',
           sentAt: new Date(),
           resendEmailId: result.messageId || null,
           error: null,
@@ -258,7 +258,7 @@ export const emailService = {
           data: {
             emailNotificationSent: true,
             emailNotificationSentAt: new Date(),
-            emailNotificationStatus: EmailStatus.SENT,
+            emailNotificationStatus: 'SENT',
             emailNotificationError: null,
           },
         });
@@ -273,7 +273,7 @@ export const emailService = {
       await prisma.emailNotification.update({
         where: { id: emailNotificationId },
         data: {
-          status: EmailStatus.FAILED,
+          status: 'FAILED',
           failedAt: new Date(),
           error: error.message || 'Retry failed',
         },
@@ -289,10 +289,10 @@ export const emailService = {
   async getEmailStats() {
     const [total, sent, failed, pending, opened] = await Promise.all([
       prisma.emailNotification.count(),
-      prisma.emailNotification.count({ where: { status: EmailStatus.SENT } }),
-      prisma.emailNotification.count({ where: { status: EmailStatus.FAILED } }),
-      prisma.emailNotification.count({ where: { status: EmailStatus.PENDING } }),
-      prisma.emailNotification.count({ where: { status: EmailStatus.OPENED } }),
+      prisma.emailNotification.count({ where: { status: 'SENT' } }),
+      prisma.emailNotification.count({ where: { status: 'FAILED' } }),
+      prisma.emailNotification.count({ where: { status: 'PENDING' } }),
+      prisma.emailNotification.count({ where: { status: 'OPENED' } }),
     ]);
 
     const successRate = total > 0 ? ((sent / total) * 100).toFixed(2) : '0';

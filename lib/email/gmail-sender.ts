@@ -108,7 +108,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
           subject,
           htmlContent,
           textContent: textContent || null,
-          status: EmailStatus.PENDING,
+          status: 'PENDING',
           metadata: metadata || null,
         },
       });
@@ -141,7 +141,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
         await prisma.emailNotification.update({
           where: { id: emailNotification.id },
           data: {
-            status: EmailStatus.SENT,
+            status: 'SENT',
             sentAt: new Date(),
             resendEmailId: info.messageId,
           },
@@ -159,7 +159,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
           data: {
             emailNotificationSent: true,
             emailNotificationSentAt: new Date(),
-            emailNotificationStatus: EmailStatus.SENT,
+            emailNotificationStatus: 'SENT',
           },
         });
       } catch (updateError) {
@@ -178,7 +178,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
           where: {
             userId: params.userId,
             recipientEmail: params.recipientEmail,
-            status: EmailStatus.PENDING,
+            status: 'PENDING',
           },
           orderBy: { createdAt: 'desc' },
         });
@@ -187,7 +187,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
           await prisma.emailNotification.update({
             where: { id: failedNotification.id },
             data: {
-              status: EmailStatus.FAILED,
+              status: 'FAILED',
               failedAt: new Date(),
               error: error.message || 'Unknown error',
             },
@@ -200,7 +200,7 @@ export async function sendEmailViaGmail(params: SendEmailParams): Promise<SendEm
         await prisma.videoAnalysis.update({
           where: { id: params.videoAnalysisId },
           data: {
-            emailNotificationStatus: EmailStatus.FAILED,
+            emailNotificationStatus: 'FAILED',
             emailNotificationError: error.message || 'Unknown error',
           },
         });

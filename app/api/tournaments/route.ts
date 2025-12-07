@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     } else {
       // Default: only show upcoming and registration open tournaments
       where.status = {
-        in: [TournamentStatus.UPCOMING, TournamentStatus.REGISTRATION_OPEN]
+        in: ['UPCOMING', 'REGISTRATION_OPEN']
       }
     }
 

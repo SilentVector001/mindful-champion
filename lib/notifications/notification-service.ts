@@ -41,7 +41,7 @@ export async function sendNotification(params: SendNotificationParams): Promise<
     title,
     message,
     data,
-    deliveryMethod = NotificationDeliveryMethod.EMAIL,
+    deliveryMethod = 'EMAIL',
     source = NotificationSource.SYSTEM,
   } = params;
 
@@ -63,7 +63,7 @@ export async function sendNotification(params: SendNotificationParams): Promise<
       message,
       data,
       scheduledFor: new Date(), // Send immediately
-      status: NotificationStatus.PENDING,
+      status: 'PENDING',
       deliveryMethod,
       source,
     },
@@ -77,7 +77,7 @@ export async function sendNotification(params: SendNotificationParams): Promise<
     const updated = await prisma.scheduledNotification.update({
       where: { id: notification.id },
       data: {
-        status: NotificationStatus.SENT,
+        status: 'SENT',
         sentAt: new Date(),
       },
     });
@@ -96,7 +96,7 @@ export async function sendNotification(params: SendNotificationParams): Promise<
     // Update status to FAILED
     await prisma.scheduledNotification.update({
       where: { id: notification.id },
-      data: { status: NotificationStatus.FAILED },
+      data: { status: 'FAILED' },
     });
     throw error;
   }
@@ -114,7 +114,7 @@ export async function scheduleNotification(params: ScheduleNotificationParams): 
     message,
     scheduledFor,
     data,
-    deliveryMethod = NotificationDeliveryMethod.EMAIL,
+    deliveryMethod = 'EMAIL',
     source = NotificationSource.SYSTEM,
   } = params;
 
@@ -136,7 +136,7 @@ export async function scheduleNotification(params: ScheduleNotificationParams): 
       message,
       data,
       scheduledFor,
-      status: NotificationStatus.PENDING,
+      status: 'PENDING',
       deliveryMethod,
       source,
     },
@@ -151,7 +151,7 @@ export async function scheduleNotification(params: ScheduleNotificationParams): 
 export async function cancelNotification(notificationId: string): Promise<void> {
   await prisma.scheduledNotification.update({
     where: { id: notificationId },
-    data: { status: NotificationStatus.CANCELLED },
+    data: { status: 'CANCELLED' },
   });
 }
 
@@ -165,7 +165,7 @@ export async function getUpcomingNotifications(
   return prisma.scheduledNotification.findMany({
     where: {
       userId,
-      status: NotificationStatus.PENDING,
+      status: 'PENDING',
       scheduledFor: {
         gte: new Date(),
       },
@@ -186,7 +186,7 @@ export async function processScheduledNotifications(): Promise<void> {
   // Find all pending notifications that should be sent
   const notifications = await prisma.scheduledNotification.findMany({
     where: {
-      status: NotificationStatus.PENDING,
+      status: 'PENDING',
       scheduledFor: {
         lte: now,
       },
@@ -207,7 +207,7 @@ export async function processScheduledNotifications(): Promise<void> {
       await prisma.scheduledNotification.update({
         where: { id: notification.id },
         data: {
-          status: NotificationStatus.SENT,
+          status: 'SENT',
           sentAt: new Date(),
         },
       });
@@ -228,7 +228,7 @@ export async function processScheduledNotifications(): Promise<void> {
       // Update status to FAILED
       await prisma.scheduledNotification.update({
         where: { id: notification.id },
-        data: { status: NotificationStatus.FAILED },
+        data: { status: 'FAILED' },
       });
     }
   }
@@ -263,11 +263,11 @@ function isDeliveryMethodEnabled(
   }
 
   switch (method) {
-    case NotificationDeliveryMethod.EMAIL:
+    case 'EMAIL':
       return preferences.emailEnabled;
-    case NotificationDeliveryMethod.PUSH:
+    case 'PUSH':
       return preferences.pushEnabled;
-    case NotificationDeliveryMethod.IN_APP:
+    case 'IN_APP':
       return preferences.inAppEnabled;
     default:
       return true;
@@ -279,7 +279,7 @@ function isDeliveryMethodEnabled(
  */
 async function deliverNotification(notification: ScheduledNotification): Promise<void> {
   switch (notification.deliveryMethod) {
-    case NotificationDeliveryMethod.EMAIL:
+    case 'EMAIL':
       await sendNotificationEmail({
         userId: notification.userId,
         category: notification.category,
@@ -290,12 +290,12 @@ async function deliverNotification(notification: ScheduledNotification): Promise
       });
       break;
     
-    case NotificationDeliveryMethod.PUSH:
+    case 'PUSH':
       // TODO: Implement push notification logic
       console.log('Push notifications not yet implemented');
       break;
     
-    case NotificationDeliveryMethod.IN_APP:
+    case 'IN_APP':
       // For in-app notifications, just mark as delivered
       // The frontend will query for them
       break;

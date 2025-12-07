@@ -38,17 +38,17 @@ export function calculateNextTrigger(
   const userTimezoneOffset = getTimezoneOffset(timezone);
   
   switch (frequency) {
-    case NotificationFrequency.DAILY:
+    case 'DAILY':
       // Send once per day at the user's preferred time (default: 8 AM)
       const dailyTime = customTimes?.[0] || DEFAULT_TIMES.MORNING;
       return getNextOccurrence(dailyTime, userTimezoneOffset);
     
-    case NotificationFrequency.MULTIPLE:
+    case 'MULTIPLE':
       // Send multiple times per day
       const times = customTimes || [DEFAULT_TIMES.MORNING, DEFAULT_TIMES.MIDDAY, DEFAULT_TIMES.EVENING];
       return getNextOccurrenceFromMultiple(times, userTimezoneOffset);
     
-    case NotificationFrequency.WEEKLY:
+    case 'WEEKLY':
       // Send once per week at the user's preferred time
       const weeklyTime = customTimes?.[0] || DEFAULT_TIMES.MORNING;
       const nextWeekly = getNextOccurrence(weeklyTime, userTimezoneOffset);
@@ -143,7 +143,7 @@ export async function updateSchedule(
       emailEnabled: newSchedule.emailEnabled ?? true,
       pushEnabled: newSchedule.pushEnabled ?? true,
       inAppEnabled: newSchedule.inAppEnabled ?? true,
-      frequency: newSchedule.frequency ?? NotificationFrequency.DAILY,
+      frequency: newSchedule.frequency ?? 'DAILY',
       customTimes: newSchedule.customTimes ?? null,
       timezone: newSchedule.timezone ?? 'America/New_York',
     },
@@ -239,7 +239,7 @@ export async function scheduleDailyGoalNotifications(
     },
   });
 
-  const frequency = preferences?.frequency || NotificationFrequency.DAILY;
+  const frequency = preferences?.frequency || 'DAILY';
   const customTimes = preferences?.customTimes as string[] | null;
   const timezone = preferences?.timezone || 'America/New_York';
 

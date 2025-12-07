@@ -17,7 +17,7 @@ export interface TierAccess {
 export class SubscriptionUtils {
   static getTierAccess(tier: SubscriptionTier): TierAccess {
     switch (tier) {
-      case SubscriptionTier.TRIAL:
+      case 'TRIAL':
         return {
           canAccessLiveStreams: true,
           canAccessAllPodcasts: true,
@@ -27,8 +27,8 @@ export class SubscriptionUtils {
           canDownloadContent: true,
           showUpgradePrompts: false
         };
-      case SubscriptionTier.PREMIUM:
-      case SubscriptionTier.PRO:
+      case 'PREMIUM':
+      case 'PRO':
         return {
           canAccessLiveStreams: true,
           canAccessAllPodcasts: true,
@@ -38,7 +38,7 @@ export class SubscriptionUtils {
           canDownloadContent: true,
           showUpgradePrompts: false
         };
-      case SubscriptionTier.FREE:
+      case 'FREE':
       default:
         return {
           canAccessLiveStreams: false,
@@ -54,7 +54,7 @@ export class SubscriptionUtils {
 
   static async getUserTierAccess(userId?: string): Promise<TierAccess> {
     if (!userId) {
-      return this.getTierAccess(SubscriptionTier.FREE);
+      return this.getTierAccess('FREE');
     }
 
     try {
@@ -68,28 +68,28 @@ export class SubscriptionUtils {
       });
 
       if (!user) {
-        return this.getTierAccess(SubscriptionTier.FREE);
+        return this.getTierAccess('FREE');
       }
 
       // Check if trial has expired
-      if (user.subscriptionTier === SubscriptionTier.TRIAL && user.trialEndDate) {
+      if (user.subscriptionTier === 'TRIAL' && user.trialEndDate) {
         if (new Date() > user.trialEndDate) {
           // Update user to FREE tier if trial expired
           await prisma.user.update({
             where: { id: userId },
             data: { 
-              subscriptionTier: SubscriptionTier.FREE,
+              subscriptionTier: 'FREE',
               isTrialActive: false
             }
           });
-          return this.getTierAccess(SubscriptionTier.FREE);
+          return this.getTierAccess('FREE');
         }
       }
 
       return this.getTierAccess(user.subscriptionTier);
     } catch (error) {
       console.error('Error getting user tier access:', error);
-      return this.getTierAccess(SubscriptionTier.FREE);
+      return this.getTierAccess('FREE');
     }
   }
 
@@ -104,7 +104,7 @@ export class SubscriptionUtils {
         }
       });
 
-      if (!user || user.subscriptionTier !== SubscriptionTier.TRIAL) {
+      if (!user || user.subscriptionTier !== 'TRIAL') {
         return false;
       }
 
@@ -127,7 +127,7 @@ export class SubscriptionUtils {
       await prisma.user.update({
         where: { id: userId },
         data: { 
-          subscriptionTier: SubscriptionTier.FREE,
+          subscriptionTier: 'FREE',
           isTrialActive: false
         }
       });

@@ -44,15 +44,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Tournament not found' }, { status: 404 })
     }
 
-    if (tournament.status === TournamentStatus.REGISTRATION_CLOSED) {
+    if (tournament.status === 'REGISTRATION_CLOSED') {
       return NextResponse.json(
         { error: 'Registration is closed for this tournament' },
         { status: 400 }
       )
     }
 
-    if (tournament.status === TournamentStatus.COMPLETED || 
-        tournament.status === TournamentStatus.CANCELLED) {
+    if (tournament.status === 'COMPLETED' || 
+        tournament.status === 'CANCELLED') {
       return NextResponse.json(
         { error: 'This tournament is not accepting registrations' },
         { status: 400 }
