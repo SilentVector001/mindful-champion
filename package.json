@@ -18,7 +18,8 @@
     "test:notifications:goals": "cd scripts/tests/notification-system && npx ts-node goal-notifications-tests.ts",
     "test:notifications:email": "cd scripts/tests/notification-system && npx ts-node email-tests.ts",
     "test:notifications:cron": "cd scripts/tests/notification-system && npx ts-node cron-tests.ts",
-    "test:notifications:integration": "cd scripts/tests/notification-system && npx ts-node integration-tests.ts"
+    "test:notifications:integration": "cd scripts/tests/notification-system && npx ts-node integration-tests.ts",
+    "postinstall": "prisma generate"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
@@ -130,7 +131,7 @@
     "jotai": "2.6.0",
     "jsonwebtoken": "9.0.2",
     "lodash": "4.17.21",
-    "lucide-react": "0.446.0",
+    "lucide-react": "^0.556.0",
     "mammoth": "^1.11.0",
     "mapbox-gl": "1.13.3",
     "next": "14.2.28",
