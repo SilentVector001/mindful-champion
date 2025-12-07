@@ -163,7 +163,7 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
     'activities-heart': 'HEART_RATE',
     'activities-steps': 'STEPS',
     'activities-distance': 'DISTANCE',
-    'activities-calories': 'CALORIES'_BURNED,
+    'activities-calories': 'CALORIES',
     'activities-minutesVeryActive': 'ACTIVE_MINUTES',
     'sleep-minutesAsleep': 'SLEEP',
   };
@@ -173,7 +173,7 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
     'heartRate': 'HEART_RATE',
     'steps': 'STEPS',
     'distance': 'DISTANCE',
-    'calories': 'CALORIES'_BURNED,
+    'calories': 'CALORIES',
     'sleepSeconds': 'SLEEP',
   };
 
@@ -204,7 +204,7 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
         heartRate: 'HEART_RATE',
         steps: 'STEPS',
         distance: 'DISTANCE',
-        calories: 'CALORIES'_BURNED,
+        calories: 'CALORIES',
         sleep: 'SLEEP',
       };
   }
