@@ -180,9 +180,9 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
   // Whoop mappings
   const whoopMappings: Record<string, HealthDataType> = {
     'recovery_score': 'RECOVERY_SCORE',
-    'hrv': 'HEART_RATE'_VARIABILITY,
+    'hrv': 'HRV',
     'resting_heart_rate': 'RESTING_HEART_RATE',
-    'sleep_performance': 'SLEEP_QUALITY',
+    'sleep_performance': 'SLEEP',
   };
 
   // Select appropriate mapping based on device type
