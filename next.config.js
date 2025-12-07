@@ -31,11 +31,6 @@ const nextConfig = {
   outputFileTracing: true,
   // Optimize bundle size
   swcMinify: true,
-  modularizeImports: {
-    '@prisma/client': {
-      transform: '@prisma/client',
-    },
-  },
 };
 
 module.exports = nextConfig;
