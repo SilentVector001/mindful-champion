@@ -153,11 +153,11 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </Link>
             </InfoTooltip>
 
-            {/* SPACER - Push menu button to the right on mobile */}
-            <div className="flex-1 md:hidden"></div>
+            {/* SPACER - Push menu button to the right on mobile/tablet */}
+            <div className="flex-1 lg:hidden"></div>
 
-            {/* Mobile Menu Button - HIGHLY VISIBLE ON ALL MOBILE DEVICES */}
-            <div className="md:hidden ml-auto flex-shrink-0">
+            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE */}
+            <div className="lg:hidden ml-auto flex-shrink-0">
               <SheetTrigger asChild>
                 <Button 
                   variant="default" 
@@ -176,8 +176,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </SheetTrigger>
             </div>
 
-            {/* Main Navigation - Desktop Only */}
-            <div className="hidden md:flex items-center gap-1">
+            {/* Main Navigation - Desktop Only (1024px+) */}
+            <div className="hidden lg:flex items-center gap-1">
             {/* My Progress */}
             <InfoTooltip content="Your personal training hub - track progress, view stats, and personalized recommendations">
               <Link href="/dashboard">
@@ -541,8 +541,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             </InfoTooltip>
           </div>
 
-          {/* Right Side - Profile Menu - HIDDEN ON MOBILE */}
-          <div className="hidden md:flex items-center gap-2 flex-shrink-0 max-w-[350px] overflow-hidden">
+          {/* Right Side - Profile Menu - HIDDEN ON MOBILE/TABLET */}
+          <div className="hidden lg:flex items-center gap-2 flex-shrink-0 max-w-[350px] overflow-hidden">
             {/* Reward Points Badge */}
             <InfoTooltip content="Your reward points - earn more by completing achievements!">
               <Link href="/marketplace" className="flex-shrink-0">
