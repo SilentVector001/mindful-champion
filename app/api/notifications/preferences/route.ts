@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { NotificationCategory, NotificationFrequency } from '@prisma/client';
+import { NotificationCategory, NotificationFrequency } from '@/lib/prisma-types';
 
 export const dynamic = 'force-dynamic';
 

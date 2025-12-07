@@ -4,7 +4,7 @@
  * Each connector handles OAuth flows and data synchronization
  */
 
-import { WearableDeviceType, HealthDataType } from '@prisma/client';
+import { WearableDeviceType, HealthDataType } from '@/lib/prisma-types';
 
 export interface DeviceConnector {
   deviceType: WearableDeviceType;

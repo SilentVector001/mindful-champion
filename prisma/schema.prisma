@@ -2691,6 +2691,9 @@ enum AchievementCategory {
   MULTI_SECTION
   ULTIMATE
   GENERAL
+  VIDEO
+  PRACTICE
+  SUBSCRIPTION
 }
 
 enum ProgramStatus {

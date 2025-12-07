@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { LiveStreamService } from '@/lib/media-center/live-stream-service';
 import { SubscriptionUtils } from '@/lib/media-center/subscription-utils';
-import { LiveStreamStatus } from '@prisma/client';
+import { LiveStreamStatus } from '@/lib/prisma-types';
 import { prisma } from '@/lib/db';
 
 export const dynamic = "force-dynamic";

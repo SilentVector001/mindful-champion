@@ -15,7 +15,7 @@ import { prisma } from '@/lib/db';
  */
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions);
@@ -23,7 +23,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { id } = params;
+    // Await params in Next.js 15+
+    const { id } = await params;
 
     // Verify the notification belongs to the user
     const notification = await prisma.scheduledNotification.findUnique({

@@ -5,9 +5,9 @@ import { prisma } from "@/lib/db"
 import { sendMilestoneAchievedEmail } from "@/lib/notifications/goal-notifications"
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     goalId: string
-  }
+  }>
 }
 
 // GET all milestones for a goal
@@ -18,9 +18,12 @@ export async function GET(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Await params in Next.js 15+
+    const { goalId } = await params
+
     const milestones = await prisma.milestone.findMany({
       where: {
-        goalId: params.goalId,
+        goalId: goalId,
         goal: { userId: session.user.id }
       },
       orderBy: { order: 'asc' }
@@ -41,10 +44,13 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Await params in Next.js 15+
+    const { goalId } = await params
+
     // Verify goal ownership
     const goal = await prisma.goal.findFirst({
       where: {
-        id: params.goalId,
+        id: goalId,
         userId: session.user.id
       }
     })
@@ -58,7 +64,7 @@ export async function POST(req: NextRequest, { params }: RouteContext) {
 
     const milestone = await prisma.milestone.create({
       data: {
-        goalId: params.goalId,
+        goalId: goalId,
         title,
         description,
         targetValue,

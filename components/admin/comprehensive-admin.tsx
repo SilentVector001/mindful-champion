@@ -181,7 +181,7 @@ export default function ComprehensiveAdmin({ initialData }: ComprehensiveAdminPr
 
           {/* Overview Tab */}
           <TabsContent value="overview">
-            <OverviewDashboard data={initialData} />
+            <OverviewDashboard data={initialData} setActiveTab={setActiveTab} />
           </TabsContent>
 
           {/* Revenue Dashboard Tab */}
@@ -336,19 +336,15 @@ export default function ComprehensiveAdmin({ initialData }: ComprehensiveAdminPr
   )
 }
 
-function OverviewDashboard({ data }: { data: any }) {
+function OverviewDashboard({ data, setActiveTab }: { data: any; setActiveTab: (tab: string) => void }) {
   const router = useRouter()
   
   const navigateToUsersTab = () => {
-    const tabs = document.querySelector('[role="tablist"]');
-    const usersTab = tabs?.querySelector('[value="users"]') as HTMLElement;
-    usersTab?.click();
+    setActiveTab("users");
   }
   
   const navigateToAnalyticsTab = () => {
-    const tabs = document.querySelector('[role="tablist"]');
-    const analyticsTab = tabs?.querySelector('[value="analytics"]') as HTMLElement;
-    analyticsTab?.click();
+    setActiveTab("analytics");
   }
 
   const quickStats = [

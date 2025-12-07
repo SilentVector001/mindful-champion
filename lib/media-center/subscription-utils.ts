@@ -2,7 +2,7 @@
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { SubscriptionTier } from '@prisma/client';
+import { SubscriptionTier } from '@/lib/prisma-types';
 
 export interface TierAccess {
   canAccessLiveStreams: boolean;

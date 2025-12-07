@@ -5,7 +5,7 @@ import { prisma } from '@/lib/db'
 export const dynamic = "force-dynamic";
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { SkillLevel, TournamentStatus } from '@prisma/client'
+import { SkillLevel, TournamentStatus } from '@/lib/prisma-types'
 
 // Haversine formula to calculate distance between two coordinates
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {

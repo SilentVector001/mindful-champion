@@ -3,7 +3,7 @@
  * Extracts reminder information from user messages
  */
 
-import { NotificationCategory, NotificationFrequency } from '@prisma/client';
+import { NotificationCategory, NotificationFrequency } from '@/lib/prisma-types';
 
 export interface ParsedReminder {
   isReminder: boolean;

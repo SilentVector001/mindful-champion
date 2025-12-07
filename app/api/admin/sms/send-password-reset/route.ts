@@ -7,7 +7,7 @@ import {
   sendPasswordResetSMS,
   normalizePhoneNumber 
 } from '@/lib/sms/twilio';
-import { SMSVerificationType, UserRole } from '@prisma/client';
+import { SMSVerificationType, UserRole } from '@/lib/prisma-types';
 
 export async function POST(request: Request) {
   try {

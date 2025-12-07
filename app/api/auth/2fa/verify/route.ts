@@ -2,7 +2,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/sms/twilio';
-import { SMSVerificationType } from '@prisma/client';
+import { SMSVerificationType } from '@/lib/prisma-types';
 
 const MAX_VERIFICATION_ATTEMPTS = 5;
 

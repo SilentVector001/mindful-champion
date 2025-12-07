@@ -4,7 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import { NotificationCategory, NotificationFrequency, NotificationDeliveryMethod, NotificationStatus } from '@prisma/client';
+import { NotificationCategory, NotificationFrequency, NotificationDeliveryMethod, NotificationStatus } from '@/lib/prisma-types';
 import { parseReminderRequest, ParsedReminder } from './reminder-parser';
 
 export interface ReminderToolInput {

@@ -7,7 +7,7 @@ import {
   send2FACode,
   normalizePhoneNumber 
 } from '@/lib/sms/twilio';
-import { SMSVerificationType } from '@prisma/client';
+import { SMSVerificationType } from '@/lib/prisma-types';
 import crypto from 'crypto';
 
 export async function POST(request: Request) {

@@ -1,7 +1,7 @@
 
 import { ApiCache } from './api-cache';
 import { prisma } from '@/lib/db';
-import { ExternalEventType, TournamentFormat, TournamentStatus, SkillLevel } from '@prisma/client';
+import { ExternalEventType, TournamentFormat, TournamentStatus, SkillLevel } from '@/lib/prisma-types';
 
 export interface AllPickleballTournamentsEvent {
   id: string;

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { NotificationCategory } from '@prisma/client';
+import { NotificationCategory } from '@/lib/prisma-types';
 import { startOfDay, endOfDay, subDays } from 'date-fns';
 
 export const dynamic = 'force-dynamic';

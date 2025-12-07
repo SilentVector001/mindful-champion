@@ -1,6 +1,6 @@
 
 import { prisma } from '@/lib/db';
-import { WearableDeviceType, HealthDataType } from '@prisma/client';
+import { WearableDeviceType, HealthDataType } from '@/lib/prisma-types';
 
 export interface WearableDeviceInfo {
   deviceType: WearableDeviceType;

@@ -4,14 +4,7 @@
  */
 
 import { prisma } from '@/lib/db';
-import {
-  NotificationCategory,
-  NotificationStatus,
-  NotificationDeliveryMethod,
-  NotificationSource,
-  type ScheduledNotification,
-  type NotificationPreferences,
-} from '@prisma/client';
+import { NotificationCategory, NotificationStatus, NotificationDeliveryMethod } from '@/lib/prisma-types';
 import { sendNotificationEmail } from './email-templates';
 
 export interface SendNotificationParams {

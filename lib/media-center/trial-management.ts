@@ -1,6 +1,6 @@
 
 import { prisma } from '@/lib/db'
-import { SubscriptionTier } from '@prisma/client'
+import { SubscriptionTier } from '@/lib/prisma-types'
 import { MediaCenterEmailService } from './email-service'
 
 export interface TrialUser {

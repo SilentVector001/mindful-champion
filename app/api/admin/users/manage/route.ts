@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { SubscriptionTier } from '@prisma/client';
+import { SubscriptionTier } from '@/lib/prisma-types';
 
 export async function PATCH(request: NextRequest) {
   try {

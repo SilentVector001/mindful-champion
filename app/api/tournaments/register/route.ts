@@ -8,7 +8,7 @@ import { getServerSession } from 'next-auth'
 
 import { authOptions } from '@/lib/auth'
 
-import { RegistrationStatus, TournamentStatus } from '@prisma/client'
+import { RegistrationStatus, TournamentStatus } from '@/lib/prisma-types'
 
 
 export async function POST(request: NextRequest) {

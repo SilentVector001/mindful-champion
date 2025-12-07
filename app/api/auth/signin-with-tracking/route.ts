@@ -10,7 +10,7 @@ import {
   resetFailedAttempts,
   logSecurityEvent
 } from '@/lib/security';
-import { SecurityEventType, SecurityEventSeverity } from '@prisma/client';
+import { SecurityEventType, SecurityEventSeverity } from '@/lib/prisma-types';
 
 export async function POST(request: Request) {
   try {

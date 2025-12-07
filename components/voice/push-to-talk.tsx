@@ -139,13 +139,12 @@ export default function PushToTalk({
       }
     };
 
-    // Request permission immediately when component mounts (except on iOS where user gesture is needed)
-    if (!isIOS) {
-      requestMicrophonePermission();
-    } else {
-      console.log('📱 iOS: Waiting for user gesture to request microphone permission');
-      setPermissionStatus('prompt');
-    }
+    // DON'T request permission on mount - wait for user gesture (on-demand)
+    // This prevents crashes when no microphone is available
+    console.log('⏸️ Microphone permission will be requested on user interaction');
+    setPermissionStatus('prompt');
+    // Don't show error on mount - just show neutral instruction
+    // setError('Click the button to enable microphone');
 
     // Initialize recognition
     const recognition = new SpeechRecognition();
@@ -461,6 +460,13 @@ export default function PushToTalk({
     if (permissionStatus !== 'granted' && !microphoneStream) {
       console.log('🎤 Requesting microphone permission on first use...');
       try {
+        // Check if getUserMedia is available
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          const error = new Error('getUserMedia is not supported in this browser');
+          error.name = 'NotSupportedError';
+          throw error;
+        }
+        
         const stream = await navigator.mediaDevices.getUserMedia({ 
           audio: {
             echoCancellation: true,
@@ -476,17 +482,34 @@ export default function PushToTalk({
       } catch (err: any) {
         console.error('❌ Microphone access error on button press:', err);
         
+        // Provide user-friendly error messages
+        let errorMessage = 'Unable to access microphone.';
+        
         if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
-          setError('Please allow microphone access in your browser settings and refresh the page');
+          errorMessage = 'Microphone access denied. Please check your browser settings.';
           setPermissionStatus('denied');
         } else if (err.name === 'NotFoundError') {
-          setError('No microphone found. Please connect a microphone.');
+          errorMessage = 'No microphone detected. Voice input is unavailable. Use text chat below.';
+          setPermissionStatus('denied');
+        } else if (err.name === 'NotSupportedError' || err.message?.includes('getUserMedia')) {
+          errorMessage = 'Voice input not supported. Use text chat below.';
           setPermissionStatus('denied');
         } else {
-          setError('Unable to access microphone. Try again.');
+          errorMessage = 'Microphone error. Use text chat below.';
+          setPermissionStatus('denied');
         }
         
+        setError(errorMessage);
         setPttState('error');
+        
+        // Don't propagate the error - just handle it gracefully
+        // Show error for 5 seconds then hide it
+        setTimeout(() => {
+          if (stateRef.current === 'error') {
+            setPttState('idle');
+          }
+        }, 5000);
+        
         return; // Don't set isHolding if we failed
       }
     }
@@ -814,6 +837,10 @@ export default function PushToTalk({
         }
         return error || 'Tap to Retry';
       default:
+        // Show friendly message based on permission status
+        if (permissionStatus === 'prompt') {
+          return '🎤 Press & Hold to Talk to Coach Kai';
+        }
         return '🎤 Press & Hold to Talk to Coach Kai';
     }
   };

@@ -3,6 +3,8 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { stripe } from '@/lib/sponsor-stripe';
 import { prisma } from '@/lib/db';
+
+export const dynamic = 'force-dynamic';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcryptjs';
 

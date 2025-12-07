@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { SponsorOfferStatus } from '@prisma/client';
+import { SponsorOfferStatus } from '@/lib/prisma-types';
 
 // Get offers (for sponsors to see their own or users to browse marketplace)
 export async function GET(req: NextRequest) {

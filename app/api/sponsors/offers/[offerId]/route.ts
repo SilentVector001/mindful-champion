@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { SponsorOfferStatus } from '@prisma/client';
+import { SponsorOfferStatus } from '@/lib/prisma-types';
 
 // Get single offer
 export async function GET(

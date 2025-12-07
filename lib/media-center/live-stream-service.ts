@@ -1,7 +1,7 @@
 
 import { ApiCache } from './api-cache';
 import { prisma } from '@/lib/db';
-import { LiveStreamPlatform, LiveStreamStatus, ExternalEventType } from '@prisma/client';
+import { LiveStreamPlatform, LiveStreamStatus, ExternalEventType } from '@/lib/prisma-types';
 
 export interface YouTubeVideo {
   id: { videoId: string };

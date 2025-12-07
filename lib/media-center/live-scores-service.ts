@@ -87,6 +87,12 @@ export class LiveScoresService {
   }
 
   private static async fetchBetsApiData(endpoint: string, params: Record<string, string> = {}): Promise<BetsApiMatch[]> {
+    // Check if API key is configured (not demo_key)
+    if (this.BETS_API_KEY === 'demo_key' || !this.BETS_API_KEY) {
+      console.warn('[LiveScoresService] BetsAPI key not configured. Using sample data.');
+      throw new Error('BetsAPI key not configured');
+    }
+
     const url = new URL(`https://api.betsapi.com/v1/bet365/${endpoint}`);
     url.searchParams.set('sport_id', this.SPORT_ID);
     url.searchParams.set('token', this.BETS_API_KEY);
@@ -95,14 +101,42 @@ export class LiveScoresService {
       url.searchParams.set(key, value);
     });
 
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      throw new Error(`BetsAPI request failed: ${response.status}`);
-    }
+    try {
+      const response = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+        },
+        // Add timeout
+        signal: AbortSignal.timeout(10000) // 10 second timeout
+      });
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.error('[LiveScoresService] BetsAPI authentication failed (401). Check API key.');
+        } else if (response.status === 403) {
+          console.error('[LiveScoresService] BetsAPI access forbidden (403). Check API permissions.');
+        } else {
+          console.error(`[LiveScoresService] BetsAPI request failed: ${response.status} ${response.statusText}`);
+        }
+        throw new Error(`BetsAPI request failed: ${response.status}`);
+      }
 
-    const data = await response.json();
-    return data?.results || [];
+      const data = await response.json();
+      
+      // Check if API returned an error in the response body
+      if (data.error) {
+        console.error('[LiveScoresService] BetsAPI error:', data.error);
+        throw new Error(`BetsAPI error: ${data.error}`);
+      }
+      
+      return data?.results || [];
+    } catch (error) {
+      // Re-throw to be caught by the caller
+      if (error instanceof Error) {
+        console.error('[LiveScoresService] Fetch error:', error.message);
+      }
+      throw error;
+    }
   }
 
   private static processMatch(match: BetsApiMatch): ProcessedMatch | null {

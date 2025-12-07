@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { ContentType } from '@prisma/client';
+import { ContentType } from '@/lib/prisma-types';
 import { SubscriptionUtils } from '@/lib/media-center/subscription-utils';
 
 export const dynamic = "force-dynamic";

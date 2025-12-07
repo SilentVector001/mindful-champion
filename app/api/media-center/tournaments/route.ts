@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { TournamentStatus, SkillLevel, TournamentFormat } from '@prisma/client';
+import { TournamentStatus, SkillLevel, TournamentFormat } from '@/lib/prisma-types';
 
 export async function GET(request: NextRequest) {
   try {

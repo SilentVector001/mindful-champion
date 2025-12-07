@@ -5,10 +5,10 @@ import { prisma } from "@/lib/db"
 import { sendMilestoneAchievedEmail } from "@/lib/notifications/goal-notifications"
 
 interface RouteContext {
-  params: {
+  params: Promise<{
     goalId: string
     milestoneId: string
-  }
+  }>
 }
 
 // PATCH update milestone
@@ -19,11 +19,14 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Await params in Next.js 15+
+    const { goalId, milestoneId } = await params
+
     // Verify ownership
     const milestone = await prisma.milestone.findFirst({
       where: {
-        id: params.milestoneId,
-        goalId: params.goalId,
+        id: milestoneId,
+        goalId: goalId,
         goal: { userId: session.user.id }
       }
     })
@@ -40,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     const isNowCompleted = status === 'COMPLETED'
 
     const updatedMilestone = await prisma.milestone.update({
-      where: { id: params.milestoneId },
+      where: { id: milestoneId },
       data: {
         status,
         currentValue,
@@ -54,13 +57,13 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
     if (wasNotCompleted && isNowCompleted) {
       await sendMilestoneAchievedEmail(
         session.user.id,
-        params.goalId,
+        goalId,
         updatedMilestone.title
       )
 
       // Update goal progress
       const goal = await prisma.goal.findUnique({
-        where: { id: params.goalId },
+        where: { id: goalId },
         include: { milestones: true }
       })
 
@@ -70,7 +73,7 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
         const newProgress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
         await prisma.goal.update({
-          where: { id: params.goalId },
+          where: { id: goalId },
           data: { progress: newProgress }
         })
       }
@@ -91,11 +94,14 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    // Await params in Next.js 15+
+    const { goalId, milestoneId } = await params
+
     // Verify ownership
     const milestone = await prisma.milestone.findFirst({
       where: {
-        id: params.milestoneId,
-        goalId: params.goalId,
+        id: milestoneId,
+        goalId: goalId,
         goal: { userId: session.user.id }
       }
     })
@@ -105,7 +111,7 @@ export async function DELETE(req: NextRequest, { params }: RouteContext) {
     }
 
     await prisma.milestone.delete({
-      where: { id: params.milestoneId }
+      where: { id: milestoneId }
     })
 
     return NextResponse.json({ success: true })

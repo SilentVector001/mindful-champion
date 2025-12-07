@@ -8,7 +8,7 @@ import {
   isValidPhoneNumber, 
   normalizePhoneNumber 
 } from '@/lib/sms/twilio';
-import { SMSVerificationType } from '@prisma/client';
+import { SMSVerificationType } from '@/lib/prisma-types';
 
 export async function POST(request: Request) {
   try {

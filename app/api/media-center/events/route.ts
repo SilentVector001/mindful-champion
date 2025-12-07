@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/auth';
 import { EventsService } from '@/lib/media-center/events-service';
 import { SubscriptionUtils } from '@/lib/media-center/subscription-utils';
-import { ExternalEventType } from '@prisma/client';
+import { ExternalEventType } from '@/lib/prisma-types';
 
 export const dynamic = "force-dynamic";
 

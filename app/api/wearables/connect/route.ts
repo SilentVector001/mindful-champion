@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { WearableService } from '@/lib/wearables/wearable-service';
 import { buildAuthUrl } from '@/lib/wearables/device-connectors';
-import { WearableDeviceType } from '@prisma/client';
+import { WearableDeviceType } from '@/lib/prisma-types';
 
 /**
  * POST /api/wearables/connect

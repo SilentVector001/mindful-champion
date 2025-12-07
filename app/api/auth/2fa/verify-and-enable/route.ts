@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { normalizePhoneNumber } from '@/lib/sms/twilio';
-import { SMSVerificationType } from '@prisma/client';
+import { SMSVerificationType } from '@/lib/prisma-types';
 import crypto from 'crypto';
 
 const MAX_VERIFICATION_ATTEMPTS = 3;

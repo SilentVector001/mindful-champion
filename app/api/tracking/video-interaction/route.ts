@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-import { VideoInteractionType } from '@prisma/client';
+import { VideoInteractionType } from '@/lib/prisma-types';
 
 export async function POST(request: Request) {
   try {

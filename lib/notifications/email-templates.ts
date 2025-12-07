@@ -3,7 +3,7 @@
  * All templates use warm, encouraging, expert coaching tone
  */
 
-import { NotificationCategory } from '@prisma/client';
+import { NotificationCategory } from '@/lib/prisma-types';
 import { prisma } from '@/lib/db';
 
 const COACH_KAI_SIGNATURE = `
