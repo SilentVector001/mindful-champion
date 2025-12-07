@@ -33,7 +33,7 @@ export async function POST(request: Request) {
       where: {
         phoneNumber: normalizedPhone,
         code,
-        type: SMSVerificationType.PASSWORD_RESET,
+        type: 'PASSWORD_RESET',
         used: false,
         expiresAt: {
           gt: new Date(),

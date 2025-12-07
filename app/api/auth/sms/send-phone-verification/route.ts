@@ -89,7 +89,7 @@ export async function POST(request: Request) {
         userId: user.id,
         phoneNumber: normalizedPhone,
         code,
-        type: SMSVerificationType.PHONE_VERIFICATION,
+        type: 'PHONE_VERIFICATION',
         expiresAt,
         used: false,
         attemptsCount: 0,

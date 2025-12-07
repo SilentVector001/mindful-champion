@@ -92,7 +92,7 @@ export async function POST(req: NextRequest) {
       const updatedUser = await tx.user.update({
         where: { id: session.user.id },
         data: {
-          subscriptionTier: SubscriptionTier.PRO,
+          subscriptionTier: 'PRO',
           trialEndDate: trialEndDate,
           isTrialActive: true,
           trialStartDate: new Date()

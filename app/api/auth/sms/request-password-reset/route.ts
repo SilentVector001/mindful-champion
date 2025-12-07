@@ -56,7 +56,7 @@ export async function POST(request: Request) {
         userId: user.id,
         phoneNumber: normalizedPhone,
         code,
-        type: SMSVerificationType.PASSWORD_RESET,
+        type: 'PASSWORD_RESET',
         expiresAt,
         used: false,
         attemptsCount: 0,

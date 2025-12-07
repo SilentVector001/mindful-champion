@@ -95,7 +95,7 @@ export async function POST(request: NextRequest) {
         partnerName,
         partnerEmail,
         notes,
-        status: RegistrationStatus.CONFIRMED
+        status: 'CONFIRMED'
       },
       include: {
         tournament: true
@@ -164,7 +164,7 @@ export async function DELETE(request: NextRequest) {
     await prisma.tournamentRegistration.update({
       where: { id: registration.id },
       data: {
-        status: RegistrationStatus.CANCELLED,
+        status: 'CANCELLED',
         cancelledAt: new Date()
       }
     })

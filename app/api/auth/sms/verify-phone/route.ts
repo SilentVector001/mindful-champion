@@ -46,7 +46,7 @@ export async function POST(request: Request) {
       where: {
         userId: user.id,
         phoneNumber: normalizedPhone,
-        type: SMSVerificationType.PHONE_VERIFICATION,
+        type: 'PHONE_VERIFICATION',
         used: false,
         expiresAt: {
           gt: new Date(),

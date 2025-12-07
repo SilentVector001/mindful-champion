@@ -11,7 +11,7 @@ const DEFAULT_PREFERENCES = {
   emailEnabled: true,
   pushEnabled: false,
   inAppEnabled: true,
-  frequency: NotificationFrequency.DAILY,
+  frequency: 'DAILY',
   customTimes: ['08:00'],
   timezone: 'America/New_York'
 };
@@ -97,7 +97,7 @@ export async function PUT(request: NextRequest) {
             emailEnabled: pref.emailEnabled ?? true,
             pushEnabled: pref.pushEnabled ?? false,
             inAppEnabled: pref.inAppEnabled ?? true,
-            frequency: pref.frequency ?? NotificationFrequency.DAILY,
+            frequency: pref.frequency ?? 'DAILY',
             customTimes: pref.customTimes ?? ['08:00'],
             timezone: pref.timezone ?? 'America/New_York'
           },
@@ -107,7 +107,7 @@ export async function PUT(request: NextRequest) {
             emailEnabled: pref.emailEnabled ?? true,
             pushEnabled: pref.pushEnabled ?? false,
             inAppEnabled: pref.inAppEnabled ?? true,
-            frequency: pref.frequency ?? NotificationFrequency.DAILY,
+            frequency: pref.frequency ?? 'DAILY',
             customTimes: pref.customTimes ?? ['08:00'],
             timezone: pref.timezone ?? 'America/New_York'
           }

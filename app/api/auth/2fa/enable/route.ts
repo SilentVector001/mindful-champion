@@ -64,7 +64,7 @@ export async function POST(request: Request) {
         userId: user.id,
         phoneNumber: normalizePhoneNumber(user.phoneNumber),
         code,
-        type: SMSVerificationType.TWO_FACTOR_AUTH,
+        type: 'TWO_FACTOR_AUTH',
         expiresAt,
         used: false,
         attemptsCount: 0,
