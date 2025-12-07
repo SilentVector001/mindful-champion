@@ -18,11 +18,24 @@ const nextConfig = {
         'node_modules/@esbuild/linux-x64',
         'node_modules/webpack',
         'node_modules/terser',
+        'node_modules/@prisma/engines/**',
+        'node_modules/prisma/build/**',
+        '.git/**',
+        'public/**',
+        'docs/**',
+        'scripts/**',
       ],
     },
   },
   // Reduce function bundle sizes
   outputFileTracing: true,
+  // Optimize bundle size
+  swcMinify: true,
+  modularizeImports: {
+    '@prisma/client': {
+      transform: '@prisma/client',
+    },
+  },
 };
 
 module.exports = nextConfig;
