@@ -16,7 +16,7 @@ export interface EmailTemplate {
 }
 
 export class MediaCenterEmailService {
-  private static readonly FROM_EMAIL = 'noreply@updates.reai.io';
+  private static readonly FROM_EMAIL = 'noreply@resend.dev';
   private static readonly FROM_NAME = 'Mindful Champion';
   private static readonly REPLY_TO_EMAIL = 'noreply@mindfulchampion.com';
 

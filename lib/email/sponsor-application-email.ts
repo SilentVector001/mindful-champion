@@ -213,7 +213,7 @@ Your Complete Pickleball Coaching Ecosystem
     `;
 
     const result = await resendClient.emails.send({
-      from: 'Mindful Champion <noreply@updates.reai.io>',
+      from: 'Mindful Champion <noreply@resend.dev>',
       to: data.email,
       subject: `🎉 Application Received - ${data.companyName} | Mindful Champion`,
       html: htmlContent,

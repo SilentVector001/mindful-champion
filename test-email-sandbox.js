@@ -4,12 +4,12 @@ const resend = new Resend('re_MF3dtRpT_ENzbTRqTxGSruvwBPzwzp4Qs');
 
 async function testEmail() {
   try {
-    console.log('Testing email with Dean@mindfulchampion.com...');
+    console.log('Testing email with sandbox domain (onboarding@resend.dev)...');
     const result = await resend.emails.send({
-      from: 'Dean@mindfulchampion.com',
-      to: 'test@example.com',
-      subject: 'Test Email - Mindful Champion',
-      html: '<p>This is a test email from Mindful Champion</p>',
+      from: 'onboarding@resend.dev',
+      to: 'delivered@resend.dev',
+      subject: 'Test Email - Mindful Champion (Sandbox)',
+      html: '<p>This is a test email from Mindful Champion using sandbox</p>',
     });
     
     console.log('SUCCESS:', JSON.stringify(result, null, 2));

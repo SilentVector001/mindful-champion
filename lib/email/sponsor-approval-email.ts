@@ -324,12 +324,12 @@ Your Complete Pickleball Coaching Ecosystem
     `;
 
     const result = await resendClient.emails.send({
-      from: 'Mindful Champion <noreply@updates.reai.io>',
+      from: 'Mindful Champion <onboarding@resend.dev>',
       to: data.email,
       subject: `✅ Approved! Welcome to Mindful Champion, ${data.companyName} 🎉`,
       html: htmlContent,
       text: plainText,
-      replyTo: 'noreply@mindfulchampion.com',
+      replyTo: 'support@mindfulchampion.com',
     });
 
     if (result.error) {
