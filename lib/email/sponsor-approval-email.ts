@@ -321,14 +321,18 @@ Your Complete Pickleball Coaching Ecosystem
 © ${new Date().getFullYear()} Mindful Champion. All rights reserved.
     `;
 
-    await resendClient.emails.send({
-      from: 'Mindful Champion Partnerships <partnerships@updates.reai.io>',
+    const result = await resendClient.emails.send({
+      from: 'Mindful Champion <noreply@updates.reai.io>',
       to: data.email,
       subject: `✅ Approved! Welcome to Mindful Champion, ${data.companyName} 🎉`,
       html: htmlContent,
       text: plainText,
-      replyTo: 'partnerships@mindfulchampion.com',
+      replyTo: 'noreply@mindfulchampion.com',
     });
+
+    if (result.error) {
+      throw result.error;
+    }
 
     console.log(`✅ Sponsor approval email sent successfully to ${data.email}`);
     return { success: true };

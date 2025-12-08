@@ -16,8 +16,9 @@ export interface EmailTemplate {
 }
 
 export class MediaCenterEmailService {
-  private static readonly FROM_EMAIL = process.env.EMAIL_FROM || 'welcomefrommc@mindfulchampion.com';
+  private static readonly FROM_EMAIL = 'noreply@updates.reai.io';
   private static readonly FROM_NAME = 'Mindful Champion';
+  private static readonly REPLY_TO_EMAIL = 'noreply@mindfulchampion.com';
 
   static async sendTrialExpirationEmail(userId: string): Promise<boolean> {
     try {
@@ -45,7 +46,8 @@ export class MediaCenterEmailService {
         to: [user.email],
         subject: template.subject,
         html: template.html,
-        text: template.text
+        text: template.text,
+        replyTo: this.REPLY_TO_EMAIL
       });
 
       if (error) {
@@ -245,7 +247,8 @@ export class MediaCenterEmailService {
         to: [user.email],
         subject: template.subject,
         html: template.html,
-        text: template.text
+        text: template.text,
+        replyTo: this.REPLY_TO_EMAIL
       });
 
       if (error) {
