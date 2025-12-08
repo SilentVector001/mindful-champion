@@ -522,6 +522,24 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* My Rewards */}
+            <InfoTooltip content="Redeem your achievement points for exclusive sponsor rewards">
+              <Link href="/marketplace">
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2 font-medium transition-all",
+                    isActive("/marketplace") || isActive("/rewards")
+                      ? "bg-champion-green/10 text-champion-green"
+                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
+                  )}
+                >
+                  <Trophy className="w-4 h-4" />
+                  My Rewards
+                </Button>
+              </Link>
+            </InfoTooltip>
+
             {/* Media Hub */}
             <InfoTooltip content="Discover live tournaments, podcasts, events, and more">
               <Link href="/media">
@@ -845,6 +863,13 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Award className="w-5 h-5 text-orange-500" />
                     Achievement Gallery
+                  </Button>
+                </Link>
+
+                <Link href="/marketplace" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-champion-gold/5 to-transparent hover:from-champion-gold/10">
+                    <Trophy className="w-5 h-5 text-champion-gold" />
+                    <span className="font-semibold">My Rewards</span>
                   </Button>
                 </Link>
               </div>

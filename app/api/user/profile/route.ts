@@ -20,12 +20,16 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { email: session.user.email },
       select: {
+        id: true,
+        email: true,
+        name: true,
+        firstName: true,
+        lastName: true,
+        playerRating: true,
         rewardPoints: true,
-        achievementStats: {
-          select: {
-            totalAchievements: true,
-          },
-        },
+        subscriptionTier: true,
+        role: true,
+        createdAt: true,
       },
     });
 
@@ -34,18 +38,12 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      stats: {
-        rewardPoints: user.rewardPoints,
-        achievements: user.achievementStats?.totalAchievements || 0,
-      },
-      // Keep backward compatibility
-      points: user.rewardPoints,
-      achievements: user.achievementStats?.totalAchievements || 0,
+      user,
     });
   } catch (error) {
-    console.error('Failed to fetch user stats:', error);
+    console.error('Failed to fetch user profile:', error);
     return NextResponse.json(
-      { error: 'Failed to fetch user stats' },
+      { error: 'Failed to fetch user profile' },
       { status: 500 }
     );
   }
