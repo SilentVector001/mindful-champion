@@ -1,48 +1,45 @@
-require('dotenv').config();
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
+require('dotenv').config({ path: '.env.local' });
 
 async function testEmail() {
-  console.log('🔍 Testing email configuration...\n');
-  console.log('Gmail User:', process.env.GMAIL_USER);
-  console.log('Password length:', process.env.GMAIL_APP_PASSWORD?.length || 0);
-  console.log('Password format:', process.env.GMAIL_APP_PASSWORD?.includes(' ') ? 'contains spaces' : 'no spaces');
-  console.log('');
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
-  try {
-    console.log('📧 Attempting to send test email...');
-    
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
-      subject: 'Mindful Champion - Email Test',
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h1 style="color: #2563eb;">✅ Email System Test Successful!</h1>
-          <p>This is a test email from your Mindful Champion app.</p>
-          <p>Your email system is configured correctly and ready to send welcome emails to new users.</p>
-          <p><strong>Timestamp:</strong> ${new Date().toLocaleString()}</p>
-        </div>
-      `,
-    });
-
-    console.log('✅ SUCCESS! Test email sent successfully to', process.env.GMAIL_USER);
-    console.log('\nNext step: You can now send welcome emails to users! 🎉');
-    process.exit(0);
-    
-  } catch (error) {
-    console.error('❌ ERROR: Failed to send email\n');
-    console.error('Error code:', error.code);
-    console.error('Error message:', error.message);
-    console.error('\nFull error:', error);
+  console.log('🔍 Testing Resend API configuration...\n');
+  
+  const apiKey = process.env.RESEND_API_KEY;
+  
+  if (!apiKey) {
+    console.error('❌ RESEND_API_KEY not found in environment');
     process.exit(1);
+  }
+  
+  console.log('✅ API Key found:', apiKey.substring(0, 10) + '...');
+  
+  const resend = new Resend(apiKey);
+  
+  try {
+    console.log('\n📧 Attempting to send test email...\n');
+    
+    const result = await resend.emails.send({
+      from: 'Mindful Champion <noreply@updates.reai.io>',
+      to: 'test@example.com', // This will fail but will show us if auth works
+      subject: 'Test Email - Mindful Champion',
+      html: '<p>This is a test email from Mindful Champion deployment verification.</p>',
+    });
+    
+    console.log('✅ Email API call successful!');
+    console.log('Response:', JSON.stringify(result, null, 2));
+  } catch (error) {
+    if (error.message && error.message.includes('API key')) {
+      console.error('❌ API Key authentication failed:', error.message);
+      console.error('\nPlease verify:');
+      console.error('1. The API key is correct');
+      console.error('2. The API key has the correct format (starts with re_)');
+      console.error('3. The API key has not expired');
+    } else if (error.message && error.message.includes('domain')) {
+      console.log('✅ API Key is valid! (Domain configuration note received)');
+      console.log('Note:', error.message);
+    } else {
+      console.error('❌ Error:', error.message);
+    }
   }
 }
 

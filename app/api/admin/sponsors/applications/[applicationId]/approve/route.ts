@@ -4,7 +4,8 @@ import { getServerSession } from 'next-auth';
 import { prisma } from '@/lib/db';
 import { authOptions } from '@/lib/auth';
 import { createSponsorCheckoutSession } from '@/lib/sponsor-stripe';
-import nodemailer from 'nodemailer';
+import { sendSponsorApprovalEmail } from '@/lib/email/sponsor-approval-email';
+import bcrypt from 'bcryptjs';
 
 export async function POST(
   request: Request,
@@ -68,96 +69,68 @@ export async function POST(
       }
     }
 
-    // Send approval email with next steps
-    const transporter = nodemailer.createTransport({
-      host: process.env.EMAIL_SERVER_HOST,
-      port: Number(process.env.EMAIL_SERVER_PORT),
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_SERVER_USER,
-        pass: process.env.EMAIL_SERVER_PASSWORD,
-      },
+    // Check if user account exists for this email
+    let existingUser = await prisma.user.findUnique({
+      where: { email: application.email },
     });
 
-    if (application.interestedTier === 'platinum') {
-      // Platinum tier requires custom pricing - send sales contact email
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: application.email,
-        subject: 'Mindful Champion Platinum Partnership - Next Steps',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(135deg, #A855F7, #7C3AED); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0;">🎉 Application Approved!</h1>
-              </div>
-              <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-                <h2 style="color: #A855F7;">Platinum Partnership</h2>
-                <p>Hi ${application.contactPerson},</p>
-                <p>Congratulations! Your application for <strong>${application.companyName}</strong> has been approved for our <strong>Platinum Partnership</strong> tier.</p>
-                
-                <p>Our partnerships team will contact you within 24 hours to discuss:</p>
-                <ul>
-                  <li>Custom pricing tailored to your needs</li>
-                  <li>Exclusive features and co-branding opportunities</li>
-                  <li>Dedicated account management</li>
-                  <li>Strategic planning for your partnership</li>
-                </ul>
+    let isNewUser = false;
+    let temporaryPassword = '';
+    let loginEmail = application.email;
 
-                <p style="margin-top: 30px; color: #6b7280;">Questions? Contact us at <a href="mailto:partnerships@mindfulchampion.com">partnerships@mindfulchampion.com</a></p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
+    // If user doesn't exist, create one with SPONSOR role
+    if (!existingUser) {
+      isNewUser = true;
+      temporaryPassword = Math.random().toString(36).slice(-10) + Math.random().toString(36).slice(-10).toUpperCase();
+      const hashedPassword = await bcrypt.hash(temporaryPassword, 10);
+
+      existingUser = await prisma.user.create({
+        data: {
+          email: application.email,
+          name: application.contactPerson,
+          hashedPassword,
+          role: 'SPONSOR',
+          emailVerified: new Date(), // Auto-verify sponsor accounts
+          // Additional sponsor metadata
+          sponsorId: id, // Link to sponsor application
+        },
       });
+
+      console.log(`✅ Created new SPONSOR user for ${application.email}`);
     } else {
-      // Standard tiers - send checkout link
-      await transporter.sendMail({
-        from: process.env.EMAIL_FROM,
-        to: application.email,
-        subject: 'Mindful Champion Sponsorship Approved - Complete Your Setup! 🎉',
-        html: `
-          <!DOCTYPE html>
-          <html>
-          <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; line-height: 1.6; color: #333;">
-            <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-              <div style="background: linear-gradient(135deg, #06B6D4, #0891B2); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0;">
-                <h1 style="margin: 0;">🎉 Application Approved!</h1>
-              </div>
-              <div style="background: #f9fafb; padding: 30px; border-radius: 0 0 8px 8px;">
-                <p>Hi ${application.contactPerson},</p>
-                <p>Great news! Your sponsorship application for <strong>${application.companyName}</strong> has been approved!</p>
-                
-                <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; border: 2px solid #06B6D4;">
-                  <h3 style="margin-top: 0; color: #06B6D4;">Your Partnership Tier</h3>
-                  <p style="font-size: 20px; font-weight: bold; margin: 0;">${application.interestedTier.toUpperCase()}</p>
-                </div>
+      // If user exists, update their role to SPONSOR if they aren't already
+      if (existingUser.role !== 'SPONSOR' && existingUser.role !== 'ADMIN') {
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            role: 'SPONSOR',
+            sponsorId: id,
+          },
+        });
+        console.log(`✅ Updated existing user ${application.email} to SPONSOR role`);
+      }
+    }
 
-                <h3>Complete Your Setup:</h3>
-                <p>Click the button below to complete your payment and activate your sponsorship:</p>
-                
-                <p style="margin: 30px 0; text-align: center;">
-                  <a href="${checkoutUrl}" style="background: linear-gradient(135deg, #06B6D4, #0891B2); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; display: inline-block; font-weight: bold; font-size: 16px;">Complete Payment & Get Started</a>
-                </p>
+    // Send approval email with next steps using Resend
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindful-champion-2hzb4j.abacusai.app';
+    const portalUrl = `${appUrl}/sponsors/portal`;
 
-                <p style="font-size: 14px; color: #6b7280;">Once your payment is processed, you'll receive login credentials to access your sponsor dashboard where you can:</p>
-                <ul style="color: #6b7280;">
-                  <li>Upload your company logo</li>
-                  <li>Add products to the rewards marketplace</li>
-                  <li>Track performance and analytics</li>
-                  <li>Manage your partnership</li>
-                </ul>
-
-                <p style="margin-top: 30px; color: #6b7280;">Questions? Contact us at <a href="mailto:partnerships@mindfulchampion.com">partnerships@mindfulchampion.com</a></p>
-              </div>
-            </div>
-          </body>
-          </html>
-        `,
+    try {
+      await sendSponsorApprovalEmail({
+        companyName: application.companyName,
+        contactPerson: application.contactPerson,
+        email: application.email,
+        approvedTier: application.interestedTier.toUpperCase(),
+        loginEmail,
+        temporaryPassword: isNewUser ? temporaryPassword : '',
+        portalUrl,
+        isNewUser,
       });
+
+      console.log(`✅ Sponsor approval email sent successfully to ${application.email}`);
+    } catch (emailError) {
+      console.error('❌ Error sending sponsor approval email:', emailError);
+      // Continue anyway - don't block the approval process due to email failure
     }
 
     return NextResponse.json({

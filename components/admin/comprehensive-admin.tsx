@@ -30,6 +30,7 @@ import AnalyticsSection from "./sections/analytics-section"
 import KaiConversationsSection from "./sections/kai-conversations-section"
 import UserActivityFeed from "./sections/user-activity-feed"
 import RevenueDashboard from "./sections/revenue-dashboard"
+import EmailManagementSection from "./sections/email-management-section"
 
 interface ComprehensiveAdminProps {
   initialData: any
@@ -257,33 +258,7 @@ export default function ComprehensiveAdmin({ initialData }: ComprehensiveAdminPr
 
           {/* Email Notifications Tab */}
           <TabsContent value="email-notifications">
-            <div className="space-y-4">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Mail className="h-5 w-5" />
-                    Email Management
-                  </CardTitle>
-                  <CardDescription>
-                    Send, manage, and track all system emails
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <p className="text-sm text-gray-600">
-                      Send custom emails, manage email templates, track delivery status, and resend emails. 
-                      View complete email history and test the email system.
-                    </p>
-                    <Link href="/admin/emails">
-                      <Button className="w-full sm:w-auto bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700">
-                        <Mail className="h-4 w-4 mr-2" />
-                        Open Email Management Dashboard
-                      </Button>
-                    </Link>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <EmailManagementSection />
           </TabsContent>
 
           {/* Kai Conversations Tab */}
