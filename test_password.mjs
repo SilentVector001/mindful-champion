@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
-async function verifyPassword() {
+async function testPassword() {
   try {
     const user = await prisma.user.findFirst({
       where: { 
@@ -18,16 +18,15 @@ async function verifyPassword() {
       return;
     }
     
-    console.log('Verifying new password...');
-    const testPassword = 'MindfulChampion2025!';
-    const isValid = await bcrypt.compare(testPassword, user.password);
-    console.log(`Password "${testPassword}": ${isValid ? '✅ MATCH' : '❌ NO MATCH'}`);
+    console.log('Testing password comparison...');
+    console.log('Password hash from DB:', user.password.substring(0, 20) + '...');
     
-    if (isValid) {
-      console.log('\n✅ SUCCESS! The password has been reset.');
-      console.log('User can now sign in with:');
-      console.log('  Email: deansnow59@gmail.com');
-      console.log('  Password: MindfulChampion2025!');
+    // Test with common passwords
+    const testPasswords = ['test123', 'Test123', 'password', 'Password123', 'admin123'];
+    
+    for (const pwd of testPasswords) {
+      const isValid = await bcrypt.compare(pwd, user.password);
+      console.log(`Password "${pwd}": ${isValid ? 'MATCH ✓' : 'NO MATCH ✗'}`);
     }
     
   } catch (error) {
@@ -37,4 +36,4 @@ async function verifyPassword() {
   }
 }
 
-verifyPassword();
+testPassword();
