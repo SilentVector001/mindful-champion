@@ -1,4 +1,5 @@
 import { getResendClient } from './resend-client';
+import { prisma } from '@/lib/db';
 
 export interface SponsorApprovalEmailData {
   companyName: string;
@@ -9,6 +10,7 @@ export interface SponsorApprovalEmailData {
   temporaryPassword: string;
   portalUrl: string;
   isNewUser: boolean;
+  userId?: string; // Optional userId to log the email
 }
 
 export async function sendSponsorApprovalEmail(data: SponsorApprovalEmailData) {
@@ -335,9 +337,70 @@ Your Complete Pickleball Coaching Ecosystem
     }
 
     console.log(`✅ Sponsor approval email sent successfully to ${data.email}`);
-    return { success: true };
+
+    // Log to database if userId is provided
+    if (data.userId) {
+      try {
+        await prisma.emailNotification.create({
+          data: {
+            userId: data.userId,
+            type: 'CUSTOM',
+            recipientEmail: data.email,
+            recipientName: data.contactPerson,
+            subject: `✅ Approved! Welcome to Mindful Champion, ${data.companyName} 🎉`,
+            htmlContent: htmlContent,
+            textContent: plainText,
+            status: 'SENT',
+            sentAt: new Date(),
+            resendEmailId: result.data?.id,
+            metadata: {
+              emailType: 'SPONSOR_APPROVAL',
+              companyName: data.companyName,
+              approvedTier: data.approvedTier,
+              isNewUser: data.isNewUser,
+              service: 'resend',
+            },
+          },
+        });
+        console.log(`✅ Email notification logged to database for ${data.email}`);
+      } catch (dbError) {
+        console.error('❌ Error logging email to database:', dbError);
+        // Don't fail the email send if logging fails
+      }
+    }
+
+    return { success: true, emailId: result.data?.id };
   } catch (error) {
     console.error('❌ Error sending sponsor approval email:', error);
+
+    // Log failure to database if userId is provided
+    if (data.userId) {
+      try {
+        await prisma.emailNotification.create({
+          data: {
+            userId: data.userId,
+            type: 'CUSTOM',
+            recipientEmail: data.email,
+            recipientName: data.contactPerson,
+            subject: `✅ Approved! Welcome to Mindful Champion, ${data.companyName} 🎉`,
+            htmlContent: '',
+            textContent: '',
+            status: 'FAILED',
+            failedAt: new Date(),
+            error: error instanceof Error ? error.message : 'Unknown error',
+            metadata: {
+              emailType: 'SPONSOR_APPROVAL',
+              companyName: data.companyName,
+              approvedTier: data.approvedTier,
+              service: 'resend',
+            },
+          },
+        });
+      } catch (dbError) {
+        console.error('❌ Error logging failed email to database:', dbError);
+      }
+    }
+
     // Don't throw - email failure shouldn't prevent approval process
     return { success: false, error };
   }

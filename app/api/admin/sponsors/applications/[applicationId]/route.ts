@@ -122,7 +122,8 @@ export async function PATCH(
             loginEmail: user.email,
             temporaryPassword: tempPassword,
             portalUrl,
-            isNewUser: true
+            isNewUser: true,
+            userId: user.id // Log to database
           });
           console.log(`✅ Approval email with credentials sent to ${application.email} for ${application.companyName}`);
         } catch (emailError: any) {
@@ -140,7 +141,8 @@ export async function PATCH(
             loginEmail: user.email,
             temporaryPassword: '', // No password for existing users
             portalUrl,
-            isNewUser: false
+            isNewUser: false,
+            userId: user.id // Log to database
           });
           console.log(`✅ Approval notification sent to ${application.email} (existing user) for ${application.companyName}`);
         } catch (emailError: any) {

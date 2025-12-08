@@ -125,6 +125,7 @@ export async function POST(
         temporaryPassword: isNewUser ? temporaryPassword : '',
         portalUrl,
         isNewUser,
+        userId: existingUser.id, // Log to database
       });
 
       console.log(`✅ Sponsor approval email sent successfully to ${application.email}`);
