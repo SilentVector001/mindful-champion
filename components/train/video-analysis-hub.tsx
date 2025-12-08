@@ -144,16 +144,38 @@ export default function VideoAnalysisHub() {
   })
 
   const handleUploadAndAnalyze = async () => {
-    if (!selectedFile) return
+    if (!selectedFile) {
+      alert('❌ Please select a video file first.')
+      return
+    }
+
+    // Validate file type
+    const validTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm']
+    if (!validTypes.includes(selectedFile.type)) {
+      alert('❌ Invalid file type. Please upload a video file (MP4, MOV, AVI, or WebM).')
+      return
+    }
+
+    // Validate file size (max 500MB)
+    const maxSize = 500 * 1024 * 1024 // 500MB
+    if (selectedFile.size > maxSize) {
+      alert('❌ File too large. Maximum size is 500MB.')
+      return
+    }
 
     setUploading(true)
     setUploadProgress(0)
 
     try {
-      console.log('[Upload] Starting direct S3 upload for file:', selectedFile.name, `(${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)`)
+      console.log('='.repeat(80))
+      console.log('[Upload] 🎬 Starting video upload process')
+      console.log('[Upload] File:', selectedFile.name)
+      console.log('[Upload] Size:', `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`)
+      console.log('[Upload] Type:', selectedFile.type)
+      console.log('='.repeat(80))
       
       // Step 1: Get pre-signed URL from API
-      console.log('[Upload] Step 1: Requesting pre-signed URL...')
+      console.log('[Upload] STEP 1/3: Requesting upload URL from server...')
       const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -166,56 +188,70 @@ export default function VideoAnalysisHub() {
 
       if (!preSignedRes.ok) {
         const errorData = await preSignedRes.json()
+        console.error('[Upload] ❌ Failed to get upload URL:', errorData)
         throw new Error(errorData.error || 'Failed to get upload URL')
       }
 
       const { uploadUrl, key } = await preSignedRes.json()
-      console.log('[Upload] Pre-signed URL received:', { key })
+      console.log('[Upload] ✅ Upload URL received')
+      console.log('[Upload] Storage key:', key)
 
       // Step 2: Upload directly to S3 using pre-signed URL
-      console.log('[Upload] Step 2: Uploading directly to S3...')
+      console.log('[Upload] STEP 2/3: Uploading file to cloud storage...')
       const xhr = new XMLHttpRequest()
       const uploadPromise = new Promise<void>((resolve, reject) => {
         // Track upload progress
+        let lastReportedProgress = 0
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100
-            setUploadProgress(Math.round(percentComplete))
-            console.log(`[Upload] Progress: ${Math.round(percentComplete)}%`)
+            const rounded = Math.round(percentComplete)
+            setUploadProgress(rounded)
+            
+            // Log every 10% progress
+            if (rounded >= lastReportedProgress + 10 || rounded === 100) {
+              console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
+              lastReportedProgress = rounded
+            }
           }
         })
 
         xhr.addEventListener('load', () => {
           if (xhr.status === 200 || xhr.status === 204) {
-            console.log('[Upload] S3 upload successful!')
+            console.log('[Upload] ✅ File successfully uploaded to cloud storage!')
             resolve()
           } else {
-            console.error('[Upload] S3 upload failed:', xhr.status, xhr.statusText)
-            reject(new Error(`S3 upload failed with status ${xhr.status}`))
+            console.error('[Upload] ❌ Cloud upload failed')
+            console.error('[Upload] Status:', xhr.status, xhr.statusText)
+            console.error('[Upload] Response:', xhr.responseText)
+            reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`))
           }
         })
 
-        xhr.addEventListener('error', () => {
-          console.error('[Upload] Network error during S3 upload')
-          reject(new Error('Network error during upload'))
+        xhr.addEventListener('error', (e) => {
+          console.error('[Upload] ❌ Network error during upload')
+          console.error('[Upload] Error details:', e)
+          reject(new Error('Network error during upload. Please check your internet connection and try again.'))
         })
 
         xhr.addEventListener('abort', () => {
-          console.error('[Upload] S3 upload cancelled')
+          console.error('[Upload] ⚠️ Upload cancelled by user or browser')
           reject(new Error('Upload cancelled'))
         })
 
         // PUT request to S3 pre-signed URL
+        console.log('[Upload] Initiating upload request...')
         xhr.open('PUT', uploadUrl)
         xhr.setRequestHeader('Content-Type', selectedFile.type)
         xhr.send(selectedFile)
       })
 
       await uploadPromise
-      console.log('[Upload] S3 upload complete, progress:', uploadProgress)
+      setUploadProgress(100)
+      console.log('[Upload] ✅ STEP 2/3 Complete')
 
       // Step 3: Confirm upload with our API and create database record
-      console.log('[Upload] Step 3: Confirming upload with API...')
+      console.log('[Upload] STEP 3/3: Saving video record to database...')
       const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -227,24 +263,32 @@ export default function VideoAnalysisHub() {
       })
 
       if (!confirmRes.ok) {
-        const errorData = await confirmRes.json()
+        const errorData = await confirmRes.json().catch(() => ({ error: 'Unknown error', code: 'UNKNOWN' }))
         const errorCode = errorData.code
+        
+        console.error('[Upload] ❌ Failed to confirm upload')
+        console.error('[Upload] Error code:', errorCode)
+        console.error('[Upload] Error details:', errorData)
         
         // Provide user-friendly error messages
         if (errorCode === 'USER_NOT_FOUND' || errorCode === 'INVALID_SESSION') {
-          throw new Error('Your session has expired. Please log out and log in again.')
+          throw new Error('Your session has expired. Please refresh the page and log in again.')
         } else if (errorCode === 'FOREIGN_KEY_ERROR') {
-          throw new Error('Account validation failed. Please log out and log in again.')
+          throw new Error('Account validation failed. Please refresh the page and try again.')
         } else {
-          throw new Error(errorData.error || 'Failed to confirm upload')
+          throw new Error(errorData.error || 'Failed to save video record. Please try again.')
         }
       }
 
       const data = await confirmRes.json()
+      console.log('[Upload] ✅ STEP 3/3 Complete')
+      console.log('[Upload] Video ID:', data.videoId)
+      console.log('='.repeat(80))
+      console.log('[Upload] 🎉 UPLOAD SUCCESSFUL!')
+      console.log('='.repeat(80))
+      
       setUploadProgress(100)
       setUploading(false)
-      
-      console.log('[Upload] Upload confirmed, video ID:', data.videoId)
       
       // Check for achievements after upload
       setTimeout(() => {
@@ -252,19 +296,33 @@ export default function VideoAnalysisHub() {
       }, 1000)
       
       // Show success message
-      alert('✅ Upload complete! Starting AI analysis...')
+      alert('✅ Upload complete! Starting AI analysis...\n\nThis may take a few minutes. Check the "My Library" tab for results.')
       
       // Start analysis
       setAnalyzing(true)
       await analyzeVideo(data.videoId, data.videoUrl)
     } catch (error) {
-      console.error('[Upload] Upload error:', error)
+      console.error('='.repeat(80))
+      console.error('[Upload] ❌ UPLOAD FAILED')
+      console.error('[Upload] Error:', error)
+      if (error instanceof Error) {
+        console.error('[Upload] Error message:', error.message)
+        console.error('[Upload] Error stack:', error.stack)
+      }
+      console.error('='.repeat(80))
+      
       setUploading(false)
       setUploadProgress(0)
       
-      // Show specific error message
+      // Show specific error message with troubleshooting hints
       const errorMessage = error instanceof Error ? error.message : 'Upload failed. Please try again.'
-      alert(`❌ ${errorMessage}`)
+      const troubleshootingMsg = '\n\n💡 Troubleshooting:\n' +
+        '• Check your internet connection\n' +
+        '• Try a smaller video file (max 500MB)\n' +
+        '• Ensure file is in MP4, MOV, AVI, or WebM format\n' +
+        '• If problem persists, refresh the page and try again'
+      
+      alert(`❌ Upload Failed\n\n${errorMessage}${troubleshootingMsg}`)
     }
   }
 

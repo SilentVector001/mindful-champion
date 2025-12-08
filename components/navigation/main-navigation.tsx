@@ -157,20 +157,36 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             <div className="flex-1 lg:hidden"></div>
 
             {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE */}
-            <div className="lg:hidden ml-auto flex-shrink-0">
+            <div 
+              className="lg:hidden ml-auto flex-shrink-0 relative z-[70]"
+              style={{
+                isolation: 'isolate',
+                WebkitTransform: 'translateZ(0)',
+                transform: 'translateZ(0)',
+              }}
+            >
               <SheetTrigger asChild>
                 <Button 
                   variant="default" 
                   size="icon" 
-                  className="h-12 w-12 bg-champion-green hover:bg-champion-green/90 text-white shadow-xl rounded-lg border-2 border-white/20 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95"
+                  className="h-14 w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-3 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80"
                   aria-label="Open navigation menu"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                  style={{ 
+                    WebkitTapHighlightColor: 'transparent',
+                    WebkitTouchCallout: 'none',
+                    WebkitUserSelect: 'none',
+                    position: 'relative',
+                    zIndex: 70,
+                    minWidth: '56px',
+                    minHeight: '56px',
+                  }}
                   onClick={(e) => {
                     // Ensure the event is processed on iOS
                     e.stopPropagation();
+                    console.log('Mobile menu button clicked');
                   }}
                 >
-                  <Menu className="h-7 w-7 text-white stroke-[3] pointer-events-none" />
+                  <Menu className="h-8 w-8 text-white stroke-[3.5] pointer-events-none" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
