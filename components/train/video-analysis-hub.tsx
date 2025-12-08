@@ -150,57 +150,101 @@ export default function VideoAnalysisHub() {
     setUploadProgress(0)
 
     try {
-      const formData = new FormData()
-      formData.append('file', selectedFile)
+      console.log('[Upload] Starting direct S3 upload for file:', selectedFile.name, `(${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)`)
+      
+      // Step 1: Get pre-signed URL from API
+      console.log('[Upload] Step 1: Requesting pre-signed URL...')
+      const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+          fileSize: selectedFile.size
+        })
+      })
 
-      // Track upload progress
+      if (!preSignedRes.ok) {
+        const errorData = await preSignedRes.json()
+        throw new Error(errorData.error || 'Failed to get upload URL')
+      }
+
+      const { uploadUrl, key } = await preSignedRes.json()
+      console.log('[Upload] Pre-signed URL received:', { key })
+
+      // Step 2: Upload directly to S3 using pre-signed URL
+      console.log('[Upload] Step 2: Uploading directly to S3...')
       const xhr = new XMLHttpRequest()
-      const uploadPromise = new Promise<any>((resolve, reject) => {
+      const uploadPromise = new Promise<void>((resolve, reject) => {
+        // Track upload progress
         xhr.upload.addEventListener('progress', (e) => {
           if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100
             setUploadProgress(Math.round(percentComplete))
+            console.log(`[Upload] Progress: ${Math.round(percentComplete)}%`)
           }
         })
 
         xhr.addEventListener('load', () => {
-          if (xhr.status === 200) {
-            try {
-              const data = JSON.parse(xhr.responseText)
-              resolve(data)
-            } catch (e) {
-              reject(new Error('Invalid response from server'))
-            }
+          if (xhr.status === 200 || xhr.status === 204) {
+            console.log('[Upload] S3 upload successful!')
+            resolve()
           } else {
-            try {
-              const errorData = JSON.parse(xhr.responseText)
-              const errorMessage = errorData.error || `Upload failed with status ${xhr.status}`
-              const errorCode = errorData.code
-              
-              // Provide user-friendly error messages
-              if (errorCode === 'USER_NOT_FOUND' || errorCode === 'INVALID_SESSION') {
-                reject(new Error('Your session has expired. Please log out and log in again.'))
-              } else if (errorCode === 'FOREIGN_KEY_ERROR') {
-                reject(new Error('Account validation failed. Please log out and log in again.'))
-              } else {
-                reject(new Error(errorMessage))
-              }
-            } catch (e) {
-              reject(new Error(`Upload failed with status ${xhr.status}`))
-            }
+            console.error('[Upload] S3 upload failed:', xhr.status, xhr.statusText)
+            reject(new Error(`S3 upload failed with status ${xhr.status}`))
           }
         })
 
-        xhr.addEventListener('error', () => reject(new Error('Network error during upload')))
-        xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
+        xhr.addEventListener('error', () => {
+          console.error('[Upload] Network error during S3 upload')
+          reject(new Error('Network error during upload'))
+        })
 
-        xhr.open('POST', '/api/video-analysis/upload')
-        xhr.send(formData)
+        xhr.addEventListener('abort', () => {
+          console.error('[Upload] S3 upload cancelled')
+          reject(new Error('Upload cancelled'))
+        })
+
+        // PUT request to S3 pre-signed URL
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', selectedFile.type)
+        xhr.send(selectedFile)
       })
 
-      const data = await uploadPromise
+      await uploadPromise
+      console.log('[Upload] S3 upload complete, progress:', uploadProgress)
+
+      // Step 3: Confirm upload with our API and create database record
+      console.log('[Upload] Step 3: Confirming upload with API...')
+      const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key,
+          fileName: selectedFile.name,
+          fileSize: selectedFile.size
+        })
+      })
+
+      if (!confirmRes.ok) {
+        const errorData = await confirmRes.json()
+        const errorCode = errorData.code
+        
+        // Provide user-friendly error messages
+        if (errorCode === 'USER_NOT_FOUND' || errorCode === 'INVALID_SESSION') {
+          throw new Error('Your session has expired. Please log out and log in again.')
+        } else if (errorCode === 'FOREIGN_KEY_ERROR') {
+          throw new Error('Account validation failed. Please log out and log in again.')
+        } else {
+          throw new Error(errorData.error || 'Failed to confirm upload')
+        }
+      }
+
+      const data = await confirmRes.json()
       setUploadProgress(100)
       setUploading(false)
+      
+      console.log('[Upload] Upload confirmed, video ID:', data.videoId)
       
       // Check for achievements after upload
       setTimeout(() => {
@@ -214,7 +258,7 @@ export default function VideoAnalysisHub() {
       setAnalyzing(true)
       await analyzeVideo(data.videoId, data.videoUrl)
     } catch (error) {
-      console.error('Upload error:', error)
+      console.error('[Upload] Upload error:', error)
       setUploading(false)
       setUploadProgress(0)
       

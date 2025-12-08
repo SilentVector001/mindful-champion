@@ -60,3 +60,4 @@ core
 # Parent directory files
 ../*.tar.gz
 ../core
+.env.backup.replit

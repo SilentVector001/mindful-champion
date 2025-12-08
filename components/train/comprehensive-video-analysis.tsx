@@ -163,10 +163,28 @@ export default function ComprehensiveVideoAnalysis() {
     toast.loading('Starting video upload...', { id: 'video-upload' })
 
     try {
-      // Step 1: Upload video with real progress tracking
-      const formData = new FormData()
-      formData.append('file', selectedFile)
+      // Step 1: Get pre-signed URL from API
+      console.log('[Upload] Starting direct S3 upload for file:', selectedFile.name, `(${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB)`)
+      
+      const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fileName: selectedFile.name,
+          fileType: selectedFile.type,
+          fileSize: selectedFile.size
+        })
+      })
 
+      if (!preSignedRes.ok) {
+        const errorData = await preSignedRes.json()
+        throw new Error(errorData.error || 'Failed to get upload URL')
+      }
+
+      const { uploadUrl, key } = await preSignedRes.json()
+      console.log('[Upload] Pre-signed URL received:', { key })
+
+      // Step 2: Upload directly to S3 using pre-signed URL with progress tracking
       const uploadData = await new Promise<any>((resolve, reject) => {
         const xhr = new XMLHttpRequest()
 
@@ -175,37 +193,62 @@ export default function ComprehensiveVideoAnalysis() {
           if (e.lengthComputable) {
             const percentComplete = (e.loaded / e.total) * 100
             setUploadProgress(Math.round(percentComplete))
-            toast.loading(`Uploading video... ${Math.round(percentComplete)}%`, { id: 'video-upload' })
+            toast.loading(`Uploading to S3... ${Math.round(percentComplete)}%`, { id: 'video-upload' })
           }
         })
 
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200) {
+        xhr.addEventListener('load', async () => {
+          if (xhr.status === 200 || xhr.status === 204) {
+            console.log('[Upload] S3 upload successful!')
+            
+            // Step 3: Confirm upload with our API and create database record
             try {
-              const data = JSON.parse(xhr.responseText)
+              const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  key,
+                  fileName: selectedFile.name,
+                  fileSize: selectedFile.size
+                })
+              })
+
+              if (!confirmRes.ok) {
+                const errorData = await confirmRes.json()
+                reject(new Error(errorData.error || 'Failed to confirm upload'))
+                return
+              }
+
+              const data = await confirmRes.json()
               resolve(data)
-            } catch (e) {
-              reject(new Error('Invalid response from server'))
+            } catch (error) {
+              reject(error)
             }
           } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`))
+            console.error('[Upload] S3 upload failed:', xhr.status, xhr.statusText)
+            reject(new Error(`S3 upload failed with status ${xhr.status}`))
           }
         })
 
         xhr.addEventListener('error', () => {
+          console.error('[Upload] Network error during S3 upload')
           reject(new Error('Network error during upload'))
         })
 
         xhr.addEventListener('abort', () => {
+          console.error('[Upload] S3 upload cancelled')
           reject(new Error('Upload cancelled'))
         })
 
-        xhr.open('POST', '/api/video-analysis/upload')
-        xhr.send(formData)
+        // PUT request to S3 pre-signed URL
+        xhr.open('PUT', uploadUrl)
+        xhr.setRequestHeader('Content-Type', selectedFile.type)
+        xhr.send(selectedFile)
       })
 
       setUploadProgress(100)
       toast.success('✅ Upload complete! Starting AI analysis...', { id: 'video-upload', duration: 3000 })
+      console.log('[Upload] Upload confirmed, video ID:', uploadData.videoId)
       
       // Small delay to show completion
       await new Promise(resolve => setTimeout(resolve, 500))
