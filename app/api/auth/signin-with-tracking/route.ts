@@ -109,7 +109,7 @@ export async function POST(request: Request) {
     
     await logSecurityEvent({
       userId: user.id,
-      eventType: 'LOGIN_SUCCESS',
+      eventType: 'SUCCESSFUL_LOGIN',
       severity: SecurityEventSeverity.LOW,
       description: 'User logged in successfully',
       ipAddress,

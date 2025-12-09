@@ -39,6 +39,7 @@ import {
   X,
 } from 'lucide-react';
 import { toast } from 'sonner';
+import Link from 'next/link';
 import { InteractiveUSMap } from '@/components/media/interactive-us-map';
 import { cn } from '@/lib/utils';
 
@@ -402,6 +403,16 @@ export function UnifiedMediaHub() {
             </div>
             
             <div className="flex items-center gap-3">
+              {/* Link to Enhanced Media Center */}
+              <Link href="/media-center">
+                <Button 
+                  className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-purple-500/50 transition-all"
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Enhanced Media Center
+                </Button>
+              </Link>
+              
               {/* Notifications Dropdown */}
               <div className="relative">
                 <Button 

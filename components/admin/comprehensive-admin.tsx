@@ -79,7 +79,7 @@ export default function ComprehensiveAdmin({ initialData }: ComprehensiveAdminPr
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-lg sticky top-0 z-50"
+        className="bg-white/80 backdrop-blur-xl border-b border-slate-200 shadow-lg sticky top-0 z-[70]"
       >
         <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-purple-500/5 to-blue-500/5 pointer-events-none" />
         <div className="max-w-[1600px] mx-auto px-6 py-4 relative">

@@ -91,8 +91,6 @@ export async function POST(
           password: hashedPassword,
           role: 'SPONSOR',
           emailVerified: new Date(), // Auto-verify sponsor accounts
-          // Additional sponsor metadata
-          sponsorId: id, // Link to sponsor application
         },
       });
 
@@ -104,7 +102,6 @@ export async function POST(
           where: { id: existingUser.id },
           data: {
             role: 'SPONSOR',
-            sponsorId: id,
           },
         });
         console.log(`✅ Updated existing user ${application.email} to SPONSOR role`);

@@ -11,8 +11,8 @@ const DEFAULT_PREFERENCES = {
   emailEnabled: true,
   pushEnabled: false,
   inAppEnabled: true,
-  frequency: 'DAILY',
-  customTimes: ['08:00'],
+  frequency: NotificationFrequency.DAILY,
+  customTimes: ['08:00'] as any, // JSON field
   timezone: 'America/New_York'
 };
 

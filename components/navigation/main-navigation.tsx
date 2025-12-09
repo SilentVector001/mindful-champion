@@ -1061,7 +1061,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
           </div>
 
           {/* User Info Footer */}
-          <div className="border-t p-4 shrink-0">
+          <div className="border-t p-4 shrink-0 space-y-3">
+            {/* User Info - Top Section */}
             <div className="flex items-center gap-3 max-w-full">
               <Avatar className="h-10 w-10 border-2 border-champion-green/20 flex-shrink-0">
                 <AvatarImage src={session?.user?.image || ""} />
@@ -1090,10 +1091,17 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     {user?.subscriptionTier || 'FREE'}
                   </Badge>
                 </div>
-                <div className="flex items-center gap-1.5 mt-1">
-                  <Award className="w-3 h-3 text-champion-gold flex-shrink-0" />
-                  <span className="text-xs font-bold text-champion-gold truncate">
-                    {rewardPoints.toLocaleString()} points
+              </div>
+            </div>
+
+            {/* Points Display - Bottom Right */}
+            <div className="flex justify-end">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-champion-gold/10 to-yellow-500/10 border border-champion-gold/20">
+                <Award className="w-5 h-5 text-champion-gold flex-shrink-0 animate-pulse" />
+                <div className="text-right">
+                  <p className="text-xs text-gray-600 font-medium">Your Points</p>
+                  <span className="text-lg font-bold text-champion-gold">
+                    {rewardPoints.toLocaleString()}
                   </span>
                 </div>
               </div>

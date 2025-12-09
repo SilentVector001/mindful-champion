@@ -153,7 +153,7 @@ export default function RewardsCenter() {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-8"
         >
           <div className="flex items-center justify-center gap-3 mb-4">
             <Trophy className="w-10 h-10 text-teal-500" />
@@ -164,6 +164,42 @@ export default function RewardsCenter() {
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Earn points, unlock tiers, and redeem exclusive rewards from our partner sponsors
           </p>
+        </motion.div>
+
+        {/* Prominent Points Display at Top */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1 }}
+          className="mb-8"
+        >
+          <Card className="border-0 shadow-xl overflow-hidden bg-gradient-to-r from-teal-500 to-cyan-500">
+            <CardContent className="p-8 text-center">
+              <div className="flex items-center justify-center gap-4 mb-2">
+                <Sparkles className="w-10 h-10 text-white animate-pulse" />
+                <div>
+                  <p className="text-white/90 text-sm font-medium uppercase tracking-wider mb-1">
+                    Your Points Balance
+                  </p>
+                  <div className="flex items-center justify-center gap-2">
+                    <span className="text-6xl font-extrabold text-white drop-shadow-lg">
+                      {userPoints?.toLocaleString?.() ?? 0}
+                    </span>
+                    <Star className="w-8 h-8 text-yellow-300 animate-pulse" />
+                  </div>
+                </div>
+              </div>
+              <Button
+                variant="secondary"
+                size="lg"
+                onClick={() => router.push('/progress/achievements')}
+                className="mt-4 bg-white hover:bg-gray-100 text-teal-600 font-semibold shadow-lg"
+              >
+                <Award className="w-5 h-5 mr-2" />
+                Earn More Points
+              </Button>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Current Status Card */}

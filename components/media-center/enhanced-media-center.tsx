@@ -28,6 +28,7 @@ import {
   AlertCircle
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import Link from 'next/link';
 import { mediaDesignTokens } from '@/lib/media-design-system';
 import { cn } from '@/lib/utils';
 
@@ -237,6 +238,15 @@ export function EnhancedMediaCenter() {
                   {trialStatus.daysRemaining} days left
                 </Badge>
               )}
+              
+              <Link href="/media">
+                <Button 
+                  className="rounded-full bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white font-semibold shadow-lg hover:shadow-teal-500/50 transition-all"
+                >
+                  <Home className="w-4 h-4 mr-2" />
+                  Main Media Hub
+                </Button>
+              </Link>
               
               <Button 
                 onClick={fetchLiveIndicators}
