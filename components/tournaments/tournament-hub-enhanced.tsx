@@ -44,6 +44,7 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center'
+import { InteractiveUSMap } from '@/components/media/interactive-us-map'
 
 interface Tournament {
   id: string
@@ -337,15 +338,36 @@ export function TournamentHubEnhanced() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50 overflow-x-hidden">
       <div className="container mx-auto py-6 px-4 max-w-[1600px] relative">
         {/* Navigation */}
-        <div className="mb-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.push('/connect')}
-            className="hover:bg-slate-100"
-          >
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Connect
-          </Button>
+        <div className="mb-4 flex items-center justify-between flex-wrap gap-4">
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              onClick={() => router.push('/connect')}
+              className="hover:bg-slate-100"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Connect
+            </Button>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              onClick={() => router.push('/media-center')}
+              className="border-2 border-teal-500 text-teal-700 hover:bg-teal-50"
+            >
+              <Radio className="w-4 h-4 mr-2" />
+              Media Center
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/dashboard')}
+              className="border-2 border-slate-300 hover:bg-slate-50"
+            >
+              <Trophy className="w-4 h-4 mr-2" />
+              Dashboard
+            </Button>
+          </div>
         </div>
 
         {/* Header */}
@@ -533,118 +555,28 @@ export function TournamentHubEnhanced() {
 
           {/* Right Column - Interactive Map & Activity Feed */}
           <div className="lg:col-span-1 space-y-4">
-            {/* Interactive US Map */}
-            <Card className="border-2 border-teal-200 shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 py-3">
-                <CardTitle className="flex items-center gap-2 text-white text-lg">
-                  <Globe className="w-5 h-5" />
-                  Tournament Map
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-4 bg-gradient-to-br from-slate-50 to-teal-50">
-                {/* SVG US Map */}
-                <div className="relative aspect-[4/3] bg-white rounded-lg border border-slate-200 p-4">
-                  <svg viewBox="0 0 100 70" className="w-full h-full">
-                    {/* Map background */}
-                    <rect x="0" y="0" width="100" height="70" fill="#f8fafc" rx="2" />
-                    
-                    {/* State dots */}
-                    {US_STATES.map((state) => {
-                      const count = tournamentsByState[state.abbr] || 0
-                      const isHovered = hoveredState === state.abbr
-                      const isSelected = selectedMapState === state.abbr
-                      
-                      return (
-                        <g key={state.abbr}>
-                          {/* Pulse animation for states with tournaments */}
-                          {count > 0 && (
-                            <circle
-                              cx={state.x}
-                              cy={state.y}
-                              r={isHovered || isSelected ? 6 : 4}
-                              className={`${count >= 3 ? 'animate-pulse' : ''} transition-all duration-300`}
-                              fill={count >= 5 ? '#0d9488' : count >= 3 ? '#14b8a6' : count >= 1 ? '#5eead4' : '#e2e8f0'}
-                              opacity={0.3}
-                            />
-                          )}
-                          {/* Main dot */}
-                          <circle
-                            cx={state.x}
-                            cy={state.y}
-                            r={isHovered || isSelected ? 4 : count > 0 ? 3 : 2}
-                            className={`cursor-pointer transition-all duration-200 ${
-                              isSelected ? 'fill-orange-500' :
-                              isHovered ? 'fill-teal-600' :
-                              count >= 5 ? 'fill-teal-600' :
-                              count >= 3 ? 'fill-teal-500' :
-                              count >= 1 ? 'fill-teal-400' :
-                              'fill-slate-300'
-                            }`}
-                            stroke={isHovered || isSelected ? '#fff' : 'none'}
-                            strokeWidth={1}
-                            onMouseEnter={() => setHoveredState(state.abbr)}
-                            onMouseLeave={() => setHoveredState(null)}
-                            onClick={() => handleMapStateClick(state.abbr)}
-                          />
-                          {/* State label on hover */}
-                          {(isHovered || isSelected) && (
-                            <text
-                              x={state.x}
-                              y={state.y - 6}
-                              textAnchor="middle"
-                              className="text-[3px] font-bold fill-slate-700"
-                            >
-                              {state.abbr}
-                            </text>
-                          )}
-                        </g>
-                      )
-                    })}
-                  </svg>
-                  
-                  {/* Hover tooltip */}
-                  <AnimatePresence>
-                    {hoveredState && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 5 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 5 }}
-                        className="absolute top-2 left-2 bg-white/95 backdrop-blur rounded-lg shadow-lg p-2 border border-teal-200"
-                      >
-                        <div className="font-bold text-slate-900 text-sm">
-                          {US_STATES.find(s => s.abbr === hoveredState)?.name}
-                        </div>
-                        <div className="flex items-center gap-1 text-xs text-slate-600">
-                          <Trophy className="w-3 h-3 text-teal-600" />
-                          {tournamentsByState[hoveredState] || 0} tournaments
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                {/* Legend */}
-                <div className="flex items-center justify-center gap-4 mt-3 text-xs">
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-teal-600" />
-                    <span>5+</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-teal-400" />
-                    <span>1-4</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="w-3 h-3 rounded-full bg-slate-300" />
-                    <span>None</span>
-                  </div>
-                </div>
-
-                {/* Click to filter hint */}
-                <p className="text-center text-xs text-slate-500 mt-2">
-                  Click a state to filter tournaments
-                </p>
-              </CardContent>
-            </Card>
+            {/* Interactive US Map with Real State Boundaries */}
+            <InteractiveUSMap
+              tournaments={tournaments.map(t => ({
+                id: t.id,
+                name: t.name,
+                state: t.state,
+                city: t.city,
+                venue: t.venue,
+                date: new Date(t.startDate),
+                isLive: t.status === 'Open',
+                status: t.status === 'Open' ? 'live' : 
+                        (new Date(t.startDate).toDateString() === new Date().toDateString() ? 'today' : 
+                        (new Date(t.startDate) > new Date() ? 'upcoming' : 'completed')) as 'live' | 'upcoming' | 'today' | 'completed',
+                streamUrl: t.websiteUrl,
+                websiteUrl: t.websiteUrl,
+                organization: t.organization || 'Tournament',
+                description: t.description,
+              }))}
+              onStateClick={(stateAbbr) => {
+                handleMapStateClick(stateAbbr);
+              }}
+            />
 
             {/* Quick Stats */}
             <div className="grid grid-cols-2 gap-3">

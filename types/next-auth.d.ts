@@ -14,6 +14,7 @@ declare module "next-auth" {
       onboardingCompleted?: boolean
       trialEndDate?: string | null
       trialExpired?: boolean
+      rewardPoints?: number
     }
   }
 
@@ -24,6 +25,7 @@ declare module "next-auth" {
     onboardingCompleted?: boolean
     trialEndDate?: string | null
     trialExpired?: boolean
+    rewardPoints?: number
   }
 }
 
@@ -35,5 +37,6 @@ declare module "next-auth/jwt" {
     onboardingCompleted?: boolean
     trialEndDate?: string | null
     trialExpired?: boolean
+    rewardPoints?: number
   }
 }

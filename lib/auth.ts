@@ -104,6 +104,7 @@ export const authOptions: NextAuthOptions = {
           subscriptionTier: user.subscriptionTier,
           isTrialActive: user.isTrialActive,
           onboardingCompleted: user.onboardingCompleted,
+          rewardPoints: user.rewardPoints || 0,
         }
       }
     }),
@@ -134,6 +135,7 @@ export const authOptions: NextAuthOptions = {
         token.subscriptionTier = user.subscriptionTier
         token.isTrialActive = user.isTrialActive
         token.onboardingCompleted = user.onboardingCompleted
+        token.rewardPoints = user.rewardPoints || 0
       }
       
       // CRITICAL FIX: Always refresh onboarding status to prevent redirect loops
@@ -151,7 +153,8 @@ export const authOptions: NextAuthOptions = {
             role: true,
             subscriptionTier: true,
             isTrialActive: true,
-            trialEndDate: true
+            trialEndDate: true,
+            rewardPoints: true
           }
         })
         if (freshUser) {
@@ -160,6 +163,7 @@ export const authOptions: NextAuthOptions = {
           token.subscriptionTier = freshUser.subscriptionTier
           token.isTrialActive = freshUser.isTrialActive
           token.trialEndDate = freshUser.trialEndDate?.toISOString()
+          token.rewardPoints = freshUser.rewardPoints || 0
           token.lastRefresh = Date.now()
           
           // Check if trial has expired
@@ -182,6 +186,7 @@ export const authOptions: NextAuthOptions = {
         session.user.onboardingCompleted = token.onboardingCompleted as boolean
         session.user.trialEndDate = token.trialEndDate as string
         session.user.trialExpired = token.trialExpired as boolean
+        session.user.rewardPoints = (token.rewardPoints as number) || 0
       }
       return session
     }

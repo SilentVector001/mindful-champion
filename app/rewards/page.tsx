@@ -16,7 +16,9 @@ import {
   Crown,
   Zap,
   Trophy,
-  ShoppingBag
+  ShoppingBag,
+  ArrowLeft,
+  Home
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -25,6 +27,8 @@ import { Badge } from '@/components/ui/badge';
 import TierUnlockCelebration from '@/app/components/tier-unlock-celebration';
 import { toast } from 'sonner';
 import Image from 'next/image';
+import MainNavigation from '@/components/navigation/main-navigation';
+import Link from 'next/link';
 
 export default function RewardsCenter() {
   const { data: session, status } = useSession() || {};
@@ -51,6 +55,10 @@ export default function RewardsCenter() {
       if (tierRes?.ok) {
         const data = await tierRes.json();
         setTierData(data);
+        console.log('✅ Rewards data loaded:', data);
+      } else {
+        console.error('❌ Failed to load tier data:', tierRes.status, tierRes.statusText);
+        toast.error('Failed to load rewards data. Please try refreshing the page.');
       }
 
       // Load sponsor offers
@@ -58,9 +66,12 @@ export default function RewardsCenter() {
       if (offersRes?.ok) {
         const data = await offersRes.json();
         setSponsorOffers(data?.offers ?? []);
+      } else {
+        console.warn('⚠️ Failed to load sponsor offers:', offersRes.status);
       }
     } catch (error) {
-      console.error('Error loading rewards data:', error);
+      console.error('❌ Error loading rewards data:', error);
+      toast.error('An error occurred while loading your rewards. Please refresh the page.');
     } finally {
       setLoading(false);
     }
@@ -139,6 +150,9 @@ export default function RewardsCenter() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-cyan-50">
+      {/* Main Navigation */}
+      <MainNavigation user={session?.user} />
+
       {/* Celebration Modal */}
       {showCelebration && celebrationData && (
         <TierUnlockCelebration
@@ -149,6 +163,28 @@ export default function RewardsCenter() {
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        {/* Navigation Breadcrumb */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="mb-6"
+        >
+          <div className="flex items-center gap-4">
+            <Link href="/dashboard">
+              <Button variant="outline" size="sm">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Dashboard
+              </Button>
+            </Link>
+            <Link href="/">
+              <Button variant="ghost" size="sm">
+                <Home className="w-4 h-4 mr-2" />
+                Home
+              </Button>
+            </Link>
+          </div>
+        </motion.div>
+
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -187,17 +223,37 @@ export default function RewardsCenter() {
                     </span>
                     <Star className="w-8 h-8 text-yellow-300 animate-pulse" />
                   </div>
+                  {userPoints === 0 && tierData && (
+                    <p className="text-white/70 text-sm mt-2">
+                      Start earning points by completing activities!
+                    </p>
+                  )}
                 </div>
               </div>
-              <Button
-                variant="secondary"
-                size="lg"
-                onClick={() => router.push('/progress/achievements')}
-                className="mt-4 bg-white hover:bg-gray-100 text-teal-600 font-semibold shadow-lg"
-              >
-                <Award className="w-5 h-5 mr-2" />
-                Earn More Points
-              </Button>
+              <div className="flex items-center justify-center gap-3 mt-4">
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => router.push('/progress/achievements')}
+                  className="bg-white hover:bg-gray-100 text-teal-600 font-semibold shadow-lg"
+                >
+                  <Award className="w-5 h-5 mr-2" />
+                  Earn More Points
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  onClick={() => {
+                    setLoading(true);
+                    loadData();
+                    toast.success('Refreshing rewards data...');
+                  }}
+                  className="bg-white/20 hover:bg-white/30 text-white font-semibold shadow-lg backdrop-blur-sm"
+                >
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Refresh
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </motion.div>

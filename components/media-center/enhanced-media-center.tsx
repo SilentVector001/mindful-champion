@@ -39,6 +39,7 @@ import { EventsCalendarSection } from './events-calendar-section';
 import { TrainingLibrarySection } from './training-library-section';
 import { MyLibrarySection } from './my-library-section';
 import { RecentHighlightsSection } from './recent-highlights-section';
+import { TournamentHub } from '@/components/media/tournament-hub';
 
 // Import new enhanced sections
 import { FeaturedHeroCarousel } from './featured-hero-carousel';
@@ -416,6 +417,15 @@ export function EnhancedMediaCenter() {
               transition={{ delay: 0.4 }}
             >
               <EventsCalendarSection tierAccess={tierAccess} />
+            </motion.div>
+            
+            {/* Tournament Hub Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+            >
+              <TournamentHub />
             </motion.div>
           </TabsContent>
 
