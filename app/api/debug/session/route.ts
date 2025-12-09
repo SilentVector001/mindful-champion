@@ -1,75 +1,56 @@
-
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma as db } from '@/lib/db'
 import { getToken } from 'next-auth/jwt'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
-/**
- * Debug endpoint to check session and JWT token status
- * Helpful for diagnosing onboarding redirect loop issues
- */
 export async function GET(request: NextRequest) {
+  console.log('[Debug Session] Testing session...')
+  
   try {
-    // Get session
+    // Test 1: Get server session
     const session = await getServerSession(authOptions)
+    console.log('[Debug Session] Server Session:', session ? 'EXISTS' : 'NULL')
     
-    // Get JWT token
-    const token = await getToken({
-      req: request,
-      secret: process.env.NEXTAUTH_SECRET,
+    // Test 2: Get JWT token
+    const token = await getToken({ 
+      req: request, 
+      secret: process.env.NEXTAUTH_SECRET 
     })
+    console.log('[Debug Session] JWT Token:', token ? 'EXISTS' : 'NULL')
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ 
-        error: 'Not authenticated',
-        session: null,
-        token: null 
-      }, { status: 401 })
-    }
-
-    // Get database user
-    const dbUser = await db.user.findUnique({
-      where: { id: session.user.id },
-      select: {
-        id: true,
-        email: true,
-        onboardingCompleted: true,
-        onboardingCompletedAt: true,
-        primaryGoals: true,
-        biggestChallenges: true,
-        skillLevel: true,
-        subscriptionTier: true,
-        isTrialActive: true,
-      }
-    })
-
-    return NextResponse.json({ 
+    // Test 3: Check cookies
+    const cookies = request.cookies.getAll()
+    console.log('[Debug Session] Cookies:', cookies.map(c => c.name))
+    
+    // Test 4: Environment check
+    const nextAuthUrl = process.env.NEXTAUTH_URL
+    const nextAuthSecret = process.env.NEXTAUTH_SECRET ? 'SET' : 'MISSING'
+    
+    return NextResponse.json({
       timestamp: new Date().toISOString(),
-      session: {
-        userId: session.user.id,
-        email: session.user.email,
-        onboardingCompleted: session.user.onboardingCompleted,
-      },
-      jwtToken: {
-        onboardingCompleted: token?.onboardingCompleted,
-        lastRefresh: token?.lastRefresh ? new Date(token.lastRefresh as number).toISOString() : null,
-      },
-      database: dbUser,
-      comparison: {
-        sessionMatchesDB: session.user.onboardingCompleted === dbUser?.onboardingCompleted,
-        jwtMatchesDB: token?.onboardingCompleted === dbUser?.onboardingCompleted,
-        allMatch: session.user.onboardingCompleted === dbUser?.onboardingCompleted && 
-                  token?.onboardingCompleted === dbUser?.onboardingCompleted
+      session: session ? {
+        user: {
+          id: session.user?.id,
+          email: session.user?.email,
+          name: session.user?.name
+        }
+      } : null,
+      token: token ? {
+        sub: token.sub,
+        email: token.email
+      } : null,
+      cookies: cookies.map(c => ({ name: c.name, value: c.value.substring(0, 20) + '...' })),
+      env: {
+        nextAuthUrl,
+        nextAuthSecret
       }
     })
   } catch (error) {
-    console.error('Error in debug/session:', error)
-    return NextResponse.json({ 
-      error: 'Failed to get debug info',
-      details: error instanceof Error ? error.message : String(error)
+    console.error('[Debug Session] Error:', error)
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
