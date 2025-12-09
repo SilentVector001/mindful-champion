@@ -99,18 +99,29 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const { codeId, status } = await req.json();
+    const body = await req.json();
+    const codeId = body.codeId;
+    const statusValue = body.status;
 
-    if (!codeId || !status) {
+    if (!codeId || !statusValue) {
       return NextResponse.json(
         { error: 'Code ID and status are required' },
         { status: 400 }
       );
     }
 
+    // Validate status is a valid PromoCodeStatus
+    const validStatuses: Array<PromoCodeStatus> = ['ACTIVE', 'REDEEMED', 'EXPIRED', 'REVOKED'];
+    if (!validStatuses.includes(statusValue as PromoCodeStatus)) {
+      return NextResponse.json(
+        { error: 'Invalid status. Must be one of: ACTIVE, REDEEMED, EXPIRED, REVOKED' },
+        { status: 400 }
+      );
+    }
+
     const updated = await prisma.promoCode.update({
       where: { id: codeId },
-      data: { status: status as PromoCodeStatus }
+      data: { status: statusValue }
     });
 
     return NextResponse.json({

@@ -4,7 +4,7 @@
  * Each connector handles OAuth flows and data synchronization
  */
 
-import { WearableDeviceType, HealthDataType } from '@/lib/prisma-types';
+import { WearableDeviceType, HealthDataType } from '@prisma/client';
 
 export interface DeviceConnector {
   deviceType: WearableDeviceType;
@@ -107,7 +107,7 @@ export const SamsungHealthConnector: DeviceConnector = {
  * Oura Ring connector
  */
 export const OuraConnector: DeviceConnector = {
-  deviceType: 'OURA',
+  deviceType: 'OURA_RING',
   authUrl: 'https://cloud.ouraring.com/oauth/authorize',
   scopes: ['daily', 'heartrate', 'workout', 'session'],
   clientId: process.env.OURA_CLIENT_ID,
@@ -163,9 +163,9 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
     'activities-heart': 'HEART_RATE',
     'activities-steps': 'STEPS',
     'activities-distance': 'DISTANCE',
-    'activities-calories': 'CALORIES',
+    'activities-calories': 'CALORIES_BURNED',
     'activities-minutesVeryActive': 'ACTIVE_MINUTES',
-    'sleep-minutesAsleep': 'SLEEP',
+    'sleep-minutesAsleep': 'SLEEP_DURATION',
   };
 
   // Garmin mappings
@@ -173,16 +173,16 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
     'heartRate': 'HEART_RATE',
     'steps': 'STEPS',
     'distance': 'DISTANCE',
-    'calories': 'CALORIES',
-    'sleepSeconds': 'SLEEP',
+    'calories': 'CALORIES_BURNED',
+    'sleepSeconds': 'SLEEP_DURATION',
   };
 
   // Whoop mappings
   const whoopMappings: Record<string, HealthDataType> = {
     'recovery_score': 'RECOVERY_SCORE',
-    'hrv': 'HRV',
+    'hrv': 'HEART_RATE_VARIABILITY',
     'resting_heart_rate': 'RESTING_HEART_RATE',
-    'sleep_performance': 'SLEEP',
+    'sleep_performance': 'SLEEP_QUALITY',
   };
 
   // Select appropriate mapping based on device type
@@ -204,8 +204,8 @@ export function mapToHealthDataType(deviceType: WearableDeviceType, dataKey: str
         heartRate: 'HEART_RATE',
         steps: 'STEPS',
         distance: 'DISTANCE',
-        calories: 'CALORIES',
-        sleep: 'SLEEP',
+        calories: 'CALORIES_BURNED',
+        sleep: 'SLEEP_DURATION',
       };
   }
 

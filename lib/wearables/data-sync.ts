@@ -3,7 +3,7 @@
  * Data synchronization utilities for wearable devices
  */
 
-import { WearableDeviceType, HealthDataType } from '@/lib/prisma-types';
+import { WearableDeviceType, HealthDataType } from '@prisma/client';
 import { WearableService, HealthDataEntry } from './wearable-service';
 
 export interface SyncOptions {

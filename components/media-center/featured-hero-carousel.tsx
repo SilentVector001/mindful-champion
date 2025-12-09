@@ -48,82 +48,82 @@ interface FeaturedItem {
 const SAMPLE_FEATURED_ITEMS: FeaturedItem[] = [
   {
     id: '1',
-    type: 'upcoming',
-    title: 'PPA Tour Championship Finals - Coming Dec 15!',
-    description: 'Watch the most anticipated finals of the season. Ben Johns vs Tyson McGuffin in an epic showdown for the championship title.',
+    type: 'live',
+    title: 'PPA Mesa Arizona Grand Slam 2025 - LIVE NOW',
+    description: 'Watch Ben Johns defend his title against Tyson McGuffin in the Men\'s Singles semifinal. Championship court action streaming live!',
     imageUrl: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200&h=600&fit=crop',
-    badgeText: '📅 Dec 15',
-    badgeColor: 'bg-blue-500',
-    ctaText: 'Set Reminder',
-    ctaUrl: 'https://youtube.com/@PPAtour',
+    badgeText: '🔴 LIVE',
+    badgeColor: 'bg-red-500',
+    ctaText: 'Watch Live',
+    ctaUrl: 'https://www.youtube.com/@PPATour/streams',
     metadata: {
-      tournament: 'PPA Tour Championship',
-      date: 'December 15, 2025',
-      location: 'Dallas, TX'
+      tournament: 'PPA Mesa Arizona Grand Slam',
+      date: 'Live Now',
+      location: 'Mesa, AZ'
     },
-    isLive: false,
+    isLive: true,
     featured: true
   },
   {
     id: '2',
     type: 'highlight',
-    title: 'Best Plays of the Week: Incredible Ernies & Resets',
-    description: 'Check out this week\'s most spectacular plays featuring ATP\'s, impossible gets, and game-winning shots from pro tour events.',
-    imageUrl: 'https://i.ytimg.com/vi/uOy8ow5yoQ4/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLAgA57DqE_HsvJyYC1qf8u6EMOumA voices-best-plays?w=1200&h=600&fit=crop',
-    badgeText: '⭐ Featured',
+    title: 'Top 10 Shots of the Week: Incredible Ernies & Around-The-Posts!',
+    description: 'Check out this week\'s most spectacular plays featuring ATPs, impossible gets, and game-winning shots from PPA and MLP events.',
+    imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=1200&h=600&fit=crop',
+    badgeText: '🔥 Trending',
     badgeColor: 'bg-amber-500',
     ctaText: 'Watch Now',
-    ctaUrl: '/media-center?tab=highlights',
+    ctaUrl: 'https://www.youtube.com/@PPATour',
     metadata: {
-      viewCount: 125000,
-      duration: '12:45'
+      viewCount: 2450000,
+      duration: '8:32'
     },
     featured: true
   },
   {
     id: '3',
     type: 'upcoming',
-    title: 'MLP Miami Slam - Premium Event Starting Soon',
-    description: 'Major League Pickleball returns to Miami with the biggest names in the sport. Don\'t miss the draft and opening matches!',
+    title: 'MLP Orlando Cup 2025 - Team Competition',
+    description: 'Major League Pickleball returns with 24 teams featuring Ben Johns, Anna Leigh Waters, and the top pros battling for supremacy!',
     imageUrl: 'https://images.unsplash.com/photo-1577223625816-7546f13df25d?w=1200&h=600&fit=crop',
-    badgeText: '📅 Dec 15',
-    badgeColor: 'bg-blue-500',
-    ctaText: 'Set Reminder',
-    ctaUrl: '/media-center?tab=events',
+    badgeText: '📅 Feb 7-9',
+    badgeColor: 'bg-purple-500',
+    ctaText: 'Learn More',
+    ctaUrl: 'https://majorleaguepickleball.net',
     metadata: {
-      tournament: 'MLP Miami Slam',
-      date: 'December 15, 2025',
-      location: 'Miami, FL'
+      tournament: 'MLP Orlando Cup',
+      date: 'February 7-9, 2025',
+      location: 'Orlando, FL'
     }
   },
   {
     id: '4',
     type: 'podcast',
-    title: 'Pro Insights: Anna Leigh Waters Interview',
-    description: 'Exclusive interview with the #1 ranked women\'s player discussing her training regimen, mental preparation, and 2025 goals.',
+    title: 'The Dink: Ben Johns Reveals His Training Secrets',
+    description: 'Exclusive interview with the world #1 discussing his daily routine, mental preparation, and predictions for the 2025 season.',
     imageUrl: 'https://images.unsplash.com/photo-1478737270239-2f02b77fc618?w=1200&h=600&fit=crop',
     badgeText: '🎙️ New Episode',
-    badgeColor: 'bg-purple-500',
+    badgeColor: 'bg-cyan-500',
     ctaText: 'Listen Now',
-    ctaUrl: '/media-center?tab=podcasts',
+    ctaUrl: 'https://www.youtube.com/@TheDinkPickleball',
     metadata: {
-      channel: 'Pickleball Therapy',
-      duration: '52 min'
+      channel: 'The Dink Pickleball',
+      duration: '1:12:00'
     }
   },
   {
     id: '5',
     type: 'training',
-    title: 'Master the Third Shot Drop - Pro Techniques',
-    description: 'Learn the most crucial shot in pickleball from PPA pros. Step-by-step breakdown of grip, stance, and follow-through.',
+    title: 'Master the Erne Shot - Step by Step Guide',
+    description: 'Learn the most exciting shot in pickleball from Selkirk TV. Complete breakdown of footwork, timing, and when to use this weapon.',
     imageUrl: 'https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=600&fit=crop',
-    badgeText: '📚 Training',
+    badgeText: '📚 Pro Training',
     badgeColor: 'bg-teal-500',
     ctaText: 'Start Learning',
-    ctaUrl: '/train/library',
+    ctaUrl: 'https://www.youtube.com/@SelkirkTV',
     metadata: {
-      duration: '25 min',
-      viewCount: 89000
+      duration: '14:32',
+      viewCount: 1560000
     }
   }
 ];

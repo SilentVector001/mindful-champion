@@ -32,6 +32,10 @@ import { AchievementToast, useAchievementNotifications } from "@/components/rewa
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
   const { achievements, isShowing, dismissAchievements, checkForAchievements } = useAchievementNotifications()
+  
+  // Upload method toggle - set to true to bypass CORS (server-side proxy)
+  const USE_PROXY_UPLOAD = true // Toggle: true=server proxy, false=direct S3
+  
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload')
   const [uploading, setUploading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
@@ -169,89 +173,163 @@ export default function VideoAnalysisHub() {
     try {
       console.log('='.repeat(80))
       console.log('[Upload] 🎬 Starting video upload process')
+      console.log('[Upload] Method:', USE_PROXY_UPLOAD ? 'Server Proxy (No CORS)' : 'Direct S3 (Requires CORS)')
       console.log('[Upload] File:', selectedFile.name)
       console.log('[Upload] Size:', `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`)
       console.log('[Upload] Type:', selectedFile.type)
       console.log('='.repeat(80))
-      
-      // Step 1: Get pre-signed URL from API
-      console.log('[Upload] STEP 1/3: Requesting upload URL from server...')
-      const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedFile.name,
-          fileType: selectedFile.type,
-          fileSize: selectedFile.size
-        })
-      })
 
-      if (!preSignedRes.ok) {
-        const errorData = await preSignedRes.json()
-        console.error('[Upload] ❌ Failed to get upload URL:', errorData)
-        throw new Error(errorData.error || 'Failed to get upload URL')
+      let key: string
+      let videoUrl: string | undefined
+
+      if (USE_PROXY_UPLOAD) {
+        // ============================================
+        // METHOD 1: Server-Side Proxy Upload (No CORS)
+        // ============================================
+        console.log('[Upload] Using server-side proxy upload (bypasses CORS)')
+        
+        const formData = new FormData()
+        formData.append('file', selectedFile)
+        formData.append('fileName', selectedFile.name)
+
+        const xhr = new XMLHttpRequest()
+        
+        const uploadPromise = new Promise<{key: string, url: string}>((resolve, reject) => {
+          // Track upload progress
+          let lastReportedProgress = 0
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const percentComplete = (e.loaded / e.total) * 100
+              const rounded = Math.round(percentComplete)
+              setUploadProgress(rounded)
+              
+              // Log every 10% progress
+              if (rounded >= lastReportedProgress + 10 || rounded === 100) {
+                console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
+                lastReportedProgress = rounded
+              }
+            }
+          })
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+              const response = JSON.parse(xhr.responseText)
+              console.log('[Upload] ✅ Server proxy upload successful')
+              console.log('[Upload] Upload time:', `${response.uploadTime}ms`)
+              console.log('[Upload] Total time:', `${response.totalTime}ms`)
+              resolve({ key: response.key, url: response.url })
+            } else {
+              const errorData = JSON.parse(xhr.responseText || '{"error":"Upload failed"}')
+              console.error('[Upload] ❌ Server proxy upload failed')
+              console.error('[Upload] Status:', xhr.status, xhr.statusText)
+              console.error('[Upload] Error:', errorData)
+              reject(new Error(errorData.error || 'Server proxy upload failed'))
+            }
+          })
+
+          xhr.addEventListener('error', () => {
+            console.error('[Upload] ❌ Network error during proxy upload')
+            reject(new Error('Network error during upload. Please check your connection and try again.'))
+          })
+
+          xhr.addEventListener('abort', () => {
+            console.error('[Upload] ⚠️ Upload cancelled by user or browser')
+            reject(new Error('Upload cancelled'))
+          })
+
+          xhr.open('POST', '/api/video-analysis/upload-proxy')
+          xhr.send(formData)
+        })
+
+        const result = await uploadPromise
+        key = result.key
+        videoUrl = result.url
+
+      } else {
+        // ============================================
+        // METHOD 2: Direct S3 Upload (Requires CORS)
+        // ============================================
+        console.log('[Upload] Using direct S3 upload (requires CORS)')
+        
+        // Step 1: Get pre-signed URL
+        console.log('[Upload] STEP 1/2: Requesting pre-signed URL from server...')
+        const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            fileName: selectedFile.name,
+            fileType: selectedFile.type,
+            fileSize: selectedFile.size
+          })
+        })
+
+        if (!preSignedRes.ok) {
+          const errorData = await preSignedRes.json()
+          console.error('[Upload] ❌ Failed to get upload URL:', errorData)
+          throw new Error(errorData.error || 'Failed to get upload URL')
+        }
+
+        const { uploadUrl, key: s3Key } = await preSignedRes.json()
+        key = s3Key
+        console.log('[Upload] ✅ Pre-signed URL received')
+        console.log('[Upload] Storage key:', key)
+
+        // Step 2: Upload to S3
+        console.log('[Upload] STEP 2/2: Uploading file to S3...')
+        const xhr = new XMLHttpRequest()
+        
+        const uploadPromise = new Promise<void>((resolve, reject) => {
+          let lastReportedProgress = 0
+          xhr.upload.addEventListener('progress', (e) => {
+            if (e.lengthComputable) {
+              const percentComplete = (e.loaded / e.total) * 100
+              const rounded = Math.round(percentComplete)
+              setUploadProgress(rounded)
+              
+              if (rounded >= lastReportedProgress + 10 || rounded === 100) {
+                console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
+                lastReportedProgress = rounded
+              }
+            }
+          })
+
+          xhr.addEventListener('load', () => {
+            if (xhr.status === 200 || xhr.status === 204) {
+              console.log('[Upload] ✅ File successfully uploaded to S3!')
+              resolve()
+            } else {
+              console.error('[Upload] ❌ S3 upload failed')
+              console.error('[Upload] Status:', xhr.status, xhr.statusText)
+              console.error('[Upload] Response:', xhr.responseText)
+              reject(new Error(`S3 upload failed with status ${xhr.status}: ${xhr.statusText}`))
+            }
+          })
+
+          xhr.addEventListener('error', (e) => {
+            console.error('[Upload] ❌ Network error during S3 upload')
+            console.error('[Upload] This is likely a CORS configuration issue')
+            console.error('[Upload] Error details:', e)
+            reject(new Error('Network error during upload. This may be a CORS issue - try enabling USE_PROXY_UPLOAD=true'))
+          })
+
+          xhr.addEventListener('abort', () => {
+            console.error('[Upload] ⚠️ Upload cancelled by user or browser')
+            reject(new Error('Upload cancelled'))
+          })
+
+          xhr.open('PUT', uploadUrl)
+          xhr.setRequestHeader('Content-Type', selectedFile.type)
+          xhr.send(selectedFile)
+        })
+
+        await uploadPromise
       }
 
-      const { uploadUrl, key } = await preSignedRes.json()
-      console.log('[Upload] ✅ Upload URL received')
-      console.log('[Upload] Storage key:', key)
-
-      // Step 2: Upload directly to S3 using pre-signed URL
-      console.log('[Upload] STEP 2/3: Uploading file to cloud storage...')
-      const xhr = new XMLHttpRequest()
-      const uploadPromise = new Promise<void>((resolve, reject) => {
-        // Track upload progress
-        let lastReportedProgress = 0
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) {
-            const percentComplete = (e.loaded / e.total) * 100
-            const rounded = Math.round(percentComplete)
-            setUploadProgress(rounded)
-            
-            // Log every 10% progress
-            if (rounded >= lastReportedProgress + 10 || rounded === 100) {
-              console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
-              lastReportedProgress = rounded
-            }
-          }
-        })
-
-        xhr.addEventListener('load', () => {
-          if (xhr.status === 200 || xhr.status === 204) {
-            console.log('[Upload] ✅ File successfully uploaded to cloud storage!')
-            resolve()
-          } else {
-            console.error('[Upload] ❌ Cloud upload failed')
-            console.error('[Upload] Status:', xhr.status, xhr.statusText)
-            console.error('[Upload] Response:', xhr.responseText)
-            reject(new Error(`Upload failed with status ${xhr.status}: ${xhr.statusText}`))
-          }
-        })
-
-        xhr.addEventListener('error', (e) => {
-          console.error('[Upload] ❌ Network error during upload')
-          console.error('[Upload] Error details:', e)
-          reject(new Error('Network error during upload. Please check your internet connection and try again.'))
-        })
-
-        xhr.addEventListener('abort', () => {
-          console.error('[Upload] ⚠️ Upload cancelled by user or browser')
-          reject(new Error('Upload cancelled'))
-        })
-
-        // PUT request to S3 pre-signed URL
-        console.log('[Upload] Initiating upload request...')
-        xhr.open('PUT', uploadUrl)
-        xhr.setRequestHeader('Content-Type', selectedFile.type)
-        xhr.send(selectedFile)
-      })
-
-      await uploadPromise
       setUploadProgress(100)
-      console.log('[Upload] ✅ STEP 2/3 Complete')
+      console.log('[Upload] ✅ Upload complete!')
 
-      // Step 3: Confirm upload with our API and create database record
-      console.log('[Upload] STEP 3/3: Saving video record to database...')
+      // Confirm upload with database
+      console.log('[Upload] Saving video record to database...')
       const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -281,7 +359,7 @@ export default function VideoAnalysisHub() {
       }
 
       const data = await confirmRes.json()
-      console.log('[Upload] ✅ STEP 3/3 Complete')
+      console.log('[Upload] ✅ Database record saved')
       console.log('[Upload] Video ID:', data.videoId)
       console.log('='.repeat(80))
       console.log('[Upload] 🎉 UPLOAD SUCCESSFUL!')
@@ -300,7 +378,7 @@ export default function VideoAnalysisHub() {
       
       // Start analysis
       setAnalyzing(true)
-      await analyzeVideo(data.videoId, data.videoUrl)
+      await analyzeVideo(data.videoId, videoUrl || data.videoUrl)
     } catch (error) {
       console.error('='.repeat(80))
       console.error('[Upload] ❌ UPLOAD FAILED')

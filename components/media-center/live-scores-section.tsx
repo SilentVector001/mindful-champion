@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -7,7 +6,22 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Trophy, Users, Clock, MapPin, Zap, Crown, Loader2 } from 'lucide-react';
+import { 
+  Trophy, 
+  Users, 
+  Clock, 
+  MapPin, 
+  Zap, 
+  Crown, 
+  Loader2,
+  Radio,
+  ChevronRight,
+  Sparkles,
+  Activity,
+  Timer,
+  Target
+} from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface Match {
   id: string;
@@ -24,6 +38,7 @@ interface Match {
   format: 'singles' | 'doubles';
   startTime: string;
   court?: string;
+  round?: string;
 }
 
 interface LiveScoresSectionProps {
@@ -33,6 +48,58 @@ interface LiveScoresSectionProps {
     showUpgradePrompts: boolean;
   };
 }
+
+// Sample match data for demo - real pickleball tournaments
+const SAMPLE_MATCHES: Match[] = [
+  {
+    id: 'live_1',
+    tournament: 'PPA Mesa Arizona Grand Slam 2025',
+    players: {
+      team1: ['Ben Johns', 'Collin Johns'],
+      team2: ['Riley Newman', 'Matt Wright']
+    },
+    score: {
+      sets: [{ team1: 11, team2: 9 }, { team1: 8, team2: 11 }],
+      currentSet: { team1: 9, team2: 7 }
+    },
+    status: 'live',
+    format: 'doubles',
+    startTime: new Date().toISOString(),
+    court: 'Championship Court',
+    round: 'Semifinal'
+  },
+  {
+    id: 'live_2',
+    tournament: 'PPA Mesa Arizona Grand Slam 2025',
+    players: {
+      team1: ['Anna Leigh Waters'],
+      team2: ['Catherine Parenteau']
+    },
+    score: {
+      sets: [{ team1: 11, team2: 6 }],
+      currentSet: { team1: 5, team2: 3 }
+    },
+    status: 'live',
+    format: 'singles',
+    startTime: new Date().toISOString(),
+    court: 'Court 2',
+    round: 'Quarterfinal'
+  },
+  {
+    id: 'upcoming_1',
+    tournament: 'MLP Dallas Season Finals',
+    players: {
+      team1: ['Tyson McGuffin', 'Jay Devilliers'],
+      team2: ['Federico Staksrud', 'Pablo Tellez']
+    },
+    score: { sets: [] },
+    status: 'upcoming',
+    format: 'doubles',
+    startTime: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+    court: 'Main Arena',
+    round: 'Final'
+  }
+];
 
 export function LiveScoresSection({ tierAccess }: LiveScoresSectionProps) {
   const [matches, setMatches] = useState<Match[]>([]);
@@ -66,44 +133,9 @@ export function LiveScoresSection({ tierAccess }: LiveScoresSectionProps) {
       console.error('Error fetching live scores:', error);
       setError('Connection error - showing sample data');
       // Show sample data on error
-      setMatches([
-        {
-          id: 'sample_1',
-          tournament: 'PPA Mesa Masters 2025',
-          players: {
-            team1: ['Ben Johns', 'Collin Johns'],
-            team2: ['Riley Newman', 'Matt Wright']
-          },
-          score: {
-            sets: [{ team1: 11, team2: 9 }, { team1: 8, team2: 11 }],
-            currentSet: { team1: 7, team2: 5 }
-          },
-          status: 'live',
-          format: 'doubles',
-          startTime: new Date().toISOString(),
-          court: 'Court 1'
-        }
-      ]);
+      setMatches(SAMPLE_MATCHES);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'live': return 'bg-red-500 text-white animate-pulse';
-      case 'completed': return 'bg-green-500 text-white';
-      case 'upcoming': return 'bg-blue-500 text-white';
-      default: return 'bg-gray-500 text-white';
-    }
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'live': return <Zap className="w-4 h-4" />;
-      case 'completed': return <Trophy className="w-4 h-4" />;
-      case 'upcoming': return <Clock className="w-4 h-4" />;
-      default: return null;
     }
   };
 
@@ -118,23 +150,27 @@ export function LiveScoresSection({ tierAccess }: LiveScoresSectionProps) {
     }
   };
 
-  // Removed paywall - show live scores to all users (sample data for non-premium)
+  const liveMatches = matches.filter(m => m.status === 'live');
+  const upcomingMatches = matches.filter(m => m.status === 'upcoming');
 
   if (loading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5" />
-            Live Scores
+      <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 overflow-hidden">
+        <CardHeader className="pb-4">
+          <CardTitle className="flex items-center gap-3">
+            <div className="p-2 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg">
+              <Trophy className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-800">Live Scores</h3>
+              <p className="text-sm text-slate-500 font-normal">Loading matches...</p>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-4 w-3/4" />
-              <Skeleton className="h-6 w-1/2" />
-              <Skeleton className="h-4 w-full" />
+          {[...Array(2)].map((_, i) => (
+            <div key={i} className="animate-pulse">
+              <div className="h-32 bg-gradient-to-r from-slate-100 to-slate-50 rounded-xl"></div>
             </div>
           ))}
         </CardContent>
@@ -142,174 +178,264 @@ export function LiveScoresSection({ tierAccess }: LiveScoresSectionProps) {
     );
   }
 
-  if (error && matches.length === 0) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5" />
-            Live Scores
+  return (
+    <Card className="border-0 shadow-xl bg-gradient-to-br from-white to-slate-50 overflow-hidden">
+      <CardHeader className="pb-3 border-b border-slate-100">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-3">
+            <div className="relative">
+              <div className="p-2 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-xl shadow-lg">
+                <Trophy className="w-5 h-5 text-white" />
+              </div>
+              {liveMatches.length > 0 && (
+                <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold text-slate-800">Live Scores</h3>
+              <p className="text-sm text-slate-500 font-normal">Pro tournament action</p>
+            </div>
           </CardTitle>
-        </CardHeader>
-        <CardContent>
+          
+          <div className="flex items-center gap-2">
+            {liveMatches.length > 0 && (
+              <Badge className="bg-gradient-to-r from-red-500 to-rose-500 text-white animate-pulse shadow-md">
+                <Radio className="w-3 h-3 mr-1" />
+                {liveMatches.length} LIVE
+              </Badge>
+            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={fetchLiveScores}
+              disabled={loading}
+              className="text-teal-600 hover:text-teal-700 hover:bg-teal-50"
+            >
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Activity className="w-4 h-4" />}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="pt-4">
+        {error && matches.length === 0 ? (
           <div className="text-center py-8">
-            <Trophy className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground mb-4">{error}</p>
-            <Button onClick={fetchLiveScores} disabled={loading}>
-              {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+            <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+              <Trophy className="w-8 h-8 text-slate-300" />
+            </div>
+            <p className="text-slate-500 mb-4">{error}</p>
+            <Button onClick={fetchLiveScores} variant="outline" className="rounded-full">
+              <Loader2 className="w-4 h-4 mr-2" />
               Try Again
             </Button>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
+        ) : (
+          <div className="space-y-4">
+            <AnimatePresence>
+              {/* Live Matches */}
+              {liveMatches.map((match, index) => (
+                <motion.div
+                  key={match.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group cursor-pointer"
+                >
+                  <div className={cn(
+                    "relative p-4 rounded-2xl transition-all duration-300",
+                    "bg-gradient-to-r from-red-50 via-white to-rose-50",
+                    "border-2 border-red-200 hover:border-red-300",
+                    "hover:shadow-lg hover:shadow-red-500/10"
+                  )}>
+                    {/* Live Indicator */}
+                    <div className="absolute -top-2 left-4">
+                      <Badge className="bg-gradient-to-r from-red-500 to-rose-500 text-white shadow-lg animate-pulse">
+                        <span className="relative flex h-2 w-2 mr-1.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                        </span>
+                        LIVE
+                      </Badge>
+                    </div>
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Trophy className="w-5 h-5" />
-            Live Scores
-            <Badge variant="outline" className="ml-2">
-              {matches.filter(m => m.status === 'live').length} Live
-            </Badge>
-          </div>
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={fetchLiveScores}
-            disabled={loading}
-          >
-            {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Refresh
-          </Button>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          <AnimatePresence>
-            {matches.map((match) => (
-              <motion.div
-                key={match.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Badge className={getStatusColor(match.status)}>
-                        {getStatusIcon(match.status)}
-                        <span className="ml-1 capitalize">{match.status}</span>
-                      </Badge>
-                      <Badge variant="outline" className="text-xs">
-                        <Users className="w-3 h-3 mr-1" />
-                        {match.format}
-                      </Badge>
-                    </div>
-                    <p className="text-sm font-medium text-muted-foreground">
-                      {match.tournament}
-                    </p>
-                  </div>
-                  <div className="text-right text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {formatTime(match.startTime)}
-                    </div>
-                    {match.court && (
-                      <div className="flex items-center gap-1 mt-1">
+                    {/* Tournament Info */}
+                    <div className="flex items-center justify-between mb-3 pt-2">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-xs bg-white/80">
+                          {match.format === 'doubles' ? <Users className="w-3 h-3 mr-1" /> : <Target className="w-3 h-3 mr-1" />}
+                          {match.format}
+                        </Badge>
+                        {match.round && (
+                          <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
+                            <Crown className="w-3 h-3 mr-1" />
+                            {match.round}
+                          </Badge>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 text-xs text-slate-500">
                         <MapPin className="w-3 h-3" />
                         {match.court}
                       </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  {/* Team 1 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {match.players.team1.join(' / ')}
-                      </span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      {match.score.sets.map((set, idx) => (
-                        <Badge 
-                          key={idx} 
-                          variant={set.team1 > set.team2 ? 'default' : 'outline'}
-                          className="min-w-[2.5rem] justify-center"
-                        >
-                          {set.team1}
-                        </Badge>
-                      ))}
-                      {match.score.currentSet && match.status === 'live' && (
-                        <Badge 
-                          variant="destructive" 
-                          className="min-w-[2.5rem] justify-center animate-pulse"
-                        >
-                          {match.score.currentSet.team1}
+
+                    <p className="text-xs font-medium text-slate-600 mb-3">{match.tournament}</p>
+
+                    {/* Match Score */}
+                    <div className="space-y-3">
+                      {/* Team 1 */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                            {match.players.team1[0].charAt(0)}
+                          </div>
+                          <span className="font-semibold text-sm text-slate-800">
+                            {match.players.team1.join(' / ')}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {match.score.sets.map((set, idx) => (
+                            <div 
+                              key={idx} 
+                              className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold",
+                                set.team1 > set.team2 
+                                  ? "bg-gradient-to-br from-emerald-400 to-green-500 text-white shadow-sm"
+                                  : "bg-slate-100 text-slate-600"
+                              )}
+                            >
+                              {set.team1}
+                            </div>
+                          ))}
+                          {match.score.currentSet && (
+                            <div className="w-10 h-8 rounded-lg flex items-center justify-center text-sm font-bold bg-gradient-to-br from-red-500 to-rose-500 text-white animate-pulse shadow-md">
+                              {match.score.currentSet.team1}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Team 2 */}
+                      <div className="flex items-center justify-between p-2 rounded-xl bg-white/80 border border-slate-100">
+                        <div className="flex items-center gap-2">
+                          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+                            {match.players.team2[0].charAt(0)}
+                          </div>
+                          <span className="font-semibold text-sm text-slate-800">
+                            {match.players.team2.join(' / ')}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1.5">
+                          {match.score.sets.map((set, idx) => (
+                            <div 
+                              key={idx} 
+                              className={cn(
+                                "w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold",
+                                set.team2 > set.team1 
+                                  ? "bg-gradient-to-br from-emerald-400 to-green-500 text-white shadow-sm"
+                                  : "bg-slate-100 text-slate-600"
+                              )}
+                            >
+                              {set.team2}
+                            </div>
+                          ))}
+                          {match.score.currentSet && (
+                            <div className="w-10 h-8 rounded-lg flex items-center justify-center text-sm font-bold bg-gradient-to-br from-red-500 to-rose-500 text-white animate-pulse shadow-md">
+                              {match.score.currentSet.team2}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+
+              {/* Upcoming Matches */}
+              {upcomingMatches.slice(0, 2).map((match, index) => (
+                <motion.div
+                  key={match.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ delay: (liveMatches.length + index) * 0.1 }}
+                  className="group cursor-pointer"
+                >
+                  <div className={cn(
+                    "relative p-4 rounded-2xl transition-all duration-300",
+                    "bg-gradient-to-r from-blue-50/50 via-white to-cyan-50/50",
+                    "border border-slate-200 hover:border-blue-200",
+                    "hover:shadow-md"
+                  )}>
+                    {/* Upcoming Badge */}
+                    <div className="absolute -top-2 left-4">
+                      <Badge variant="outline" className="bg-white shadow-sm">
+                        <Timer className="w-3 h-3 mr-1 text-blue-500" />
+                        {formatTime(match.startTime)}
+                      </Badge>
+                    </div>
+
+                    <div className="flex items-center justify-between mb-2 pt-2">
+                      <Badge variant="outline" className="text-xs">
+                        {match.format === 'doubles' ? <Users className="w-3 h-3 mr-1" /> : <Target className="w-3 h-3 mr-1" />}
+                        {match.format}
+                      </Badge>
+                      {match.round && (
+                        <Badge variant="secondary" className="text-xs bg-amber-100 text-amber-700">
+                          {match.round}
                         </Badge>
                       )}
                     </div>
-                  </div>
 
-                  {/* Team 2 */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">
-                        {match.players.team2.join(' / ')}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {match.score.sets.map((set, idx) => (
-                        <Badge 
-                          key={idx} 
-                          variant={set.team2 > set.team1 ? 'default' : 'outline'}
-                          className="min-w-[2.5rem] justify-center"
-                        >
-                          {set.team2}
-                        </Badge>
-                      ))}
-                      {match.score.currentSet && match.status === 'live' && (
-                        <Badge 
-                          variant="destructive" 
-                          className="min-w-[2.5rem] justify-center animate-pulse"
-                        >
-                          {match.score.currentSet.team2}
-                        </Badge>
-                      )}
+                    <p className="text-xs text-slate-500 mb-2">{match.tournament}</p>
+
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="font-medium text-sm text-slate-800">{match.players.team1.join(' / ')}</p>
+                        <p className="text-xs text-slate-400">vs</p>
+                        <p className="font-medium text-sm text-slate-800">{match.players.team2.join(' / ')}</p>
+                      </div>
+                      <div className="text-right text-xs text-slate-400">
+                        <MapPin className="w-3 h-3 inline mr-1" />
+                        {match.court}
+                      </div>
                     </div>
                   </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {matches.length === 0 && !loading && (
+              <div className="text-center py-8">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center">
+                  <Sparkles className="w-8 h-8 text-slate-300" />
                 </div>
+                <p className="text-slate-500">No matches right now</p>
+                <p className="text-xs text-slate-400 mt-1">Check back during tournament hours</p>
+              </div>
+            )}
+          </div>
+        )}
 
-                {match.status === 'live' && (
-                  <div className="mt-3 pt-2 border-t">
-                    <Badge variant="destructive" className="animate-pulse">
-                      <Zap className="w-3 h-3 mr-1" />
-                      LIVE NOW
-                    </Badge>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </AnimatePresence>
-
-          {matches.length === 0 && !loading && (
-            <div className="text-center py-8 text-muted-foreground">
-              <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
-              <p>No matches available right now</p>
-              <p className="text-sm">Check back later for live scores</p>
-            </div>
-          )}
-        </div>
+        {/* View All Button */}
+        {matches.length > 0 && (
+          <div className="mt-4 pt-3 border-t border-slate-100">
+            <Button 
+              variant="ghost" 
+              className="w-full text-teal-600 hover:text-teal-700 hover:bg-teal-50 rounded-xl"
+            >
+              View All Scores
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        )}
 
         {error && matches.length > 0 && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">{error}</p>
+          <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+            <p className="text-xs text-amber-700 flex items-center gap-2">
+              <Activity className="w-3 h-3" />
+              {error} - Showing demo data
+            </p>
           </div>
         )}
       </CardContent>

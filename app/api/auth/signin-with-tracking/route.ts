@@ -48,7 +48,7 @@ export async function POST(request: Request) {
     if (!user || !user.password) {
       // Track failed attempt for non-existent user
       await logSecurityEvent({
-        eventType: 'LOGIN_FAILURE',
+        eventType: 'FAILED_LOGIN',
         severity: SecurityEventSeverity.LOW,
         description: `Failed login attempt for non-existent user: ${email}`,
         ipAddress,

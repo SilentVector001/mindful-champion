@@ -88,7 +88,7 @@ export async function POST(
         data: {
           email: application.email,
           name: application.contactPerson,
-          hashedPassword,
+          password: hashedPassword,
           role: 'SPONSOR',
           emailVerified: new Date(), // Auto-verify sponsor accounts
           // Additional sponsor metadata

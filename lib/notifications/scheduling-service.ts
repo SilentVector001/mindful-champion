@@ -5,6 +5,7 @@
 
 import { prisma } from '@/lib/db';
 import { NotificationCategory, NotificationFrequency } from '@/lib/prisma-types';
+import type { NotificationPreferences } from '@/lib/prisma-types';
 import { scheduleNotification } from './notification-service';
 
 export interface ScheduleRecurringParams {

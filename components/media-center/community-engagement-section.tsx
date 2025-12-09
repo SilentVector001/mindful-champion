@@ -71,31 +71,31 @@ const ACTIVE_DISCUSSIONS: Discussion[] = [
   {
     id: '1',
     author: { name: 'PickleballPro', avatar: '', badge: '🏆 Pro' },
-    content: "Who do you think will win the PPA finals this weekend? My money's on Ben Johns, but Tyson has been playing incredible lately!",
+    content: "Ben Johns just went 52 shots in a rally against McGuffin at the Mesa Grand Slam! The footwork was unreal. Who else caught that match? 🔥",
     topic: 'Tournament Talk',
-    likes: 247,
-    replies: 89,
-    timeAgo: '2 hours ago',
+    likes: 847,
+    replies: 234,
+    timeAgo: '1 hour ago',
     isHot: true
   },
   {
     id: '2',
     author: { name: 'DinkMaster', avatar: '', badge: '⭐ 4.5' },
-    content: "Just switched from JOOLA to Selkirk and WOW the difference in spin is incredible. Anyone else made the switch?",
+    content: "Finally upgraded to the JOOLA Hyperion CFS 16mm - the sweet spot is massive and the pop on resets is chef's kiss. Worth every penny!",
     topic: 'Equipment',
-    likes: 156,
-    replies: 67,
-    timeAgo: '4 hours ago',
+    likes: 312,
+    replies: 98,
+    timeAgo: '3 hours ago',
     isHot: false
   },
   {
     id: '3',
     author: { name: 'CourtSide', avatar: '', badge: '🎯 Coach' },
-    content: "Hot take: The third shot drop is overrated. Let's discuss why the drive can be more effective at 3.5+ level play.",
+    content: "Hot take: The two-handed backhand drive from ALW is the most underrated shot in pro pickleball. She generates SO much power from the kitchen line.",
     topic: 'Strategy',
-    likes: 423,
-    replies: 156,
-    timeAgo: '6 hours ago',
+    likes: 567,
+    replies: 189,
+    timeAgo: '5 hours ago',
     isHot: true
   }
 ];
@@ -115,11 +115,11 @@ const ACTIVE_POLL: Poll = {
 };
 
 const WEEKLY_LEADERBOARD: LeaderboardEntry[] = [
-  { rank: 1, user: { name: 'PickleKing' }, points: 2450, streak: 12, badge: '👑' },
-  { rank: 2, user: { name: 'DinkQueen' }, points: 2180, streak: 8, badge: '🥈' },
-  { rank: 3, user: { name: 'SidelinePro' }, points: 1920, streak: 15, badge: '🥉' },
-  { rank: 4, user: { name: 'NetNinja' }, points: 1850, streak: 5, badge: '🏅' },
-  { rank: 5, user: { name: 'SpinMaster' }, points: 1680, streak: 7, badge: '⭐' }
+  { rank: 1, user: { name: 'ErnieGuru' }, points: 3420, streak: 18, badge: '👑' },
+  { rank: 2, user: { name: 'KitchenBoss' }, points: 3180, streak: 14, badge: '🥈' },
+  { rank: 3, user: { name: 'ThirdShotDrop' }, points: 2890, streak: 21, badge: '🥉' },
+  { rank: 4, user: { name: 'DinkDynasty' }, points: 2650, streak: 9, badge: '🏅' },
+  { rank: 5, user: { name: 'ATPMaster' }, points: 2480, streak: 11, badge: '⭐' }
 ];
 
 export function CommunityEngagementSection() {

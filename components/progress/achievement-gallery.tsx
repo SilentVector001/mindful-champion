@@ -197,12 +197,31 @@ const achievements: Achievement[] = [
 export default function AchievementGallery() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all")
   const [totalPoints, setTotalPoints] = useState(0)
+  const [userRewardPoints, setUserRewardPoints] = useState<number>(0)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const points = achievements
       .filter(a => a.earned)
       .reduce((sum, a) => sum + a.points, 0)
     setTotalPoints(points)
+    
+    // Fetch user's actual reward points from API
+    const fetchUserPoints = async () => {
+      try {
+        const response = await fetch('/api/rewards/user-stats')
+        if (response.ok) {
+          const data = await response.json()
+          setUserRewardPoints(data.points || data.stats?.rewardPoints || 0)
+        }
+      } catch (error) {
+        console.error('Failed to fetch user reward points:', error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    
+    fetchUserPoints()
   }, [])
 
   const filteredAchievements = selectedCategory === "all" 
@@ -250,6 +269,29 @@ export default function AchievementGallery() {
           </div>
           <p className="text-slate-600">Celebrate your badges, streaks, and accomplishments</p>
         </div>
+
+        {/* Your Total Reward Points - Prominent Display */}
+        <Card className="mb-6 bg-gradient-to-br from-amber-50 via-yellow-50 to-orange-50 border-2 border-amber-200">
+          <CardHeader className="pb-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-6 h-6 text-amber-600" />
+              <CardTitle className="text-lg font-bold text-amber-900">
+                Your Total Reward Points
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex items-center gap-3">
+              <div className="text-5xl font-black text-amber-600">
+                {loading ? "..." : userRewardPoints.toLocaleString()}
+              </div>
+              <Trophy className="w-8 h-8 text-amber-500 animate-pulse" />
+            </div>
+            <p className="text-sm text-amber-700 mt-2 font-medium">
+              🎉 Use these points in the Rewards Marketplace to redeem awesome prizes!
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Stats Overview */}
         <div className="grid gap-4 md:grid-cols-3 mb-8">
