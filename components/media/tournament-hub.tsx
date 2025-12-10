@@ -1144,127 +1144,73 @@ export function TournamentHub() {
 
       {/* Main Content */}
       <div className={`max-w-7xl mx-auto ${mediaDesignTokens.spacing.section} space-y-8`}>
-        {/* Interactive US Map Section with 2-7-3 Grid Layout */}
+        {/* Interactive US Map Section with Larger 9-3 Grid Layout */}
         <motion.section
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="grid grid-cols-12 gap-4 mb-16"
+          className="grid grid-cols-12 gap-6 mb-16"
         >
-          {/* LEFT: Tournament Highlights & Featured Stats (2 columns) */}
-          <div className="hidden lg:block lg:col-span-2">
-            <div className="space-y-4">
-              {/* Featured Match of the Day */}
-              <Card className={`${getCardClasses('default')} bg-gradient-to-br from-amber-900/40 to-orange-900/40 border-2 border-amber-500/30 backdrop-blur-sm overflow-hidden`}>
-                <div className="h-2 bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-500 animate-pulse" />
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center gap-2">
+          {/* LEFT: Tournament Map (9 columns - much larger for better visibility) */}
+          <div className="col-span-12 lg:col-span-9">
+            <Card className={`${getCardClasses('default')} bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-teal-500/30 backdrop-blur-sm overflow-hidden shadow-2xl shadow-teal-500/20`}>
+              {/* Map Header with Stats */}
+              <div className="p-4 border-b border-teal-500/30 bg-gradient-to-r from-teal-900/40 to-cyan-900/40">
+                <div className="flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
                     <motion.div 
-                      className={`p-2 ${mediaDesignTokens.radius.md} bg-gradient-to-br from-amber-500 to-yellow-500`}
-                      animate={{ rotate: [0, 5, -5, 0] }}
+                      className="p-3 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500"
+                      animate={{ scale: [1, 1.05, 1] }}
                       transition={{ duration: 2, repeat: Infinity }}
                     >
-                      <Zap className="w-5 h-5 text-white" />
+                      <MapPin className="w-6 h-6 text-white" />
                     </motion.div>
                     <div>
-                      <h3 className="text-sm font-black text-amber-300">Featured</h3>
-                      <p className="text-xs text-amber-200">Match of the Day</p>
+                      <h2 className="text-xl font-black text-white">US Tournament Map</h2>
+                      <p className="text-sm text-teal-200">Click any state to filter events</p>
                     </div>
                   </div>
-                  
-                  <div className="space-y-2 pt-2 border-t border-amber-500/30">
-                    <div className="text-xs text-amber-100 font-medium">Championship Finals</div>
-                    <div className={`${mediaDesignTokens.radius.md} bg-white/10 p-2`}>
-                      <div className="text-xs font-bold text-white">Ben Johns vs</div>
-                      <div className="text-xs font-bold text-white">Tyson McGuffin</div>
+                  <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 bg-red-500/20 px-3 py-1.5 rounded-full">
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      <span className="text-sm font-bold text-red-300">{liveTournaments.length} Live</span>
                     </div>
-                    <Badge className="bg-red-500 text-white border-0 px-2 py-1 text-xs w-full justify-center">
-                      <Radio className="w-3 h-3 mr-1 animate-pulse" />
-                      LIVE NOW
-                    </Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Quick Stats */}
-              <Card className={`${getCardClasses('default')} bg-gradient-to-br from-teal-900/40 to-cyan-900/40 border-2 border-teal-500/30 backdrop-blur-sm`}>
-                <CardContent className="p-4 space-y-3">
-                  <div className="flex items-center gap-2 mb-2">
-                    <BarChart3 className="w-5 h-5 text-teal-400" />
-                    <h3 className="text-sm font-black text-teal-300">Quick Stats</h3>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className={`${mediaDesignTokens.radius.md} bg-white/10 p-2`}>
-                      <div className="text-2xl font-black text-white">{liveTournaments.length + todayTournaments.length}</div>
-                      <div className="text-xs text-teal-200">Active Events</div>
+                    <div className="flex items-center gap-2 bg-orange-500/20 px-3 py-1.5 rounded-full">
+                      <span className="w-2 h-2 bg-orange-500 rounded-full" />
+                      <span className="text-sm font-bold text-orange-300">{todayTournaments.length} Today</span>
                     </div>
-                    
-                    <div className={`${mediaDesignTokens.radius.md} bg-white/10 p-2`}>
-                      <div className="text-2xl font-black text-white">{TOP_VENUES.reduce((sum, v) => sum + v.courtsCount, 0)}</div>
-                      <div className="text-xs text-teal-200">Total Courts</div>
-                    </div>
-                    
-                    <div className={`${mediaDesignTokens.radius.md} bg-white/10 p-2`}>
-                      <div className="text-2xl font-black text-white">{TOP_VENUES.reduce((sum, v) => sum + v.upcomingCount, 0)}</div>
-                      <div className="text-xs text-teal-200">Upcoming</div>
+                    <div className="flex items-center gap-2 bg-blue-500/20 px-3 py-1.5 rounded-full">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full" />
+                      <span className="text-sm font-bold text-blue-300">{upcomingTournaments.length} Upcoming</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Top Players Trending */}
-              <Card className={`${getCardClasses('default')} bg-gradient-to-br from-purple-900/40 to-pink-900/40 border-2 border-purple-500/30 backdrop-blur-sm`}>
-                <CardContent className="p-4 space-y-2">
-                  <div className="flex items-center gap-2 mb-2">
-                    <TrendingUp className="w-5 h-5 text-purple-400" />
-                    <h3 className="text-sm font-black text-purple-300">Trending</h3>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    {['Ben Johns', 'Anna Leigh Waters', 'Tyson McGuffin'].map((player, idx) => (
-                      <div key={idx} className={`flex items-center gap-2 ${mediaDesignTokens.radius.md} bg-white/10 p-2`}>
-                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                          idx === 0 ? 'bg-yellow-500 text-yellow-900' : 
-                          idx === 1 ? 'bg-gray-400 text-gray-900' : 
-                          'bg-amber-700 text-amber-100'
-                        }`}>
-                          {idx + 1}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-white truncate">{player}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+                </div>
+              </div>
+              {/* Map Component */}
+              <div className="p-4">
+                <InteractiveUSMap
+                  tournaments={[...liveTournaments, ...todayTournaments, ...upcomingTournaments]}
+                  courts={activeCourts}
+                  venues={TOP_VENUES.map(v => ({
+                    state: v.state,
+                    courtsCount: v.courtsCount,
+                    upcomingCount: v.upcomingCount
+                  }))}
+                  onStateClick={(stateAbbr) => {
+                    setSelectedStateFilter(stateAbbr);
+                    toast.info('Filter Applied', {
+                      description: `Showing events in ${stateAbbr}`,
+                      duration: 2000,
+                    });
+                  }}
+                />
+              </div>
+            </Card>
           </div>
 
-          {/* CENTER: Tournament Map (7 columns - larger to show all states) */}
-          <div className="col-span-12 lg:col-span-7">
-            <InteractiveUSMap
-              tournaments={[...liveTournaments, ...todayTournaments, ...upcomingTournaments]}
-              courts={activeCourts}
-              venues={TOP_VENUES.map(v => ({
-                state: v.state,
-                courtsCount: v.courtsCount,
-                upcomingCount: v.upcomingCount
-              }))}
-              onStateClick={(stateAbbr) => {
-                setSelectedStateFilter(stateAbbr);
-                toast.info('Filter Applied', {
-                  description: `Showing events in ${stateAbbr}`,
-                  duration: 2000,
-                });
-              }}
-            />
-          </div>
-
-          {/* RIGHT: Live Tournament Quick View (3 columns) */}
+          {/* RIGHT: Live & Upcoming Events Panel (3 columns) */}
           <div className="col-span-12 lg:col-span-3">
-            <Card className={`${getCardClasses('default')} bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-teal-500/30 backdrop-blur-sm min-h-[450px] lg:min-h-[550px] overflow-hidden shadow-2xl shadow-teal-500/20`}>
+            <Card className={`${getCardClasses('default')} bg-gradient-to-br from-slate-800/80 to-slate-900/80 border-2 border-teal-500/30 backdrop-blur-sm overflow-hidden shadow-2xl shadow-teal-500/20`}>
               <div className="h-3 bg-gradient-to-r from-teal-500 via-cyan-500 to-teal-500">
                 <motion.div
                   className="h-full bg-gradient-to-r from-transparent via-white/40 to-transparent"
@@ -1272,185 +1218,131 @@ export function TournamentHub() {
                   transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
                 />
               </div>
-              <CardHeader className="pb-3 border-b border-teal-500/30">
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-teal-300 flex items-center gap-2 text-lg font-black">
-                    <motion.div
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                    >
-                      <Radio className="w-5 h-5 animate-pulse text-red-500" />
-                    </motion.div>
-                    Live Matches
-                  </CardTitle>
-                  <Badge className="bg-teal-500/20 text-teal-300 border-teal-500/30 px-3 py-1">
-                    {liveTournaments.length + todayTournaments.slice(0, 8 - liveTournaments.length).length} Active
-                  </Badge>
-                </div>
-              </CardHeader>
               
-              <CardContent className="p-4 space-y-3 max-h-[500px] overflow-y-auto">
-                {/* Show up to 8 states with live/streaming events */}
-                {[...liveTournaments, ...todayTournaments]
-                  .slice(0, 8)
-                  .map((tournament, idx) => {
-                    // Generate dynamic match data for each tournament
-                    const matches = [
-                      { player1: 'Johns/Waters', player2: 'Newman/Bright', score1: 11, score2: 8, game: 'Game 2' },
-                      { player1: 'McGuffin/Devilliers', player2: 'Johnson/Smith', score1: 9, score2: 11, game: 'Match Point' },
-                      { player1: 'Parenteau/Kawamoto', player2: 'Rettger/Wright', score1: 11, score2: 7, game: 'Game 1' },
-                      { player1: 'Bar/Johnson', player2: 'Tardio/Ignatowich', score1: 10, score2: 11, game: 'Game 3' },
-                    ];
-                    const match = matches[idx % matches.length];
-                    const isLive = tournament.isLive;
-                    const viewers = tournament.viewerCount ? `${(tournament.viewerCount / 1000).toFixed(1)}K` : `${(Math.random() * 5 + 0.5).toFixed(1)}K`;
-                    
-                    // Color for state bullet (matching map legend)
-                    const bulletColor = isLive ? 'bg-red-500' : 'bg-orange-500';
-
-                    return (
-                      <motion.div
-                        key={tournament.id}
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: idx * 0.05 }}
-                        className={`${mediaDesignTokens.radius.md} p-3 ${
-                          isLive 
-                            ? 'bg-gradient-to-br from-red-900/40 to-pink-900/40 border-2 border-red-500/50' 
-                            : 'bg-slate-800/50 border border-slate-700'
-                        } space-y-2 hover:shadow-lg hover:shadow-teal-500/20 transition-all backdrop-blur-sm ${
-                          tournament.streamUrl && tournament.streamUrl.trim() !== '' && tournament.streamUrl.startsWith('http') 
-                            ? 'cursor-pointer hover:scale-[1.02] hover:border-teal-500/50' 
-                            : ''
-                        }`}
-                        onClick={() => {
-                          if (tournament.streamUrl && tournament.streamUrl.trim() !== '' && tournament.streamUrl.startsWith('http')) {
-                            window.open(tournament.streamUrl, '_blank');
-                            toast.success('Opening Stream', {
-                              description: `Loading ${tournament.name}...`,
-                              icon: <Play className="w-4 h-4" />,
-                              duration: 2000,
-                            });
-                          }
-                        }}
-                      >
-                        {/* State Name with Color-Coded Bullet */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 ${bulletColor} rounded-full ${isLive ? 'animate-pulse' : ''}`} />
-                            <span className="text-sm font-bold text-white">{tournament.state || 'FL'}</span>
-                          </div>
-                          {isLive && (
-                            <Badge className="bg-gradient-to-r from-red-500 to-pink-500 text-white text-xs px-2 py-0.5 animate-pulse">
-                              🔴 LIVE
-                            </Badge>
-                          )}
-                        </div>
-
-                        {/* Tournament Name with Viewer Count */}
-                        <div className="flex items-center justify-between">
-                          <h4 className="text-xs font-semibold text-slate-200 line-clamp-1">{tournament.name}</h4>
-                          <div className="flex items-center gap-1 text-xs text-purple-400">
-                            <Eye className="w-3 h-3" />
-                            <span className="font-bold">{viewers}</span>
-                          </div>
-                        </div>
-
-                        {/* Featured Court */}
-                        <div className="text-xs text-slate-400 flex items-center gap-1">
-                          <Target className="w-3 h-3 text-teal-400" />
-                          <span className="font-medium">Center Court</span>
-                        </div>
-
-                        {/* Current Match with Dynamic Scores */}
-                        <div className="space-y-1.5">
-                          {/* Leading Player (Bold, Green Gradient, Pulsing, TrendingUp Icon) */}
-                          <div className={`flex items-center justify-between px-2 py-1.5 ${mediaDesignTokens.radius.sm} ${
-                            match.score1 > match.score2 
-                              ? 'bg-gradient-to-r from-green-500/30 to-emerald-500/30 ring-1 ring-green-400/50' 
-                              : 'bg-slate-700/50'
-                          }`}>
-                            <div className="flex items-center gap-1.5">
-                              {match.score1 > match.score2 && (
-                                <TrendingUp className="w-3 h-3 text-green-400 animate-pulse" />
-                              )}
-                              <span className={`text-xs ${
-                                match.score1 > match.score2 
-                                  ? 'font-bold text-white' 
-                                  : 'font-medium text-slate-300'
-                              }`}>
-                                {match.player1}
-                              </span>
+              {/* Tab Headers for Live vs Upcoming */}
+              <div className="flex border-b border-teal-500/30">
+                <button className="flex-1 px-4 py-3 flex items-center justify-center gap-2 bg-gradient-to-br from-red-900/40 to-pink-900/40 border-r border-teal-500/30">
+                  <motion.div
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <Radio className="w-4 h-4 animate-pulse text-red-500" />
+                  </motion.div>
+                  <span className="text-sm font-bold text-red-300">Live ({liveTournaments.length})</span>
+                </button>
+                <button className="flex-1 px-4 py-3 flex items-center justify-center gap-2 bg-gradient-to-br from-blue-900/40 to-cyan-900/40">
+                  <Calendar className="w-4 h-4 text-blue-400" />
+                  <span className="text-sm font-bold text-blue-300">Upcoming ({upcomingTournaments.length})</span>
+                </button>
+              </div>
+              
+              <div className="max-h-[500px] overflow-y-auto">
+                {/* Live Events Section */}
+                {liveTournaments.length > 0 && (
+                  <div className="p-3 border-b border-teal-500/20">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                      <span className="text-xs font-bold text-red-300 uppercase tracking-wider">Live Now</span>
+                    </div>
+                    <div className="space-y-2">
+                      {liveTournaments.slice(0, 4).map((tournament, idx) => {
+                        const matches = [
+                          { player1: 'Johns/Waters', player2: 'Newman/Bright', score1: 11, score2: 8, game: 'Game 2' },
+                          { player1: 'McGuffin/Devilliers', player2: 'Johnson/Smith', score1: 9, score2: 11, game: 'Match Point' },
+                        ];
+                        const match = matches[idx % matches.length];
+                        const viewers = tournament.viewerCount ? `${(tournament.viewerCount / 1000).toFixed(1)}K` : `${(Math.random() * 5 + 0.5).toFixed(1)}K`;
+                        
+                        return (
+                          <motion.div
+                            key={tournament.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            className={`${mediaDesignTokens.radius.md} p-3 bg-gradient-to-br from-red-900/40 to-pink-900/40 border border-red-500/50 space-y-2 hover:shadow-lg hover:shadow-red-500/20 transition-all cursor-pointer hover:scale-[1.02]`}
+                            onClick={() => {
+                              if (tournament.streamUrl && tournament.streamUrl.startsWith('http')) {
+                                window.open(tournament.streamUrl, '_blank');
+                                toast.success('Opening Stream', { description: `Loading ${tournament.name}...`, duration: 2000 });
+                              }
+                            }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm font-bold text-white">{tournament.state || 'FL'}</span>
+                              <Badge className="bg-red-500 text-white text-xs px-2 py-0.5 animate-pulse">🔴 LIVE</Badge>
                             </div>
-                            <span className={`text-sm ${
-                              match.score1 > match.score2 
-                                ? 'font-bold text-green-400' 
-                                : 'font-medium text-slate-400'
-                            }`}>
-                              {match.score1}
-                            </span>
-                          </div>
-
-                          {/* Trailing Player */}
-                          <div className={`flex items-center justify-between px-2 py-1.5 ${mediaDesignTokens.radius.sm} ${
-                            match.score2 > match.score1 
-                              ? 'bg-gradient-to-r from-green-500/30 to-emerald-500/30 ring-1 ring-green-400/50' 
-                              : 'bg-slate-700/50'
-                          }`}>
-                            <div className="flex items-center gap-1.5">
-                              {match.score2 > match.score1 && (
-                                <TrendingUp className="w-3 h-3 text-green-400 animate-pulse" />
-                              )}
-                              <span className={`text-xs ${
-                                match.score2 > match.score1 
-                                  ? 'font-bold text-white' 
-                                  : 'font-medium text-slate-300'
-                              }`}>
-                                {match.player2}
-                              </span>
+                            <h4 className="text-xs font-semibold text-slate-200 line-clamp-1">{tournament.name}</h4>
+                            <div className="flex items-center justify-between text-xs">
+                              <span className="text-slate-400">{match.player1} vs {match.player2}</span>
+                              <div className="flex items-center gap-1 text-purple-400">
+                                <Eye className="w-3 h-3" />
+                                <span className="font-bold">{viewers}</span>
+                              </div>
                             </div>
-                            <span className={`text-sm ${
-                              match.score2 > match.score1 
-                                ? 'font-bold text-green-400' 
-                                : 'font-medium text-slate-400'
-                            }`}>
-                              {match.score2}
-                            </span>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Upcoming Events Section */}
+                <div className="p-3">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Calendar className="w-3 h-3 text-blue-400" />
+                    <span className="text-xs font-bold text-blue-300 uppercase tracking-wider">Upcoming Events</span>
+                  </div>
+                  <div className="space-y-2">
+                    {[...todayTournaments, ...upcomingTournaments].slice(0, 6).map((tournament, idx) => {
+                      const isToday = todayTournaments.some(t => t.id === tournament.id);
+                      return (
+                        <motion.div
+                          key={tournament.id}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className={`${mediaDesignTokens.radius.md} p-2.5 ${
+                            isToday 
+                              ? 'bg-gradient-to-br from-orange-900/30 to-amber-900/30 border border-orange-500/30' 
+                              : 'bg-slate-800/50 border border-slate-700/50'
+                          } hover:shadow-lg transition-all cursor-pointer hover:scale-[1.02]`}
+                          onClick={() => {
+                            if (tournament.streamUrl && tournament.streamUrl.startsWith('http')) {
+                              window.open(tournament.streamUrl, '_blank');
+                            }
+                          }}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <span className="text-xs font-bold text-white">{tournament.state || 'FL'}</span>
+                            {isToday && (
+                              <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30 text-xs px-1.5 py-0.5">Today</Badge>
+                            )}
                           </div>
-                        </div>
-
-                        {/* Game Status Badge */}
-                        <div className="flex items-center justify-between pt-1">
-                          <Badge className={`text-xs px-2 py-0.5 ${
-                            match.game === 'Match Point' 
-                              ? 'bg-red-500/20 text-red-300 border-red-500/30' 
-                              : 'bg-blue-500/20 text-blue-300 border-blue-500/30'
-                          }`}>
-                            {match.game}
-                          </Badge>
-                          {isLive && (
-                            <div className="flex items-center gap-1">
-                              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
-                              <span className="text-xs text-red-400 font-medium">Live Match</span>
-                            </div>
-                          )}
-                        </div>
-                      </motion.div>
-                    );
-                  })}
-
+                          <h4 className="text-xs font-medium text-slate-300 line-clamp-1">{tournament.name}</h4>
+                          <div className="flex items-center gap-2 mt-1 text-xs text-slate-500">
+                            <MapPin className="w-3 h-3" />
+                            <span>{tournament.city || tournament.venue || 'TBA'}</span>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+                
                 {/* Empty State */}
-                {liveTournaments.length === 0 && todayTournaments.length === 0 && (
+                {liveTournaments.length === 0 && todayTournaments.length === 0 && upcomingTournaments.length === 0 && (
                   <div className="text-center py-8 space-y-2">
                     <Radio className="w-12 h-12 text-slate-600 mx-auto" />
-                    <p className="text-sm text-slate-300 font-medium">No live events right now</p>
+                    <p className="text-sm text-slate-300 font-medium">No events scheduled</p>
                     <p className="text-xs text-slate-500">Check back soon for updates!</p>
                   </div>
                 )}
-              </CardContent>
+              </div>
             </Card>
           </div>
         </motion.section>
+
+
 
         {/* ✅ ENHANCED: Live Now Section with Premium Design */}
         {liveTournaments.length > 0 && (
