@@ -1,40 +1,49 @@
-#!/usr/bin/env tsx
 import { PrismaClient } from '@prisma/client';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+config({ path: resolve(__dirname, '../.env') });
 
 const prisma = new PrismaClient();
 
-async function verifySyncResults() {
-  try {
-    const liveStreams = await prisma.liveStream.count();
-    const podcastShows = await prisma.podcastShow.count();
-    const externalEvents = await prisma.externalEvent.count();
-
-    console.log('\n📊 Database Verification:');
-    console.log('═'.repeat(50));
-    console.log(`Live Streams: ${liveStreams} records`);
-    console.log(`Podcast Shows: ${podcastShows} records`);
-    console.log(`External Events: ${externalEvents} records`);
-    console.log('═'.repeat(50));
-
-    // Show some sample data
-    console.log('\n🎥 Sample Live Streams:');
-    const streams = await prisma.liveStream.findMany({ take: 3 });
-    streams.forEach(s => console.log(`  - ${s.title} (${s.platform})`));
-
-    console.log('\n🎙️ Sample Podcasts:');
-    const podcasts = await prisma.podcastShow.findMany({ take: 3 });
-    podcasts.forEach(p => console.log(`  - ${p.title} by ${p.author}`));
-
-    console.log('\n🏆 Sample Events:');
-    const events = await prisma.externalEvent.findMany({ take: 3 });
-    events.forEach(e => console.log(`  - ${e.title} (${e.location})`));
-
-    console.log('\n✅ Verification complete!\n');
-  } catch (error) {
-    console.error('❌ Verification failed:', error);
-  } finally {
-    await prisma.$disconnect();
+async function verify() {
+  const liveStreams = await prisma.liveStream.count();
+  const podcasts = await prisma.podcastShow.count();
+  const events = await prisma.externalEvent.count();
+  
+  console.log('Database Verification:');
+  console.log('═'.repeat(40));
+  console.log(`Live Streams: ${liveStreams} records`);
+  console.log(`Podcast Shows: ${podcasts} records`);
+  console.log(`External Events: ${events} records`);
+  console.log('═'.repeat(40));
+  
+  // Show sample data
+  const sampleStream = await prisma.liveStream.findFirst();
+  const samplePodcast = await prisma.podcastShow.findFirst();
+  const sampleEvent = await prisma.externalEvent.findFirst();
+  
+  if (sampleStream) {
+    console.log('\nSample Live Stream:');
+    console.log(`  Title: ${sampleStream.title}`);
+    console.log(`  Platform: ${sampleStream.platform}`);
+    console.log(`  Status: ${sampleStream.status}`);
   }
+  
+  if (samplePodcast) {
+    console.log('\nSample Podcast:');
+    console.log(`  Title: ${samplePodcast.title}`);
+    console.log(`  Author: ${samplePodcast.author}`);
+  }
+  
+  if (sampleEvent) {
+    console.log('\nSample Event:');
+    console.log(`  Title: ${sampleEvent.title}`);
+    console.log(`  Location: ${sampleEvent.location}`);
+    console.log(`  Start Date: ${sampleEvent.startDate.toLocaleDateString()}`);
+  }
+  
+  await prisma.$disconnect();
 }
 
-verifySyncResults();
+verify().catch(console.error);

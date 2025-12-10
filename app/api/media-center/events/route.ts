@@ -86,7 +86,7 @@ const SAMPLE_EVENTS = [
   {
     id: 'usap_indian_wells_2025',
     title: 'USA Pickleball Indian Wells Open',
-    description: 'Play on the same courts as the tennis pros at this prestigious desert event.',
+    description: 'Premier pickleball tournament at the prestigious Indian Wells Tennis Garden venue.',
     eventType: 'USA_PICKLEBALL_TOURNAMENT',
     startDate: '2025-04-04',
     endDate: '2025-04-06',
