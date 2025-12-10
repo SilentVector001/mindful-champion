@@ -249,7 +249,7 @@ export function EnhancedMediaCenter() {
                 </Button>
               </Link>
               
-              <Link href="/media/tournaments">
+              <Link href="/connect/tournaments">
                 <Button 
                   className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-purple-500/50 transition-all"
                 >
