@@ -7,6 +7,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { processScheduledNotifications } from '@/lib/notifications/notification-service';
 
+// Force dynamic rendering - this route uses request.headers
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * GET /api/cron/process-notifications
  * Process all pending notifications that are due
