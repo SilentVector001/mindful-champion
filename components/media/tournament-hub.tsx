@@ -42,7 +42,7 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { InteractiveUSMap } from '@/components/media/interactive-us-map';
+import { EnhancedUSMap } from '@/components/media/enhanced-us-map';
 import { mediaDesignTokens, getCardClasses, getBadgeClasses } from '@/lib/media-design-system';
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center';
 
@@ -1188,20 +1188,17 @@ export function TournamentHub() {
               </div>
               {/* Map Component */}
               <div className="p-4">
-                <InteractiveUSMap
+                <EnhancedUSMap
                   tournaments={[...liveTournaments, ...todayTournaments, ...upcomingTournaments]}
-                  courts={activeCourts}
-                  venues={TOP_VENUES.map(v => ({
-                    state: v.state,
-                    courtsCount: v.courtsCount,
-                    upcomingCount: v.upcomingCount
-                  }))}
-                  onStateClick={(stateAbbr) => {
+                  selectedState={selectedStateFilter}
+                  onStateSelect={(stateAbbr) => {
                     setSelectedStateFilter(stateAbbr);
-                    toast.info('Filter Applied', {
-                      description: `Showing events in ${stateAbbr}`,
-                      duration: 2000,
-                    });
+                    if (stateAbbr) {
+                      toast.info('Filter Applied', {
+                        description: `Showing events in ${stateAbbr}`,
+                        duration: 2000,
+                      });
+                    }
                   }}
                 />
               </div>
