@@ -1,12 +1,12 @@
 {
-  "crons": [
-    {
-      "path": "/api/cron/process-notifications",
-      "schedule": "0 0 * * *"
-    },
-    {
-      "path": "/api/cron/process-goal-notifications",
-      "schedule": "0 0 * * *"
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 300
     }
-  ]
+  },
+  "build": {
+    "env": {
+      "NEXT_TELEMETRY_DISABLED": "1"
+    }
+  }
 }
