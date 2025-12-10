@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { getResendClient } from '@/lib/email/resend-client';
+import { EMAIL_CONFIG } from '@/lib/email/config';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { to } = await req.json();
+    const { to, fromAccount = 'NOREPLY' } = await req.json();
 
     if (!to) {
       return NextResponse.json(
@@ -23,7 +24,10 @@ export async function POST(req: NextRequest) {
     }
 
     const resend = getResendClient();
-    const fromEmail = 'Mindful Champion <noreply@mindfulchampion.com>';
+    
+    // Get the appropriate from email
+    const account = EMAIL_CONFIG.ACCOUNTS[fromAccount as keyof typeof EMAIL_CONFIG.ACCOUNTS] || EMAIL_CONFIG.ACCOUNTS.NOREPLY;
+    const fromEmail = account.formatted;
 
     // Send test email
     const result: any = await resend.emails.send({

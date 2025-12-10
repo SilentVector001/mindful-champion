@@ -9,7 +9,7 @@
 
 import { prisma } from "@/lib/db"
 import { generateGoalTip, generateMotivationalQuote } from "./goal-tip-generator"
-import { sendEmail } from "@/lib/email/config"
+import { sendEmail } from "@/lib/email"
 
 export interface GoalNotificationPreferences {
   enableDailyReminders: boolean

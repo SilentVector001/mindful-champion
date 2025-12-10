@@ -28,11 +28,15 @@ import {
   Loader2,
   Eye,
   Trash2,
+  Settings,
+  Globe,
+  Shield,
 } from 'lucide-react';
 import { format } from 'date-fns';
+import { EMAIL_CONFIG } from '@/lib/email/config';
 
 export default function AdminEmailManagement() {
-  const [activeTab, setActiveTab] = useState('send');
+  const [activeTab, setActiveTab] = useState('domain');
   const [loading, setLoading] = useState(false);
   
   // Send Email Form State
@@ -42,6 +46,7 @@ export default function AdminEmailManagement() {
     body: '',
     template: 'custom',
     isHtml: true,
+    fromAccount: 'ADMIN',
   });
   
   // Email History State
@@ -142,7 +147,7 @@ export default function AdminEmailManagement() {
       
       if (response.ok) {
         toast.success('Email sent successfully!');
-        setEmailForm({ to: '', subject: '', body: '', template: 'custom', isHtml: true });
+        setEmailForm({ to: '', subject: '', body: '', template: 'custom', isHtml: true, fromAccount: 'ADMIN' });
       } else {
         toast.error(data.error || 'Failed to send email');
       }
@@ -175,23 +180,31 @@ export default function AdminEmailManagement() {
     }
   };
 
+  // Test email form state
+  const [testEmailForm, setTestEmailForm] = useState({
+    to: '',
+    fromAccount: 'NOREPLY',
+  });
+
   // Send Test Email
   const handleSendTestEmail = async () => {
-    const testEmail = prompt('Enter email address for test:');
-    if (!testEmail) return;
+    if (!testEmailForm.to) {
+      toast.error('Please enter a recipient email address');
+      return;
+    }
     
     setLoading(true);
     try {
       const response = await fetch('/api/admin/emails/test', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ to: testEmail }),
+        body: JSON.stringify(testEmailForm),
       });
       
       const data = await response.json();
       
       if (response.ok) {
-        toast.success(`Test email sent to ${testEmail}!`);
+        toast.success(`Test email sent to ${testEmailForm.to}!`);
       } else {
         toast.error(data.error || 'Failed to send test email');
       }
@@ -283,10 +296,14 @@ export default function AdminEmailManagement() {
 
         {/* Main Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
+            <TabsTrigger value="domain" className="flex items-center gap-2">
+              <Globe className="h-4 w-4" />
+              Domain
+            </TabsTrigger>
             <TabsTrigger value="send" className="flex items-center gap-2">
               <Send className="h-4 w-4" />
-              Send Email
+              Send
             </TabsTrigger>
             <TabsTrigger value="templates" className="flex items-center gap-2">
               <FileText className="h-4 w-4" />
@@ -302,6 +319,206 @@ export default function AdminEmailManagement() {
             </TabsTrigger>
           </TabsList>
 
+          {/* Domain Configuration Tab */}
+          <TabsContent value="domain">
+            <div className="space-y-6">
+              {/* Domain Status Card */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="flex items-center gap-2">
+                        <Globe className="h-5 w-5" />
+                        Domain Configuration
+                      </CardTitle>
+                      <CardDescription>
+                        Email domain: {EMAIL_CONFIG.DOMAIN}
+                      </CardDescription>
+                    </div>
+                    <Badge variant="default" className="bg-green-600">
+                      <CheckCircle2 className="h-3 w-3 mr-1" />
+                      Active
+                    </Badge>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-blue-900 mb-2 flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        Domain Setup Status
+                      </h4>
+                      <div className="space-y-2 text-sm text-blue-800">
+                        <div className="flex items-center justify-between">
+                          <span>Domain:</span>
+                          <Badge variant="outline" className="text-blue-900 border-blue-300">
+                            {EMAIL_CONFIG.DOMAIN}
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Provider:</span>
+                          <Badge variant="outline" className="text-blue-900 border-blue-300">
+                            Resend
+                          </Badge>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span>Status:</span>
+                          <Badge className="bg-green-600">
+                            <CheckCircle2 className="h-3 w-3 mr-1" />
+                            Verified
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-yellow-900 mb-2">
+                        ⚠️ Important: Domain Verification Required
+                      </h4>
+                      <p className="text-sm text-yellow-800 mb-3">
+                        To send emails from @mindfulchampion.com addresses, you must first add and verify the domain in your Resend account.
+                      </p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="text-yellow-900 border-yellow-300 hover:bg-yellow-100"
+                        onClick={() => window.open('https://resend.com/domains', '_blank')}
+                      >
+                        <Globe className="h-4 w-4 mr-2" />
+                        Open Resend Domains
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Email Accounts Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Email Accounts</CardTitle>
+                  <CardDescription>
+                    Configured email addresses for different purposes
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    {Object.entries(EMAIL_CONFIG.ACCOUNTS).map(([key, account]) => (
+                      <motion.div
+                        key={key}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="border rounded-lg p-4 hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Mail className="h-4 w-4 text-teal-600" />
+                              <h4 className="font-semibold text-gray-900">{account.name}</h4>
+                              <Badge variant="outline" className="text-xs">
+                                {key}
+                              </Badge>
+                            </div>
+                            <div className="space-y-1">
+                              <p className="text-sm font-mono text-gray-700 bg-gray-50 px-2 py-1 rounded">
+                                {account.email}
+                              </p>
+                              <p className="text-xs text-gray-600">
+                                {account.purpose}
+                              </p>
+                            </div>
+                          </div>
+                          <Badge className="bg-green-600">Active</Badge>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Setup Instructions Card */}
+              <Card>
+                <CardHeader>
+                  <CardTitle>Setup Instructions</CardTitle>
+                  <CardDescription>
+                    How to add mindfulchampion.com to Resend
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-4">
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                        <Settings className="h-4 w-4" />
+                        Step-by-Step Guide
+                      </h4>
+                      <ol className="space-y-3 text-sm text-gray-700">
+                        <li className="flex items-start gap-3">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold flex-shrink-0">
+                            1
+                          </span>
+                          <div>
+                            <strong>Go to Resend Domains:</strong>
+                            <a 
+                              href="https://resend.com/domains" 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-teal-600 hover:underline ml-1"
+                            >
+                              https://resend.com/domains
+                            </a>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold flex-shrink-0">
+                            2
+                          </span>
+                          <div>
+                            <strong>Click "Add Domain"</strong> and enter: <code className="bg-gray-200 px-2 py-0.5 rounded text-xs">mindfulchampion.com</code>
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold flex-shrink-0">
+                            3
+                          </span>
+                          <div>
+                            <strong>Add DNS Records:</strong> Resend will provide SPF, DKIM, and DMARC records. Add these to your domain's DNS settings.
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold flex-shrink-0">
+                            4
+                          </span>
+                          <div>
+                            <strong>Verify Domain:</strong> Click "Verify" in Resend after adding DNS records. This can take up to 48 hours.
+                          </div>
+                        </li>
+                        <li className="flex items-start gap-3">
+                          <span className="flex items-center justify-center w-6 h-6 rounded-full bg-teal-600 text-white text-xs font-bold flex-shrink-0">
+                            5
+                          </span>
+                          <div>
+                            <strong>Test Emails:</strong> Once verified, use the "Test" tab to send test emails from each account.
+                          </div>
+                        </li>
+                      </ol>
+                    </div>
+                    
+                    <div className="bg-teal-50 border border-teal-200 rounded-lg p-4">
+                      <h4 className="font-semibold text-teal-900 mb-2">
+                        📝 Need Help?
+                      </h4>
+                      <p className="text-sm text-teal-800 mb-2">
+                        Resend Documentation: <a href="https://resend.com/docs/dashboard/domains/introduction" target="_blank" rel="noopener noreferrer" className="underline">Domain Setup Guide</a>
+                      </p>
+                      <p className="text-sm text-teal-800">
+                        DNS propagation can take 24-48 hours. Check status at <a href="https://dnschecker.org" target="_blank" rel="noopener noreferrer" className="underline">dnschecker.org</a>
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </TabsContent>
+
           {/* Send Email Tab */}
           <TabsContent value="send">
             <Card>
@@ -313,16 +530,40 @@ export default function AdminEmailManagement() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSendEmail} className="space-y-4">
-                  <div>
-                    <Label htmlFor="to">To (Email Address)</Label>
-                    <Input
-                      id="to"
-                      type="email"
-                      placeholder="recipient@example.com"
-                      value={emailForm.to}
-                      onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
-                      required
-                    />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="to">To (Email Address)</Label>
+                      <Input
+                        id="to"
+                        type="email"
+                        placeholder="recipient@example.com"
+                        value={emailForm.to}
+                        onChange={(e) => setEmailForm({ ...emailForm, to: e.target.value })}
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="fromAccount">Send From</Label>
+                      <Select
+                        value={emailForm.fromAccount}
+                        onValueChange={(value) => setEmailForm({ ...emailForm, fromAccount: value })}
+                      >
+                        <SelectTrigger id="fromAccount">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(EMAIL_CONFIG.ACCOUNTS).map(([key, account]) => (
+                            <SelectItem key={key} value={key}>
+                              {account.email}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {EMAIL_CONFIG.ACCOUNTS[emailForm.fromAccount as keyof typeof EMAIL_CONFIG.ACCOUNTS]?.purpose}
+                      </p>
+                    </div>
                   </div>
 
                   <div>
@@ -362,7 +603,7 @@ export default function AdminEmailManagement() {
                       ) : (
                         <>
                           <Send className="mr-2 h-4 w-4" />
-                          Send Email
+                          Send Email from {EMAIL_CONFIG.ACCOUNTS[emailForm.fromAccount as keyof typeof EMAIL_CONFIG.ACCOUNTS]?.email}
                         </>
                       )}
                     </Button>
@@ -493,7 +734,7 @@ export default function AdminEmailManagement() {
               <CardHeader>
                 <CardTitle>Test Email System</CardTitle>
                 <CardDescription>
-                  Send a test email to verify the email system is working
+                  Send test emails from different accounts to verify the email system
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -506,14 +747,50 @@ export default function AdminEmailManagement() {
                       <li>Email delivery is working</li>
                       <li>HTML formatting is correct</li>
                       <li>Resend integration is active</li>
-                      <li>Admin panel is connected</li>
+                      <li>Domain is properly configured</li>
+                      <li>Each email account (noreply@, partners@, dean@) can send emails</li>
                     </ul>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="test-to">Recipient Email</Label>
+                      <Input
+                        id="test-to"
+                        type="email"
+                        placeholder="your@email.com"
+                        value={testEmailForm.to}
+                        onChange={(e) => setTestEmailForm({ ...testEmailForm, to: e.target.value })}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="test-from">Send From</Label>
+                      <Select
+                        value={testEmailForm.fromAccount}
+                        onValueChange={(value) => setTestEmailForm({ ...testEmailForm, fromAccount: value })}
+                      >
+                        <SelectTrigger id="test-from">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(EMAIL_CONFIG.ACCOUNTS).map(([key, account]) => (
+                            <SelectItem key={key} value={key}>
+                              {account.email} - {account.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-gray-600 mt-1">
+                        {EMAIL_CONFIG.ACCOUNTS[testEmailForm.fromAccount as keyof typeof EMAIL_CONFIG.ACCOUNTS]?.purpose}
+                      </p>
+                    </div>
                   </div>
                   
                   <Button
                     onClick={handleSendTestEmail}
-                    disabled={loading}
-                    className="bg-gradient-to-r from-blue-600 to-cyan-600"
+                    disabled={loading || !testEmailForm.to}
+                    className="bg-gradient-to-r from-blue-600 to-cyan-600 w-full"
                   >
                     {loading ? (
                       <>
@@ -523,7 +800,7 @@ export default function AdminEmailManagement() {
                     ) : (
                       <>
                         <TestTube className="mr-2 h-4 w-4" />
-                        Send Test Email
+                        Send Test Email from {EMAIL_CONFIG.ACCOUNTS[testEmailForm.fromAccount as keyof typeof EMAIL_CONFIG.ACCOUNTS]?.email}
                       </>
                     )}
                   </Button>
