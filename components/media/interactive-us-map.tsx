@@ -1,12 +1,12 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ComposableMap, Geographies, Geography } from 'react-simple-maps';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { MapPin, Trophy, Calendar, Target, X, Radio, Video, Users, Play, MapPinned, TrendingUp } from 'lucide-react';
+import { MapPin, Trophy, Calendar, Target, X, Radio, Video, Users, Play, MapPinned, TrendingUp, Zap, Eye, BarChart3, Building, Globe, Activity, Flame } from 'lucide-react';
 import { mediaDesignTokens } from '@/lib/media-design-system';
 
 // US States GeoJSON topology URL
@@ -188,134 +188,349 @@ export function InteractiveUSMap({ tournaments, courts, venues, onStateClick }: 
     .sort((a, b) => b.liveCount - a.liveCount)
     .slice(0, 8); // Show top 8 live states
 
+  // Calculate state activity summary
+  const stateActivitySummary = useMemo(() => {
+    const activeStates = Array.from(stateData.values()).filter(s => s.eventCount > 0);
+    const totalEvents = activeStates.reduce((sum, s) => sum + s.eventCount, 0);
+    const totalLive = activeStates.reduce((sum, s) => sum + s.liveCount, 0);
+    const totalStreaming = activeStates.reduce((sum, s) => sum + s.streamingCount, 0);
+    const totalUpcoming = activeStates.reduce((sum, s) => sum + s.upcomingCount, 0);
+    
+    // Top 5 most active states
+    const topStates = activeStates
+      .sort((a, b) => (b.eventCount + b.liveCount * 3) - (a.eventCount + a.liveCount * 3))
+      .slice(0, 5);
+    
+    return { activeStates: activeStates.length, totalEvents, totalLive, totalStreaming, totalUpcoming, topStates };
+  }, [stateData]);
+
   return (
     <div className="space-y-4">
-      {/* Tournament Map - Clean & Centered */}
-      <Card className="overflow-hidden border-2 border-slate-700 shadow-lg">
-        <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 py-3">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <CardTitle className="flex items-center gap-2 text-white">
-              <MapPin className="w-5 h-5 text-teal-400" />
-              <span className="text-lg font-bold">Tournament Map</span>
-            </CardTitle>
-            
-            {/* Enhanced Legend - Updated colors */}
-            <div className="flex items-center gap-2 flex-wrap text-xs">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-red-500" />
-                <span className="font-medium text-slate-300">Live</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full" style={{ background: '#8B5CF6' }} />
-                <span className="font-medium text-slate-300">Multiple</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full" style={{ background: '#A855F7' }} />
-                <span className="font-medium text-slate-300">Streaming</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-orange-500" />
-                <span className="font-medium text-slate-300">Upcoming</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-full bg-gray-300" />
-                <span className="font-medium text-slate-300">None</span>
-              </div>
-            </div>
-          </div>
-        </CardHeader>
+      {/* Main Grid Layout - Map with Side Panels */}
+      <div className="grid grid-cols-12 gap-4">
         
-        <CardContent className="p-3 bg-gradient-to-br from-slate-900/50 to-indigo-950/50">
-          {/* Smaller map - static, no zooming - scale 450 to show ALL 50 states coast-to-coast including Alaska and Hawaii */}
-          <div className="relative w-full max-w-2xl mx-auto" style={{ paddingBottom: '70%' }}>
-            <div className="absolute inset-0">
-              <ComposableMap
-                projection="geoAlbersUsa"
-                projectionConfig={{
-                  scale: 450,
-                }}
-                width={800}
-                height={550}
-              >
-                <Geographies geography={US_STATES_TOPO_URL}>
-                  {({ geographies }) =>
-                    geographies.map((geo) => {
-                      const stateId = geo.id;
-                      const stateName = geo.properties?.name || '';
-                      // Find state abbreviation
-                      const stateAbbr = Object.keys(STATE_NAMES).find(
-                        (abbr) => STATE_NAMES[abbr] === stateName
-                      );
-                      
-                      const fillColor = stateAbbr ? getStateColor(stateAbbr) : '#E5E7EB';
-                      const isHovered = hoveredState === stateAbbr;
-                      const isSelected = selectedState === stateAbbr;
-                      
-                      return (
-                        <Geography
-                          key={stateId}
-                          geography={geo}
-                          fill={fillColor}
-                          stroke="#FFFFFF"
-                          strokeWidth={isSelected ? 2 : isHovered ? 1.5 : 0.75}
-                          style={{
-                            default: {
-                              outline: 'none',
-                              transition: 'all 0.2s ease-in-out',
-                            },
-                            hover: {
-                              fill: fillColor,
-                              outline: 'none',
-                              stroke: '#14B8A6',
-                              strokeWidth: 2,
-                              cursor: stateAbbr && stateData.get(stateAbbr)?.eventCount ? 'pointer' : 'default',
-                            },
-                            pressed: {
-                              fill: fillColor,
-                              outline: 'none',
-                            },
-                          }}
-                          onMouseEnter={() => stateAbbr && setHoveredState(stateAbbr)}
-                          onMouseLeave={() => setHoveredState(null)}
-                          onClick={() => stateAbbr && handleStateClick(stateAbbr)}
-                        />
-                      );
-                    })
-                  }
-                </Geographies>
-              </ComposableMap>
-
-              {/* Hover Tooltip */}
-              <AnimatePresence>
-                {hoveredInfo && hoveredState && (
+        {/* LEFT PANEL: Live Events Panel */}
+        <div className="col-span-12 lg:col-span-3">
+          <Card className="h-full overflow-hidden border-2 border-red-500/30 bg-gradient-to-br from-slate-800/90 to-red-950/30 shadow-xl shadow-red-500/10">
+            <CardHeader className="bg-gradient-to-r from-red-600 to-rose-600 py-3 px-4">
+              <CardTitle className="flex items-center gap-2 text-white text-base">
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  <Radio className="w-5 h-5 animate-pulse" />
+                </motion.div>
+                <span className="font-bold">Live Events</span>
+                <Badge className="bg-white/20 text-white ml-auto">
+                  {stateActivitySummary.totalLive}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 space-y-2 max-h-[400px] overflow-y-auto">
+              {liveTournaments.length > 0 ? (
+                liveTournaments.map((state, idx) => (
                   <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="absolute top-4 left-4 pointer-events-none"
+                    key={state.abbr}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className={`p-3 rounded-xl cursor-pointer transition-all hover:scale-[1.02] ${
+                      state.liveCount > 0 
+                        ? 'bg-gradient-to-r from-red-900/50 to-rose-900/50 border border-red-500/50 hover:border-red-400' 
+                        : 'bg-slate-800/50 border border-slate-700 hover:border-teal-500/50'
+                    }`}
+                    onClick={() => handleStateClick(state.abbr)}
                   >
-                    <Card className="bg-slate-800/95 backdrop-blur-md shadow-xl border-2 border-teal-500/50">
-                      <CardContent className="p-3 space-y-1">
-                        <div className="font-bold text-white">{hoveredInfo.name}</div>
-                        <div className="flex items-center gap-4 text-sm">
-                          <Badge className="bg-teal-500/30 text-teal-300 border-teal-500/50">
-                            {hoveredInfo.eventCount} Events
-                          </Badge>
-                          {hoveredInfo.liveCount > 0 && (
-                            <Badge className="bg-red-500/30 text-red-300 border-red-500/50 animate-pulse">
-                              {hoveredInfo.liveCount} Live
-                            </Badge>
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full ${state.liveCount > 0 ? 'bg-red-500 animate-pulse' : 'bg-orange-500'}`} />
+                        <span className="font-bold text-white text-sm">{state.abbr}</span>
+                        <span className="text-xs text-slate-400">{state.name}</span>
+                      </div>
+                      {state.liveCount > 0 && (
+                        <Badge className="bg-red-500 text-white text-xs px-1.5 py-0.5">LIVE</Badge>
+                      )}
+                    </div>
+                    
+                    {/* Event previews */}
+                    {state.events.slice(0, 2).map((event, i) => (
+                      <div key={event.id} className="text-xs text-slate-300 pl-4 py-1 border-l-2 border-slate-700 mb-1">
+                        <div className="font-medium text-white truncate">{event.name}</div>
+                        <div className="text-slate-400">{event.venue}</div>
+                      </div>
+                    ))}
+                    
+                    <div className="flex items-center gap-3 mt-2 text-xs">
+                      <span className="text-slate-400 flex items-center gap-1">
+                        <Trophy className="w-3 h-3" />
+                        {state.eventCount} events
+                      </span>
+                      {state.streamingCount > 0 && (
+                        <span className="text-purple-400 flex items-center gap-1">
+                          <Video className="w-3 h-3" />
+                          {state.streamingCount} streaming
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <Radio className="w-10 h-10 text-slate-600 mx-auto mb-2" />
+                  <p className="text-sm text-slate-400">No live events</p>
+                  <p className="text-xs text-slate-500">Check back soon!</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* CENTER: Tournament Map */}
+        <div className="col-span-12 lg:col-span-6">
+          <Card className="overflow-hidden border-2 border-slate-700 shadow-lg h-full">
+            <CardHeader className="bg-gradient-to-r from-slate-800 to-slate-900 border-b border-slate-700 py-3">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <CardTitle className="flex items-center gap-2 text-white">
+                  <Globe className="w-5 h-5 text-teal-400" />
+                  <span className="text-lg font-bold">Tournament Map</span>
+                </CardTitle>
+                
+                {/* Enhanced Legend - Updated colors */}
+                <div className="flex items-center gap-2 flex-wrap text-xs">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-red-500" />
+                    <span className="font-medium text-slate-300">Live</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#8B5CF6' }} />
+                    <span className="font-medium text-slate-300">Multiple</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full" style={{ background: '#A855F7' }} />
+                    <span className="font-medium text-slate-300">Streaming</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-orange-500" />
+                    <span className="font-medium text-slate-300">Upcoming</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-full bg-gray-300" />
+                    <span className="font-medium text-slate-300">None</span>
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+            
+            <CardContent className="p-3 bg-gradient-to-br from-slate-900/50 to-indigo-950/50">
+              {/* Map container */}
+              <div className="relative w-full" style={{ paddingBottom: '65%' }}>
+                <div className="absolute inset-0">
+                  <ComposableMap
+                    projection="geoAlbersUsa"
+                    projectionConfig={{
+                      scale: 500,
+                    }}
+                    width={800}
+                    height={500}
+                  >
+                    <Geographies geography={US_STATES_TOPO_URL}>
+                      {({ geographies }) =>
+                        geographies.map((geo) => {
+                          const stateId = geo.id;
+                          const stateName = geo.properties?.name || '';
+                          // Find state abbreviation
+                          const stateAbbr = Object.keys(STATE_NAMES).find(
+                            (abbr) => STATE_NAMES[abbr] === stateName
+                          );
+                          
+                          const fillColor = stateAbbr ? getStateColor(stateAbbr) : '#E5E7EB';
+                          const isHovered = hoveredState === stateAbbr;
+                          const isSelected = selectedState === stateAbbr;
+                          
+                          return (
+                            <Geography
+                              key={stateId}
+                              geography={geo}
+                              fill={fillColor}
+                              stroke="#FFFFFF"
+                              strokeWidth={isSelected ? 2 : isHovered ? 1.5 : 0.75}
+                              style={{
+                                default: {
+                                  outline: 'none',
+                                  transition: 'all 0.2s ease-in-out',
+                                },
+                                hover: {
+                                  fill: fillColor,
+                                  outline: 'none',
+                                  stroke: '#14B8A6',
+                                  strokeWidth: 2,
+                                  cursor: stateAbbr && stateData.get(stateAbbr)?.eventCount ? 'pointer' : 'default',
+                                },
+                                pressed: {
+                                  fill: fillColor,
+                                  outline: 'none',
+                                },
+                              }}
+                              onMouseEnter={() => stateAbbr && setHoveredState(stateAbbr)}
+                              onMouseLeave={() => setHoveredState(null)}
+                              onClick={() => stateAbbr && handleStateClick(stateAbbr)}
+                            />
+                          );
+                        })
+                      }
+                    </Geographies>
+                  </ComposableMap>
+
+                  {/* Hover Tooltip */}
+                  <AnimatePresence>
+                    {hoveredInfo && hoveredState && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 10 }}
+                        className="absolute top-4 left-4 pointer-events-none z-20"
+                      >
+                        <Card className="bg-slate-800/95 backdrop-blur-md shadow-xl border-2 border-teal-500/50">
+                          <CardContent className="p-3 space-y-1">
+                            <div className="font-bold text-white">{hoveredInfo.name}</div>
+                            <div className="flex items-center gap-4 text-sm">
+                              <Badge className="bg-teal-500/30 text-teal-300 border-teal-500/50">
+                                {hoveredInfo.eventCount} Events
+                              </Badge>
+                              {hoveredInfo.liveCount > 0 && (
+                                <Badge className="bg-red-500/30 text-red-300 border-red-500/50 animate-pulse">
+                                  {hoveredInfo.liveCount} Live
+                                </Badge>
+                              )}
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* RIGHT PANEL: State Activity Summary */}
+        <div className="col-span-12 lg:col-span-3">
+          <Card className="h-full overflow-hidden border-2 border-teal-500/30 bg-gradient-to-br from-slate-800/90 to-teal-950/30 shadow-xl shadow-teal-500/10">
+            <CardHeader className="bg-gradient-to-r from-teal-600 to-cyan-600 py-3 px-4">
+              <CardTitle className="flex items-center gap-2 text-white text-base">
+                <BarChart3 className="w-5 h-5" />
+                <span className="font-bold">Activity Summary</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-3 space-y-3">
+              {/* Quick Stats Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  className="p-3 rounded-xl bg-gradient-to-br from-red-900/40 to-rose-900/40 border border-red-500/30"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Radio className="w-4 h-4 text-red-400 animate-pulse" />
+                    <span className="text-xs text-red-300 font-medium">Live Now</span>
+                  </div>
+                  <div className="text-2xl font-black text-white">{stateActivitySummary.totalLive}</div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  className="p-3 rounded-xl bg-gradient-to-br from-purple-900/40 to-pink-900/40 border border-purple-500/30"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Video className="w-4 h-4 text-purple-400" />
+                    <span className="text-xs text-purple-300 font-medium">Streaming</span>
+                  </div>
+                  <div className="text-2xl font-black text-white">{stateActivitySummary.totalStreaming}</div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  className="p-3 rounded-xl bg-gradient-to-br from-orange-900/40 to-amber-900/40 border border-orange-500/30"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <Calendar className="w-4 h-4 text-orange-400" />
+                    <span className="text-xs text-orange-300 font-medium">Upcoming</span>
+                  </div>
+                  <div className="text-2xl font-black text-white">{stateActivitySummary.totalUpcoming}</div>
+                </motion.div>
+                
+                <motion.div 
+                  whileHover={{ scale: 1.03 }}
+                  className="p-3 rounded-xl bg-gradient-to-br from-teal-900/40 to-cyan-900/40 border border-teal-500/30"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <MapPin className="w-4 h-4 text-teal-400" />
+                    <span className="text-xs text-teal-300 font-medium">States</span>
+                  </div>
+                  <div className="text-2xl font-black text-white">{stateActivitySummary.activeStates}</div>
+                </motion.div>
+              </div>
+              
+              {/* Top Active States */}
+              <div className="mt-4">
+                <div className="flex items-center gap-2 mb-3">
+                  <Flame className="w-4 h-4 text-orange-400" />
+                  <span className="text-sm font-bold text-white">Hottest States</span>
+                </div>
+                <div className="space-y-2">
+                  {stateActivitySummary.topStates.map((state, idx) => (
+                    <motion.div
+                      key={state.abbr}
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: idx * 0.05 }}
+                      className="flex items-center gap-3 p-2 rounded-lg bg-slate-800/50 hover:bg-slate-700/50 cursor-pointer transition-all"
+                      onClick={() => handleStateClick(state.abbr)}
+                    >
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                        idx === 0 ? 'bg-gradient-to-br from-yellow-400 to-amber-500 text-yellow-900' :
+                        idx === 1 ? 'bg-gradient-to-br from-slate-300 to-slate-400 text-slate-800' :
+                        idx === 2 ? 'bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100' :
+                        'bg-slate-600 text-slate-300'
+                      }`}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-white text-sm">{state.abbr}</span>
+                          <span className="text-xs text-slate-400 truncate">{state.name}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs">
+                          <span className="text-teal-400">{state.eventCount} events</span>
+                          {state.liveCount > 0 && (
+                            <span className="text-red-400 flex items-center gap-1">
+                              <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse" />
+                              {state.liveCount} live
+                            </span>
                           )}
                         </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+                      </div>
+                      <Activity className="w-4 h-4 text-teal-400" />
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Total Events Banner */}
+              <motion.div 
+                className="mt-4 p-4 rounded-xl bg-gradient-to-r from-teal-600/20 to-cyan-600/20 border border-teal-500/30"
+                whileHover={{ scale: 1.02 }}
+              >
+                <div className="text-center">
+                  <div className="text-xs text-teal-300 font-medium mb-1">Total Events Nationwide</div>
+                  <div className="text-3xl font-black text-white">{stateActivitySummary.totalEvents}</div>
+                  <div className="text-xs text-slate-400 mt-1">across {stateActivitySummary.activeStates} states</div>
+                </div>
+              </motion.div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
 
       {/* Comprehensive State Details - Organized by Category */}
       <AnimatePresence>

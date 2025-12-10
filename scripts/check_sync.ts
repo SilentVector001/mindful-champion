@@ -4,48 +4,39 @@ const prisma = new PrismaClient();
 
 async function checkSyncResults() {
   const liveStreams = await prisma.liveStream.findMany({
-    select: {
-      title: true,
-      platform: true,
-      status: true,
-      updatedAt: true
-    },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { createdAt: 'desc' },
     take: 5
   });
-
+  
   const podcasts = await prisma.podcastShow.findMany({
-    select: {
-      title: true,
-      author: true,
-      updatedAt: true
-    },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { createdAt: 'desc' },
     take: 5
   });
-
+  
   const events = await prisma.externalEvent.findMany({
-    select: {
-      title: true,
-      eventType: true,
-      startDate: true,
-      location: true,
-      updatedAt: true
-    },
-    orderBy: { updatedAt: 'desc' },
+    orderBy: { createdAt: 'desc' },
     take: 5
   });
 
-  console.log('\n📊 Database Sync Verification:\n');
-  console.log('Live Streams:', liveStreams.length);
-  liveStreams.forEach(s => console.log(`  - ${s.title} (${s.platform}, ${s.status})`));
+  console.log('\n📊 Database Sync Verification:');
+  console.log('═'.repeat(60));
+  console.log(`\n🎥 Live Streams (${liveStreams.length} recent):`);
+  liveStreams.forEach(stream => {
+    console.log(`  - ${stream.title} (${stream.platform}, ${stream.status})`);
+  });
   
-  console.log('\nPodcast Shows:', podcasts.length);
-  podcasts.forEach(p => console.log(`  - ${p.title} by ${p.author}`));
+  console.log(`\n🎙️ Podcast Shows (${podcasts.length} recent):`);
+  podcasts.forEach(podcast => {
+    console.log(`  - ${podcast.title} by ${podcast.author}`);
+  });
   
-  console.log('\nExternal Events:', events.length);
-  events.forEach(e => console.log(`  - ${e.title} (${e.location})`));
-
+  console.log(`\n🏆 Events (${events.length} recent):`);
+  events.forEach(event => {
+    console.log(`  - ${event.title} (${event.location})`);
+  });
+  
+  console.log('\n═'.repeat(60));
+  
   await prisma.$disconnect();
 }
 

@@ -249,6 +249,15 @@ export function EnhancedMediaCenter() {
                 </Button>
               </Link>
               
+              <Link href="/media/tournaments">
+                <Button 
+                  className="rounded-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white font-semibold shadow-lg hover:shadow-purple-500/50 transition-all"
+                >
+                  <Trophy className="w-4 h-4 mr-2" />
+                  Tournament Hub
+                </Button>
+              </Link>
+              
               <Button 
                 onClick={fetchLiveIndicators}
                 className="rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white hover:bg-white/20 transition-all shadow-lg"

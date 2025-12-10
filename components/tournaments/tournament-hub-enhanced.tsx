@@ -562,7 +562,7 @@ export function TournamentHubEnhanced() {
                 name: t.name,
                 state: t.state,
                 city: t.city,
-                venue: t.venue,
+                venue: t.venueName,
                 date: new Date(t.startDate),
                 isLive: t.status === 'Open',
                 status: t.status === 'Open' ? 'live' : 
@@ -570,7 +570,7 @@ export function TournamentHubEnhanced() {
                         (new Date(t.startDate) > new Date() ? 'upcoming' : 'completed')) as 'live' | 'upcoming' | 'today' | 'completed',
                 streamUrl: t.websiteUrl,
                 websiteUrl: t.websiteUrl,
-                organization: t.organization || 'Tournament',
+                organization: t.organizerName || 'Tournament',
                 description: t.description,
               }))}
               onStateClick={(stateAbbr) => {

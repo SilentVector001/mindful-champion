@@ -5,6 +5,7 @@ import { getToken } from 'next-auth/jwt'
 // Public paths that don't require authentication
 const publicPaths = [
   '/', // Landing page (features) - accessible to everyone
+  '/media-center', // Media Center - accessible to everyone
   '/auth/signin',
   '/auth/signup',
   '/auth/forgot-password',
