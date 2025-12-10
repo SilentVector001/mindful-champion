@@ -80,15 +80,13 @@ export async function POST(request: NextRequest) {
       where: { id: videoId },
       data: {
         analysisStatus: 'COMPLETED',
-        analysisData: {
-          shots: mockShots,
-          totalShots: mockShots.length,
-          note: 'Full AI shot detection will be available soon'
-        } as any,
+        detectedShots: mockShots,
+        totalShots: mockShots.length,
         shotDetectionProgress: {
           stage: 'completed',
           message: 'Shot detection completed (mock mode)',
         } as any,
+        analyzedAt: new Date(),
       },
     });
 

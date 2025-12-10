@@ -103,12 +103,18 @@ export async function POST(request: NextRequest) {
       where: { id: videoId },
       data: {
         analysisStatus: 'COMPLETED',
-        analysisData: mockAnalysisData as any,
         overallScore: mockAnalysisData.overallScore,
-        technicalScore: mockAnalysisData.technicalScore,
-        tacticalScore: mockAnalysisData.tacticalScore,
-        consistencyScore: mockAnalysisData.consistencyScore,
-        completedAt: new Date(),
+        strengths: mockAnalysisData.strengths,
+        areasForImprovement: mockAnalysisData.areasForImprovement,
+        recommendations: mockAnalysisData.keyInsights,
+        technicalScores: {
+          technical: mockAnalysisData.technicalScore,
+          tactical: mockAnalysisData.tacticalScore,
+          consistency: mockAnalysisData.consistencyScore
+        },
+        shotTypes: mockAnalysisData.detailedMetrics,
+        usedTensorFlow: false,
+        analyzedAt: new Date(),
       },
     })
 
