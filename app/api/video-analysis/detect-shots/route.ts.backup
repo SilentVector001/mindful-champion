@@ -5,8 +5,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
-// TEMPORARY: Heavy ML imports disabled to reduce serverless function size
-// import { LLMShotDetector } from '@/lib/video-analysis/llm-shot-detector';
+import { LLMShotDetector } from '@/lib/video-analysis/llm-shot-detector';
 import path from 'path';
 import fs from 'fs';
 import { sendEmail } from '@/lib/email';

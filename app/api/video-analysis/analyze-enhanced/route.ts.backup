@@ -6,9 +6,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
-// TEMPORARY: Heavy ML imports disabled to reduce serverless function size
-// import { LLMShotDetector } from '@/lib/video-analysis/llm-shot-detector'
-// import { EnhancedAnalysisEngine } from '@/lib/video-analysis/enhanced-analysis-engine'
+import { LLMShotDetector } from '@/lib/video-analysis/llm-shot-detector'
+// import { EnhancedAnalysisEngine } from '@/lib/video-analysis/enhanced-analysis-engine' // Temporarily disabled for production build
 import path from 'path'
 
 export async function POST(request: NextRequest) {
