@@ -6,13 +6,12 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 
-// TEMPORARY: Heavy ML imports disabled to reduce serverless function size
+// TEMPORARY: Heavy ML imports and email functions disabled to reduce serverless function size
 // import { AdvancedAnalysisEngine } from '@/lib/video-analysis/advanced-analysis-engine'
 // import { LLMShotDetector } from '@/lib/video-analysis/llm-shot-detector'
 // import { downloadVideoForProcessing } from '@/lib/video-analysis/video-downloader'
-
-import { sendEmailViaGmail } from '@/lib/email/gmail-sender'
-import { generateVideoAnalysisCompleteEmail } from '@/lib/email/templates/video-analysis-complete'
+// import { sendEmailViaGmail } from '@/lib/email/gmail-sender'
+// import { generateVideoAnalysisCompleteEmail } from '@/lib/email/templates/video-analysis-complete'
 
 export async function POST(request: NextRequest) {
   let videoId: string | null = null
@@ -134,34 +133,35 @@ export async function POST(request: NextRequest) {
 
     console.log('✅ Video analysis completed:', videoId)
 
-    // Send email notification
-    try {
-      if (user.email) {
-        const emailHtml = generateVideoAnalysisCompleteEmail({
-          userName: user.name || 'Player',
-          videoTitle: existingAnalysis.title || 'Your Video',
-          overallScore: mockAnalysisData.overallScore,
-          technicalScore: mockAnalysisData.technicalScore,
-          tacticalScore: mockAnalysisData.tacticalScore,
-          consistencyScore: mockAnalysisData.consistencyScore,
-          keyInsights: mockAnalysisData.keyInsights,
-          strengths: mockAnalysisData.strengths,
-          areasForImprovement: mockAnalysisData.areasForImprovement,
-          videoUrl: `${process.env.NEXTAUTH_URL}/train/video-analysis/${videoId}`,
-        })
-
-        await sendEmailViaGmail({
-          to: user.email,
-          subject: '🎾 Your Pickleball Video Analysis is Ready!',
-          html: emailHtml,
-        })
-
-        console.log('📧 Analysis complete email sent to:', user.email)
-      }
-    } catch (emailError) {
-      console.error('❌ Failed to send email:', emailError)
-      // Don't fail the request if email fails
-    }
+    // TEMPORARY: Email notification disabled until email template is fixed
+    // try {
+    //   if (user.email) {
+    //     const emailHtml = generateVideoAnalysisCompleteEmail({
+    //       userName: user.name || 'Player',
+    //       videoTitle: existingAnalysis.title || 'Your Video',
+    //       overallScore: mockAnalysisData.overallScore,
+    //       technicalScore: mockAnalysisData.technicalScore,
+    //       tacticalScore: mockAnalysisData.tacticalScore,
+    //       consistencyScore: mockAnalysisData.consistencyScore,
+    //       keyInsights: mockAnalysisData.keyInsights,
+    //       strengths: mockAnalysisData.strengths,
+    //       areasForImprovement: mockAnalysisData.areasForImprovement,
+    //       videoUrl: `${process.env.NEXTAUTH_URL}/train/video-analysis/${videoId}`,
+    //     })
+    //
+    //     await sendEmailViaGmail({
+    //       to: user.email,
+    //       subject: '🎾 Your Pickleball Video Analysis is Ready!',
+    //       html: emailHtml,
+    //     })
+    //
+    //     console.log('📧 Analysis complete email sent to:', user.email)
+    //   }
+    // } catch (emailError) {
+    //   console.error('❌ Failed to send email:', emailError)
+    //   // Don't fail the request if email fails
+    // }
+    console.log('📧 Email notification temporarily disabled')
 
     return NextResponse.json({
       success: true,
