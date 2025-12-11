@@ -44,7 +44,6 @@ import {
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center'
-import { InteractiveUSMap } from '@/components/media/interactive-us-map'
 
 interface Tournament {
   id: string
@@ -587,7 +586,7 @@ export function TournamentHubEnhanced() {
                 </Card>
               </div>
 
-              {/* Tournament Map */}
+              {/* Tournament Map - Simplified for Sidebar */}
               <Card className="border-slate-200 bg-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
@@ -595,28 +594,53 @@ export function TournamentHubEnhanced() {
                     Tournament Map
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pb-4">
-                  <InteractiveUSMap
-                    tournaments={tournaments.map(t => ({
-                      id: t.id,
-                      name: t.name,
-                      state: t.state,
-                      city: t.city,
-                      venue: t.venueName,
-                      date: new Date(t.startDate),
-                      isLive: t.status === 'Open',
-                      status: t.status === 'Open' ? 'live' : 
-                              (new Date(t.startDate).toDateString() === new Date().toDateString() ? 'today' : 
-                              (new Date(t.startDate) > new Date() ? 'upcoming' : 'completed')) as 'live' | 'upcoming' | 'today' | 'completed',
-                      streamUrl: t.websiteUrl,
-                      websiteUrl: t.websiteUrl,
-                      organization: t.organizerName || 'Tournament',
-                      description: t.description,
-                    }))}
-                    onStateClick={(stateAbbr) => {
-                      handleMapStateClick(stateAbbr);
-                    }}
-                  />
+                <CardContent className="pb-4 max-h-[400px] overflow-hidden">
+                  <div className="space-y-3">
+                    {/* Simplified map view for sidebar */}
+                    <div className="grid grid-cols-2 gap-2">
+                      {Object.entries(
+                        tournaments.reduce((acc, t) => {
+                          acc[t.state] = (acc[t.state] || 0) + 1
+                          return acc
+                        }, {} as Record<string, number>)
+                      )
+                      .sort((a, b) => b[1] - a[1])
+                      .slice(0, 8)
+                      .map(([state, count]) => (
+                        <div
+                          key={state}
+                          className="p-3 bg-gradient-to-br from-teal-50 to-white border border-teal-200 rounded-lg hover:border-teal-400 hover:shadow-md transition-all cursor-pointer"
+                          onClick={() => {
+                            setSelectedState(state)
+                            const stateName = US_STATES.find(s => s.abbr === state)?.name
+                            if (stateName) setSelectedMapState(state)
+                          }}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="font-bold text-slate-900 text-sm">{state}</span>
+                            <Badge variant="secondary" className="bg-teal-100 text-teal-700 text-xs">
+                              {count}
+                            </Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {tournaments.length > 8 && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        onClick={() => {
+                          // Could open a full map modal here
+                          toast.info('Full map view coming soon!')
+                        }}
+                      >
+                        <Globe className="w-3 h-3 mr-1" />
+                        View Full Map
+                      </Button>
+                    )}
+                  </div>
                 </CardContent>
               </Card>
 

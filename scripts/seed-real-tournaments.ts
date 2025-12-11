@@ -1,4 +1,9 @@
 import { PrismaClient } from '@prisma/client'
+import * as dotenv from 'dotenv'
+import * as path from 'path'
+
+// Load environment variables from .env.local
+dotenv.config({ path: path.join(__dirname, '../.env.local') })
 
 const prisma = new PrismaClient()
 
@@ -20,7 +25,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-11-01'),
     registrationEnd: new Date('2025-01-03'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 800,
     entryFee: 95,
     prizePool: 150000,
@@ -46,7 +51,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-11-01'),
     registrationEnd: new Date('2025-01-12'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 600,
     entryFee: 85,
     prizePool: 100000,
@@ -72,7 +77,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-11-15'),
     registrationEnd: new Date('2025-01-18'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 750,
     entryFee: 95,
     prizePool: 150000,
@@ -98,7 +103,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-12-01'),
     registrationEnd: new Date('2025-02-02'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 700,
     entryFee: 85,
     prizePool: 100000,
@@ -124,7 +129,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-12-01'),
     registrationEnd: new Date('2025-02-02'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 650,
     entryFee: 90,
     prizePool: 125000,
@@ -150,7 +155,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-12-15'),
     registrationEnd: new Date('2025-02-14'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 900,
     entryFee: 100,
     prizePool: 200000,
@@ -176,7 +181,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2025-01-01'),
     registrationEnd: new Date('2025-02-23'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 550,
     entryFee: 85,
     prizePool: 100000,
@@ -202,7 +207,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2025-01-15'),
     registrationEnd: new Date('2025-03-09'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 800,
     entryFee: 95,
     prizePool: 175000,
@@ -228,7 +233,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2025-01-15'),
     registrationEnd: new Date('2025-03-23'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 700,
     entryFee: 90,
     prizePool: 150000,
@@ -254,7 +259,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2025-01-01'),
     registrationEnd: new Date('2025-04-01'),
     format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
     maxParticipants: 2500,
     entryFee: 125,
     prizePool: 500000,
@@ -281,7 +286,7 @@ const REAL_TOURNAMENTS = [
     registrationStart: new Date('2024-11-15'),
     registrationEnd: new Date('2025-01-21'),
     format: ['DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['SENIOR_PRO', 'ADVANCED', 'INTERMEDIATE'],
+    skillLevels: ['ADVANCED', 'INTERMEDIATE'],
     maxParticipants: 300,
     entryFee: 65,
     prizePool: 25000,
