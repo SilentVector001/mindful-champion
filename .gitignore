@@ -22,3 +22,4 @@ core
 .env.local
 .env.local.backup
 .env
+nextjs_space
