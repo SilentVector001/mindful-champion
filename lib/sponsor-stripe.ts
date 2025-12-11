@@ -1,9 +1,20 @@
 
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-10-29.clover',
-});
+// Lazy-loaded Stripe instance to avoid build-time errors
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not configured');
+    }
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-10-29.clover',
+    });
+  }
+  return stripe;
+}
 
 // Sponsorship tier pricing configuration
 export const SPONSOR_TIERS = {
@@ -67,8 +78,9 @@ export async function createSponsorCheckoutSession(
   }
 
   const tierConfig = SPONSOR_TIERS[tier];
+  const stripeInstance = getStripe();
 
-  const session = await stripe.checkout.sessions.create({
+  const session = await stripeInstance.checkout.sessions.create({
     payment_method_types: ['card'],
     mode: 'subscription',
     customer_email: sponsorEmail,
@@ -102,7 +114,8 @@ export async function createSponsorBillingPortalSession(
   stripeCustomerId: string,
   returnUrl?: string
 ) {
-  const session = await stripe.billingPortal.sessions.create({
+  const stripeInstance = getStripe();
+  const session = await stripeInstance.billingPortal.sessions.create({
     customer: stripeCustomerId,
     return_url: returnUrl || `${process.env.NEXTAUTH_URL}/dashboard`,
   });
@@ -111,11 +124,13 @@ export async function createSponsorBillingPortalSession(
 }
 
 export async function getSponsorSubscription(subscriptionId: string) {
-  return await stripe.subscriptions.retrieve(subscriptionId);
+  const stripeInstance = getStripe();
+  return await stripeInstance.subscriptions.retrieve(subscriptionId);
 }
 
 export async function cancelSponsorSubscription(subscriptionId: string) {
-  return await stripe.subscriptions.cancel(subscriptionId);
+  const stripeInstance = getStripe();
+  return await stripeInstance.subscriptions.cancel(subscriptionId);
 }
 
-export { stripe };
+export { getStripe as stripe };

@@ -5,11 +5,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { stripe as getStripe } from "@/lib/stripe"
 import Stripe from "stripe"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2025-10-29.clover",
-})
 
 export async function POST(
   req: Request,
@@ -42,7 +39,7 @@ export async function POST(
     switch (action) {
       case 'pause':
         // Pause subscription in Stripe
-        const pausedSub = await stripe.subscriptions.update(subscriptionId, {
+        const pausedSub = await getStripe().subscriptions.update(subscriptionId, {
           pause_collection: {
             behavior: 'mark_uncollectible',
           },
@@ -74,7 +71,7 @@ export async function POST(
 
       case 'cancel':
         // Cancel subscription in Stripe
-        const canceledSub = await stripe.subscriptions.cancel(subscriptionId)
+        const canceledSub = await getStripe().subscriptions.cancel(subscriptionId)
         
         // Update in database
         await prisma.subscription.updateMany({
@@ -125,7 +122,7 @@ export async function POST(
         }
 
         // Create refund in Stripe
-        const refund = await stripe.refunds.create({
+        const refund = await getStripe().refunds.create({
           payment_intent: recentPayment.stripePaymentIntentId,
           reason: 'requested_by_customer',
         })
@@ -145,7 +142,7 @@ export async function POST(
 
       case 'resume':
         // Resume paused subscription
-        const resumedSub = await stripe.subscriptions.update(subscriptionId, {
+        const resumedSub = await getStripe().subscriptions.update(subscriptionId, {
           pause_collection: null,
         })
         

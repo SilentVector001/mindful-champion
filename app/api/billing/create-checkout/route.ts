@@ -2,11 +2,8 @@ import { NextResponse } from "next/server"
 import { getServerSession } from "next-auth/next"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { stripe as getStripe } from "@/lib/stripe"
 import Stripe from "stripe"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover',
-})
 
 const PRICE_IDS = {
   PREMIUM: process.env.STRIPE_PREMIUM_PRICE_ID || 'price_premium',
@@ -47,7 +44,7 @@ export async function POST(request: Request) {
     let customerId = user.stripeCustomerId
 
     if (!customerId) {
-      const customer = await stripe.customers.create({
+      const customer = await getStripe().customers.create({
         email: user.email!,
         name: user.name || undefined,
         metadata: {
@@ -65,7 +62,7 @@ export async function POST(request: Request) {
     }
 
     // Create checkout session
-    const checkoutSession = await stripe.checkout.sessions.create({
+    const checkoutSession = await getStripe().checkout.sessions.create({
       customer: customerId,
       mode: 'subscription',
       payment_method_types: ['card'],

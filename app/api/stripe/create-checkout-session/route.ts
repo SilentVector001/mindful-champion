@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
-import { stripe } from '@/lib/stripe';
+import { stripe as getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 
 export async function POST(request: NextRequest) {
@@ -30,6 +30,8 @@ export async function POST(request: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
+
+    const stripe = getStripe();
 
     // Create or retrieve Stripe customer
     let customerId = user.stripeCustomerId;

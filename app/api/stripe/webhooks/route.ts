@@ -1,7 +1,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe } from '@/lib/stripe';
+import { stripe as getStripe } from '@/lib/stripe';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
   let event: Stripe.Event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(
       body,
       signature,
@@ -99,6 +100,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   // Update Stripe customer with address information
   if (customerId && session.customer_details?.address) {
     try {
+      const stripe = getStripe();
       await stripe.customers.update(customerId, {
         address: session.customer_details.address,
         name: session.customer_details.name || undefined,
@@ -205,6 +207,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   const subscriptionId = (invoice as any).subscription;
 
   if (subscriptionId && typeof subscriptionId === 'string') {
+    const stripe = getStripe();
     const subscription = await stripe.subscriptions.retrieve(subscriptionId);
     await handleSubscriptionUpdate(subscription);
   }

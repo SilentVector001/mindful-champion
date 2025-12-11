@@ -4,11 +4,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
+import { stripe as getStripe } from "@/lib/stripe"
 import Stripe from "stripe"
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-10-29.clover'
-})
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,7 +50,7 @@ export async function POST(request: NextRequest) {
     switch (action) {
       case 'pause':
         // Get Stripe subscriptions
-        const stripeSubscriptions = await stripe.subscriptions.list({
+        const stripeSubscriptions = await getStripe().subscriptions.list({
           customer: user.stripeCustomerId,
           status: 'active',
           limit: 1
@@ -67,7 +64,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Pause subscription
-        const pausedSubscription = await stripe.subscriptions.update(
+        const pausedSubscription = await getStripe().subscriptions.update(
           stripeSubscriptions.data[0].id,
           {
             pause_collection: {
@@ -90,7 +87,7 @@ export async function POST(request: NextRequest) {
 
       case 'resume':
         // Get paused subscriptions
-        const pausedStripeSubscriptions = await stripe.subscriptions.list({
+        const pausedStripeSubscriptions = await getStripe().subscriptions.list({
           customer: user.stripeCustomerId,
           status: 'paused',
           limit: 1
@@ -104,7 +101,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Resume subscription
-        const resumedSubscription = await stripe.subscriptions.update(
+        const resumedSubscription = await getStripe().subscriptions.update(
           pausedStripeSubscriptions.data[0].id,
           {
             pause_collection: null,
@@ -125,7 +122,7 @@ export async function POST(request: NextRequest) {
 
       case 'cancel':
         // Get active subscriptions
-        const activeSubscriptions = await stripe.subscriptions.list({
+        const activeSubscriptions = await getStripe().subscriptions.list({
           customer: user.stripeCustomerId,
           status: 'active',
           limit: 1
@@ -139,7 +136,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Cancel subscription
-        const canceledSubscription = await stripe.subscriptions.cancel(
+        const canceledSubscription = await getStripe().subscriptions.cancel(
           activeSubscriptions.data[0].id
         )
 
@@ -193,7 +190,7 @@ export async function POST(request: NextRequest) {
         }
 
         // Create refund in Stripe
-        const refund = await stripe.refunds.create({
+        const refund = await getStripe().refunds.create({
           payment_intent: recentPayment.stripePaymentIntentId,
           reason: 'requested_by_customer',
         })

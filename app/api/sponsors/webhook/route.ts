@@ -1,7 +1,7 @@
 
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
-import { stripe } from '@/lib/sponsor-stripe';
+import { stripe as getStripe } from '@/lib/sponsor-stripe';
 import { prisma } from '@/lib/db';
 
 export const dynamic = 'force-dynamic';
@@ -21,6 +21,7 @@ export async function POST(request: Request) {
   let event;
 
   try {
+    const stripe = getStripe();
     event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
   } catch (err: any) {
     console.error('Webhook signature verification failed:', err.message);
@@ -85,6 +86,7 @@ async function handleCheckoutCompleted(session: any) {
   }
 
   // Get the subscription
+  const stripe = getStripe();
   const subscriptionData = await stripe.subscriptions.retrieve(session.subscription as string);
   const subscription = subscriptionData as any; // Type workaround for Stripe response
 
