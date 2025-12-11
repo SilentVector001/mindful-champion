@@ -7,6 +7,9 @@ import { createSponsorCheckoutSession } from '@/lib/sponsor-stripe';
 import { sendSponsorApprovalEmail } from '@/lib/email/sponsor-approval-email';
 import bcrypt from 'bcryptjs';
 
+// Force dynamic rendering (no static optimization at build time)
+export const dynamic = 'force-dynamic';
+
 export async function POST(
   request: Request,
   { params }: { params: Promise<{ applicationId: string }> }

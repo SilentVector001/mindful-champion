@@ -68,7 +68,7 @@ export async function sendGoalConfirmation(userId: string, goalData: GoalData) {
     await sendEmail({
       to: user.email,
       subject: `🎯 Goal Set! Coach Kai is Here to Help`,
-      text: `Goal Set! Coach Kai is Here to Help - ${goalData.title}`,
+      text: 'Goal confirmation email',
       html: htmlContent
     })
 
@@ -208,7 +208,7 @@ export async function sendDailyGoalProgressEmail(
     await sendEmail({
       to: user.email,
       subject: `🌟 Daily Check-in: ${goal.title}`,
-      text: `Daily Check-in: ${goal.title}`,
+      text: 'Daily progress check-in email',
       html: htmlContent
     })
 
@@ -254,7 +254,7 @@ export async function sendMilestoneAchievedEmail(
     await sendEmail({
       to: user.email,
       subject: `🏆 Milestone Reached: ${milestoneTitle}`,
-      text: `Milestone Reached: ${milestoneTitle}`,
+      text: 'Milestone achievement email',
       html: htmlContent
     })
 

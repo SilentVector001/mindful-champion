@@ -13,6 +13,9 @@ const PRICE_IDS = {
   PRO: process.env.STRIPE_PRO_PRICE_ID || 'price_pro',
 }
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
   try {
     const session = await getServerSession(authOptions)

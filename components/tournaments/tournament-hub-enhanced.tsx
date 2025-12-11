@@ -553,138 +553,150 @@ export function TournamentHubEnhanced() {
             )}
           </div>
 
-          {/* Right Column - Interactive Map & Activity Feed */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Interactive US Map with Real State Boundaries */}
-            <InteractiveUSMap
-              tournaments={tournaments.map(t => ({
-                id: t.id,
-                name: t.name,
-                state: t.state,
-                city: t.city,
-                venue: t.venueName,
-                date: new Date(t.startDate),
-                isLive: t.status === 'Open',
-                status: t.status === 'Open' ? 'live' : 
-                        (new Date(t.startDate).toDateString() === new Date().toDateString() ? 'today' : 
-                        (new Date(t.startDate) > new Date() ? 'upcoming' : 'completed')) as 'live' | 'upcoming' | 'today' | 'completed',
-                streamUrl: t.websiteUrl,
-                websiteUrl: t.websiteUrl,
-                organization: t.organizerName || 'Tournament',
-                description: t.description,
-              }))}
-              onStateClick={(stateAbbr) => {
-                handleMapStateClick(stateAbbr);
-              }}
-            />
+          {/* Right Column - Stats & Activity Feed (Clean, Non-Overlapping) */}
+          <div className="lg:col-span-1">
+            <div className="flex flex-col gap-4">
+              {/* Quick Stats - Always at Top */}
+              <div className="grid grid-cols-2 gap-3">
+                <Card className="border-slate-200 bg-gradient-to-br from-teal-50 to-white">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-teal-100 rounded-lg">
+                        <Trophy className="w-5 h-5 text-teal-600" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">{allTournaments.length}</div>
+                        <div className="text-xs text-slate-600">Tournaments</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            {/* Quick Stats */}
-            <div className="grid grid-cols-2 gap-3">
-              <Card className="border-slate-200 bg-gradient-to-br from-teal-50 to-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-teal-100 rounded-lg">
-                      <Trophy className="w-5 h-5 text-teal-600" />
+                <Card className="border-slate-200 bg-gradient-to-br from-amber-50 to-white">
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 bg-amber-100 rounded-lg">
+                        <DollarSign className="w-5 h-5 text-amber-600" />
+                      </div>
+                      <div>
+                        <div className="text-2xl font-bold text-slate-900">${(totalPrizePool / 1000).toFixed(0)}k</div>
+                        <div className="text-xs text-slate-600">Prize Pool</div>
+                      </div>
                     </div>
-                    <div>
-                      <div className="text-2xl font-bold text-slate-900">{allTournaments.length}</div>
-                      <div className="text-xs text-slate-600">Tournaments</div>
-                    </div>
-                  </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Tournament Map */}
+              <Card className="border-slate-200 bg-white">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <Map className="w-5 h-5 text-teal-600" />
+                    Tournament Map
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pb-4">
+                  <InteractiveUSMap
+                    tournaments={tournaments.map(t => ({
+                      id: t.id,
+                      name: t.name,
+                      state: t.state,
+                      city: t.city,
+                      venue: t.venueName,
+                      date: new Date(t.startDate),
+                      isLive: t.status === 'Open',
+                      status: t.status === 'Open' ? 'live' : 
+                              (new Date(t.startDate).toDateString() === new Date().toDateString() ? 'today' : 
+                              (new Date(t.startDate) > new Date() ? 'upcoming' : 'completed')) as 'live' | 'upcoming' | 'today' | 'completed',
+                      streamUrl: t.websiteUrl,
+                      websiteUrl: t.websiteUrl,
+                      organization: t.organizerName || 'Tournament',
+                      description: t.description,
+                    }))}
+                    onStateClick={(stateAbbr) => {
+                      handleMapStateClick(stateAbbr);
+                    }}
+                  />
                 </CardContent>
               </Card>
 
-              <Card className="border-slate-200 bg-gradient-to-br from-amber-50 to-white">
-                <CardContent className="p-4">
-                  <div className="flex items-center gap-2">
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <DollarSign className="w-5 h-5 text-amber-600" />
+              {/* Live Activity Feed */}
+              <Card className="border-2 border-orange-200 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-orange-500 to-pink-500 py-3">
+                  <CardTitle className="flex items-center gap-2 text-white text-lg">
+                    <Activity className="w-5 h-5" />
+                    Live Activity
+                    <Badge className="bg-white/20 text-white border-0 ml-auto animate-pulse">
+                      <Radio className="w-3 h-3 mr-1" />
+                      Live
+                    </Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <ScrollArea className="h-[250px]">
+                    <div className="divide-y divide-slate-100">
+                      {liveActivities.map((activity, idx) => (
+                        <motion.div
+                          key={activity.id}
+                          initial={idx === 0 ? { opacity: 0, x: -20 } : false}
+                          animate={{ opacity: 1, x: 0 }}
+                          className="p-3 hover:bg-slate-50 transition-colors"
+                        >
+                          <div className="flex items-start gap-3">
+                            <div className={`p-2 rounded-full bg-slate-100 ${activity.action.color}`}>
+                              <activity.action.icon className="w-4 h-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm">
+                                <span className="font-semibold text-slate-900">{activity.name}</span>
+                                <span className="text-slate-600"> {activity.action.text} </span>
+                                <span className="font-medium text-teal-700">{activity.tournament}</span>
+                              </p>
+                              <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                                <Clock className="w-3 h-3" />
+                                {activity.time}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
                     </div>
-                    <div>
-                      <div className="text-2xl font-bold text-slate-900">${(totalPrizePool / 1000).toFixed(0)}k</div>
-                      <div className="text-xs text-slate-600">Prize Pool</div>
+                  </ScrollArea>
+                </CardContent>
+              </Card>
+
+              {/* Hot Tournaments */}
+              <Card className="border-2 border-red-200 shadow-lg">
+                <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 py-3">
+                  <CardTitle className="flex items-center gap-2 text-white text-lg">
+                    <Flame className="w-5 h-5" />
+                    Trending Now
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-3 space-y-2">
+                  {allTournaments.slice(0, 3).map((t, idx) => (
+                    <div 
+                      key={t.id}
+                      className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                      onClick={() => setSelectedTournament(t)}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                        idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-slate-400' : 'bg-amber-700'
+                      }`}>
+                        {idx + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm text-slate-900 truncate">{t.name}</p>
+                        <p className="text-xs text-slate-500">{t.city}, {t.state}</p>
+                      </div>
+                      <Badge variant="outline" className="text-xs shrink-0">
+                        {t.currentRegistrations}/{t.maxParticipants || '∞'}
+                      </Badge>
                     </div>
-                  </div>
+                  ))}
                 </CardContent>
               </Card>
             </div>
-
-            {/* Live Activity Feed */}
-            <Card className="border-2 border-orange-200 shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-orange-500 to-pink-500 py-3">
-                <CardTitle className="flex items-center gap-2 text-white text-lg">
-                  <Activity className="w-5 h-5" />
-                  Live Activity
-                  <Badge className="bg-white/20 text-white border-0 ml-auto animate-pulse">
-                    <Radio className="w-3 h-3 mr-1" />
-                    Live
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0">
-                <ScrollArea className="h-[300px]">
-                  <div className="divide-y divide-slate-100">
-                    {liveActivities.map((activity, idx) => (
-                      <motion.div
-                        key={activity.id}
-                        initial={idx === 0 ? { opacity: 0, x: -20 } : false}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="p-3 hover:bg-slate-50 transition-colors"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={`p-2 rounded-full bg-slate-100 ${activity.action.color}`}>
-                            <activity.action.icon className="w-4 h-4" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm">
-                              <span className="font-semibold text-slate-900">{activity.name}</span>
-                              <span className="text-slate-600"> {activity.action.text} </span>
-                              <span className="font-medium text-teal-700">{activity.tournament}</span>
-                            </p>
-                            <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                              <Clock className="w-3 h-3" />
-                              {activity.time}
-                            </p>
-                          </div>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
-
-            {/* Hot Tournaments */}
-            <Card className="border-2 border-red-200 shadow-lg overflow-hidden">
-              <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 py-3">
-                <CardTitle className="flex items-center gap-2 text-white text-lg">
-                  <Flame className="w-5 h-5" />
-                  Trending Now
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-3 space-y-2">
-                {allTournaments.slice(0, 3).map((t, idx) => (
-                  <div 
-                    key={t.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
-                    onClick={() => setSelectedTournament(t)}
-                  >
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
-                      idx === 0 ? 'bg-amber-500' : idx === 1 ? 'bg-slate-400' : 'bg-amber-700'
-                    }`}>
-                      {idx + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm text-slate-900 truncate">{t.name}</p>
-                      <p className="text-xs text-slate-500">{t.city}, {t.state}</p>
-                    </div>
-                    <Badge variant="outline" className="text-xs shrink-0">
-                      {t.currentRegistrations}/{t.maxParticipants || '∞'}
-                    </Badge>
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
           </div>
         </div>
 
