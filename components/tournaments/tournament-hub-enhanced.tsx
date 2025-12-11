@@ -512,6 +512,91 @@ export function TournamentHubEnhanced() {
               </CardContent>
             </Card>
 
+            {/* Tournament Map - Full Width at Top */}
+            <Card className="border-2 border-teal-200 shadow-lg bg-gradient-to-br from-teal-50 to-white">
+              <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 py-4">
+                <CardTitle className="flex items-center gap-2 text-white text-xl">
+                  <Map className="w-6 h-6" />
+                  Tournament Map
+                  <Badge className="bg-white/20 text-white border-0 ml-2">
+                    <Globe className="w-3 h-3 mr-1" />
+                    {Object.keys(tournaments.reduce((acc, t) => {
+                      acc[t.state] = true
+                      return acc
+                    }, {} as Record<string, boolean>)).length} States
+                  </Badge>
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="pb-6 pt-4">
+                <div className="space-y-4">
+                  {/* State Grid - Showing all states with tournaments */}
+                  <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                    {Object.entries(
+                      tournaments.reduce((acc, t) => {
+                        acc[t.state] = (acc[t.state] || 0) + 1
+                        return acc
+                      }, {} as Record<string, number>)
+                    )
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([state, count]) => {
+                      const isSelected = selectedMapState === state
+                      return (
+                        <motion.div
+                          key={state}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                          className={`p-3 bg-gradient-to-br rounded-lg transition-all cursor-pointer ${
+                            isSelected 
+                              ? 'from-teal-500 to-cyan-500 border-2 border-teal-700 shadow-lg' 
+                              : 'from-teal-100 to-white border-2 border-teal-200 hover:border-teal-400 hover:shadow-md'
+                          }`}
+                          onClick={() => {
+                            setSelectedState(state)
+                            const stateName = US_STATES.find(s => s.abbr === state)?.name
+                            if (stateName) setSelectedMapState(isSelected ? null : state)
+                          }}
+                        >
+                          <div className="flex flex-col items-center justify-center">
+                            <span className={`font-bold text-lg ${isSelected ? 'text-white' : 'text-slate-900'}`}>
+                              {state}
+                            </span>
+                            <Badge 
+                              variant="secondary" 
+                              className={`text-xs mt-1 ${
+                                isSelected 
+                                  ? 'bg-white/30 text-white' 
+                                  : 'bg-teal-100 text-teal-700'
+                              }`}
+                            >
+                              {count} {count === 1 ? 'event' : 'events'}
+                            </Badge>
+                          </div>
+                        </motion.div>
+                      )
+                    })}
+                  </div>
+                  
+                  {/* View Full Map Button */}
+                  <div className="flex items-center justify-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full md:w-auto px-8 bg-white hover:bg-teal-50 border-2 border-teal-300 hover:border-teal-500 transition-all"
+                      onClick={() => {
+                        // Scroll to the top of the page to see all states
+                        window.scrollTo({ top: 0, behavior: 'smooth' })
+                        toast.success('Showing all tournament states above!')
+                      }}
+                    >
+                      <Globe className="w-4 h-4 mr-2" />
+                      View Full Map
+                      <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Tournament Grid */}
             {loading ? (
               <div className="flex items-center justify-center py-12">
@@ -586,60 +671,49 @@ export function TournamentHubEnhanced() {
                 </Card>
               </div>
 
-              {/* Tournament Map - Simplified for Sidebar */}
+              {/* Quick Navigation - Top States */}
               <Card className="border-slate-200 bg-white">
                 <CardHeader className="pb-3">
                   <CardTitle className="flex items-center gap-2 text-lg">
-                    <Map className="w-5 h-5 text-teal-600" />
-                    Tournament Map
+                    <Target className="w-5 h-5 text-teal-600" />
+                    Top Locations
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="pb-4 max-h-[400px] overflow-hidden">
-                  <div className="space-y-3">
-                    {/* Simplified map view for sidebar */}
-                    <div className="grid grid-cols-2 gap-2">
-                      {Object.entries(
-                        tournaments.reduce((acc, t) => {
-                          acc[t.state] = (acc[t.state] || 0) + 1
-                          return acc
-                        }, {} as Record<string, number>)
-                      )
-                      .sort((a, b) => b[1] - a[1])
-                      .slice(0, 8)
-                      .map(([state, count]) => (
-                        <div
-                          key={state}
-                          className="p-3 bg-gradient-to-br from-teal-50 to-white border border-teal-200 rounded-lg hover:border-teal-400 hover:shadow-md transition-all cursor-pointer"
-                          onClick={() => {
-                            setSelectedState(state)
-                            const stateName = US_STATES.find(s => s.abbr === state)?.name
-                            if (stateName) setSelectedMapState(state)
-                          }}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-slate-900 text-sm">{state}</span>
-                            <Badge variant="secondary" className="bg-teal-100 text-teal-700 text-xs">
-                              {count}
-                            </Badge>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {tournaments.length > 8 && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="w-full text-xs"
+                <CardContent className="pb-4">
+                  <div className="space-y-2">
+                    {Object.entries(
+                      tournaments.reduce((acc, t) => {
+                        acc[t.state] = (acc[t.state] || 0) + 1
+                        return acc
+                      }, {} as Record<string, number>)
+                    )
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 5)
+                    .map(([state, count], idx) => (
+                      <div
+                        key={state}
+                        className="flex items-center justify-between p-2 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
                         onClick={() => {
-                          // Could open a full map modal here
-                          toast.info('Full map view coming soon!')
+                          setSelectedState(state)
+                          const stateName = US_STATES.find(s => s.abbr === state)?.name
+                          if (stateName) setSelectedMapState(state)
+                          // Scroll to tournament grid
+                          document.querySelector('.lg\\:col-span-2')?.scrollIntoView({ behavior: 'smooth' })
                         }}
                       >
-                        <Globe className="w-3 h-3 mr-1" />
-                        View Full Map
-                      </Button>
-                    )}
+                        <div className="flex items-center gap-2">
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-xs ${
+                            idx === 0 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-700'
+                          }`}>
+                            {idx + 1}
+                          </div>
+                          <span className="font-semibold text-slate-900 text-sm">{state}</span>
+                        </div>
+                        <Badge variant="secondary" className="bg-teal-100 text-teal-700 text-xs">
+                          {count}
+                        </Badge>
+                      </div>
+                    ))}
                   </div>
                 </CardContent>
               </Card>

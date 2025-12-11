@@ -34,7 +34,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.7583,
     longitude: -116.4347,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=450&fit=crop',
+    imageUrl: 'https://i.ytimg.com/vi/pthJ1IQPqGE/maxresdefault.jpg',
   },
   {
     name: 'APP Fort Lauderdale Open',
@@ -60,7 +60,7 @@ const REAL_TOURNAMENTS = [
     latitude: 26.1223,
     longitude: -80.1434,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&h=450&fit=crop',
+    imageUrl: 'https://i.ytimg.com/vi/K2RcRe2aUUc/maxresdefault.jpg',
   },
   {
     name: 'PPA Southern California Open',
@@ -86,7 +86,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.7038,
     longitude: -117.9627,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=800&h=450&fit=crop',
+    imageUrl: 'https://media.istockphoto.com/id/1412985102/photo/top-down-aerial-view-of-doubles-pickleball-game.jpg?s=612x612&w=0&k=20&c=C9dA_XoJs_6CtwDXCRd3oQSSR2iC9fw6KLjQVF-yd9U=',
   },
   {
     name: 'APP Daytona Beach Open',
@@ -112,7 +112,7 @@ const REAL_TOURNAMENTS = [
     latitude: 29.2436,
     longitude: -81.0376,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?w=800&h=450&fit=crop',
+    imageUrl: 'https://www.clearspan.com/wp-content/uploads/2023/01/CS-TX-Dreamland13-1-scaled.jpg',
   },
   {
     name: 'PPA Tucson Open',
@@ -138,7 +138,7 @@ const REAL_TOURNAMENTS = [
     latitude: 32.2229,
     longitude: -110.9748,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&h=450&fit=crop',
+    imageUrl: 'https://thumbs.dreamstime.com/b/pickleball-paddles-balls-close-up-two-sport-game-equipment-327294697.jpg',
   },
   {
     name: 'PPA Carvana Mesa Cup',
@@ -164,7 +164,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.4152,
     longitude: -111.8315,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=450&fit=crop',
+    imageUrl: 'https://ppatour.com/wp-content/uploads/2023/12/Pro-Player-Profiles-1.webp',
   },
   {
     name: 'APP Sacramento Open',
@@ -190,7 +190,7 @@ const REAL_TOURNAMENTS = [
     latitude: 38.7521,
     longitude: -121.2880,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&h=450&fit=crop',
+    imageUrl: 'https://cdn.aarp.net/content/dam/aarp/health/healthy-living/2024/01/1140-woman-serve-pickleball.jpg',
   },
   {
     name: 'PPA Zimmer Biomet Texas Open',
@@ -216,7 +216,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.1976,
     longitude: -96.6154,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=800&h=450&fit=crop',
+    imageUrl: 'https://static01.nyt.com/images/2024/11/14/multimedia/06PICKLEBALL-CHAMPIONSHIP-01-vblc/06PICKLEBALL-CHAMPIONSHIP-01-vblc-videoSixteenByNineJumbo1600.jpg',
   },
   {
     name: 'PPA North Carolina Open',
@@ -242,7 +242,7 @@ const REAL_TOURNAMENTS = [
     latitude: 35.6513,
     longitude: -78.8336,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?w=800&h=450&fit=crop',
+    imageUrl: 'https://i.ytimg.com/vi/dFYyij4ykTI/maxresdefault.jpg',
   },
   {
     name: 'US Open Pickleball Championships',
@@ -268,7 +268,7 @@ const REAL_TOURNAMENTS = [
     latitude: 26.1422,
     longitude: -81.7943,
     status: 'UPCOMING',
-    imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&h=450&fit=crop',
+    imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/f/f7/Pickleball_Pros.jpg',
   },
   // Additional tournaments to fill out the calendar
   {
@@ -295,7 +295,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.4942,
     longitude: -111.9261,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=450&fit=crop',
+    imageUrl: 'https://media.istockphoto.com/id/577656562/photo/young-man-pickleball-player-playing-pickleball-in-court.jpg?s=612x612&w=0&k=20&c=nhPTJeroXI204Or30Z38eTFYY26XNv4ah1QDS4kDA4Y=',
   },
   {
     name: 'Las Vegas Invitational',
@@ -321,7 +321,7 @@ const REAL_TOURNAMENTS = [
     latitude: 36.0708,
     longitude: -115.1178,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&h=450&fit=crop',
+    imageUrl: 'https://cdn.aarp.net/content/dam/aarp/health/healthy-living/2024/01/1140-pickleball-doubles-meet.jpg',
   },
   {
     name: 'Georgia Peach Classic',
@@ -347,7 +347,7 @@ const REAL_TOURNAMENTS = [
     latitude: 33.9797,
     longitude: -84.3488,
     status: 'REGISTRATION_OPEN',
-    imageUrl: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=800&h=450&fit=crop',
+    imageUrl: 'https://holbrookpickleball.com/cdn/shop/articles/unveiling-utahs-top-3-pickleball-tournaments-in-2024-a-smash-hit-on-the-courts-361642.jpg?v=1706959195&width=2048',
   },
   {
     name: 'Pacific Northwest Championship',
@@ -373,7 +373,7 @@ const REAL_TOURNAMENTS = [
     latitude: 47.6319,
     longitude: -122.3081,
     status: 'UPCOMING',
-    imageUrl: 'https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?w=800&h=450&fit=crop',
+    imageUrl: 'https://img.freepik.com/premium-photo/aerial-view-outdoor-tennis-pickleball-courts_1314537-559.jpg',
   },
   {
     name: 'Colorado Mountain Open',
@@ -399,7 +399,7 @@ const REAL_TOURNAMENTS = [
     latitude: 39.7392,
     longitude: -104.9903,
     status: 'UPCOMING',
-    imageUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&h=450&fit=crop',
+    imageUrl: 'https://media.istockphoto.com/id/1472159975/photo/aerial-view-of-pickleball-courts.jpg?s=612x612&w=0&k=20&c=eCJ-4Rj7iNl53-idfcB5ZO8jvySLTK-723tiegvu82s=',
   },
 ]
 
