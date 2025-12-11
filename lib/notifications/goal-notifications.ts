@@ -68,7 +68,7 @@ export async function sendGoalConfirmation(userId: string, goalData: GoalData) {
     await sendEmail({
       to: user.email,
       subject: `🎯 Goal Set! Coach Kai is Here to Help`,
-      text: `Goal Set! Coach Kai is Here to Help - ${goal.title}`,
+      text: `Goal Set! Coach Kai is Here to Help - ${goalData.title}`,
       html: htmlContent
     })
 
