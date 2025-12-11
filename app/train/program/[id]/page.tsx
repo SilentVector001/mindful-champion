@@ -27,47 +27,101 @@ async function getProgram(programId: string) {
     if (!program) return null
     
     // Transform to match expected type
-    // Handle multiple possible formats for dailyStructure
-    let dailyStructure = []
+    // Handle multiple possible formats for dailyStructure with ROBUST error handling
+    let dailyStructure: any[] = []
     
     try {
       const structure = program.dailyStructure
       
-      // If it's already an array, use it
-      if (Array.isArray(structure)) {
+      if (!structure) {
+        console.warn(`Program ${program.name} (${program.id}): No dailyStructure data`)
+        dailyStructure = []
+      }
+      // Strategy 1: Already an array - use directly
+      else if (Array.isArray(structure)) {
         dailyStructure = structure
-      } 
-      // If it's an object with a 'days' property, extract it
-      else if (structure && typeof structure === 'object') {
-        if ('days' in structure && Array.isArray((structure as any).days)) {
-          dailyStructure = (structure as any).days
-        }
-        // If it's an object with numeric keys (day 1, day 2, etc), convert to array
-        else if (Object.keys(structure).length > 0) {
-          const keys = Object.keys(structure).sort()
-          dailyStructure = keys.map(key => (structure as any)[key])
+        console.log(`✅ Program ${program.name}: Loaded ${dailyStructure.length} days (array format)`)
+      }
+      // Strategy 2: Object with 'days' property
+      else if (structure && typeof structure === 'object' && 'days' in structure) {
+        const daysData = (structure as any).days
+        if (Array.isArray(daysData)) {
+          dailyStructure = daysData
+          console.log(`✅ Program ${program.name}: Loaded ${dailyStructure.length} days (object.days format)`)
+        } else {
+          console.error(`❌ Program ${program.name}: 'days' property exists but is not an array`)
         }
       }
-      // If it's a string (shouldn't happen with Prisma, but just in case), parse it
+      // Strategy 3: Object with numeric keys (e.g., {"1": {day: 1, ...}, "2": {day: 2, ...}})
+      else if (structure && typeof structure === 'object') {
+        const keys = Object.keys(structure)
+        // Check if keys look like day numbers (1, 2, 3, etc)
+        const dayNumbers = keys.map(k => parseInt(k)).filter(n => !isNaN(n) && n > 0)
+        
+        if (dayNumbers.length > 0) {
+          // Sort and extract
+          const sorted = dayNumbers.sort((a, b) => a - b)
+          dailyStructure = sorted.map(day => (structure as any)[day.toString()])
+          console.log(`✅ Program ${program.name}: Loaded ${dailyStructure.length} days (numeric keys format)`)
+        } else {
+          console.error(`❌ Program ${program.name}: Object structure but no numeric keys found`)
+          console.error(`Available keys:`, keys.slice(0, 5))
+        }
+      }
+      // Strategy 4: String (JSON) - parse it
       else if (typeof structure === 'string') {
-        const parsed = JSON.parse(structure)
-        if (Array.isArray(parsed)) {
-          dailyStructure = parsed
-        } else if (parsed.days && Array.isArray(parsed.days)) {
-          dailyStructure = parsed.days
+        try {
+          const parsed = JSON.parse(structure)
+          if (Array.isArray(parsed)) {
+            dailyStructure = parsed
+            console.log(`✅ Program ${program.name}: Loaded ${dailyStructure.length} days (JSON string array)`)
+          } else if (parsed.days && Array.isArray(parsed.days)) {
+            dailyStructure = parsed.days
+            console.log(`✅ Program ${program.name}: Loaded ${dailyStructure.length} days (JSON string object.days)`)
+          } else {
+            console.error(`❌ Program ${program.name}: JSON string parsed but unexpected format`)
+          }
+        } catch (jsonError) {
+          console.error(`❌ Program ${program.name}: Failed to parse JSON string:`, jsonError)
+        }
+      }
+      else {
+        console.error(`❌ Program ${program.name}: Unknown dailyStructure format - type: ${typeof structure}`)
+      }
+      
+      // Final validation - ensure each day has required fields
+      if (dailyStructure.length > 0) {
+        const validDays = dailyStructure.filter((day: any) => 
+          day && typeof day === 'object' && 'day' in day && 'title' in day
+        )
+        if (validDays.length !== dailyStructure.length) {
+          console.warn(`⚠️ Program ${program.name}: ${dailyStructure.length - validDays.length} invalid day entries removed`)
+          dailyStructure = validDays
         }
       }
       
-      console.log(`Program ${program.name}: Loaded ${dailyStructure.length} days from dailyStructure`)
     } catch (parseError) {
-      console.error('Error parsing dailyStructure for program:', program.id, parseError)
-      // Return empty array on parse error
+      console.error(`❌ CRITICAL: Error parsing dailyStructure for program ${program.id}:`, parseError)
+      console.error('Program data:', {
+        id: program.id,
+        name: program.name,
+        structureType: typeof program.dailyStructure,
+        structureSample: JSON.stringify(program.dailyStructure).substring(0, 200)
+      })
       dailyStructure = []
+    }
+    
+    // If we still have no data, log a final warning
+    if (dailyStructure.length === 0) {
+      console.error(`🚨 FINAL WARNING: Program ${program.name} (${program.id}) has NO valid dailyStructure data`)
     }
     
     return {
       ...program,
-      dailyStructure
+      dailyStructure,
+      // Add metadata for debugging
+      _parsedDaysCount: dailyStructure.length,
+      _originalStructureType: typeof program.dailyStructure
     }
   } catch (error) {
     console.error('Error fetching program:', error)
