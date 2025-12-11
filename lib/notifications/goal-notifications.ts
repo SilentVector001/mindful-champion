@@ -66,11 +66,10 @@ export async function sendGoalConfirmation(userId: string, goalData: GoalData) {
 
     // Send email via Resend
     await sendEmail({
-      from: 'Coach Kai <coach@resend.dev>',
       to: user.email,
       subject: `🎯 Goal Set! Coach Kai is Here to Help`,
-      html: htmlContent,
-      replyTo: 'support@resend.dev'
+      text: `Goal Set! Coach Kai is Here to Help - ${goal.title}`,
+      html: htmlContent
     })
 
     console.log(`Goal confirmation email sent to ${user.email}`)
@@ -207,11 +206,10 @@ export async function sendDailyGoalProgressEmail(
 
     // Send email
     await sendEmail({
-      from: 'Coach Kai <coach@resend.dev>',
       to: user.email,
       subject: `🌟 Daily Check-in: ${goal.title}`,
-      html: htmlContent,
-      replyTo: 'support@resend.dev'
+      text: `Daily Check-in: ${goal.title}`,
+      html: htmlContent
     })
 
     console.log(`Daily progress email sent for goal ${goalId}`)
@@ -254,11 +252,10 @@ export async function sendMilestoneAchievedEmail(
     })
 
     await sendEmail({
-      from: 'Coach Kai <coach@resend.dev>',
       to: user.email,
       subject: `🏆 Milestone Reached: ${milestoneTitle}`,
-      html: htmlContent,
-      replyTo: 'support.reai.io'
+      text: `Milestone Reached: ${milestoneTitle}`,
+      html: htmlContent
     })
 
     console.log(`Milestone achievement email sent for ${milestoneTitle}`)
