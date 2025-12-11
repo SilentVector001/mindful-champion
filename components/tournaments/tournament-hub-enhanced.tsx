@@ -555,9 +555,9 @@ export function TournamentHubEnhanced() {
 
           {/* Right Column - Stats & Activity Feed (Clean, Non-Overlapping) */}
           <div className="lg:col-span-1">
-            <div className="flex flex-col gap-4">
+            <div className="flex flex-col gap-6 lg:sticky lg:top-6 lg:self-start">
               {/* Quick Stats - Always at Top */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <Card className="border-slate-200 bg-gradient-to-br from-teal-50 to-white">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2">
@@ -621,7 +621,7 @@ export function TournamentHubEnhanced() {
               </Card>
 
               {/* Live Activity Feed */}
-              <Card className="border-2 border-orange-200 shadow-lg">
+              <Card className="border-2 border-orange-200 shadow-lg overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-orange-500 to-pink-500 py-3">
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Activity className="w-5 h-5" />
@@ -633,7 +633,7 @@ export function TournamentHubEnhanced() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <ScrollArea className="h-[250px]">
+                  <ScrollArea className="h-[280px]">
                     <div className="divide-y divide-slate-100">
                       {liveActivities.map((activity, idx) => (
                         <motion.div
@@ -666,14 +666,14 @@ export function TournamentHubEnhanced() {
               </Card>
 
               {/* Hot Tournaments */}
-              <Card className="border-2 border-red-200 shadow-lg">
+              <Card className="border-2 border-red-200 shadow-lg overflow-hidden">
                 <CardHeader className="bg-gradient-to-r from-red-500 to-orange-500 py-3">
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Flame className="w-5 h-5" />
                     Trending Now
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="p-3 space-y-2">
+                <CardContent className="p-4 space-y-3">
                   {allTournaments.slice(0, 3).map((t, idx) => (
                     <div 
                       key={t.id}

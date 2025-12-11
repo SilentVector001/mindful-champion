@@ -57,6 +57,112 @@ interface Video {
   verified?: boolean;
 }
 
+// Sample videos to display when database is empty
+const SAMPLE_VIDEOS: Video[] = [
+  {
+    id: 'sample-1',
+    videoId: 'demo-1',
+    title: 'Mastering the Third Shot Drop - Essential Pickleball Technique',
+    url: 'https://www.youtube.com/watch?v=sample1',
+    channel: 'Pickleball Mastery',
+    duration: '12:34',
+    description: 'Learn the fundamentals of the third shot drop, one of the most important shots in pickleball. Perfect for intermediate players looking to improve their soft game.',
+    skillLevel: 'INTERMEDIATE',
+    primaryTopic: 'Third Shot Drop',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=450&fit=crop',
+    avgRating: 4.8,
+    ratingCount: 245,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+  {
+    id: 'sample-2',
+    videoId: 'demo-2',
+    title: 'Dinking Strategy: How to Win More Points at the Kitchen',
+    url: 'https://www.youtube.com/watch?v=sample2',
+    channel: 'Pro Pickleball Tips',
+    duration: '15:22',
+    description: 'Master the art of dinking with professional strategies. Learn patience, positioning, and how to create opportunities at the non-volley zone.',
+    skillLevel: 'ADVANCED',
+    primaryTopic: 'Dinking',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&h=450&fit=crop',
+    avgRating: 4.9,
+    ratingCount: 312,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+  {
+    id: 'sample-3',
+    videoId: 'demo-3',
+    title: 'Pickleball Serve Fundamentals for Beginners',
+    url: 'https://www.youtube.com/watch?v=sample3',
+    channel: 'Pickleball Basics',
+    duration: '10:15',
+    description: 'Start your pickleball journey right with proper serve technique. This video covers the basics of the underhand serve, grip, stance, and follow-through.',
+    skillLevel: 'BEGINNER',
+    primaryTopic: 'Serves',
+    thumbnailUrl: 'https://i.ytimg.com/vi/fThStvI53oA/hqdefault.jpg',
+    avgRating: 4.7,
+    ratingCount: 189,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+  {
+    id: 'sample-4',
+    videoId: 'demo-4',
+    title: 'Advanced Volley Techniques with Ben Johns',
+    url: 'https://www.youtube.com/watch?v=sample4',
+    channel: 'Pickleball Pro',
+    duration: '18:45',
+    description: 'Learn advanced volleying techniques from pro player Ben Johns. Covers punch volleys, swing volleys, and net positioning for aggressive play.',
+    skillLevel: 'ADVANCED',
+    primaryTopic: 'Volleys',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=800&h=450&fit=crop',
+    avgRating: 5.0,
+    ratingCount: 428,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+  {
+    id: 'sample-5',
+    videoId: 'demo-5',
+    title: 'Footwork Drills to Improve Your Pickleball Game',
+    url: 'https://www.youtube.com/watch?v=sample5',
+    channel: 'Pickleball Fitness',
+    duration: '14:20',
+    description: 'Essential footwork drills that will transform your court coverage. Learn proper split step timing, lateral movement, and transition zone footwork.',
+    skillLevel: 'INTERMEDIATE',
+    primaryTopic: 'Footwork',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1594911772125-07fc7a2d8d9f?w=800&h=450&fit=crop',
+    avgRating: 4.6,
+    ratingCount: 156,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+  {
+    id: 'sample-6',
+    videoId: 'demo-6',
+    title: 'Return of Serve: Strategy and Execution',
+    url: 'https://www.youtube.com/watch?v=sample6',
+    channel: 'Pickleball Strategy',
+    duration: '11:30',
+    description: 'Master the return of serve with proven strategies. Learn deep returns, angled returns, and how to set up your third shot.',
+    skillLevel: 'INTERMEDIATE',
+    primaryTopic: 'Return of Serve',
+    thumbnailUrl: 'https://images.unsplash.com/photo-1617137968427-85924c800a22?w=800&h=450&fit=crop',
+    avgRating: 4.8,
+    ratingCount: 203,
+    userVideoProgress: [],
+    ratings: [],
+    verified: true,
+  },
+];
+
 export default function TrainingLibrary() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,7 +187,25 @@ export default function TrainingLibrary() {
 
       const response = await fetch(`/api/video-library/videos?${params}`);
       const data = await response.json();
-      setVideos(data.videos || []);
+      
+      // Use sample videos if database is empty
+      const fetchedVideos = data.videos || [];
+      let videosToUse = fetchedVideos.length > 0 ? fetchedVideos : SAMPLE_VIDEOS;
+      
+      // Apply filters to sample videos if using them
+      if (fetchedVideos.length === 0) {
+        videosToUse = SAMPLE_VIDEOS.filter(video => {
+          const matchesSkillLevel = skillLevel === 'ALL' || video.skillLevel === skillLevel;
+          const matchesTopic = topic === 'ALL' || video.primaryTopic === topic;
+          const matchesSearch = !search || 
+            video.title.toLowerCase().includes(search.toLowerCase()) ||
+            video.description.toLowerCase().includes(search.toLowerCase()) ||
+            video.channel.toLowerCase().includes(search.toLowerCase());
+          return matchesSkillLevel && matchesTopic && matchesSearch;
+        });
+      }
+      
+      setVideos(videosToUse);
       setFilteredCount(data.filtered || 0);
       
       if (data.filtered > 0) {
@@ -90,6 +214,20 @@ export default function TrainingLibrary() {
     } catch (error) {
       console.error('Error fetching videos:', error);
       toast.error('Failed to load videos');
+      // Use sample videos on error (with filters applied)
+      let filteredSamples = SAMPLE_VIDEOS;
+      if (skillLevel !== 'ALL' || topic !== 'ALL' || search) {
+        filteredSamples = SAMPLE_VIDEOS.filter(video => {
+          const matchesSkillLevel = skillLevel === 'ALL' || video.skillLevel === skillLevel;
+          const matchesTopic = topic === 'ALL' || video.primaryTopic === topic;
+          const matchesSearch = !search || 
+            video.title.toLowerCase().includes(search.toLowerCase()) ||
+            video.description.toLowerCase().includes(search.toLowerCase()) ||
+            video.channel.toLowerCase().includes(search.toLowerCase());
+          return matchesSkillLevel && matchesTopic && matchesSearch;
+        });
+      }
+      setVideos(filteredSamples);
     } finally {
       setLoading(false);
     }
