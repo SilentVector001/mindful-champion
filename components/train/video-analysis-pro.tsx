@@ -43,6 +43,7 @@ import { useDropzone } from "react-dropzone"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
 import Image from "next/image"
+import { toast } from "sonner"
 
 interface AnalysisResult {
   strengths?: string[]
@@ -93,19 +94,19 @@ export default function VideoAnalysisPro() {
     setUploadProgress(0)
 
     try {
+      const formData = new FormData()
+      formData.append("file", selectedFile)
+
       // Simulate upload progress
       const uploadInterval = setInterval(() => {
         setUploadProgress((prev) => {
-          if (prev >= 100) {
+          if (prev >= 95) {
             clearInterval(uploadInterval)
-            return 100
+            return 95
           }
           return prev + 10
         })
       }, 200)
-
-      const formData = new FormData()
-      formData.append("video", selectedFile)
 
       const uploadResponse = await fetch("/api/analyze-video", {
         method: "POST",
@@ -119,36 +120,90 @@ export default function VideoAnalysisPro() {
         throw new Error("Upload failed")
       }
 
+      // Upload complete - show success
+      toast.success("Video uploaded successfully!", {
+        description: "Starting AI analysis...",
+        duration: 3000
+      })
+      
       setUploading(false)
       setAnalyzing(true)
       setAnalysisProgress(0)
 
-      // Simulate analysis progress
-      const analysisInterval = setInterval(() => {
-        setAnalysisProgress((prev) => {
-          if (prev >= 100) {
-            clearInterval(analysisInterval)
-            return 100
+      // Handle streaming response
+      const reader = uploadResponse.body?.getReader()
+      const decoder = new TextDecoder()
+
+      if (!reader) {
+        throw new Error("Failed to read response")
+      }
+
+      let buffer = ''
+      let finalResult: any = null
+
+      while (true) {
+        const { done, value } = await reader.read()
+        
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+        const lines = buffer.split('\n\n')
+        buffer = lines.pop() || ''
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            
+            if (data === '[DONE]') {
+              continue
+            }
+
+            try {
+              const parsed = JSON.parse(data)
+              
+              if (parsed.status === 'processing') {
+                // Update progress based on stage
+                setAnalysisProgress((prev) => Math.min(prev + 15, 90))
+              } else if (parsed.status === 'completed') {
+                setAnalysisProgress(100)
+                finalResult = parsed.result
+              }
+            } catch (e) {
+              console.error('Failed to parse SSE data:', e)
+            }
           }
-          return prev + 5
+        }
+      }
+
+      // Show success and results
+      if (finalResult) {
+        toast.success("Analysis Complete!", {
+          description: "Your personalized insights are ready to view.",
+          duration: 4000
         })
-      }, 300)
-
-      const result = await uploadResponse.json()
-
-      clearInterval(analysisInterval)
-      setAnalysisProgress(100)
-      
-      setTimeout(() => {
-        setAnalysisResult(result)
-        setAnalyzing(false)
-      }, 500)
+        
+        setTimeout(() => {
+          setAnalysisResult(finalResult)
+          setAnalyzing(false)
+        }, 500)
+      } else {
+        throw new Error("No analysis result received")
+      }
 
     } catch (err) {
       console.error("Analysis error:", err)
-      setError("Failed to analyze video. Please try again.")
+      const errorMessage = "Failed to analyze video. Please try again."
+      setError(errorMessage)
+      
+      toast.error("Upload Failed", {
+        description: errorMessage,
+        duration: 5000
+      })
+      
       setUploading(false)
       setAnalyzing(false)
+      setUploadProgress(0)
+      setAnalysisProgress(0)
     }
   }
 
@@ -166,11 +221,168 @@ export default function VideoAnalysisPro() {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-champion-green/5 dark:from-champion-charcoal dark:via-gray-900 dark:to-champion-green/5">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-          {/* Results view - will be implemented in next section */}
-          <div className="text-center py-20">
-            <CheckCircle2 className="w-16 h-16 text-champion-green mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-4">Analysis Complete!</h2>
-            <Button onClick={handleReset}>Analyze Another Video</Button>
+          {/* Success Header */}
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-champion-green/10 rounded-full mb-4">
+              <CheckCircle2 className="w-12 h-12 text-champion-green" />
+            </div>
+            <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+              Analysis Complete!
+            </h1>
+            <p className="text-lg text-gray-600 dark:text-gray-400 mb-6">
+              Your personalized insights are ready
+            </p>
+            <Button 
+              onClick={handleReset}
+              size="lg"
+              variant="outline"
+              className="mb-8"
+            >
+              <Upload className="w-4 h-4 mr-2" />
+              Analyze Another Video
+            </Button>
+          </div>
+
+          {/* Results Grid */}
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Strengths */}
+            {analysisResult.strengths && analysisResult.strengths.length > 0 && (
+              <Card className="border-champion-green/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-champion-green">
+                    <Trophy className="w-5 h-5" />
+                    Your Strengths
+                  </CardTitle>
+                  <CardDescription>
+                    What you're doing well
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {analysisResult.strengths.map((strength: string, index: number) => (
+                      <li key={index} className="flex gap-3 text-sm">
+                        <CheckCircle2 className="w-5 h-5 text-champion-green flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 dark:text-gray-300">{strength}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Areas for Improvement */}
+            {analysisResult.areasForImprovement && analysisResult.areasForImprovement.length > 0 && (
+              <Card className="border-champion-gold/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-champion-gold">
+                    <Target className="w-5 h-5" />
+                    Areas for Growth
+                  </CardTitle>
+                  <CardDescription>
+                    Opportunities to elevate your game
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {analysisResult.areasForImprovement.map((area: string, index: number) => (
+                      <li key={index} className="flex gap-3 text-sm">
+                        <Zap className="w-5 h-5 text-champion-gold flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 dark:text-gray-300">{area}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Recommendations */}
+            {analysisResult.recommendations && analysisResult.recommendations.length > 0 && (
+              <Card className="border-champion-blue/20 lg:col-span-2">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2 text-champion-blue">
+                    <Lightbulb className="w-5 h-5" />
+                    Personalized Recommendations
+                  </CardTitle>
+                  <CardDescription>
+                    Your action plan to improve
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-3">
+                    {analysisResult.recommendations.map((rec: string, index: number) => (
+                      <li key={index} className="flex gap-3 text-sm">
+                        <Sparkles className="w-5 h-5 text-champion-blue flex-shrink-0 mt-0.5" />
+                        <span className="text-gray-700 dark:text-gray-300">{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Shot Types (Pro feature) */}
+            {analysisResult.shotTypes && analysisResult.shotTypes.length > 0 && (
+              <Card className="border-champion-green/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-champion-green" />
+                    Shot Analysis
+                  </CardTitle>
+                  <CardDescription>
+                    Breakdown by shot type
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {analysisResult.shotTypes.map((shot: any, index: number) => (
+                      <div key={index} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {shot.type}
+                          </span>
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {shot.count} shots • {shot.accuracy}% accuracy
+                          </span>
+                        </div>
+                        <Progress value={shot.accuracy} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Movement Analysis (Premium feature) */}
+            {analysisResult.movementAnalysis && (
+              <Card className="border-champion-gold/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Activity className="w-5 h-5 text-champion-gold" />
+                    Movement Metrics
+                  </CardTitle>
+                  <CardDescription>
+                    Court positioning and footwork
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {Object.entries(analysisResult.movementAnalysis).map(([key, value]: [string, any]) => (
+                      <div key={key} className="space-y-1">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="font-medium text-gray-900 dark:text-white capitalize">
+                            {key.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                          <span className="text-champion-gold font-semibold">
+                            {value}/10
+                          </span>
+                        </div>
+                        <Progress value={value * 10} className="h-2" />
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>
