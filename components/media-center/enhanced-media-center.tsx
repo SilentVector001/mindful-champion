@@ -25,7 +25,8 @@ import {
   TrendingUp,
   Library,
   Video,
-  AlertCircle
+  AlertCircle,
+  CircleDot
 } from 'lucide-react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -226,8 +227,9 @@ export function EnhancedMediaCenter() {
                     </Badge>
                   )}
                 </h1>
-                <p className="text-purple-200 text-lg font-medium">
-                  🎾 Your ultimate pickleball content destination
+                <p className="text-purple-200 text-lg font-medium flex items-center gap-2">
+                  <CircleDot className="w-5 h-5" />
+                  Your ultimate pickleball content destination
                 </p>
               </div>
             </div>

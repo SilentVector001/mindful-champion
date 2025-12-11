@@ -37,6 +37,7 @@ import {
   RefreshCw,
   Bell,
   X,
+  CircleDot,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import Link from 'next/link';
@@ -396,8 +397,9 @@ export function UnifiedMediaHub() {
                     </Badge>
                   )}
                 </h1>
-                <p className="text-slate-400 text-lg font-medium mt-1">
-                  🎾 Your ultimate pickleball content destination
+                <p className="text-slate-400 text-lg font-medium mt-1 flex items-center gap-2">
+                  <CircleDot className="w-5 h-5" />
+                  Your ultimate pickleball content destination
                 </p>
               </div>
             </div>

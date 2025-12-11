@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { 
   Search, ChevronLeft, ChevronRight, Users, Mail, Calendar, ExternalLink,
   Filter, Download, RefreshCw, Activity, Clock, TrendingUp, Crown, Sparkles,
-  UserCheck, UserX, AlertTriangle
+  UserCheck, UserX, AlertTriangle, CircleDot
 } from "lucide-react"
 import { format, formatDistanceToNow } from "date-fns"
 import UserDetailPanel from "@/components/admin/user-detail-panel"
@@ -491,7 +491,8 @@ export default function EnhancedUsersSection() {
                                   {user.loginCount || 0} logins
                                 </span>
                                 <span className="flex items-center gap-1" title="Matches">
-                                  🎾 {user._count?.matches || 0}
+                                  <CircleDot className="w-3 h-3" />
+                                  {user._count?.matches || 0}
                                 </span>
                               </div>
                             </td>
