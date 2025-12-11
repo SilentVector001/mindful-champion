@@ -27,12 +27,42 @@ async function getProgram(programId: string) {
     if (!program) return null
     
     // Transform to match expected type
-    // Handle both array format and object with days property
+    // Handle multiple possible formats for dailyStructure
     let dailyStructure = []
-    if (Array.isArray(program.dailyStructure)) {
-      dailyStructure = program.dailyStructure
-    } else if (program.dailyStructure && typeof program.dailyStructure === 'object' && 'days' in program.dailyStructure) {
-      dailyStructure = (program.dailyStructure as any).days || []
+    
+    try {
+      const structure = program.dailyStructure
+      
+      // If it's already an array, use it
+      if (Array.isArray(structure)) {
+        dailyStructure = structure
+      } 
+      // If it's an object with a 'days' property, extract it
+      else if (structure && typeof structure === 'object') {
+        if ('days' in structure && Array.isArray((structure as any).days)) {
+          dailyStructure = (structure as any).days
+        }
+        // If it's an object with numeric keys (day 1, day 2, etc), convert to array
+        else if (Object.keys(structure).length > 0) {
+          const keys = Object.keys(structure).sort()
+          dailyStructure = keys.map(key => (structure as any)[key])
+        }
+      }
+      // If it's a string (shouldn't happen with Prisma, but just in case), parse it
+      else if (typeof structure === 'string') {
+        const parsed = JSON.parse(structure)
+        if (Array.isArray(parsed)) {
+          dailyStructure = parsed
+        } else if (parsed.days && Array.isArray(parsed.days)) {
+          dailyStructure = parsed.days
+        }
+      }
+      
+      console.log(`Program ${program.name}: Loaded ${dailyStructure.length} days from dailyStructure`)
+    } catch (parseError) {
+      console.error('Error parsing dailyStructure for program:', program.id, parseError)
+      // Return empty array on parse error
+      dailyStructure = []
     }
     
     return {

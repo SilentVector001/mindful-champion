@@ -136,41 +136,62 @@ export default function PremiumProgramViewer({
   const [loadingAI, setLoadingAI] = useState(false)
 
   // Ensure dailyStructure is always an array
-  // Handle both array format and object with days property
+  // Handle multiple possible formats
   const dailySchedule: DayStructure[] = (() => {
     try {
+      const structure = program.dailyStructure
+      
       // If it's already an array, use it
-      if (Array.isArray(program.dailyStructure)) {
-        return program.dailyStructure as DayStructure[]
+      if (Array.isArray(structure)) {
+        console.log(`✅ Parsed ${structure.length} days from array format`)
+        return structure as DayStructure[]
       }
       
       // If it's an object with a 'days' property
-      if (
-        program.dailyStructure && 
-        typeof program.dailyStructure === 'object' && 
-        'days' in program.dailyStructure
-      ) {
-        const daysData = (program.dailyStructure as any).days
-        if (Array.isArray(daysData)) {
+      if (structure && typeof structure === 'object') {
+        if ('days' in structure && Array.isArray((structure as any).days)) {
+          const daysData = (structure as any).days
+          console.log(`✅ Parsed ${daysData.length} days from object.days format`)
           return daysData as DayStructure[]
+        }
+        
+        // If it's an object with numeric keys, convert to array
+        const keys = Object.keys(structure)
+        if (keys.length > 0) {
+          // Check if keys look like day numbers
+          const dayNumbers = keys.map(k => parseInt(k)).filter(n => !isNaN(n))
+          if (dayNumbers.length > 0) {
+            const sorted = dayNumbers.sort((a, b) => a - b)
+            const daysArray = sorted.map(day => (structure as any)[day.toString()])
+            console.log(`✅ Parsed ${daysArray.length} days from object with numeric keys`)
+            return daysArray as DayStructure[]
+          }
         }
       }
       
       // If it's a string (JSON), parse it
-      if (typeof program.dailyStructure === 'string') {
-        const parsed = JSON.parse(program.dailyStructure)
+      if (typeof structure === 'string') {
+        const parsed = JSON.parse(structure)
         if (Array.isArray(parsed)) {
+          console.log(`✅ Parsed ${parsed.length} days from JSON string (array)`)
           return parsed as DayStructure[]
         }
         if (parsed.days && Array.isArray(parsed.days)) {
+          console.log(`✅ Parsed ${parsed.days.length} days from JSON string (object.days)`)
           return parsed.days as DayStructure[]
         }
       }
       
-      console.error('Unable to parse dailyStructure:', program.dailyStructure)
+      console.error('❌ Unable to parse dailyStructure:', {
+        type: typeof structure,
+        isArray: Array.isArray(structure),
+        keys: structure && typeof structure === 'object' ? Object.keys(structure) : 'N/A',
+        sample: JSON.stringify(structure).substring(0, 200)
+      })
       return []
     } catch (error) {
-      console.error('Error parsing dailySchedule:', error)
+      console.error('❌ Error parsing dailySchedule:', error)
+      console.error('Program data:', program.id, program.name)
       return []
     }
   })()
