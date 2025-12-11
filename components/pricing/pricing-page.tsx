@@ -51,7 +51,7 @@ const tiers = [
     name: "Premium",
     description: "Ideal for dedicated players seeking improvement",
     monthlyPrice: 29,
-    annualPrice: 299,
+    annualPrice: 191,
     priceId: "price_1SKk9Z3ZJvYimaqqDm90FY5e",
     icon: Zap,
     gradient: "from-teal-500 to-orange-500",
@@ -69,13 +69,13 @@ const tiers = [
       "Coach booking system",
       "Full training library access",
     ],
-    savings: 49
+    savings: 157
   },
   {
     name: "Pro",
     description: "For competitive players who demand excellence",
     monthlyPrice: 49,
-    annualPrice: 499,
+    annualPrice: 323,
     priceId: "price_1SKk9Z3ZJvYimaqqfqqeKzkm",
     icon: Crown,
     gradient: "from-purple-500 to-pink-500",
@@ -92,7 +92,7 @@ const tiers = [
       "1-on-1 monthly coach consultation",
       "Priority customer support",
     ],
-    savings: 89
+    savings: 265
   }
 ]
 
@@ -237,7 +237,7 @@ export default function PricingPage() {
               </span>
               {isAnnual && (
                 <Badge variant="secondary" className="bg-green-100 text-green-800">
-                  Save $10.88
+                  Save 45% 🎉
                 </Badge>
               )}
             </div>
