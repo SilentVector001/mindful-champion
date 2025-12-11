@@ -18,9 +18,3 @@ out
 .deploy
 .logs
 *.tsbuildinfo
-core
-.env.local
-.env.local.backup
-.env
-nextjs_space
-yarn.lock

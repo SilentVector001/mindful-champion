@@ -49,7 +49,8 @@ import {
   RefreshCw,
   Activity,
   Target,
-  Award
+  Award,
+  Mic
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -727,43 +728,361 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
 
 // Sub-components for each tab
 function LiveStreamsContent({ liveData }: { liveData: any }) {
+  // Mock live stream data - 2 live tournament streams
+  const liveStreams = [
+    {
+      id: 'live-1',
+      title: 'PPA Tour Championship - Championship Court',
+      tournament: 'PPA Tour Championship Finals',
+      court: 'Championship Court',
+      match: 'Ben Johns vs Tyson McGuffin',
+      score: '11-9, 8-11, 7-5',
+      status: 'Game 3 - Live',
+      viewers: 12453,
+      thumbnail: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
+      streamUrl: 'https://www.ppatour.com/watch',
+      isLive: true
+    },
+    {
+      id: 'live-2',
+      title: 'MLP Miami - Court 2',
+      tournament: 'Major League Pickleball Miami Slam',
+      court: 'Center Court',
+      match: 'Anna Leigh Waters vs Catherine Parenteau',
+      score: '11-7, 9-11, 5-3',
+      status: 'Game 3 - Live',
+      viewers: 8721,
+      thumbnail: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
+      streamUrl: 'https://www.majorleaguepickleball.net',
+      isLive: true
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Radio className="w-5 h-5 text-red-500" />
-            Live Streams
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {liveData.liveStreams > 0 ? (
-            <p>Currently streaming {liveData.liveStreams} events</p>
-          ) : (
-            <div className="text-center py-12">
-              <Radio className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">No Live Streams Right Now</h3>
-              <p className="text-slate-500">Check back during tournament hours for live coverage</p>
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-red-100 rounded-xl">
+            <Radio className="w-6 h-6 text-red-600" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Live Streams</h2>
+            <p className="text-slate-500">Watch professional matches in real-time</p>
+          </div>
+        </div>
+        <Badge className="bg-red-500 text-white px-4 py-2">
+          <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse inline-block"></span>
+          {liveStreams.length} LIVE
+        </Badge>
+      </motion.div>
+
+      {/* Live Stream Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {liveStreams.map((stream, idx) => (
+          <motion.div
+            key={stream.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            className="group"
+          >
+            <Card className="overflow-hidden border-2 border-red-500/20 hover:border-red-500 transition-all shadow-lg hover:shadow-2xl hover:shadow-red-500/20">
+              {/* Live Indicator Bar */}
+              <div className="h-1 bg-gradient-to-r from-red-500 via-orange-500 to-red-500 animate-pulse"></div>
+              
+              {/* Thumbnail */}
+              <div className="relative aspect-video bg-slate-900">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center"
+                  style={{ 
+                    backgroundImage: `url(${stream.thumbnail})`,
+                    filter: 'brightness(0.7)'
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+                
+                {/* Live Badge */}
+                <Badge className="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 shadow-lg">
+                  <span className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse inline-block"></span>
+                  LIVE
+                </Badge>
+                
+                {/* Viewer Count */}
+                <div className="absolute top-3 right-3 bg-black/70 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  {stream.viewers.toLocaleString()}
+                </div>
+                
+                {/* Play Button Overlay */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="w-20 h-20 bg-white/90 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                    <Play className="w-10 h-10 text-red-600 ml-1" />
+                  </div>
+                </div>
+              </div>
+              
+              <CardContent className="p-5">
+                {/* Tournament Name */}
+                <div className="flex items-center gap-2 mb-2">
+                  <Trophy className="w-4 h-4 text-teal-600" />
+                  <span className="text-sm font-medium text-teal-600">{stream.tournament}</span>
+                </div>
+                
+                {/* Stream Title */}
+                <h3 className="text-lg font-bold text-slate-800 mb-3 group-hover:text-teal-600 transition-colors">
+                  {stream.title}
+                </h3>
+                
+                {/* Match Info */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-slate-600 font-medium">{stream.match}</span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-2xl font-bold text-slate-800">{stream.score}</span>
+                    <Badge className="bg-emerald-500 text-white">
+                      {stream.status}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-500">
+                    <MapPin className="w-4 h-4" />
+                    {stream.court}
+                  </div>
+                </div>
+                
+                {/* Watch Button */}
+                <Button 
+                  className="w-full bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-600 hover:to-orange-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all"
+                  onClick={() => {
+                    const link = document.createElement('a');
+                    link.href = stream.streamUrl;
+                    link.target = '_blank';
+                    link.rel = 'noopener noreferrer';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                  }}
+                >
+                  <Play className="w-5 h-5 mr-2" />
+                  Watch Live Stream
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* No Live Streams State (shown when liveStreams array is empty) */}
+      {liveStreams.length === 0 && (
+        <Card className="bg-gradient-to-br from-slate-50 to-white">
+          <CardContent className="text-center py-16">
+            <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Radio className="w-10 h-10 text-slate-400" />
             </div>
-          )}
-        </CardContent>
-      </Card>
+            <h3 className="text-xl font-bold text-slate-700 mb-2">No Live Streams Right Now</h3>
+            <p className="text-slate-500 mb-6">Check back during tournament hours for live coverage</p>
+            <Button variant="outline" className="rounded-full">
+              <Calendar className="w-4 h-4 mr-2" />
+              View Upcoming Events
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
 
 function HighlightsContent() {
+  // Real YouTube pickleball highlight videos
+  const highlightVideos = [
+    {
+      videoId: 'mIzddYkHV6Q',
+      title: 'World #1 Ben Johns Teaches SECRET to Pickleball\'s 3rd and 5th Shots!',
+      thumbnail: 'https://i.ytimg.com/vi/mIzddYkHV6Q/maxresdefault.jpg',
+      duration: '8:45',
+      views: '125K',
+      channel: 'Josh J Pickleball',
+      type: 'Tutorial'
+    },
+    {
+      videoId: 'yCl5bnm1tes',
+      title: 'The Masters - Ben Johns vs. Zane Navratil - Round of 16 Match Highlights',
+      thumbnail: 'https://i.ytimg.com/vi/yCl5bnm1tes/maxresdefault.jpg',
+      duration: '10:30',
+      views: '89K',
+      channel: 'Pickleball Highlights',
+      type: 'Match Highlight'
+    },
+    {
+      videoId: '053RBKEHn0k',
+      title: 'Ben Johns 2022 Arizona Grand Slam - Full Championship Sunday Highlights',
+      thumbnail: 'https://i.ytimg.com/vi/053RBKEHn0k/maxresdefault.jpg',
+      duration: '15:20',
+      views: '210K',
+      channel: 'Ben Johns',
+      type: 'Championship'
+    },
+    {
+      videoId: 'eN2i2Ub0eWw',
+      title: 'Johns/Johns v Duong/Klinger at the Lapiplasty Pickleball World Championships',
+      thumbnail: 'https://i.ytimg.com/vi/eN2i2Ub0eWw/sddefault.jpg',
+      duration: '10:30',
+      views: '156K',
+      channel: 'PPA Tour',
+      type: 'Match Highlight'
+    },
+    {
+      videoId: '7ZMCHKi5m3I',
+      title: 'MIXED PRO GOLD 2024 US Open Pickleball Championships',
+      thumbnail: 'https://i.ytimg.com/vi/7ZMCHKi5m3I/maxresdefault.jpg',
+      duration: '10:30',
+      views: '98K',
+      channel: 'Pickleball Channel',
+      type: 'US Open'
+    },
+    {
+      videoId: 'pthJ1IQPqGE',
+      title: 'MEN\'S PRO GOLD 2024 US Open Pickleball Championships',
+      thumbnail: 'https://i.ytimg.com/vi/pthJ1IQPqGE/maxresdefault.jpg',
+      duration: '10:30',
+      views: '134K',
+      channel: 'Pickleball Channel',
+      type: 'US Open'
+    },
+    {
+      videoId: 'brXy4jmw-Ys',
+      title: 'WOMEN\'S PRO SEMI 2024 US Open Pickleball Championships',
+      thumbnail: 'https://i.ytimg.com/vi/brXy4jmw-Ys/maxresdefault.jpg',
+      duration: '10:30',
+      views: '87K',
+      channel: 'Pickleball Channel',
+      type: 'US Open'
+    },
+    {
+      videoId: 'I1gtR70ZZ9Y',
+      title: 'WOMEN\'S PRO GOLD 2024 US Open Pickleball Championships',
+      thumbnail: 'https://i.ytimg.com/vi/I1gtR70ZZ9Y/maxresdefault.jpg',
+      duration: '10:30',
+      views: '112K',
+      channel: 'Pickleball Channel',
+      type: 'US Open'
+    }
+  ];
+
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Trophy className="w-5 h-5 text-amber-500" />
-            Top Highlights
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-slate-500">Best plays and moments from recent tournaments</p>
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl">
+            <Trophy className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Top Highlights</h2>
+            <p className="text-slate-500">Best plays and moments from professional tournaments</p>
+          </div>
+        </div>
+        <Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white px-4 py-2">
+          <Star className="w-4 h-4 mr-2" />
+          {highlightVideos.length} Videos
+        </Badge>
+      </motion.div>
+
+      {/* Video Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {highlightVideos.map((video, idx) => (
+          <motion.div
+            key={video.videoId}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            className="group cursor-pointer"
+            onClick={() => {
+              const url = `https://www.youtube.com/watch?v=${video.videoId}`;
+              const link = document.createElement('a');
+              link.href = url;
+              link.target = '_blank';
+              link.rel = 'noopener noreferrer';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+          >
+            <Card className="overflow-hidden border-slate-200 hover:border-teal-500 hover:shadow-2xl hover:shadow-teal-500/10 transition-all">
+              {/* Thumbnail */}
+              <div className="relative aspect-video bg-slate-900">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform group-hover:scale-105 duration-300"
+                  style={{ 
+                    backgroundImage: `url(${video.thumbnail})`
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                
+                {/* Duration Badge */}
+                <Badge className="absolute top-2 right-2 bg-black/80 text-white text-xs">
+                  {video.duration}
+                </Badge>
+                
+                {/* Type Badge */}
+                <Badge className="absolute top-2 left-2 bg-teal-500 text-white text-xs">
+                  {video.type}
+                </Badge>
+                
+                {/* Play Button */}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="w-16 h-16 bg-teal-500 rounded-full flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                    <Play className="w-8 h-8 text-white ml-1" />
+                  </div>
+                </div>
+              </div>
+              
+              <CardContent className="p-4">
+                {/* Title */}
+                <h3 className="font-semibold text-slate-800 line-clamp-2 mb-2 group-hover:text-teal-600 transition-colors">
+                  {video.title}
+                </h3>
+                
+                {/* Meta Info */}
+                <div className="flex items-center justify-between text-sm">
+                  <span className="text-slate-600 flex items-center gap-1">
+                    <Video className="w-3 h-3" />
+                    {video.channel}
+                  </span>
+                  <span className="text-slate-500 flex items-center gap-1">
+                    <Eye className="w-3 h-3" />
+                    {video.views}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Call to Action */}
+      <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-100">
+        <CardContent className="p-6 text-center">
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Want to see your highlights here?</h3>
+          <p className="text-slate-600 mb-4">Upload your match videos and get featured in our community highlights</p>
+          <Button className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-full">
+            <Video className="w-4 h-4 mr-2" />
+            Upload Your Video
+          </Button>
         </CardContent>
       </Card>
     </div>
@@ -773,27 +1092,133 @@ function HighlightsContent() {
 function EventsContent() {
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calendar className="w-5 h-5 text-blue-500" />
-            Upcoming Events
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {PICKLEBALL_CONTENT.featuredEvents.map((event) => (
-              <div key={event.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl">
-                <div className="p-3 bg-teal-100 rounded-xl">
-                  <Calendar className="w-6 h-6 text-teal-600" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-slate-800">{event.title}</h3>
-                  <p className="text-sm text-slate-500">{event.date} • {event.location}</p>
-                </div>
-                <Badge>{event.organization}</Badge>
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl">
+            <Calendar className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Upcoming Events</h2>
+            <p className="text-slate-500">Major tournaments and competitions</p>
+          </div>
+        </div>
+        <Badge className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2">
+          <Trophy className="w-4 h-4 mr-2" />
+          {PICKLEBALL_CONTENT.featuredEvents.length} Events
+        </Badge>
+      </motion.div>
+
+      {/* Events Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {PICKLEBALL_CONTENT.featuredEvents.map((event, idx) => (
+          <motion.div
+            key={event.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            className="group"
+          >
+            <Card className="overflow-hidden border-slate-200 hover:border-blue-500 hover:shadow-2xl hover:shadow-blue-500/10 transition-all cursor-pointer">
+              {/* Event Image */}
+              <div className="relative h-48 bg-slate-900">
+                <div 
+                  className="absolute inset-0 bg-cover bg-center transition-transform group-hover:scale-105 duration-300"
+                  style={{ 
+                    backgroundImage: `url(${event.image})`,
+                    filter: 'brightness(0.7)'
+                  }}
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent" />
+                
+                {/* Organization Badge */}
+                <Badge className="absolute top-3 left-3 bg-teal-500 text-white">
+                  {event.organization}
+                </Badge>
+                
+                {/* Status Badge */}
+                {event.isUpcoming && (
+                  <Badge className="absolute top-3 right-3 bg-blue-500 text-white">
+                    <Clock className="w-3 h-3 mr-1" />
+                    Upcoming
+                  </Badge>
+                )}
               </div>
-            ))}
+              
+              <CardContent className="p-5">
+                {/* Title */}
+                <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">
+                  {event.title}
+                </h3>
+                
+                {/* Subtitle */}
+                <p className="text-slate-600 mb-4">{event.subtitle}</p>
+                
+                {/* Event Details */}
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <Calendar className="w-4 h-4 text-blue-500" />
+                    <span className="font-medium">{event.date}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-slate-600">
+                    <MapPin className="w-4 h-4 text-blue-500" />
+                    <span>{event.location}</span>
+                  </div>
+                </div>
+                
+                {/* Actions */}
+                <div className="flex gap-3">
+                  <Button 
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-xl"
+                    onClick={() => {
+                      const link = document.createElement('a');
+                      link.href = event.streamUrl;
+                      link.target = '_blank';
+                      link.rel = 'noopener noreferrer';
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                    }}
+                  >
+                    <ExternalLink className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="border-blue-500 text-blue-600 hover:bg-blue-50"
+                  >
+                    <Calendar className="w-4 h-4" />
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* All Tournaments Link */}
+      <Card className="bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-100 hover:shadow-lg transition-shadow cursor-pointer">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-bold text-slate-800 mb-1">View All Tournaments</h3>
+              <p className="text-slate-600">Explore our complete tournament calendar and find events near you</p>
+            </div>
+            <Button 
+              asChild
+              className="bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white rounded-full"
+            >
+              <Link href="/connect/tournaments">
+                <MapPin className="w-4 h-4 mr-2" />
+                Tournament Map
+                <ChevronRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -804,21 +1229,108 @@ function EventsContent() {
 function TrainingContent() {
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-emerald-500" />
-            Training Library
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-slate-500 mb-4">Improve your skills with pro tutorials</p>
-          <Button asChild>
-            <Link href="/train/library">
-              Go to Training Library
-              <ChevronRight className="w-4 h-4 ml-2" />
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl">
+            <BookOpen className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Training Library</h2>
+            <p className="text-slate-500">Improve your skills with pro tutorials</p>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Training Categories */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[
+          { 
+            title: 'Video Analysis', 
+            description: 'AI-powered video analysis', 
+            icon: Video, 
+            color: 'from-purple-500 to-pink-500',
+            link: '/train/video'
+          },
+          { 
+            title: 'Training Programs', 
+            description: '7-day structured programs', 
+            icon: Target, 
+            color: 'from-emerald-500 to-teal-500',
+            link: '/train'
+          },
+          { 
+            title: 'Practice Drills', 
+            description: 'Skill-building exercises', 
+            icon: Activity, 
+            color: 'from-blue-500 to-indigo-500',
+            link: '/train/drills'
+          }
+        ].map((category, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+          >
+            <Link href={category.link}>
+              <Card className="overflow-hidden border-slate-200 hover:shadow-2xl hover:shadow-teal-500/10 transition-all cursor-pointer group h-full">
+                <CardContent className="p-6">
+                  <div className={cn(
+                    "w-14 h-14 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform",
+                    category.color
+                  )}>
+                    <category.icon className="w-7 h-7 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-slate-800 mb-2 group-hover:text-teal-600 transition-colors">
+                    {category.title}
+                  </h3>
+                  <p className="text-slate-600 mb-4">{category.description}</p>
+                  <div className="flex items-center text-teal-600 font-semibold group-hover:gap-3 transition-all">
+                    <span>Explore</span>
+                    <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </CardContent>
+              </Card>
             </Link>
-          </Button>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Coach Kai CTA */}
+      <Card className="bg-gradient-to-br from-teal-50 to-emerald-50 border-teal-100 overflow-hidden">
+        <CardContent className="p-8">
+          <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-2">
+                <Award className="w-5 h-5 text-teal-600" />
+                <span className="text-sm font-semibold text-teal-600">AI COACHING</span>
+              </div>
+              <h3 className="text-2xl font-bold text-slate-800 mb-2">Train with Coach Kai</h3>
+              <p className="text-slate-600 mb-4">
+                Get personalized coaching powered by AI. Real-time feedback, custom drills, and voice-guided training.
+              </p>
+              <Button 
+                asChild
+                size="lg"
+                className="bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-full"
+              >
+                <Link href="/train/coach">
+                  <Zap className="w-5 h-5 mr-2" />
+                  Start AI Coaching
+                  <ChevronRight className="w-5 h-5 ml-2" />
+                </Link>
+              </Button>
+            </div>
+            <div className="flex-shrink-0">
+              <div className="w-32 h-32 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-3xl shadow-2xl shadow-teal-500/30"></div>
+            </div>
+          </div>
         </CardContent>
       </Card>
     </div>
@@ -826,30 +1338,153 @@ function TrainingContent() {
 }
 
 function PodcastsContent() {
+  // Enhanced podcast data
+  const enhancedPodcasts = [
+    {
+      id: 'p1',
+      title: 'The Dink Podcast',
+      host: 'Thomas Shields & Zane Navratil',
+      episode: 'Episode 245: 2024 Championship Predictions',
+      description: 'Deep dive into the upcoming championship season with expert analysis and pro player insights',
+      duration: '58 min',
+      image: '/podcast-dink.jpg',
+      rating: 4.9,
+      subscribers: '45K',
+      gradient: 'from-purple-500 to-pink-500'
+    },
+    {
+      id: 'p2',
+      title: 'Pickleball Fire',
+      host: 'Mark Renneson',
+      episode: 'Episode 112: Pro Training Secrets Revealed',
+      description: 'Learn the training methods and mental strategies used by professional players',
+      duration: '45 min',
+      image: '/podcast-fire.jpg',
+      rating: 4.7,
+      subscribers: '32K',
+      gradient: 'from-orange-500 to-red-500'
+    },
+    {
+      id: 'p3',
+      title: 'Pickleball Kitchen Podcast',
+      host: 'Barrett Kincheloe',
+      episode: 'Episode 189: Kitchen Strategy Masterclass',
+      description: 'Expert tips on dominating at the net and mastering the non-volley zone',
+      duration: '52 min',
+      image: '/podcast-kitchen.jpg',
+      rating: 4.8,
+      subscribers: '38K',
+      gradient: 'from-emerald-500 to-teal-500'
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Headphones className="w-5 h-5 text-purple-500" />
-            Pickleball Podcasts
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {PICKLEBALL_CONTENT.podcasts.map((podcast) => (
-              <div key={podcast.id} className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl hover:bg-slate-100 transition-colors cursor-pointer">
-                <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-                  <Headphones className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-slate-800">{podcast.title}</h3>
-                  <p className="text-sm text-slate-500">{podcast.episode}</p>
-                  <p className="text-xs text-slate-400">{podcast.duration}</p>
-                </div>
-              </div>
-            ))}
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl">
+            <Headphones className="w-6 h-6 text-white" />
           </div>
+          <div>
+            <h2 className="text-2xl font-bold text-slate-800">Pickleball Podcasts</h2>
+            <p className="text-slate-500">Listen to expert analysis and pro player interviews</p>
+          </div>
+        </div>
+        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2">
+          <Headphones className="w-4 h-4 mr-2" />
+          {enhancedPodcasts.length} Shows
+        </Badge>
+      </motion.div>
+
+      {/* Podcasts Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {enhancedPodcasts.map((podcast, idx) => (
+          <motion.div
+            key={podcast.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            whileHover={{ y: -4, scale: 1.02 }}
+            className="group"
+          >
+            <Card className="overflow-hidden border-slate-200 hover:border-purple-500 hover:shadow-2xl hover:shadow-purple-500/10 transition-all cursor-pointer h-full">
+              <CardContent className="p-6">
+                {/* Podcast Icon */}
+                <div className={cn(
+                  "w-20 h-20 bg-gradient-to-br rounded-2xl flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform",
+                  podcast.gradient
+                )}>
+                  <Headphones className="w-10 h-10 text-white" />
+                </div>
+                
+                {/* Rating & Subscribers */}
+                <div className="flex items-center gap-4 mb-3">
+                  <div className="flex items-center gap-1 text-amber-500">
+                    <Star className="w-4 h-4 fill-current" />
+                    <span className="text-sm font-semibold">{podcast.rating}</span>
+                  </div>
+                  <div className="flex items-center gap-1 text-slate-500">
+                    <Users className="w-4 h-4" />
+                    <span className="text-sm">{podcast.subscribers}</span>
+                  </div>
+                </div>
+                
+                {/* Title */}
+                <h3 className="text-lg font-bold text-slate-800 mb-2 group-hover:text-purple-600 transition-colors">
+                  {podcast.title}
+                </h3>
+                
+                {/* Host */}
+                <p className="text-sm text-slate-600 mb-3 flex items-center gap-1">
+                  <Mic className="w-3 h-3" />
+                  Hosted by {podcast.host}
+                </p>
+                
+                {/* Latest Episode */}
+                <div className="bg-slate-50 rounded-lg p-3 mb-4">
+                  <p className="text-xs font-semibold text-teal-600 mb-1">LATEST EPISODE</p>
+                  <p className="text-sm font-medium text-slate-800 mb-1">{podcast.episode}</p>
+                  <p className="text-xs text-slate-500 line-clamp-2">{podcast.description}</p>
+                </div>
+                
+                {/* Duration */}
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-4">
+                  <Clock className="w-4 h-4" />
+                  <span>{podcast.duration}</span>
+                </div>
+                
+                {/* Listen Button */}
+                <Button 
+                  className={cn(
+                    "w-full bg-gradient-to-r text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all",
+                    podcast.gradient,
+                    "hover:opacity-90"
+                  )}
+                >
+                  <Play className="w-4 h-4 mr-2" />
+                  Listen Now
+                  <ExternalLink className="w-4 h-4 ml-2" />
+                </Button>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
+      </div>
+
+      {/* Subscribe CTA */}
+      <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100">
+        <CardContent className="p-6 text-center">
+          <h3 className="text-lg font-bold text-slate-800 mb-2">Never miss an episode</h3>
+          <p className="text-slate-600 mb-4">Subscribe to get notified about new podcast episodes</p>
+          <Button className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white rounded-full">
+            <Headphones className="w-4 h-4 mr-2" />
+            Subscribe to Podcasts
+          </Button>
         </CardContent>
       </Card>
     </div>

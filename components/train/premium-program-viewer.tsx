@@ -61,10 +61,37 @@ interface DayStructure {
   day: number
   title: string
   focus: string
+  description?: string
+  duration_minutes?: number
   videos?: string[]
   exercises?: string[]
+  warmup?: {
+    title?: string
+    exercises?: string[]
+    duration_minutes?: number
+  }
+  main_drills?: {
+    name: string
+    description: string
+    duration_minutes?: number
+    reps_or_sets?: string
+    tips?: string[]
+  }[]
   practice_goals: string[]
-  success_metric: string
+  success_metric?: string
+  success_metrics?: string[]
+  cooldown?: string[]
+  coach_notes?: string
+  age_adaptations?: {
+    youth?: string
+    adult?: string
+    senior?: string
+  }
+  gender_tips?: {
+    general?: string
+    power_focus?: string
+    finesse_focus?: string
+  }
   estimated_minutes?: number
   difficulty_level?: number
 }
@@ -680,8 +707,111 @@ export default function PremiumProgramViewer({
                         </motion.div>
                       )}
 
-                      {/* Exercises/Drills */}
-                      {selectedDayData.exercises && selectedDayData.exercises.length > 0 && (
+                      {/* Day Description */}
+                      {selectedDayData.description && (
+                        <div className="bg-gradient-to-r from-slate-50 to-gray-50 p-6 rounded-2xl border border-gray-200">
+                          <p className="text-gray-700 text-lg leading-relaxed">{selectedDayData.description}</p>
+                        </div>
+                      )}
+
+                      {/* Warm-Up Section */}
+                      {selectedDayData.warmup && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Flame className="w-5 h-5 text-orange-500" />
+                            {selectedDayData.warmup.title || 'Warm-Up'} ({selectedDayData.warmup.duration_minutes || 5} min)
+                          </h3>
+                          <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
+                            <div className="space-y-2">
+                              {(selectedDayData.warmup.exercises || []).map((exercise: string, index: number) => (
+                                <motion.div
+                                  key={index}
+                                  className="flex items-center gap-3"
+                                  initial={{ opacity: 0, x: -10 }}
+                                  animate={{ opacity: 1, x: 0 }}
+                                  transition={{ delay: index * 0.05 }}
+                                >
+                                  <div className="w-6 h-6 rounded-full bg-orange-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                    {index + 1}
+                                  </div>
+                                  <span className="text-gray-700">{exercise}</span>
+                                </motion.div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Main Drills Section */}
+                      {selectedDayData.main_drills && selectedDayData.main_drills.length > 0 && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Dumbbell className="w-5 h-5 text-purple-500" />
+                            Today's Training Drills
+                          </h3>
+                          <div className="space-y-4">
+                            {selectedDayData.main_drills.map((drill: any, index: number) => (
+                              <motion.div
+                                key={index}
+                                className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 overflow-hidden"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                              >
+                                <div className="p-6">
+                                  <div className="flex items-start justify-between mb-3">
+                                    <div className="flex items-center gap-3">
+                                      <div className="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center font-bold">
+                                        {index + 1}
+                                      </div>
+                                      <div>
+                                        <h4 className="text-lg font-bold text-gray-900">{drill.name}</h4>
+                                        {drill.duration_minutes && (
+                                          <span className="text-sm text-purple-600 font-medium">{drill.duration_minutes} minutes</span>
+                                        )}
+                                      </div>
+                                    </div>
+                                    {drill.reps_or_sets && (
+                                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                                        {drill.reps_or_sets}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <p className="text-gray-700 mb-4">{drill.description}</p>
+                                  {drill.tips && drill.tips.length > 0 && (
+                                    <div className="bg-white/50 rounded-xl p-4">
+                                      <h5 className="text-sm font-semibold text-purple-900 mb-2 flex items-center gap-2">
+                                        <Sparkles className="w-4 h-4" />
+                                        Pro Tips
+                                      </h5>
+                                      <ul className="space-y-1">
+                                        {drill.tips.map((tip: string, tipIndex: number) => (
+                                          <li key={tipIndex} className="flex items-start gap-2 text-sm text-gray-600">
+                                            <ChevronRight className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                                            {tip}
+                                          </li>
+                                        ))}
+                                      </ul>
+                                    </div>
+                                  )}
+                                </div>
+                              </motion.div>
+                            ))}
+                          </div>
+                          
+                          <div className="mt-4 p-4 bg-purple-100 rounded-xl">
+                            <div className="flex items-center justify-between text-sm">
+                              <span className="text-purple-900 font-semibold">Total Session Time:</span>
+                              <span className="text-purple-700 font-bold text-lg">
+                                {selectedDayData.duration_minutes || 40} minutes
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Legacy Exercises Support */}
+                      {selectedDayData.exercises && selectedDayData.exercises.length > 0 && !selectedDayData.main_drills && (
                         <div>
                           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                             <Dumbbell className="w-5 h-5 text-purple-500" />
@@ -713,7 +843,7 @@ export default function PremiumProgramViewer({
                             <div className="flex items-center justify-between text-sm">
                               <span className="text-purple-900 font-semibold">Total Time:</span>
                               <span className="text-purple-700 font-bold text-lg">
-                                {selectedDayData.estimated_minutes || 40} minutes
+                                {selectedDayData.duration_minutes || selectedDayData.estimated_minutes || 40} minutes
                               </span>
                             </div>
                           </div>
@@ -860,69 +990,167 @@ export default function PremiumProgramViewer({
                         </div>
                       </div>
 
-                      {/* Success Metric */}
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                          <Trophy className="w-5 h-5 text-yellow-500" />
-                          Success Metric
-                        </h3>
-                        <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-2 border-yellow-300 relative overflow-hidden">
-                          <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-300 opacity-10 rounded-full -mr-16 -mt-16" />
-                          <div className="relative flex items-start gap-4">
-                            <div className="w-14 h-14 flex-shrink-0 rounded-full bg-yellow-500 flex items-center justify-center">
-                              <Trophy className="w-7 h-7 text-white" />
-                            </div>
-                            <div className="flex-1">
-                              <p className="text-gray-900 leading-relaxed font-semibold text-lg">
-                                {selectedDayData.success_metric}
-                              </p>
-                              <p className="text-gray-600 text-sm mt-2">
-                                Complete this to unlock Day {selectedDayData.day + 1}!
-                              </p>
+                      {/* Success Metrics */}
+                      {(selectedDayData.success_metrics || selectedDayData.success_metric) && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Trophy className="w-5 h-5 text-yellow-500" />
+                            Success Metrics
+                          </h3>
+                          <div className="bg-gradient-to-r from-yellow-50 to-amber-50 p-6 rounded-2xl border-2 border-yellow-300 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-300 opacity-10 rounded-full -mr-16 -mt-16" />
+                            <div className="relative">
+                              <div className="flex items-center gap-3 mb-4">
+                                <div className="w-12 h-12 flex-shrink-0 rounded-full bg-yellow-500 flex items-center justify-center">
+                                  <Trophy className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                  <h4 className="font-bold text-gray-900">Today's Success Criteria</h4>
+                                  <p className="text-sm text-gray-600">Complete these to unlock Day {selectedDayData.day + 1}!</p>
+                                </div>
+                              </div>
+                              
+                              {Array.isArray(selectedDayData.success_metrics) ? (
+                                <div className="space-y-2">
+                                  {selectedDayData.success_metrics.map((metric: string, index: number) => (
+                                    <div key={index} className="flex items-start gap-3 bg-white/50 p-3 rounded-xl">
+                                      <CheckCircle className="w-5 h-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                                      <span className="text-gray-800 font-medium">{metric}</span>
+                                    </div>
+                                  ))}
+                                </div>
+                              ) : (
+                                <p className="text-gray-900 leading-relaxed font-semibold text-lg">
+                                  {selectedDayData.success_metric}
+                                </p>
+                              )}
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
 
-                      {/* Coach's Pro Tips */}
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                          <Sparkles className="w-5 h-5 text-emerald-500" />
-                          Coach Kai's Pro Tips
-                        </h3>
-                        <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200">
-                          <div className="space-y-3">
-                            <div className="flex items-start gap-3">
-                              <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span className="text-white text-xs font-bold">1</span>
+                      {/* Coach's Notes */}
+                      {selectedDayData.coach_notes && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Brain className="w-5 h-5 text-emerald-500" />
+                            Coach Kai's Insight
+                          </h3>
+                          <div className="bg-gradient-to-br from-emerald-50 to-teal-50 p-6 rounded-2xl border border-emerald-200">
+                            <div className="flex items-start gap-4">
+                              <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0">
+                                <Brain className="w-6 h-6 text-white" />
                               </div>
-                              <p className="text-gray-800 leading-relaxed">
-                                {selectedDayData.focus === "Understanding the Third Shot" 
-                                  ? "Focus on consistency over power. The third shot drop is about control and placement."
-                                  : selectedDayData.focus === "Spin Mastery"
-                                  ? "Use your wrist to generate topspin. Keep the paddle face slightly closed on contact."
-                                  : "Stay patient and trust the process. Quality practice beats quantity every time."}
-                              </p>
-                            </div>
-                            <div className="flex items-start gap-3">
-                              <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span className="text-white text-xs font-bold">2</span>
+                              <div className="flex-1">
+                                <p className="text-gray-800 leading-relaxed text-lg italic">
+                                  "{selectedDayData.coach_notes}"
+                                </p>
+                                <p className="text-emerald-600 font-semibold mt-2">— Coach Kai</p>
                               </div>
-                              <p className="text-gray-800 leading-relaxed">
-                                Film yourself practicing and review it later. You'll spot technique improvements you might miss in the moment.
-                              </p>
-                            </div>
-                            <div className="flex items-start gap-3">
-                              <div className="w-6 h-6 rounded-full bg-emerald-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                <span className="text-white text-xs font-bold">3</span>
-                              </div>
-                              <p className="text-gray-800 leading-relaxed">
-                                Take breaks between drills. Your muscles learn during rest, not just during practice.
-                              </p>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      )}
+
+                      {/* Cooldown Section */}
+                      {selectedDayData.cooldown && selectedDayData.cooldown.length > 0 && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <RotateCcw className="w-5 h-5 text-blue-500" />
+                            Cool Down
+                          </h3>
+                          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-200">
+                            <div className="flex flex-wrap gap-3">
+                              {selectedDayData.cooldown.map((item: string, index: number) => (
+                                <div key={index} className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-blue-200">
+                                  <CheckCircle className="w-4 h-4 text-blue-500" />
+                                  <span className="text-gray-700 text-sm">{item}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Age Group Adaptations */}
+                      {selectedDayData.age_adaptations && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Users className="w-5 h-5 text-indigo-500" />
+                            Personalized for Your Age Group
+                          </h3>
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {selectedDayData.age_adaptations.youth && (
+                              <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-5 rounded-2xl border border-green-200">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                                    <Zap className="w-4 h-4 text-white" />
+                                  </div>
+                                  <span className="font-bold text-green-800">Youth (Under 18)</span>
+                                </div>
+                                <p className="text-gray-700 text-sm leading-relaxed">{selectedDayData.age_adaptations.youth}</p>
+                              </div>
+                            )}
+                            {selectedDayData.age_adaptations.adult && (
+                              <div className="bg-gradient-to-br from-blue-50 to-indigo-50 p-5 rounded-2xl border border-blue-200">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                                    <Target className="w-4 h-4 text-white" />
+                                  </div>
+                                  <span className="font-bold text-blue-800">Adult (18-50)</span>
+                                </div>
+                                <p className="text-gray-700 text-sm leading-relaxed">{selectedDayData.age_adaptations.adult}</p>
+                              </div>
+                            )}
+                            {selectedDayData.age_adaptations.senior && (
+                              <div className="bg-gradient-to-br from-purple-50 to-violet-50 p-5 rounded-2xl border border-purple-200">
+                                <div className="flex items-center gap-2 mb-3">
+                                  <div className="w-8 h-8 rounded-full bg-purple-500 flex items-center justify-center">
+                                    <Crown className="w-4 h-4 text-white" />
+                                  </div>
+                                  <span className="font-bold text-purple-800">Senior (50+)</span>
+                                </div>
+                                <p className="text-gray-700 text-sm leading-relaxed">{selectedDayData.age_adaptations.senior}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Gender Tips */}
+                      {selectedDayData.gender_tips && selectedDayData.gender_tips.general && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Award className="w-5 h-5 text-pink-500" />
+                            Training Tips
+                          </h3>
+                          <div className="bg-gradient-to-r from-pink-50 to-rose-50 p-6 rounded-2xl border border-pink-200">
+                            <p className="text-gray-700 leading-relaxed">{selectedDayData.gender_tips.general}</p>
+                            {(selectedDayData.gender_tips.power_focus || selectedDayData.gender_tips.finesse_focus) && (
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                                {selectedDayData.gender_tips.power_focus && (
+                                  <div className="bg-white/50 p-4 rounded-xl">
+                                    <span className="font-semibold text-red-700 flex items-center gap-2">
+                                      <Flame className="w-4 h-4" />
+                                      Power Players:
+                                    </span>
+                                    <p className="text-sm text-gray-600 mt-1">{selectedDayData.gender_tips.power_focus}</p>
+                                  </div>
+                                )}
+                                {selectedDayData.gender_tips.finesse_focus && (
+                                  <div className="bg-white/50 p-4 rounded-xl">
+                                    <span className="font-semibold text-blue-700 flex items-center gap-2">
+                                      <Eye className="w-4 h-4" />
+                                      Finesse Players:
+                                    </span>
+                                    <p className="text-sm text-gray-600 mt-1">{selectedDayData.gender_tips.finesse_focus}</p>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Day Navigation & Actions */}
                       <div className="border-t pt-8 mt-8">
