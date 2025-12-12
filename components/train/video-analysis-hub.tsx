@@ -181,6 +181,7 @@ export default function VideoAnalysisHub() {
 
       let key: string
       let videoUrl: string | undefined
+      let videoId: string | undefined // Track videoId from proxy upload
 
       if (USE_PROXY_UPLOAD) {
         // ============================================
@@ -194,7 +195,7 @@ export default function VideoAnalysisHub() {
 
         const xhr = new XMLHttpRequest()
         
-        const uploadPromise = new Promise<{key: string, url: string}>((resolve, reject) => {
+        const uploadPromise = new Promise<{key: string, url: string, videoId: string}>((resolve, reject) => {
           // Track upload progress
           let lastReportedProgress = 0
           xhr.upload.addEventListener('progress', (e) => {
@@ -217,7 +218,8 @@ export default function VideoAnalysisHub() {
               console.log('[Upload] ✅ Server proxy upload successful')
               console.log('[Upload] Upload time:', `${response.uploadTime}ms`)
               console.log('[Upload] Total time:', `${response.totalTime}ms`)
-              resolve({ key: response.key, url: response.url })
+              console.log('[Upload] Video ID:', response.videoId)
+              resolve({ key: response.key, url: response.url, videoId: response.videoId })
             } else {
               const errorData = JSON.parse(xhr.responseText || '{"error":"Upload failed"}')
               console.error('[Upload] ❌ Server proxy upload failed')
@@ -244,6 +246,7 @@ export default function VideoAnalysisHub() {
         const result = await uploadPromise
         key = result.key
         videoUrl = result.url
+        videoId = result.videoId // Store videoId from proxy upload
 
       } else {
         // ============================================
@@ -328,39 +331,49 @@ export default function VideoAnalysisHub() {
       setUploadProgress(100)
       console.log('[Upload] ✅ Upload complete!')
 
-      // Confirm upload with database
-      console.log('[Upload] Saving video record to database...')
-      const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key,
-          fileName: selectedFile.name,
-          fileSize: selectedFile.size
+      // Confirm upload with database (only needed for direct S3 upload)
+      // Proxy upload already creates the database record
+      if (!USE_PROXY_UPLOAD) {
+        console.log('[Upload] Saving video record to database...')
+        const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            key,
+            title: selectedFile.name, // Add title field
+            fileName: selectedFile.name,
+            fileSize: selectedFile.size
+          })
         })
-      })
 
-      if (!confirmRes.ok) {
-        const errorData = await confirmRes.json().catch(() => ({ error: 'Unknown error', code: 'UNKNOWN' }))
-        const errorCode = errorData.code
-        
-        console.error('[Upload] ❌ Failed to confirm upload')
-        console.error('[Upload] Error code:', errorCode)
-        console.error('[Upload] Error details:', errorData)
-        
-        // Provide user-friendly error messages
-        if (errorCode === 'USER_NOT_FOUND' || errorCode === 'INVALID_SESSION') {
-          throw new Error('Your session has expired. Please refresh the page and log in again.')
-        } else if (errorCode === 'FOREIGN_KEY_ERROR') {
-          throw new Error('Account validation failed. Please refresh the page and try again.')
-        } else {
-          throw new Error(errorData.error || 'Failed to save video record. Please try again.')
+        if (!confirmRes.ok) {
+          const errorData = await confirmRes.json().catch(() => ({ error: 'Unknown error', code: 'UNKNOWN' }))
+          const errorCode = errorData.code
+          
+          console.error('[Upload] ❌ Failed to confirm upload')
+          console.error('[Upload] Error code:', errorCode)
+          console.error('[Upload] Error details:', errorData)
+          
+          // Provide user-friendly error messages
+          if (errorCode === 'USER_NOT_FOUND' || errorCode === 'INVALID_SESSION') {
+            throw new Error('Your session has expired. Please refresh the page and log in again.')
+          } else if (errorCode === 'FOREIGN_KEY_ERROR') {
+            throw new Error('Account validation failed. Please refresh the page and try again.')
+          } else {
+            throw new Error(errorData.error || 'Failed to save video record. Please try again.')
+          }
         }
+
+        const data = await confirmRes.json()
+        videoId = data.videoId
+        console.log('[Upload] ✅ Database record saved')
+        console.log('[Upload] Video ID:', videoId)
+      } else {
+        console.log('[Upload] ✅ Database record already created by proxy upload')
+        console.log('[Upload] Video ID:', videoId)
       }
 
-      const data = await confirmRes.json()
-      console.log('[Upload] ✅ Database record saved')
-      console.log('[Upload] Video ID:', data.videoId)
+      const data = { videoId, videoUrl }
       console.log('='.repeat(80))
       console.log('[Upload] 🎉 UPLOAD SUCCESSFUL!')
       console.log('='.repeat(80))

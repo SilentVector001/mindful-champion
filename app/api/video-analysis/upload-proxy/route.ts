@@ -37,19 +37,13 @@ export async function POST(request: NextRequest) {
     // Parse form data
     const formData = await request.formData();
     const file = formData.get("file") as File;
-    const title = formData.get("title") as string;
+    const originalFileName = formData.get("fileName") as string;
+    const title = originalFileName || file.name; // Use fileName from form or file.name as fallback
     const description = formData.get("description") as string || "";
 
     if (!file) {
       return NextResponse.json(
         { error: "No file provided" },
-        { status: 400 }
-      );
-    }
-
-    if (!title) {
-      return NextResponse.json(
-        { error: "Title is required" },
         { status: 400 }
       );
     }
@@ -76,7 +70,7 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Generate unique filename
+    // Generate unique filename for S3 storage
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
     const fileName = `video_${timestamp}_${sanitizedName}`;
@@ -118,7 +112,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       videoId: videoAnalysis.id,
+      key: cloudStoragePath, // Frontend expects 'key'
+      url: cloudStoragePath, // Frontend expects 'url'
       cloudStoragePath,
+      uploadTime: 0, // Placeholder for compatibility
+      totalTime: 0, // Placeholder for compatibility
       message: "Video uploaded successfully"
     });
   } catch (error) {
