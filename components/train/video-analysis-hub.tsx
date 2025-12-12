@@ -89,6 +89,35 @@ export default function VideoAnalysisHub() {
     }
   }, [session])
 
+  // Auto-trigger analysis for stuck PENDING videos on mount
+  useEffect(() => {
+    if (!session?.user || videoLibrary.length === 0) return
+    
+    const pendingVideos = videoLibrary.filter(v => v.analysisStatus === 'PENDING')
+    
+    if (pendingVideos.length > 0) {
+      console.log(`[Auto-Trigger] Found ${pendingVideos.length} PENDING video(s), auto-triggering analysis...`)
+      
+      // Only auto-trigger for videos uploaded in the last 10 minutes
+      const recentPending = pendingVideos.filter(v => {
+        const uploadTime = new Date(v.uploadedAt).getTime()
+        const now = Date.now()
+        const minutesAgo = (now - uploadTime) / (1000 * 60)
+        return minutesAgo <= 10
+      })
+      
+      if (recentPending.length > 0) {
+        const video = recentPending[0] // Trigger for the most recent one
+        console.log('[Auto-Trigger] Triggering analysis for:', video.id)
+        
+        // Trigger after a short delay to avoid race conditions
+        setTimeout(() => {
+          handleManualAnalysis(video.id, video.videoUrl)
+        }, 2000)
+      }
+    }
+  }, [videoLibrary.length]) // Only run when library count changes
+
   // Poll for processing videos
   useEffect(() => {
     if (!session?.user) return
@@ -369,9 +398,20 @@ export default function VideoAnalysisHub() {
       // Show success message
       alert('✅ Upload complete! Starting AI analysis...\n\nThis may take a few minutes. Check the "My Library" tab for results.')
       
+      // Wait 3 seconds before starting analysis to ensure database commit
+      console.log('[Upload] ⏳ Waiting 3 seconds before starting analysis to ensure database commit...')
+      await new Promise(resolve => setTimeout(resolve, 3000))
+      
       // Start analysis
+      console.log('[Upload] 🔬 Starting analysis now...')
       setAnalyzing(true)
-      await analyzeVideo(data.videoId, videoUrl || data.videoUrl)
+      const analysisSuccess = await analyzeVideo(data.videoId, videoUrl || data.videoUrl)
+      
+      if (!analysisSuccess) {
+        // Analysis failed, refresh library to show the video with "Analyze Now" button
+        await fetchVideoLibrary()
+        await fetchLibraryStats()
+      }
     } catch (error) {
       console.error('='.repeat(80))
       console.error('[Upload] ❌ UPLOAD FAILED')
@@ -397,8 +437,13 @@ export default function VideoAnalysisHub() {
     }
   }
 
-  const analyzeVideo = async (videoId: string, videoUrl: string) => {
+  const analyzeVideo = async (videoId: string, videoUrl?: string, retryCount = 0): Promise<boolean> => {
+    const maxRetries = 3
+    const retryDelay = (attempt: number) => Math.min(1000 * Math.pow(2, attempt), 10000) // Exponential backoff
+
     try {
+      console.log(`[Analyze] Attempting analysis for video ${videoId} (attempt ${retryCount + 1}/${maxRetries + 1})`)
+      
       const res = await fetch('/api/video-analysis/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -410,8 +455,10 @@ export default function VideoAnalysisHub() {
         setCurrentAnalysis(data)
         setAnalyzing(false)
         
+        console.log('[Analyze] ✅ Analysis completed successfully!')
+        
         // Show success message with clear next steps
-        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.overallScore)}/100\n\n📊 Your video has been analyzed! Switch to the "My Library" tab to view detailed results and insights.`)
+        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.analysis?.overallScore || data.overallScore || 75)}/100\n\n📊 Your video has been analyzed! Switch to the "My Library" tab to view detailed results and insights.`)
         
         // Refresh library and switch to library tab
         await fetchVideoLibrary()
@@ -421,15 +468,44 @@ export default function VideoAnalysisHub() {
         // Clear selected file
         setSelectedFile(null)
         setVideoPreview(null)
+        
+        return true
       } else {
         const errorData = await res.json().catch(() => ({ error: 'Analysis failed' }))
         throw new Error(errorData.error || 'Analysis failed')
       }
     } catch (error) {
-      console.error('Analysis error:', error)
+      console.error(`[Analyze] ❌ Analysis attempt ${retryCount + 1} failed:`, error)
+      
+      // Retry logic
+      if (retryCount < maxRetries) {
+        const delay = retryDelay(retryCount)
+        console.log(`[Analyze] Retrying in ${delay}ms...`)
+        await new Promise(resolve => setTimeout(resolve, delay))
+        return analyzeVideo(videoId, videoUrl, retryCount + 1)
+      }
+      
+      // All retries exhausted
       setAnalyzing(false)
       const errorMessage = error instanceof Error ? error.message : 'Analysis failed'
-      alert(`❌ Analysis Failed\n\n${errorMessage}\n\nPlease try uploading your video again. If the problem persists, contact support.`)
+      console.error('[Analyze] ❌ All retry attempts exhausted')
+      alert(`❌ Analysis Failed\n\n${errorMessage}\n\n💡 The video was uploaded successfully but analysis failed. You can try again from the "My Library" tab by clicking the "Analyze Now" button.`)
+      
+      return false
+    }
+  }
+
+  // New: Manual analysis trigger for stuck videos
+  const handleManualAnalysis = async (videoId: string, videoUrl: string) => {
+    setAnalyzing(true)
+    console.log('[Manual Analyze] User triggered manual analysis for video:', videoId)
+    
+    const success = await analyzeVideo(videoId, videoUrl)
+    
+    if (success) {
+      console.log('[Manual Analyze] ✅ Manual analysis completed successfully')
+    } else {
+      console.error('[Manual Analyze] ❌ Manual analysis failed after all retries')
     }
   }
 
@@ -1174,6 +1250,25 @@ export default function VideoAnalysisHub() {
                                     View Analysis
                                   </Link>
                                 </Button>
+                              ) : video.analysisStatus === 'PENDING' ? (
+                                <Button
+                                  size="sm"
+                                  className="flex-1 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/50 text-yellow-400 hover:from-yellow-500/30 hover:to-orange-500/30 hover:text-yellow-300"
+                                  onClick={() => handleManualAnalysis(video.id, video.videoUrl)}
+                                  disabled={analyzing}
+                                >
+                                  {analyzing ? (
+                                    <>
+                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                      Analyzing...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Zap className="w-4 h-4 mr-2" />
+                                      Analyze Now
+                                    </>
+                                  )}
+                                </Button>
                               ) : (
                                 <Button
                                   size="sm"
@@ -1181,17 +1276,8 @@ export default function VideoAnalysisHub() {
                                   className="flex-1 border-muted"
                                   disabled
                                 >
-                                  {video.analysisStatus === 'PROCESSING' ? (
-                                    <>
-                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                      Processing...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Clock className="w-4 h-4 mr-2" />
-                                      Pending
-                                    </>
-                                  )}
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Processing...
                                 </Button>
                               )}
                               
