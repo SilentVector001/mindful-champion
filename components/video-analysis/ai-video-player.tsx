@@ -606,12 +606,12 @@ export default function AIVideoPlayer({
             </div>
           )}
 
-          {/* Loading overlay - Only show when actually loading, not playing, and no error */}
-          {!isVideoReady && !videoError && actualVideoUrl && !isPlaying && (
+          {/* Loading overlay - Only show when video is actually not ready */}
+          {!isVideoReady && !videoError && actualVideoUrl && (
             <div className="absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm z-5">
               <div className="text-center">
                 <Loader2 className="w-12 h-12 text-cyan-400 animate-spin mx-auto mb-3" />
-                <p className="text-slate-300">Preparing video...</p>
+                <p className="text-slate-300">Loading video...</p>
               </div>
             </div>
           )}
