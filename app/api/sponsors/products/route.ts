@@ -108,7 +108,7 @@ export async function POST(req: NextRequest) {
         category: data.category.trim(),
         imageUrl: data.imageUrl?.trim() || null,
         pointsCost: parseInt(data.pointsCost),
-        retailValue: parseInt(Math.round(parseFloat(data.retailValue) * 100)), // Store as cents
+        retailValue: Math.round(parseFloat(String(data.retailValue)) * 100), // Store as cents
         stockQuantity: data.unlimitedStock ? 0 : parseInt(data.stockQuantity || 0),
         unlimitedStock: Boolean(data.unlimitedStock),
         isActive: Boolean(data.isActive),

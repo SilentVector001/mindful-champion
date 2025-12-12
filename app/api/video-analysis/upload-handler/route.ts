@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
               title: originalFileName.replace(/\.[^/.]+$/, ''), // Remove extension
               description: '',
               fileName: originalFileName,
-              fileSize: blob.size,
+              fileSize: 0, // Will be updated when analysis runs
               duration: 0,
               analysisStatus: 'PENDING',
               cloud_storage_path: blob.url,
