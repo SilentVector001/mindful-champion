@@ -4,7 +4,7 @@ export const maxDuration = 60;
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { uploadFile } from "@/lib/s3";
+import { uploadFile } from "@/lib/blob";
 import { prisma } from "@/lib/db";
 
 /**
@@ -70,13 +70,13 @@ export async function POST(request: NextRequest) {
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Generate unique filename for S3 storage
+    // Generate unique filename for Blob storage
     const timestamp = Date.now();
     const sanitizedName = file.name.replace(/[^a-zA-Z0-9.]/g, "_");
     const fileName = `video_${timestamp}_${sanitizedName}`;
 
-    // Upload to S3
-    console.log("[Upload Proxy] Uploading to S3:", {
+    // Upload to Vercel Blob
+    console.log("[Upload Proxy] Uploading to Vercel Blob:", {
       fileName,
       fileSize: file.size,
       contentType: file.type
