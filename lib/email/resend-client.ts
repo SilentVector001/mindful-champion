@@ -7,17 +7,32 @@ export function getResendClient(): Resend {
     const apiKey = process.env.RESEND_API_KEY;
     
     if (!apiKey || apiKey === 'your_resend_api_key_here') {
-      console.warn('⚠️ RESEND_API_KEY not configured. Email sending will be simulated.');
-      // Return a mock client for development
+      const errorMessage = '⚠️ CRITICAL: RESEND_API_KEY not configured in environment variables. Emails cannot be sent.';
+      console.error(errorMessage);
+      console.error('📝 Setup Instructions:');
+      console.error('1. Get API key from https://resend.com/api-keys');
+      console.error('2. Add RESEND_API_KEY to Vercel environment variables');
+      console.error('3. Redeploy the application');
+      
+      // Return a mock client that throws clear errors
       return {
         emails: {
           send: async (options: any) => {
-            console.log('📧 [MOCK EMAIL SENT]', {
+            console.error('❌ [EMAIL NOT SENT - RESEND_API_KEY MISSING]', {
               to: options.to,
               subject: options.subject,
               from: options.from,
             });
-            return { data: { id: `mock_${Date.now()}` }, error: null };
+            
+            // Return error instead of success for mock emails
+            return {
+              data: null,
+              error: {
+                message: 'RESEND_API_KEY is not configured in environment variables. Please add it to Vercel to enable email sending.',
+                name: 'MissingApiKeyError',
+                statusCode: 500
+              }
+            };
           }
         }
       } as any;
