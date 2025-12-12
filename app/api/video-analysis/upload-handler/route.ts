@@ -68,6 +68,7 @@ export async function POST(request: NextRequest) {
         return {
           allowedContentTypes: ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'],
           maximumSizeInBytes: 500 * 1024 * 1024, // 500MB max
+          addRandomSuffix: true, // Generates unique filename to prevent "blob already exists" error
           tokenPayload: JSON.stringify({
             userId: user.id,
             fileName: metadata.fileName || pathname,
