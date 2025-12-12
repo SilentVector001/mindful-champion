@@ -49,7 +49,7 @@ export async function PATCH(
         ...(data.category && { category: data.category.trim() }),
         ...(data.imageUrl !== undefined && { imageUrl: data.imageUrl?.trim() || null }),
         ...(data.pointsCost && { pointsCost: parseInt(data.pointsCost) }),
-        ...(data.retailValue && { retailValue: parseInt(Math.round(parseFloat(data.retailValue) * 100)) }),
+        ...(data.retailValue && { retailValue: Math.round(parseFloat(String(data.retailValue)) * 100) }),
         ...(data.stockQuantity !== undefined && { stockQuantity: parseInt(data.stockQuantity) }),
         ...(data.unlimitedStock !== undefined && { unlimitedStock: Boolean(data.unlimitedStock) }),
         ...(data.isActive !== undefined && { isActive: Boolean(data.isActive) }),

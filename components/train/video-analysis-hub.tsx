@@ -342,7 +342,7 @@ export default function VideoAnalysisHub() {
       console.log('[Upload] ✅ Upload complete!')
 
       // Only confirm upload for legacy proxy method (client upload handles this)
-      if (UPLOAD_METHOD === 'proxy' && !videoId) {
+      if (UPLOAD_METHOD !== 'client' && !videoId) {
         console.log('[Upload] Saving video record to database...')
         const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
           method: 'POST',
