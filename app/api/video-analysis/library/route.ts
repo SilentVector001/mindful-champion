@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get videos
-    const videos = await prisma.videoAnalysis.findMany({
+    const rawVideos = await prisma.videoAnalysis.findMany({
       where,
       take: limit,
       skip: offset,
@@ -67,18 +67,31 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Sanitize scores to prevent NaN issues
+    const videos = rawVideos.map(video => ({
+      ...video,
+      // Ensure overallScore is always a valid number or null (never NaN)
+      overallScore: video.overallScore !== null && 
+                   !isNaN(video.overallScore) && 
+                   isFinite(video.overallScore)
+        ? Math.max(0, Math.min(100, Math.round(video.overallScore)))
+        : null
+    }));
+
     // Get total count
     const totalCount = await prisma.videoAnalysis.count({ where });
 
     console.log("[Library] Retrieved videos:", {
       userId: user.id,
       count: videos.length,
-      totalCount
+      totalCount,
+      scoresFixed: rawVideos.filter((v, i) => v.overallScore !== videos[i].overallScore).length
     });
 
     return NextResponse.json({
       success: true,
       videos,
+      analyses: videos, // Also include as 'analyses' for backward compatibility
       pagination: {
         limit,
         offset,

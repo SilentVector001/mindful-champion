@@ -25,6 +25,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
 import { format } from "date-fns"
 import Image from "next/image"
+import { parseScore, formatScore, getSafeScore, calculateAverageScore } from "@/lib/video-analysis/score-utils"
 
 interface VideoAnalysisItem {
   id: string;
@@ -178,7 +179,7 @@ export default function VideoLibrary() {
     )
     .sort((a, b) => {
       if (sortBy === 'score') {
-        return (b.overallScore || 0) - (a.overallScore || 0)
+        return getSafeScore(b.overallScore, 0) - getSafeScore(a.overallScore, 0)
       }
       return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
     })
@@ -637,10 +638,10 @@ export default function VideoLibrary() {
                         </div>
 
                         {/* Score Badge */}
-                        {analysis.analysisStatus === 'COMPLETED' && analysis.overallScore && (
+                        {analysis.analysisStatus === 'COMPLETED' && (
                           <div className="absolute top-3 left-3">
-                            <div className={cn("px-4 py-2 rounded-full backdrop-blur text-sm font-bold shadow-lg", getScoreColor(analysis.overallScore))}>
-                              🎯 {Math.round(analysis.overallScore)}/100
+                            <div className={cn("px-4 py-2 rounded-full backdrop-blur text-sm font-bold shadow-lg", getScoreColor(getSafeScore(analysis.overallScore, 0)))}>
+                              🎯 {formatScore(analysis.overallScore, 'Analyzing...')}
                             </div>
                           </div>
                         )}
@@ -882,10 +883,9 @@ export default function VideoLibrary() {
                       },
                       {
                         value: (() => {
-                          const completed = analyses.filter(a => a.analysisStatus === 'COMPLETED' && a.overallScore)
-                          return completed.length > 0 
-                            ? Math.round(completed.reduce((sum, a) => sum + (a.overallScore || 0), 0) / completed.length)
-                            : 0
+                          const completed = analyses.filter(a => a.analysisStatus === 'COMPLETED')
+                          const scores = completed.map(a => a.overallScore)
+                          return calculateAverageScore(scores)
                         })(),
                         label: "Average Score",
                         icon: Target,
@@ -895,7 +895,11 @@ export default function VideoLibrary() {
                         suffix: "%"
                       },
                       {
-                        value: Math.max(...analyses.filter(a => a.analysisStatus === 'COMPLETED').map(a => a.overallScore || 0), 0),
+                        value: (() => {
+                          const completed = analyses.filter(a => a.analysisStatus === 'COMPLETED')
+                          const scores = completed.map(a => getSafeScore(a.overallScore, 0))
+                          return scores.length > 0 ? Math.max(...scores) : 0
+                        })(),
                         label: "Personal Best",
                         icon: Crown,
                         gradient: "from-amber-500 to-yellow-500",
@@ -904,7 +908,7 @@ export default function VideoLibrary() {
                         suffix: "%"
                       },
                       {
-                        value: analyses.filter(a => a.analysisStatus === 'COMPLETED' && (a.overallScore || 0) >= 85).length,
+                        value: analyses.filter(a => a.analysisStatus === 'COMPLETED' && getSafeScore(a.overallScore, 0) >= 85).length,
                         label: "Excellent Games",
                         icon: Award,
                         gradient: "from-purple-500 to-pink-500",
