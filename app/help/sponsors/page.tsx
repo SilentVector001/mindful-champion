@@ -236,6 +236,59 @@ export default function SponsorProgramPage() {
           </div>
         </motion.div>
 
+        {/* Philosophy Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.15 }}
+          className="mb-16"
+        >
+          <Card className="border-2 border-emerald-300 shadow-2xl backdrop-blur-sm bg-gradient-to-br from-emerald-50 to-teal-50">
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" />
+            <CardHeader>
+              <div className="flex items-center gap-4 mb-3">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl blur-sm opacity-30" />
+                  <div className="relative bg-gradient-to-br from-emerald-500 to-teal-500 p-3 rounded-xl shadow-lg">
+                    <Sparkles className="h-8 w-8 text-white" />
+                  </div>
+                </div>
+                <CardTitle className="text-3xl font-light">
+                  Our Sponsorship <span className="font-semibold">Philosophy</span>
+                </CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4 text-gray-700">
+                <p className="text-lg font-semibold text-emerald-800">
+                  Value Through Connection, Not Interruption
+                </p>
+                <p className="leading-relaxed">
+                  Our sponsor program is built on a revolutionary approach to brand awareness. Unlike traditional advertising that interrupts and annoys, 
+                  <strong> Mindful Champion creates genuine connections</strong> between sponsors and our passionate pickleball community through our 
+                  <strong> innovative rewards program</strong>.
+                </p>
+                <div className="bg-white/70 p-5 rounded-lg border-l-4 border-emerald-500">
+                  <h4 className="font-semibold text-lg mb-2 flex items-center gap-2 text-emerald-800">
+                    <CheckCircle2 className="w-5 h-5" />
+                    How It Benefits You
+                  </h4>
+                  <p className="leading-relaxed">
+                    Sponsor products and services are introduced to users in a <strong>welcoming, non-intrusive way</strong>. 
+                    As you train, achieve goals, and improve your game, you earn reward points. These points can then be redeemed for 
+                    quality products and services from our trusted sponsors—creating a <strong>win-win relationship</strong> where you 
+                    discover products you genuinely want, and sponsors gain loyal customers who <em>chose</em> them.
+                  </p>
+                </div>
+                <p className="text-center text-lg font-semibold text-teal-700 pt-3">
+                  This approach transforms sponsor offerings from advertisements into <strong>welcomed discoveries</strong> and <strong>exciting benefits</strong> 
+                  for your achievements! 🎉
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
         {/* Benefits */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

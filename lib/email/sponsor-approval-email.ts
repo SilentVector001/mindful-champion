@@ -92,6 +92,22 @@ export async function sendSponsorApprovalEmail(data: SponsorApprovalEmailData) {
                 We're excited to announce that <strong>${data.companyName}</strong> has been <strong style="color: #10b981;">APPROVED</strong> as a <strong>${tierInfo.emoji} ${data.approvedTier} Partner</strong>!
               </p>
 
+              <!-- Philosophy & Value Proposition Section -->
+              <div style="background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%); border-radius: 12px; padding: 25px; margin: 0 0 30px 0; border: 2px solid #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);">
+                <h3 style="margin: 0 0 15px 0; font-size: 22px; font-weight: bold; color: #0f172a; text-align: center;">
+                  🌟 What You Receive as a Mindful Champion Sponsor
+                </h3>
+                <p style="margin: 0 0 15px 0; font-size: 16px; color: #1e4620; line-height: 1.8; text-align: left;">
+                  Your sponsorship provides <strong>authentic brand exposure</strong> to thousands of engaged pickleball enthusiasts through our revolutionary approach to brand awareness. Unlike traditional advertising that interrupts and annoys, Mindful Champion creates <strong>genuine connections</strong> between sponsors and our passionate community through our innovative rewards program.
+                </p>
+                <p style="margin: 0 0 15px 0; font-size: 16px; color: #1e4620; line-height: 1.8; text-align: left;">
+                  Through our rewards-based system, your products and services are introduced to users in a <strong>welcoming, non-intrusive way</strong> that creates real value. Members earn rewards by engaging with our platform—training, achieving goals, and improving their game. They can then redeem those rewards for your offerings, creating a <strong>win-win relationship</strong> where users discover quality products they genuinely want, and you gain loyal customers who <em>chose</em> you.
+                </p>
+                <p style="margin: 0; font-size: 16px; color: #1e4620; line-height: 1.8; text-align: left;">
+                  <strong>Our Philosophy:</strong> We believe in creating value through meaningful connections, not interruptions. Your brand reaches our community through our rewards program, which makes discovering new products and services an <strong>exciting benefit</strong> rather than an annoyance. This approach delivers superior brand awareness and customer acquisition because users are <strong>actively choosing</strong> to engage with your offerings—transforming your brand presence from advertisement to <strong>welcomed discovery</strong>.
+                </p>
+              </div>
+
               <!-- Credentials Box - Most Important! -->
               <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); border-radius: 12px; padding: 25px; margin: 0 0 30px 0; border: 3px solid #f59e0b; box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);">
                 <h3 style="margin: 0 0 15px 0; font-size: 20px; font-weight: bold; color: #0f172a; text-align: center;">
@@ -278,6 +294,14 @@ export async function sendSponsorApprovalEmail(data: SponsorApprovalEmailData) {
 Welcome to Mindful Champion, ${data.contactPerson}! 🤝
 
 We're excited to announce that ${data.companyName} has been APPROVED as a ${tierInfo.emoji} ${data.approvedTier} Partner!
+
+🌟 WHAT YOU RECEIVE AS A MINDFUL CHAMPION SPONSOR:
+
+Your sponsorship provides authentic brand exposure to thousands of engaged pickleball enthusiasts through our revolutionary approach to brand awareness. Unlike traditional advertising that interrupts and annoys, Mindful Champion creates genuine connections between sponsors and our passionate community through our innovative rewards program.
+
+Through our rewards-based system, your products and services are introduced to users in a welcoming, non-intrusive way that creates real value. Members earn rewards by engaging with our platform—training, achieving goals, and improving their game. They can then redeem those rewards for your offerings, creating a win-win relationship where users discover quality products they genuinely want, and you gain loyal customers who CHOSE you.
+
+OUR PHILOSOPHY: We believe in creating value through meaningful connections, not interruptions. Your brand reaches our community through our rewards program, which makes discovering new products and services an exciting benefit rather than an annoyance. This approach delivers superior brand awareness and customer acquisition because users are actively choosing to engage with your offerings—transforming your brand presence from advertisement to welcomed discovery.
 
 🔐 YOUR PORTAL LOGIN ${data.isNewUser ? 'CREDENTIALS' : 'INFORMATION'}:
 
