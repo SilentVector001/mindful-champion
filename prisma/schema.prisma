@@ -1463,29 +1463,31 @@ model RewardRedemption {
 }
 
 model SponsorApplication {
-  id               String                   @id @default(cuid())
-  companyName      String
-  website          String?
-  email            String
-  phone            String?
-  contactPerson    String
-  industry         String
-  description      String
-  yearsInBusiness  Int?
-  socialMedia      Json?
-  interestedTier   String
-  proposedProducts Json?
-  marketingGoals   String?
-  targetAudience   String?
-  status           SponsorApplicationStatus @default(PENDING)
-  reviewedAt       DateTime?
-  reviewedBy       String?
-  reviewNotes      String?
-  createdAt        DateTime                 @default(now())
-  updatedAt        DateTime                 @updatedAt
+  id                 String                   @id @default(cuid())
+  companyName        String
+  website            String?
+  email              String
+  phone              String?
+  contactPerson      String
+  industry           String
+  description        String
+  yearsInBusiness    Int?
+  socialMedia        Json?
+  interestedTier     String
+  proposedProducts   Json?
+  marketingGoals     String?
+  targetAudience     String?
+  status             SponsorApplicationStatus @default(PENDING)
+  reviewedAt         DateTime?
+  reviewedBy         String?
+  reviewNotes        String?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+  emailNotifications EmailNotification[]
 
   @@index([status])
   @@index([createdAt])
+  @@index([email])
 }
 
 model RewardTier {
@@ -2014,37 +2016,41 @@ model TournamentMatch {
 }
 
 model EmailNotification {
-  id              String                @id @default(cuid())
-  userId          String
-  videoAnalysisId String?
-  type            EmailNotificationType @default(VIDEO_ANALYSIS_COMPLETE)
-  recipientEmail  String
-  recipientName   String?
-  subject         String
-  htmlContent     String
-  textContent     String?
-  status          EmailStatus           @default(PENDING)
-  sentAt          DateTime?
-  deliveredAt     DateTime?
-  openedAt        DateTime?
-  clickedAt       DateTime?
-  failedAt        DateTime?
-  error           String?
-  metadata        Json?
-  resendEmailId   String?
-  retryCount      Int                   @default(0)
-  lastRetryAt     DateTime?
-  createdAt       DateTime              @default(now())
-  updatedAt       DateTime              @updatedAt
-  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoAnalysis   VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
+  id                   String                @id @default(cuid())
+  userId               String?
+  videoAnalysisId      String?
+  sponsorApplicationId String?
+  type                 EmailNotificationType @default(VIDEO_ANALYSIS_COMPLETE)
+  recipientEmail       String
+  recipientName        String?
+  subject              String
+  htmlContent          String                @db.Text
+  textContent          String?               @db.Text
+  status               EmailStatus           @default(PENDING)
+  sentAt               DateTime?
+  deliveredAt          DateTime?
+  openedAt             DateTime?
+  clickedAt            DateTime?
+  failedAt             DateTime?
+  error                String?               @db.Text
+  metadata             Json?
+  resendEmailId        String?
+  retryCount           Int                   @default(0)
+  lastRetryAt          DateTime?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  user                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoAnalysis        VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
+  sponsorApplication   SponsorApplication?   @relation(fields: [sponsorApplicationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([videoAnalysisId])
+  @@index([sponsorApplicationId])
   @@index([status])
   @@index([type])
   @@index([sentAt])
   @@index([createdAt])
+  @@index([recipientEmail])
 }
 
 model EmailSettings {
@@ -3015,6 +3021,10 @@ enum EmailNotificationType {
   ADMIN_TEST
   SPONSOR_APPLICATION
   SPONSOR_APPROVAL
+  SPONSOR_ADMIN_NOTIFICATION
+  SPONSOR_REJECTION
+  SPONSOR_OFFER_CREATED
+  SPONSOR_OFFER_APPROVED
 }
 
 enum LiveStreamStatus {
