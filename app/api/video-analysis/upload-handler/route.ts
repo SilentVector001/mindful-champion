@@ -19,6 +19,18 @@ export async function POST(request: NextRequest) {
   const startTime = Date.now();
   console.log('[Upload Handler] === Client upload request started ===');
 
+  // Check for BLOB_READ_WRITE_TOKEN first
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    console.error('[Upload Handler] ❌ BLOB_READ_WRITE_TOKEN not configured');
+    return NextResponse.json(
+      { 
+        error: 'Video storage not configured. Please contact support.',
+        details: 'BLOB_READ_WRITE_TOKEN missing'
+      },
+      { status: 503 }
+    );
+  }
+
   try {
     // Authenticate user
     const session = await getServerSession(authOptions);
