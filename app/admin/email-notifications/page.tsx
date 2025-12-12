@@ -15,6 +15,7 @@ import {
   Download,
   AlertCircle
 } from 'lucide-react'
+import EmailDetailModal from '@/components/admin/email-detail-modal'
 
 interface EmailNotification {
   id: string
@@ -69,6 +70,8 @@ export default function EmailNotificationsPage() {
   const [loading, setLoading] = useState(true)
   const [selectedNotification, setSelectedNotification] = useState<EmailNotification | null>(null)
   const [showSettings, setShowSettings] = useState(false)
+  const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
+  const [showEmailModal, setShowEmailModal] = useState(false)
   
   // Filters
   const [statusFilter, setStatusFilter] = useState<string>('all')
@@ -480,7 +483,10 @@ export default function EmailNotificationsPage() {
                             </button>
                           )}
                           <button
-                            onClick={() => setSelectedNotification(notification)}
+                            onClick={() => {
+                              setSelectedEmailId(notification.id);
+                              setShowEmailModal(true);
+                            }}
                             className="text-blue-600 hover:text-blue-900 flex items-center gap-1"
                             title="View details"
                           >
@@ -520,46 +526,19 @@ export default function EmailNotificationsPage() {
           )}
         </div>
 
-        {/* Preview Modal */}
-        {selectedNotification && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-auto">
-              <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                <h2 className="text-xl font-bold">Email Preview</h2>
-                <button
-                  onClick={() => setSelectedNotification(null)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>
-              <div className="p-6">
-                <div className="mb-4">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-semibold">To:</span> {selectedNotification.recipientEmail}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Status:</span> {getStatusBadge(selectedNotification.status)}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Subject:</span> {selectedNotification.subject}
-                    </div>
-                    <div>
-                      <span className="font-semibold">Type:</span> {selectedNotification.type}
-                    </div>
-                  </div>
-                </div>
-                <div className="border-t border-gray-200 pt-4">
-                  <h3 className="font-semibold mb-2">HTML Content:</h3>
-                  <div 
-                    className="border border-gray-300 rounded p-4 bg-gray-50 overflow-auto max-h-96"
-                    dangerouslySetInnerHTML={{ __html: selectedNotification.htmlContent || '' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Enhanced Email Detail Modal */}
+        {selectedEmailId && (
+          <EmailDetailModal
+            emailId={selectedEmailId}
+            isOpen={showEmailModal}
+            onClose={() => {
+              setShowEmailModal(false);
+              setSelectedEmailId(null);
+            }}
+            onResend={() => {
+              fetchData(); // Refresh the list after resending
+            }}
+          />
         )}
       </div>
     </div>
