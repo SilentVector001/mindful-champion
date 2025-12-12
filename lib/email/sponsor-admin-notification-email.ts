@@ -1,4 +1,5 @@
 import { getResendClient } from './resend-client';
+import { logEmail } from './log-email';
 
 export interface SponsorAdminNotificationEmailData {
   companyName: string;
@@ -24,6 +25,10 @@ export async function sendSponsorAdminNotificationEmail(data: SponsorAdminNotifi
   
   // Admin email - should be configurable
   const adminEmail = process.env.ADMIN_EMAIL || 'lee@mindfulchampion.com';
+  
+  let htmlContent = '';
+  let textContent = '';
+  let sendResult = { success: false, error: null as any };
 
   const tierColors: { [key: string]: { bg: string; text: string; badge: string } } = {
     BRONZE: { bg: '#cd7f32', text: '#FFF', badge: '🥉 Bronze' },
@@ -34,7 +39,7 @@ export async function sendSponsorAdminNotificationEmail(data: SponsorAdminNotifi
 
   const tierColor = tierColors[data.interestedTier] || tierColors.BRONZE;
 
-  const htmlContent = `
+  htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -238,7 +243,7 @@ export async function sendSponsorAdminNotificationEmail(data: SponsorAdminNotifi
 </html>
   `.trim();
 
-  const textContent = `
+  textContent = `
 NEW SPONSOR APPLICATION SUBMITTED
 
 Company: ${data.companyName}
@@ -285,10 +290,57 @@ Mindful Champion - Sponsor Management System
       replyTo: data.email, // Reply to the sponsor directly
     });
 
+    if (result.error) {
+      sendResult = { success: false, error: result.error };
+      throw result.error;
+    }
+
+    sendResult = { success: true, error: null };
     console.log('✅ Admin notification email sent successfully:', result);
-    return result;
+    
+    // Log email to database
+    const emailLog = await logEmail(
+      {
+        type: 'SPONSOR_ADMIN_NOTIFICATION',
+        recipientEmail: adminEmail,
+        recipientName: 'Admin Team',
+        subject: `🔔 New ${data.interestedTier} Sponsor Application - ${data.companyName}`,
+        htmlContent,
+        textContent,
+        sponsorApplicationId: data.applicationId,
+        metadata: {
+          companyName: data.companyName,
+          interestedTier: data.interestedTier,
+          applicantEmail: data.email,
+        },
+        resendEmailId: result.data?.id,
+      },
+      sendResult
+    );
+    
+    return { ...result, emailLogId: emailLog?.id };
   } catch (error) {
     console.error('❌ Failed to send admin notification email:', error);
+    
+    // Log failed email to database
+    await logEmail(
+      {
+        type: 'SPONSOR_ADMIN_NOTIFICATION',
+        recipientEmail: adminEmail,
+        recipientName: 'Admin Team',
+        subject: `🔔 New ${data.interestedTier} Sponsor Application - ${data.companyName}`,
+        htmlContent,
+        textContent,
+        sponsorApplicationId: data.applicationId,
+        metadata: {
+          companyName: data.companyName,
+          interestedTier: data.interestedTier,
+          applicantEmail: data.email,
+        },
+      },
+      { success: false, error }
+    );
+    
     throw error;
   }
 }

@@ -1,4 +1,5 @@
 import { getResendClient } from './resend-client';
+import { logEmail } from './log-email';
 
 export interface SponsorApplicationEmailData {
   companyName: string;
@@ -9,11 +10,15 @@ export interface SponsorApplicationEmailData {
 }
 
 export async function sendSponsorApplicationEmail(data: SponsorApplicationEmailData) {
-  try {
-    const resendClient = getResendClient();
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindful-champion-2hzb4j.abacusai.app';
+  const resendClient = getResendClient();
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://mindful-champion-2hzb4j.abacusai.app';
+  
+  let htmlContent = '';
+  let plainText = '';
+  let sendResult = { success: false, error: null as any };
 
-    const htmlContent = `
+  try {
+    htmlContent = `
 <!DOCTYPE html>
 <html>
 <head>
@@ -169,7 +174,7 @@ export async function sendSponsorApplicationEmail(data: SponsorApplicationEmailD
 </html>
     `;
 
-    const plainText = `
+    plainText = `
 🎉 Sponsor Application Received!
 
 Hi ${data.contactPerson},
@@ -222,13 +227,54 @@ Your Complete Pickleball Coaching Ecosystem
     });
 
     if (result.error) {
+      sendResult = { success: false, error: result.error };
       throw result.error;
     }
 
+    sendResult = { success: true, error: null };
     console.log(`✅ Sponsor application email sent successfully to ${data.email}`);
-    return { success: true };
+    
+    // Log email to database
+    const emailLog = await logEmail(
+      {
+        type: 'SPONSOR_APPLICATION',
+        recipientEmail: data.email,
+        recipientName: data.contactPerson,
+        subject: `🎉 Application Received - ${data.companyName} | Mindful Champion`,
+        htmlContent,
+        textContent: plainText,
+        sponsorApplicationId: data.applicationId,
+        metadata: {
+          companyName: data.companyName,
+          interestedTier: data.interestedTier,
+        },
+        resendEmailId: result.data?.id,
+      },
+      sendResult
+    );
+    
+    return { success: true, emailLogId: emailLog?.id };
   } catch (error) {
     console.error('❌ Error sending sponsor application email:', error);
+    
+    // Log failed email to database
+    await logEmail(
+      {
+        type: 'SPONSOR_APPLICATION',
+        recipientEmail: data.email,
+        recipientName: data.contactPerson,
+        subject: `🎉 Application Received - ${data.companyName} | Mindful Champion`,
+        htmlContent,
+        textContent: plainText,
+        sponsorApplicationId: data.applicationId,
+        metadata: {
+          companyName: data.companyName,
+          interestedTier: data.interestedTier,
+        },
+      },
+      { success: false, error }
+    );
+    
     // Don't throw - email failure shouldn't prevent application submission
     return { success: false, error };
   }
