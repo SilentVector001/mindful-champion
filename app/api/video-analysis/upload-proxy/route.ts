@@ -1,5 +1,5 @@
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
+export const maxDuration = 120; // Increased to 2 minutes for larger files
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
@@ -12,8 +12,22 @@ import { prisma } from "@/lib/db";
  * Upload video file directly through the server (proxy method)
  */
 export async function POST(request: NextRequest) {
+  console.log("[Upload Proxy] === Starting upload request ===");
+  const startTime = Date.now();
+  
   try {
+    // Check if Blob token is configured
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.error("[Upload Proxy] ❌ BLOB_READ_WRITE_TOKEN not configured!");
+      return NextResponse.json(
+        { error: "Storage not configured. Please contact support.", details: "Missing BLOB_READ_WRITE_TOKEN" },
+        { status: 500 }
+      );
+    }
+    
     const session = await getServerSession(authOptions);
+    console.log("[Upload Proxy] Session check:", { hasSession: !!session, email: session?.user?.email });
+    
     if (!session?.user?.email) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -33,8 +47,11 @@ export async function POST(request: NextRequest) {
         { status: 404 }
       );
     }
+    
+    console.log("[Upload Proxy] User found:", { userId: user.id, tier: user.subscriptionTier });
 
     // Parse form data
+    console.log("[Upload Proxy] Parsing form data...");
     const formData = await request.formData();
     const file = formData.get("file") as File;
     const originalFileName = formData.get("fileName") as string;
@@ -107,7 +124,9 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    console.log("[Upload Proxy] Video record created:", videoAnalysis.id);
+    const totalTime = Date.now() - startTime;
+    console.log("[Upload Proxy] ✅ Video record created:", videoAnalysis.id);
+    console.log("[Upload Proxy] === Upload complete in", totalTime, "ms ===");
 
     return NextResponse.json({
       success: true,
@@ -115,16 +134,36 @@ export async function POST(request: NextRequest) {
       key: cloudStoragePath, // Frontend expects 'key'
       url: cloudStoragePath, // Frontend expects 'url'
       cloudStoragePath,
-      uploadTime: 0, // Placeholder for compatibility
-      totalTime: 0, // Placeholder for compatibility
+      uploadTime: totalTime,
+      totalTime: totalTime,
       message: "Video uploaded successfully"
     });
   } catch (error) {
-    console.error("[Upload Proxy] Error:", error);
+    const errorTime = Date.now() - startTime;
+    console.error("[Upload Proxy] ❌ Error after", errorTime, "ms:", error);
+    
+    // Provide specific error messages
+    let errorMessage = "Failed to upload video";
+    let errorDetails = "Unknown error";
+    
+    if (error instanceof Error) {
+      errorDetails = error.message;
+      
+      if (error.message.includes("token") || error.message.includes("BLOB")) {
+        errorMessage = "Storage configuration error";
+      } else if (error.message.includes("limit") || error.message.includes("quota")) {
+        errorMessage = "Storage limit exceeded";
+      } else if (error.message.includes("size")) {
+        errorMessage = "File too large";
+      } else if (error.message.includes("timeout")) {
+        errorMessage = "Upload timed out";
+      }
+    }
+    
     return NextResponse.json(
       {
-        error: "Failed to upload video",
-        details: error instanceof Error ? error.message : "Unknown error"
+        error: errorMessage,
+        details: errorDetails
       },
       { status: 500 }
     );
