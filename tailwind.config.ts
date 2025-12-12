@@ -121,6 +121,10 @@ const config: Config = {
           '0%': { transform: 'translateY(0) rotate(0deg)', opacity: '1' },
           '100%': { transform: 'translateY(100vh) rotate(360deg)', opacity: '0' },
         },
+        'flash-1s': {
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.3' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -130,6 +134,7 @@ const config: Config = {
         'slide-up-fade': 'slide-up-fade 0.15s ease-out',
         'champion-pulse': 'champion-pulse 2s ease-in-out infinite',
         'confetti': 'confetti 3s ease-out forwards',
+        'flash-1s': 'flash-1s 1s ease-in-out',
       },
     },
   },

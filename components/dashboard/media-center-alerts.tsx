@@ -61,6 +61,8 @@ const getAlertColor = (status: string, type: string) => {
 export default function MediaCenterAlerts() {
   const [alerts, setAlerts] = useState<MediaAlert[]>([])
   const [loading, setLoading] = useState(true)
+  const [flashCount, setFlashCount] = useState(0)
+  const [isFlashing, setIsFlashing] = useState(true)
   const router = useRouter()
 
   useEffect(() => {
@@ -68,6 +70,20 @@ export default function MediaCenterAlerts() {
     const interval = setInterval(fetchAlerts, 60000) // Refresh every minute
     return () => clearInterval(interval)
   }, [])
+
+  // Flash animation control: exactly 5 flashes at 1 second each
+  useEffect(() => {
+    if (flashCount >= 5) {
+      setIsFlashing(false)
+      return
+    }
+
+    const timer = setTimeout(() => {
+      setFlashCount(prev => prev + 1)
+    }, 1000) // 1 second per flash
+
+    return () => clearTimeout(timer)
+  }, [flashCount])
 
   const fetchAlerts = async () => {
     try {
@@ -215,8 +231,16 @@ export default function MediaCenterAlerts() {
                             {alert.title}
                           </h4>
                           {alert.status === 'live' && (
-                            <Badge className="bg-red-500 text-white text-xs flex items-center gap-1 animate-pulse">
-                              <div className="w-1.5 h-1.5 bg-white rounded-full" />
+                            <Badge 
+                              className={cn(
+                                "bg-red-500 text-white text-xs flex items-center gap-1",
+                                isFlashing && "animate-flash-1s"
+                              )}
+                            >
+                              <div className={cn(
+                                "w-1.5 h-1.5 bg-white rounded-full",
+                                isFlashing && "animate-flash-1s"
+                              )} />
                               LIVE
                             </Badge>
                           )}
