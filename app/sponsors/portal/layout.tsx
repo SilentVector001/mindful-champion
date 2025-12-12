@@ -13,7 +13,8 @@ import {
   Award,
   Target,
   Loader2,
-  ChevronRight
+  ChevronRight,
+  ShoppingCart
 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -99,7 +100,7 @@ export default function SponsorPortalLayout({
   const navItems = [
     { href: '/sponsors/portal', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/sponsors/portal/products', label: 'Products', icon: Package },
-    { href: '/sponsors/portal/point-levels', label: 'Point Levels', icon: Target },
+    { href: '/sponsors/portal/redemptions', label: 'Redemptions', icon: ShoppingCart },
     { href: '/sponsors/portal/analytics', label: 'Analytics', icon: TrendingUp },
     { href: '/sponsors/portal/settings', label: 'Settings', icon: Settings },
   ];
