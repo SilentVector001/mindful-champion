@@ -40,7 +40,8 @@ import {
   Radio,
   Bell,
   UserPlus,
-  CheckCircle2
+  CheckCircle2,
+  ExternalLink
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center'
@@ -583,14 +584,13 @@ export function TournamentHubEnhanced() {
                       size="lg"
                       className="w-full md:w-auto px-8 bg-white hover:bg-teal-50 border-2 border-teal-300 hover:border-teal-500 transition-all"
                       onClick={() => {
-                        // Scroll to the top of the page to see all states
-                        window.scrollTo({ top: 0, behavior: 'smooth' })
-                        toast.success('Showing all tournament states above!')
+                        // Open USA Pickleball tournament finder in new tab
+                        window.open('https://usapickleball.org/play/tournament-calendar/', '_blank', 'noopener,noreferrer');
                       }}
                     >
                       <Globe className="w-4 h-4 mr-2" />
                       View Full Map
-                      <ChevronRight className="w-4 h-4 ml-2" />
+                      <ExternalLink className="w-4 h-4 ml-2" />
                     </Button>
                   </div>
                 </div>
