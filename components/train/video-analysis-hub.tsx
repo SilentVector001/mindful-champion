@@ -198,6 +198,8 @@ export default function VideoAnalysisHub() {
         const uploadPromise = new Promise<{key: string, url: string, videoId: string}>((resolve, reject) => {
           // Track upload progress
           let lastReportedProgress = 0
+          let uploadComplete = false
+          
           xhr.upload.addEventListener('progress', (e) => {
             if (e.lengthComputable) {
               const percentComplete = (e.loaded / e.total) * 100
@@ -209,23 +211,35 @@ export default function VideoAnalysisHub() {
                 console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
                 lastReportedProgress = rounded
               }
+              
+              if (rounded === 100 && !uploadComplete) {
+                uploadComplete = true
+                console.log('[Upload] 📤 Upload complete, waiting for server processing...')
+              }
             }
           })
 
           xhr.addEventListener('load', () => {
             if (xhr.status === 200) {
-              const response = JSON.parse(xhr.responseText)
-              console.log('[Upload] ✅ Server proxy upload successful')
-              console.log('[Upload] Upload time:', `${response.uploadTime}ms`)
-              console.log('[Upload] Total time:', `${response.totalTime}ms`)
-              console.log('[Upload] Video ID:', response.videoId)
-              resolve({ key: response.key, url: response.url, videoId: response.videoId })
+              try {
+                const response = JSON.parse(xhr.responseText)
+                console.log('[Upload] ✅ Server proxy upload successful')
+                console.log('[Upload] Video ID:', response.videoId)
+                resolve({ key: response.key, url: response.url, videoId: response.videoId })
+              } catch (parseError) {
+                console.error('[Upload] ❌ Failed to parse server response')
+                reject(new Error('Invalid server response. Please try again.'))
+              }
             } else {
-              const errorData = JSON.parse(xhr.responseText || '{"error":"Upload failed"}')
-              console.error('[Upload] ❌ Server proxy upload failed')
-              console.error('[Upload] Status:', xhr.status, xhr.statusText)
-              console.error('[Upload] Error:', errorData)
-              reject(new Error(errorData.error || 'Server proxy upload failed'))
+              let errorMessage = 'Upload failed'
+              try {
+                const errorData = JSON.parse(xhr.responseText || '{"error":"Upload failed"}')
+                errorMessage = errorData.error || errorData.details || 'Upload failed'
+              } catch (e) {
+                errorMessage = `Upload failed with status ${xhr.status}`
+              }
+              console.error('[Upload] ❌ Server proxy upload failed:', errorMessage)
+              reject(new Error(errorMessage))
             }
           })
 
@@ -238,8 +252,14 @@ export default function VideoAnalysisHub() {
             console.error('[Upload] ⚠️ Upload cancelled by user or browser')
             reject(new Error('Upload cancelled'))
           })
+          
+          xhr.addEventListener('timeout', () => {
+            console.error('[Upload] ⏱️ Upload timed out')
+            reject(new Error('Upload timed out. The file may be too large or connection too slow. Please try again.'))
+          })
 
           xhr.open('POST', '/api/video-analysis/upload-proxy')
+          xhr.timeout = 300000 // 5 minute timeout for large files
           xhr.send(formData)
         })
 
