@@ -75,43 +75,43 @@ const BRAND_COLORS = {
 const PICKLEBALL_CONTENT = {
   featuredEvents: [
     {
-      id: 'ppa-finals-2024',
+      id: 'ppa-finals-2025',
       title: 'PPA Tour Championship Finals',
       subtitle: 'The pinnacle of professional pickleball competition',
-      date: 'Dec 15, 2024',
+      date: 'Dec 15, 2025',
       location: 'Las Vegas, NV',
       image: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
-      isLive: false,
-      isUpcoming: true,
-      viewerCount: 0,
+      isLive: true,
+      isUpcoming: false,
+      viewerCount: 12453,
       organization: 'PPA Tour',
       streamUrl: 'https://www.ppatour.com/watch'
     },
     {
-      id: 'mlp-miami-2024',
+      id: 'app-fort-lauderdale-2025',
+      title: 'APP Fort Lauderdale Open',
+      subtitle: 'Premier pickleball at The Fort in South Florida',
+      date: 'Dec 18, 2025',
+      location: 'Fort Lauderdale, FL',
+      image: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
+      isLive: true,
+      isUpcoming: false,
+      viewerCount: 8721,
+      organization: 'APP Tour',
+      streamUrl: 'https://www.theapp.global'
+    },
+    {
+      id: 'mlp-miami-2026',
       title: 'MLP Miami Slam',
       subtitle: 'Major League Pickleball returns to Miami',
-      date: 'Dec 20, 2024',
+      date: 'Jan 10, 2026',
       location: 'Miami, FL',
-      image: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
+      image: 'https://images.pickleball.com/news/1724094389936/KC_TYSON%20X%20JAUME_MD-3.jpg',
       isLive: false,
       isUpcoming: true,
       viewerCount: 0,
       organization: 'MLP',
       streamUrl: 'https://www.majorleaguepickleball.net'
-    },
-    {
-      id: 'app-masters-2024',
-      title: 'APP Tour Masters',
-      subtitle: 'Elite competition at its finest',
-      date: 'Dec 22, 2024',
-      location: 'Phoenix, AZ',
-      image: 'https://images.pickleball.com/news/1724094389936/KC_TYSON%20X%20JAUME_MD-3.jpg',
-      isLive: false,
-      isUpcoming: true,
-      viewerCount: 0,
-      organization: 'APP Tour',
-      streamUrl: 'https://www.theapp.global'
     }
   ],
   trendingVideos: [
@@ -197,10 +197,10 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [liveData, setLiveData] = useState({
-    liveStreams: 0,
-    activeMatches: 3,
+    liveStreams: 2,
+    activeMatches: 5,
     upcomingEvents: 14,
-    totalViewers: 0
+    totalViewers: 21174
   });
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
@@ -1344,7 +1344,7 @@ function PodcastsContent() {
       id: 'p1',
       title: 'The Dink Podcast',
       host: 'Thomas Shields & Zane Navratil',
-      episode: 'Episode 245: 2024 Championship Predictions',
+      episode: 'Episode 312: 2025 Championship Predictions',
       description: 'Deep dive into the upcoming championship season with expert analysis and pro player insights',
       duration: '58 min',
       image: '/podcast-dink.jpg',
@@ -1465,6 +1465,15 @@ function PodcastsContent() {
                     podcast.gradient,
                     "hover:opacity-90"
                   )}
+                  onClick={() => {
+                    const podcastUrls: Record<string, string> = {
+                      'p1': 'https://thedinkpickleball.com/podcast/',
+                      'p2': 'https://www.thirdshot.com/pickleball-fire-podcast',
+                      'p3': 'https://www.pickleballkitchen.com/podcast/'
+                    };
+                    const url = podcastUrls[podcast.id] || 'https://podcasts.apple.com/us/genre/podcasts-sports/id1545';
+                    window.open(url, '_blank', 'noopener,noreferrer');
+                  }}
                 >
                   <Play className="w-4 h-4 mr-2" />
                   Listen Now
