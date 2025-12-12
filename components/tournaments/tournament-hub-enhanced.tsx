@@ -41,8 +41,7 @@ import {
   Bell,
   UserPlus,
   CheckCircle2,
-  ExternalLink,
-  Info
+  ExternalLink
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center'
@@ -1251,14 +1250,6 @@ export function TournamentHubEnhanced() {
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Activity className="w-5 h-5" />
                     Live Activity
-                    <div className="group relative">
-                      <Info className="w-4 h-4 text-white/70 hover:text-white cursor-help transition-colors" />
-                      <div className="invisible group-hover:visible absolute left-0 top-full mt-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-xl z-50">
-                        <p className="font-semibold mb-1">Real-time Tournament Activity</p>
-                        <p className="text-white/80">Shows simulated live registrations and match completions. In production, this connects to actual tournament data APIs for real-time updates.</p>
-                        <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-900 rotate-45" />
-                      </div>
-                    </div>
                     <Badge className={`bg-white/20 text-white border-0 ml-auto ${pulseCount < 5 ? 'animate-pulse' : ''}`}>
                       <Radio className="w-3 h-3 mr-1" />
                       Live
@@ -1304,14 +1295,6 @@ export function TournamentHubEnhanced() {
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Flame className="w-5 h-5" />
                     Trending Now
-                    <div className="group relative">
-                      <Info className="w-4 h-4 text-white/70 hover:text-white cursor-help transition-colors" />
-                      <div className="invisible group-hover:visible absolute left-0 top-full mt-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-xl z-50">
-                        <p className="font-semibold mb-1">Most Popular Tournaments</p>
-                        <p className="text-white/80">Ranked by registration numbers, view counts, and community engagement. Updated every hour based on user activity.</p>
-                        <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-900 rotate-45" />
-                      </div>
-                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 space-y-3">
