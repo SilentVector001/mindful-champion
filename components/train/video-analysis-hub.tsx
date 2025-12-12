@@ -28,13 +28,14 @@ import type { VideoAnalysisData, VideoLibraryStats } from "@/lib/video-analysis-
 import MainNavigation from "@/components/navigation/main-navigation"
 import CompactNotificationCenter from "@/components/notifications/compact-notification-center"
 import { AchievementToast, useAchievementNotifications } from "@/components/rewards/achievement-toast"
+import { upload } from '@vercel/blob/client'
 
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
   const { achievements, isShowing, dismissAchievements, checkForAchievements } = useAchievementNotifications()
   
-  // Upload method toggle - set to true to bypass CORS (server-side proxy)
-  const USE_PROXY_UPLOAD = true // Toggle: true=server proxy, false=direct S3
+  // Upload method: 'client' = direct to Blob (bypasses 4.5MB limit), 'proxy' = server proxy
+  const UPLOAD_METHOD: 'client' | 'proxy' = 'client' // Use client-side direct upload
   
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload')
   const [uploading, setUploading] = useState(false)
@@ -173,7 +174,7 @@ export default function VideoAnalysisHub() {
     try {
       console.log('='.repeat(80))
       console.log('[Upload] 🎬 Starting video upload process')
-      console.log('[Upload] Method:', USE_PROXY_UPLOAD ? 'Server Proxy (No CORS)' : 'Direct S3 (Requires CORS)')
+      console.log('[Upload] Method:', UPLOAD_METHOD === 'client' ? 'Client Direct Upload (bypasses 4.5MB limit)' : 'Server Proxy')
       console.log('[Upload] File:', selectedFile.name)
       console.log('[Upload] Size:', `${(selectedFile.size / (1024 * 1024)).toFixed(2)} MB`)
       console.log('[Upload] Type:', selectedFile.type)
@@ -181,13 +182,70 @@ export default function VideoAnalysisHub() {
 
       let key: string
       let videoUrl: string | undefined
-      let videoId: string | undefined // Track videoId from proxy upload
+      let videoId: string | undefined
 
-      if (USE_PROXY_UPLOAD) {
+      if (UPLOAD_METHOD === 'client') {
         // ============================================
-        // METHOD 1: Server-Side Proxy Upload (No CORS)
+        // CLIENT-SIDE DIRECT UPLOAD (Bypasses 4.5MB limit)
+        // Uploads directly to Vercel Blob storage
         // ============================================
-        console.log('[Upload] Using server-side proxy upload (bypasses CORS)')
+        console.log('[Upload] Using client-side direct upload to Vercel Blob')
+        
+        try {
+          // Upload directly to Vercel Blob using client SDK
+          const blob = await upload(selectedFile.name, selectedFile, {
+            access: 'public',
+            handleUploadUrl: '/api/video-analysis/upload-handler',
+            clientPayload: JSON.stringify({
+              fileName: selectedFile.name,
+              fileSize: selectedFile.size,
+              contentType: selectedFile.type
+            }),
+            onUploadProgress: (progressEvent) => {
+              const percentComplete = Math.round((progressEvent.loaded / progressEvent.total) * 100)
+              setUploadProgress(percentComplete)
+              if (percentComplete % 10 === 0) {
+                console.log(`[Upload] 📤 Progress: ${percentComplete}%`)
+              }
+            }
+          })
+
+          console.log('[Upload] ✅ Client direct upload successful:', blob.url)
+          key = blob.url
+          videoUrl = blob.url
+
+          // Save video record to database
+          console.log('[Upload] 💾 Saving video record to database...')
+          const saveRes = await fetch('/api/video-analysis/save-upload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              url: blob.url,
+              fileName: selectedFile.name,
+              fileSize: selectedFile.size,
+              contentType: selectedFile.type
+            })
+          })
+
+          if (!saveRes.ok) {
+            const errorData = await saveRes.json()
+            throw new Error(errorData.error || 'Failed to save video record')
+          }
+
+          const saveData = await saveRes.json()
+          videoId = saveData.videoId
+          console.log('[Upload] ✅ Video record saved:', videoId)
+
+        } catch (uploadError: any) {
+          console.error('[Upload] ❌ Client upload failed:', uploadError)
+          throw new Error(uploadError.message || 'Upload failed. Please try again.')
+        }
+
+      } else {
+        // ============================================
+        // SERVER PROXY UPLOAD (Legacy - has 4.5MB limit on Vercel)
+        // ============================================
+        console.log('[Upload] Using server-side proxy upload')
         
         const formData = new FormData()
         formData.append('file', selectedFile)
@@ -196,7 +254,6 @@ export default function VideoAnalysisHub() {
         const xhr = new XMLHttpRequest()
         
         const uploadPromise = new Promise<{key: string, url: string, videoId: string}>((resolve, reject) => {
-          // Track upload progress
           let lastReportedProgress = 0
           let uploadComplete = false
           
@@ -206,9 +263,8 @@ export default function VideoAnalysisHub() {
               const rounded = Math.round(percentComplete)
               setUploadProgress(rounded)
               
-              // Log every 10% progress
               if (rounded >= lastReportedProgress + 10 || rounded === 100) {
-                console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
+                console.log(`[Upload] 📤 Upload progress: ${rounded}%`)
                 lastReportedProgress = rounded
               }
               
@@ -224,136 +280,40 @@ export default function VideoAnalysisHub() {
               try {
                 const response = JSON.parse(xhr.responseText)
                 console.log('[Upload] ✅ Server proxy upload successful')
-                console.log('[Upload] Video ID:', response.videoId)
                 resolve({ key: response.key, url: response.url, videoId: response.videoId })
               } catch (parseError) {
-                console.error('[Upload] ❌ Failed to parse server response')
                 reject(new Error('Invalid server response. Please try again.'))
               }
             } else {
-              let errorMessage = 'Upload failed'
+              let errorMessage = `Upload failed with status ${xhr.status}`
               try {
-                const errorData = JSON.parse(xhr.responseText || '{"error":"Upload failed"}')
-                errorMessage = errorData.error || errorData.details || 'Upload failed'
-              } catch (e) {
-                errorMessage = `Upload failed with status ${xhr.status}`
-              }
-              console.error('[Upload] ❌ Server proxy upload failed:', errorMessage)
+                const errorData = JSON.parse(xhr.responseText || '{}')
+                errorMessage = errorData.error || errorData.details || errorMessage
+              } catch (e) {}
               reject(new Error(errorMessage))
             }
           })
 
-          xhr.addEventListener('error', () => {
-            console.error('[Upload] ❌ Network error during proxy upload')
-            reject(new Error('Network error during upload. Please check your connection and try again.'))
-          })
-
-          xhr.addEventListener('abort', () => {
-            console.error('[Upload] ⚠️ Upload cancelled by user or browser')
-            reject(new Error('Upload cancelled'))
-          })
-          
-          xhr.addEventListener('timeout', () => {
-            console.error('[Upload] ⏱️ Upload timed out')
-            reject(new Error('Upload timed out. The file may be too large or connection too slow. Please try again.'))
-          })
+          xhr.addEventListener('error', () => reject(new Error('Network error. Please check your connection.')))
+          xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
+          xhr.addEventListener('timeout', () => reject(new Error('Upload timed out. Try a smaller file.')))
 
           xhr.open('POST', '/api/video-analysis/upload-proxy')
-          xhr.timeout = 300000 // 5 minute timeout for large files
+          xhr.timeout = 300000
           xhr.send(formData)
         })
 
         const result = await uploadPromise
         key = result.key
         videoUrl = result.url
-        videoId = result.videoId // Store videoId from proxy upload
-
-      } else {
-        // ============================================
-        // METHOD 2: Direct S3 Upload (Requires CORS)
-        // ============================================
-        console.log('[Upload] Using direct S3 upload (requires CORS)')
-        
-        // Step 1: Get pre-signed URL
-        console.log('[Upload] STEP 1/2: Requesting pre-signed URL from server...')
-        const preSignedRes = await fetch('/api/video-analysis/pre-signed-url', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            fileName: selectedFile.name,
-            fileType: selectedFile.type,
-            fileSize: selectedFile.size
-          })
-        })
-
-        if (!preSignedRes.ok) {
-          const errorData = await preSignedRes.json()
-          console.error('[Upload] ❌ Failed to get upload URL:', errorData)
-          throw new Error(errorData.error || 'Failed to get upload URL')
-        }
-
-        const { uploadUrl, key: s3Key } = await preSignedRes.json()
-        key = s3Key
-        console.log('[Upload] ✅ Pre-signed URL received')
-        console.log('[Upload] Storage key:', key)
-
-        // Step 2: Upload to S3
-        console.log('[Upload] STEP 2/2: Uploading file to S3...')
-        const xhr = new XMLHttpRequest()
-        
-        const uploadPromise = new Promise<void>((resolve, reject) => {
-          let lastReportedProgress = 0
-          xhr.upload.addEventListener('progress', (e) => {
-            if (e.lengthComputable) {
-              const percentComplete = (e.loaded / e.total) * 100
-              const rounded = Math.round(percentComplete)
-              setUploadProgress(rounded)
-              
-              if (rounded >= lastReportedProgress + 10 || rounded === 100) {
-                console.log(`[Upload] 📤 Upload progress: ${rounded}% (${(e.loaded / (1024 * 1024)).toFixed(2)} MB / ${(e.total / (1024 * 1024)).toFixed(2)} MB)`)
-                lastReportedProgress = rounded
-              }
-            }
-          })
-
-          xhr.addEventListener('load', () => {
-            if (xhr.status === 200 || xhr.status === 204) {
-              console.log('[Upload] ✅ File successfully uploaded to S3!')
-              resolve()
-            } else {
-              console.error('[Upload] ❌ S3 upload failed')
-              console.error('[Upload] Status:', xhr.status, xhr.statusText)
-              console.error('[Upload] Response:', xhr.responseText)
-              reject(new Error(`S3 upload failed with status ${xhr.status}: ${xhr.statusText}`))
-            }
-          })
-
-          xhr.addEventListener('error', (e) => {
-            console.error('[Upload] ❌ Network error during S3 upload')
-            console.error('[Upload] This is likely a CORS configuration issue')
-            console.error('[Upload] Error details:', e)
-            reject(new Error('Network error during upload. This may be a CORS issue - try enabling USE_PROXY_UPLOAD=true'))
-          })
-
-          xhr.addEventListener('abort', () => {
-            console.error('[Upload] ⚠️ Upload cancelled by user or browser')
-            reject(new Error('Upload cancelled'))
-          })
-
-          xhr.open('PUT', uploadUrl)
-          xhr.setRequestHeader('Content-Type', selectedFile.type)
-          xhr.send(selectedFile)
-        })
-
-        await uploadPromise
+        videoId = result.videoId
       }
 
       setUploadProgress(100)
       console.log('[Upload] ✅ Upload complete!')
 
-      // Confirm upload with database (only needed for direct S3 upload)
-      // Proxy upload already creates the database record
-      if (!USE_PROXY_UPLOAD) {
+      // Only confirm upload for legacy proxy method (client upload handles this)
+      if (UPLOAD_METHOD === 'proxy' && !videoId) {
         console.log('[Upload] Saving video record to database...')
         const confirmRes = await fetch('/api/video-analysis/confirm-upload', {
           method: 'POST',
