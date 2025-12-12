@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { getFileUrl } from "@/lib/s3";
+import { getFileUrl } from "@/lib/blob";
 
 /**
  * POST /api/video-analysis/analyze

@@ -1,6 +1,6 @@
 
 import { NextResponse } from "next/server"
-import { getFileUrl } from "@/lib/s3"
+import { getFileUrl } from "@/lib/blob"
 
 export const dynamic = 'force-dynamic'
 

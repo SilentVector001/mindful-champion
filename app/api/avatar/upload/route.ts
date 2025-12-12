@@ -2,7 +2,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { NextResponse } from "next/server"
-import { uploadFile } from "@/lib/s3"
+import { uploadFile } from "@/lib/blob"
 import { getBucketConfig } from "@/lib/aws-config"
 
 export async function POST(req: Request) {

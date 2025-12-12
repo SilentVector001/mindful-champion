@@ -100,6 +100,7 @@
     "@types/pdfkit": "^0.17.3",
     "@types/plotly.js": "2.35.5",
     "@types/react-plotly.js": "2.6.3",
+    "@vercel/blob": "^2.0.0",
     "autoprefixer": "10.4.15",
     "aws-sdk": "^2.1692.0",
     "bcryptjs": "2.4.3",
