@@ -41,7 +41,8 @@ import {
   Bell,
   UserPlus,
   CheckCircle2,
-  ExternalLink
+  ExternalLink,
+  Info
 } from 'lucide-react'
 import { toast } from 'sonner'
 import CompactNotificationCenter from '@/components/notifications/compact-notification-center'
@@ -631,6 +632,23 @@ export function TournamentHubEnhanced() {
   const [liveActivities, setLiveActivities] = useState<any[]>([])
   const [hoveredState, setHoveredState] = useState<string | null>(null)
   const [selectedMapState, setSelectedMapState] = useState<string | null>(null)
+  const [mapExpanded, setMapExpanded] = useState(false)
+  const [pulseCount, setPulseCount] = useState(0)
+  const mapRef = useCallback((node: HTMLDivElement | null) => {
+    if (node && mapExpanded) {
+      node.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }, [mapExpanded])
+
+  // Pulse animation - flash 5 times then stop
+  useEffect(() => {
+    if (pulseCount < 5) {
+      const timer = setTimeout(() => {
+        setPulseCount(prev => prev + 1)
+      }, 1000) // 1 second interval
+      return () => clearTimeout(timer)
+    }
+  }, [pulseCount])
 
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState('')
@@ -817,13 +835,19 @@ export function TournamentHubEnhanced() {
     }
   }
 
-  const getStateColor = (abbr: string) => {
-    const count = tournamentsByState[abbr] || 0
-    if (count === 0) return 'fill-slate-200'
-    if (count >= 5) return 'fill-teal-600'
-    if (count >= 3) return 'fill-teal-500'
-    if (count >= 1) return 'fill-teal-400'
-    return 'fill-slate-200'
+  const getStateColor = (abbr: string, count: number, maxCount: number) => {
+    if (count === 0) return 'from-slate-100 to-slate-200'
+    
+    // Calculate intensity ratio (0 to 1)
+    const ratio = count / maxCount
+    
+    // Create gradient from light teal (few events) to deep teal/cyan (many events)
+    // Low count: light teal, High count: deep teal/cyan
+    if (ratio >= 0.8) return 'from-teal-600 to-cyan-600' // Most events (80-100%)
+    if (ratio >= 0.6) return 'from-teal-500 to-cyan-500' // Many events (60-80%)
+    if (ratio >= 0.4) return 'from-teal-400 to-cyan-400' // Medium events (40-60%)
+    if (ratio >= 0.2) return 'from-teal-300 to-cyan-300' // Some events (20-40%)
+    return 'from-teal-200 to-cyan-200' // Few events (1-20%)
   }
 
   const totalPrizePool = allTournaments.reduce((acc, t) => acc + (t.prizePool || 0), 0)
@@ -1009,7 +1033,7 @@ export function TournamentHubEnhanced() {
             </Card>
 
             {/* Tournament Map - Full Width at Top */}
-            <Card className="border-2 border-teal-200 shadow-lg bg-gradient-to-br from-teal-50 to-white">
+            <Card ref={mapRef} className="border-2 border-teal-200 shadow-lg bg-gradient-to-br from-teal-50 to-white">
               <CardHeader className="bg-gradient-to-r from-teal-500 to-cyan-500 py-4">
                 <CardTitle className="flex items-center gap-2 text-white text-xl">
                   <Map className="w-6 h-6" />
@@ -1027,49 +1051,57 @@ export function TournamentHubEnhanced() {
                 <div className="space-y-4">
                   {/* State Grid - Showing all states with tournaments */}
                   <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-                    {Object.entries(
-                      tournaments.reduce((acc, t) => {
-                        acc[t.state] = (acc[t.state] || 0) + 1
-                        return acc
-                      }, {} as Record<string, number>)
-                    )
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([state, count]) => {
-                      const isSelected = selectedMapState === state
-                      return (
-                        <motion.div
-                          key={state}
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          className={`p-3 bg-gradient-to-br rounded-lg transition-all cursor-pointer ${
-                            isSelected 
-                              ? 'from-teal-500 to-cyan-500 border-2 border-teal-700 shadow-lg' 
-                              : 'from-teal-100 to-white border-2 border-teal-200 hover:border-teal-400 hover:shadow-md'
-                          }`}
-                          onClick={() => {
-                            setSelectedState(state)
-                            const stateName = US_STATES.find(s => s.abbr === state)?.name
-                            if (stateName) setSelectedMapState(isSelected ? null : state)
-                          }}
-                        >
-                          <div className="flex flex-col items-center justify-center">
-                            <span className={`font-bold text-lg ${isSelected ? 'text-white' : 'text-slate-900'}`}>
-                              {state}
-                            </span>
-                            <Badge 
-                              variant="secondary" 
-                              className={`text-xs mt-1 ${
-                                isSelected 
-                                  ? 'bg-white/30 text-white' 
-                                  : 'bg-teal-100 text-teal-700'
-                              }`}
-                            >
-                              {count} {count === 1 ? 'event' : 'events'}
-                            </Badge>
-                          </div>
-                        </motion.div>
-                      )
-                    })}
+                    {(() => {
+                      const stateCounts = Object.entries(
+                        tournaments.reduce((acc, t) => {
+                          acc[t.state] = (acc[t.state] || 0) + 1
+                          return acc
+                        }, {} as Record<string, number>)
+                      ).sort((a, b) => b[1] - a[1])
+                      
+                      const maxCount = Math.max(...stateCounts.map(([_, count]) => count))
+                      
+                      return stateCounts.map(([state, count]) => {
+                        const isSelected = selectedMapState === state
+                        const gradientColor = getStateColor(state, count, maxCount)
+                        
+                        return (
+                          <motion.div
+                            key={state}
+                            whileHover={{ scale: 1.05 }}
+                            whileTap={{ scale: 0.95 }}
+                            className={`p-3 bg-gradient-to-br rounded-lg transition-all cursor-pointer ${
+                              isSelected 
+                                ? 'from-teal-600 to-cyan-600 border-2 border-teal-800 shadow-lg' 
+                                : `${gradientColor} border-2 border-teal-300 hover:border-teal-500 hover:shadow-md`
+                            }`}
+                            onClick={() => {
+                              setSelectedState(state)
+                              const stateName = US_STATES.find(s => s.abbr === state)?.name
+                              if (stateName) setSelectedMapState(isSelected ? null : state)
+                            }}
+                          >
+                            <div className="flex flex-col items-center justify-center">
+                              <span className={`font-bold text-lg ${
+                                isSelected || count / maxCount >= 0.6 ? 'text-white' : 'text-slate-900'
+                              }`}>
+                                {state}
+                              </span>
+                              <Badge 
+                                variant="secondary" 
+                                className={`text-xs mt-1 ${
+                                  isSelected || count / maxCount >= 0.6
+                                    ? 'bg-white/30 text-white' 
+                                    : 'bg-white/70 text-slate-700'
+                                }`}
+                              >
+                                {count} {count === 1 ? 'event' : 'events'}
+                              </Badge>
+                            </div>
+                          </motion.div>
+                        )
+                      })
+                    })()}
                   </div>
                   
                   {/* View Full Map Button */}
@@ -1079,13 +1111,13 @@ export function TournamentHubEnhanced() {
                       size="lg"
                       className="w-full md:w-auto px-8 bg-white hover:bg-teal-50 border-2 border-teal-300 hover:border-teal-500 transition-all"
                       onClick={() => {
-                        // Open USA Pickleball tournament finder in new tab
-                        window.open('https://usapickleball.org/play/tournament-calendar/', '_blank', 'noopener,noreferrer');
+                        setMapExpanded(!mapExpanded)
+                        toast.success(mapExpanded ? 'Map collapsed' : 'Showing all tournament states')
                       }}
                     >
-                      <Globe className="w-4 h-4 mr-2" />
-                      View Full Map
-                      <ExternalLink className="w-4 h-4 ml-2" />
+                      <Map className="w-4 h-4 mr-2" />
+                      {mapExpanded ? 'Collapse Map' : 'Expand Map View'}
+                      <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${mapExpanded ? 'rotate-90' : ''}`} />
                     </Button>
                   </div>
                 </div>
@@ -1219,7 +1251,15 @@ export function TournamentHubEnhanced() {
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Activity className="w-5 h-5" />
                     Live Activity
-                    <Badge className="bg-white/20 text-white border-0 ml-auto animate-pulse">
+                    <div className="group relative">
+                      <Info className="w-4 h-4 text-white/70 hover:text-white cursor-help transition-colors" />
+                      <div className="invisible group-hover:visible absolute left-0 top-full mt-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-xl z-50">
+                        <p className="font-semibold mb-1">Real-time Tournament Activity</p>
+                        <p className="text-white/80">Shows simulated live registrations and match completions. In production, this connects to actual tournament data APIs for real-time updates.</p>
+                        <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-900 rotate-45" />
+                      </div>
+                    </div>
+                    <Badge className={`bg-white/20 text-white border-0 ml-auto ${pulseCount < 5 ? 'animate-pulse' : ''}`}>
                       <Radio className="w-3 h-3 mr-1" />
                       Live
                     </Badge>
@@ -1264,6 +1304,14 @@ export function TournamentHubEnhanced() {
                   <CardTitle className="flex items-center gap-2 text-white text-lg">
                     <Flame className="w-5 h-5" />
                     Trending Now
+                    <div className="group relative">
+                      <Info className="w-4 h-4 text-white/70 hover:text-white cursor-help transition-colors" />
+                      <div className="invisible group-hover:visible absolute left-0 top-full mt-2 w-64 p-3 bg-slate-900 text-white text-xs rounded-lg shadow-xl z-50">
+                        <p className="font-semibold mb-1">Most Popular Tournaments</p>
+                        <p className="text-white/80">Ranked by registration numbers, view counts, and community engagement. Updated every hour based on user activity.</p>
+                        <div className="absolute -top-1 left-4 w-2 h-2 bg-slate-900 rotate-45" />
+                      </div>
+                    </div>
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="p-4 space-y-3">

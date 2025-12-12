@@ -15,6 +15,7 @@ import {
   Clock
 } from 'lucide-react'
 import { format } from 'date-fns'
+import { formatPrizeMoney } from '@/lib/format-prize'
 
 interface TournamentCardProps {
   tournament: {
@@ -137,13 +138,22 @@ export function TournamentCard({ tournament, onClick }: TournamentCardProps) {
       </div>
 
       <CardContent className="p-5 space-y-4">
-        {/* Title */}
-        <div>
-          <h3 className="font-bold text-lg text-slate-900 line-clamp-2 group-hover:text-teal-600 transition-colors">
+        {/* Title and Prize Pool - At Top */}
+        <div className="space-y-2 border-b border-slate-200 pb-3">
+          <h3 className="font-bold text-xl text-slate-900 line-clamp-2 group-hover:text-teal-600 transition-colors">
             {tournament.name}
           </h3>
+          {tournament.prizePool && (
+            <div className="flex items-center gap-2">
+              <Trophy className="w-5 h-5 text-amber-500 flex-shrink-0" />
+              <span className="text-2xl font-bold text-amber-600">
+                {formatPrizeMoney(tournament.prizePool)}
+              </span>
+              <span className="text-sm text-slate-500">prize pool</span>
+            </div>
+          )}
           {tournament.description && (
-            <p className="text-sm text-slate-600 line-clamp-2 mt-1">
+            <p className="text-sm text-slate-600 line-clamp-2 mt-2">
               {tournament.description}
             </p>
           )}
@@ -190,20 +200,13 @@ export function TournamentCard({ tournament, onClick }: TournamentCardProps) {
             </div>
           </div>
 
-          {/* Entry Fee / Prize Pool */}
-          {(tournament.entryFee || tournament.prizePool) && (
+          {/* Entry Fee */}
+          {tournament.entryFee && (
             <div className="flex items-center gap-2 text-sm">
               <DollarSign className="w-4 h-4 text-slate-500 flex-shrink-0" />
               <div className="text-slate-700">
-                {tournament.entryFee && (
-                  <span>${tournament.entryFee.toFixed(0)} entry</span>
-                )}
-                {tournament.entryFee && tournament.prizePool && <span className="mx-1">•</span>}
-                {tournament.prizePool && (
-                  <span className="text-amber-600 font-medium">
-                    ${tournament.prizePool.toLocaleString()} prize pool
-                  </span>
-                )}
+                <span className="font-medium">${tournament.entryFee.toLocaleString()}</span>
+                <span className="text-slate-500 ml-1">entry fee</span>
               </div>
             </div>
           )}
