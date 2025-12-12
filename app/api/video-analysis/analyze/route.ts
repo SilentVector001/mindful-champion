@@ -152,13 +152,32 @@ export async function POST(request: NextRequest) {
       };
     }
 
+    // Calculate overall score with proper validation
+    let overallScore = 75; // Default score
+    
+    // Try to calculate from technical breakdown if available
+    if (analysis.technicalBreakdown) {
+      const scores = Object.values(analysis.technicalBreakdown) as number[];
+      const validScores = scores.filter(s => typeof s === 'number' && !isNaN(s) && s >= 0 && s <= 10);
+      if (validScores.length > 0) {
+        const avgScore = validScores.reduce((sum, s) => sum + s, 0) / validScores.length;
+        // Convert 0-10 scale to 0-100 scale
+        overallScore = Math.round(avgScore * 10);
+      }
+    }
+    
+    // Ensure score is a valid integer between 0-100
+    overallScore = Math.max(0, Math.min(100, Math.round(overallScore)));
+    
+    console.log("[Analyze] Calculated overall score:", overallScore);
+
     // Update video analysis with results
     const updatedVideo = await prisma.videoAnalysis.update({
       where: { id: videoId },
       data: {
         analysisStatus: "COMPLETED",
         analyzedAt: new Date(),
-        overallScore: 75,
+        overallScore: overallScore, // Guaranteed to be a valid integer
         strengths: analysis.strengths,
         areasForImprovement: analysis.areasForImprovement,
         recommendations: analysis.recommendations,
@@ -180,10 +199,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       videoId: updatedVideo.id,
+      overallScore: overallScore, // Include at top level for easy access
       analysis: {
         ...analysis,
         tier: userTier,
-        overallScore: 75
+        overallScore: overallScore // Also include in analysis object
       },
       message: "Analysis completed successfully"
     });

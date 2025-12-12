@@ -28,6 +28,7 @@ import type { VideoAnalysisData, VideoLibraryStats } from "@/lib/video-analysis-
 import MainNavigation from "@/components/navigation/main-navigation"
 import CompactNotificationCenter from "@/components/notifications/compact-notification-center"
 import { AchievementToast, useAchievementNotifications } from "@/components/rewards/achievement-toast"
+import { parseScore, formatScore, getSafeScore } from "@/lib/video-analysis/score-utils"
 import { upload } from '@vercel/blob/client'
 
 export default function VideoAnalysisHub() {
@@ -458,7 +459,8 @@ export default function VideoAnalysisHub() {
         console.log('[Analyze] ✅ Analysis completed successfully!')
         
         // Show success message with clear next steps
-        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.analysis?.overallScore || data.overallScore || 75)}/100\n\n📊 Your video has been analyzed! Switch to the "My Library" tab to view detailed results and insights.`)
+        const displayScore = getSafeScore(data.analysis?.overallScore || data.overallScore, 75);
+        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${displayScore}/100\n\n📊 Your video has been analyzed! Switch to the "My Library" tab to view detailed results and insights.`)
         
         // Refresh library and switch to library tab
         await fetchVideoLibrary()
@@ -1205,11 +1207,11 @@ export default function VideoAnalysisHub() {
                               </Badge>
                             </div>
                             
-                            {video.analysisStatus === 'COMPLETED' && video.overallScore && (
+                            {video.analysisStatus === 'COMPLETED' && (
                               <div className="absolute bottom-3 left-3">
                                 <div className="bg-black/80 backdrop-blur px-4 py-2 rounded-full border border-kai-primary/30">
                                   <span className="text-kai-primary font-bold text-sm">
-                                    🎯 {video.overallScore}/100
+                                    🎯 {formatScore(video.overallScore, 'Analyzing...')}
                                   </span>
                                 </div>
                               </div>
