@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import {
@@ -17,6 +17,7 @@ import {
   Heart,
   Users,
   Globe,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,84 +25,20 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { formatPrizeMoney } from "@/lib/utils/currency"
 
 const MONTHS = ["January", "February", "March", "April", "May", "June"]
 const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
-const CALENDAR_EVENTS = [
-  { date: 15, type: "championship", name: "Miami Open", location: "FL" },
-  { date: 22, type: "amateur", name: "Community Open", location: "WA" },
-  { date: 28, type: "charity", name: "Cancer Research", location: "CA" },
-  { date: 5, type: "junior", name: "Rising Stars", location: "TX" },
-  { date: 12, type: "league", name: "League Finals", location: "MA" },
-]
-
-const ALL_EVENTS = [
-  {
-    id: "e1",
-    name: "Grand Slam - Miami Open",
-    location: "Miami, FL",
-    date: "Jan 15-19, 2025",
-    type: "championship",
-    state: "FL",
-  },
-  {
-    id: "e2",
-    name: "Community Open - Seattle",
-    location: "Seattle, WA",
-    date: "Dec 28-29, 2024",
-    type: "amateur",
-    state: "WA",
-  },
-  {
-    id: "e3",
-    name: "Pickleball for Cancer Research",
-    location: "Los Angeles, CA",
-    date: "Jan 5, 2025",
-    type: "charity",
-    state: "CA",
-  },
-  {
-    id: "e4",
-    name: "Rising Stars Junior National",
-    location: "Dallas, TX",
-    date: "Feb 1-3, 2025",
-    type: "junior",
-    state: "TX",
-  },
-  {
-    id: "e5",
-    name: "Northeast League Finals",
-    location: "Boston, MA",
-    date: "Jan 8, 2025",
-    type: "league",
-    state: "MA",
-  },
-  {
-    id: "e6",
-    name: "Southwest Regional Championship",
-    location: "Phoenix, AZ",
-    date: "Jan 22-24, 2025",
-    type: "championship",
-    state: "AZ",
-  },
-  {
-    id: "e7",
-    name: "Winter Warm-Up Tournament",
-    location: "Austin, TX",
-    date: "Jan 18-19, 2025",
-    type: "amateur",
-    state: "TX",
-  },
-  {
-    id: "e8",
-    name: "Veterans Support Tournament",
-    location: "Dallas, TX",
-    date: "Jan 12, 2025",
-    type: "charity",
-    state: "TX",
-  },
-]
+interface Tournament {
+  id: string
+  name: string
+  location: string
+  startDate: string
+  endDate?: string
+  prizePool?: number
+  type?: string
+}
 
 const TYPE_CONFIG: Record<string, { icon: typeof Trophy; color: string; label: string }> = {
   championship: { icon: Trophy, color: "text-yellow-400 bg-yellow-500/20", label: "Championship" },
@@ -116,17 +53,61 @@ export function TournamentCalendar() {
   const [viewMode, setViewMode] = useState<"calendar" | "list">("list")
   const [selectedType, setSelectedType] = useState("all")
   const [selectedState, setSelectedState] = useState("all")
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredEvents = ALL_EVENTS.filter(event => {
-    const matchesType = selectedType === "all" || event.type === selectedType
-    const matchesState = selectedState === "all" || event.state === selectedState
-    return matchesType && matchesState
-  })
+  useEffect(() => {
+    fetchAllTournaments()
+  }, [])
+
+  const fetchAllTournaments = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      const res = await fetch('/api/tournaments')
+      if (!res?.ok) throw new Error('Failed to fetch tournaments')
+      const data = await res?.json()
+      
+      setTournaments(data?.tournaments || [])
+    } catch (err) {
+      console.error('Error fetching tournaments:', err)
+      setError(err?.message || 'Failed to load tournament calendar')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (startDate: string, endDate?: string) => {
+    if (!startDate) return 'Date TBA'
+    const start = new Date(startDate)
+    const month = start?.toLocaleDateString?.('en-US', { month: 'short' })
+    const day = start?.getDate?.()
+    const year = start?.getFullYear?.()
+    
+    if (endDate) {
+      const end = new Date(endDate)
+      const endDay = end?.getDate?.()
+      return `${month} ${day}-${endDay}, ${year}`
+    }
+    return `${month} ${day}, ${year}`
+  }
+
+  const filteredEvents = tournaments?.filter?.(event => {
+    const matchesType = selectedType === "all" || event?.type === selectedType
+    // State filtering would require a state field in the database
+    return matchesType
+  }) || []
 
   const getDaysInMonth = () => {
     const days = []
     for (let i = 1; i <= 31; i++) {
-      const eventsOnDay = CALENDAR_EVENTS.filter(e => e.date === i)
+      // Match tournaments to calendar days
+      const eventsOnDay = tournaments?.filter?.(t => {
+        const date = new Date(t?.startDate)
+        return date?.getDate?.() === i && date?.getMonth?.() === currentMonth
+      }) || []
       days.push({ day: i, events: eventsOnDay })
     }
     return days
@@ -206,52 +187,70 @@ export function TournamentCalendar() {
 
       {/* Content */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        {viewMode === "list" ? (
+        {loading ? (
+          <div className="text-center py-20">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+            <p className="text-gray-400 mt-4">Loading tournament calendar...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={fetchAllTournaments} className="bg-champion-green hover:bg-champion-green/90">
+              Retry
+            </Button>
+          </div>
+        ) : viewMode === "list" ? (
           <div className="space-y-4">
-            {filteredEvents.map((event, index) => {
-              const config = TYPE_CONFIG[event.type] || TYPE_CONFIG.amateur
-              const Icon = config.icon
-              return (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-500/30 transition-all"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.color}`}>
-                      <Icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white">{event.name}</h3>
-                      <div className="flex items-center gap-3 text-sm text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {event.location}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {event.date}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Badge className={config.color}>{config.label}</Badge>
-                    <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">
-                      View Details
-                    </Button>
-                  </div>
-                </motion.div>
-              )
-            })}
-            {filteredEvents.length === 0 && (
+            {filteredEvents?.length === 0 ? (
               <div className="text-center py-12">
                 <Calendar className="w-12 h-12 text-gray-500 mx-auto mb-4" />
                 <h3 className="text-xl font-medium text-white mb-2">No events found</h3>
                 <p className="text-gray-400">Try adjusting your filters</p>
               </div>
+            ) : (
+              filteredEvents?.map?.((event, index) => {
+                const config = TYPE_CONFIG[event?.type || 'amateur'] || TYPE_CONFIG.amateur
+                const Icon = config.icon
+                return (
+                  <motion.div
+                    key={event?.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-500/30 transition-all"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${config.color}`}>
+                        <Icon className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-white">{event?.name || 'Untitled Tournament'}</h3>
+                        <div className="flex items-center gap-3 text-sm text-gray-400">
+                          <span className="flex items-center gap-1">
+                            <MapPin className="w-3 h-3" />
+                            {event?.location || 'TBA'}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3 h-3" />
+                            {formatDate(event?.startDate, event?.endDate)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Badge className={config.color}>{config.label}</Badge>
+                      {event?.prizePool && (
+                        <span className="text-sm font-semibold text-indigo-400">
+                          {formatPrizeMoney(event?.prizePool)}
+                        </span>
+                      )}
+                      <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">
+                        View Details
+                      </Button>
+                    </div>
+                  </motion.div>
+                )
+              }) || []
             )}
           </div>
         ) : (
@@ -261,7 +260,7 @@ export function TournamentCalendar() {
               <Button variant="ghost" onClick={() => setCurrentMonth(Math.max(0, currentMonth - 1))} className="text-white">
                 <ChevronLeft className="w-5 h-5" />
               </Button>
-              <h2 className="text-xl font-bold text-white">{MONTHS[currentMonth]} 2025</h2>
+              <h2 className="text-xl font-bold text-white">{MONTHS[currentMonth] || 'January'} 2025</h2>
               <Button variant="ghost" onClick={() => setCurrentMonth(Math.min(5, currentMonth + 1))} className="text-white">
                 <ChevronRight className="w-5 h-5" />
               </Button>
@@ -269,49 +268,49 @@ export function TournamentCalendar() {
 
             {/* Days Header */}
             <div className="grid grid-cols-7 gap-1 mb-2">
-              {DAYS.map(day => (
+              {DAYS?.map?.(day => (
                 <div key={day} className="text-center text-sm font-medium text-gray-400 py-2">
                   {day}
                 </div>
-              ))}
+              )) || []}
             </div>
 
             {/* Calendar Grid */}
             <div className="grid grid-cols-7 gap-1">
-              {getDaysInMonth().map(({ day, events }) => (
+              {getDaysInMonth()?.map?.(({ day, events }) => (
                 <div
                   key={day}
                   className={`min-h-[80px] rounded-lg p-2 border ${
-                    events.length > 0
+                    events?.length > 0
                       ? "border-indigo-500/30 bg-indigo-500/10"
                       : "border-white/5 bg-white/5"
                   }`}
                 >
                   <span className="text-sm text-gray-400">{day}</span>
-                  {events.map((event, i) => {
-                    const config = TYPE_CONFIG[event.type] || TYPE_CONFIG.amateur
+                  {events?.slice?.(0, 2)?.map?.((event, i) => {
+                    const config = TYPE_CONFIG[event?.type || 'amateur'] || TYPE_CONFIG.amateur
                     return (
                       <div
                         key={i}
                         className={`mt-1 text-xs px-1 py-0.5 rounded truncate ${config.color}`}
-                        title={event.name}
+                        title={event?.name}
                       >
-                        {event.name}
+                        {event?.name}
                       </div>
                     )
-                  })}
+                  }) || []}
                 </div>
-              ))}
+              )) || []}
             </div>
 
             {/* Legend */}
             <div className="flex flex-wrap gap-4 mt-6 pt-4 border-t border-white/10">
-              {Object.entries(TYPE_CONFIG).map(([key, config]) => (
+              {Object.entries(TYPE_CONFIG)?.map?.(([key, config]) => (
                 <div key={key} className="flex items-center gap-2">
                   <div className={`w-3 h-3 rounded ${config.color}`} />
                   <span className="text-sm text-gray-400">{config.label}</span>
                 </div>
-              ))}
+              )) || []}
             </div>
           </div>
         )}

@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import {
@@ -13,40 +14,23 @@ import {
   ArrowRight,
   Trophy,
   Sparkles,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { formatPrizeMoney } from "@/lib/utils/currency"
 
-const JUNIOR_EVENTS = [
-  {
-    id: "j1",
-    name: "Rising Stars Junior National",
-    location: "Dallas, TX",
-    date: "Feb 1-3, 2025",
-    ageGroups: ["U12", "U15", "U18"],
-    scholarships: true,
-    featured: true,
-  },
-  {
-    id: "j2",
-    name: "Future Champions Regional - West",
-    location: "Los Angeles, CA",
-    date: "Feb 15-16, 2025",
-    ageGroups: ["U12", "U15"],
-    scholarships: false,
-    featured: false,
-  },
-  {
-    id: "j3",
-    name: "Junior Development Camp",
-    location: "Phoenix, AZ",
-    date: "Mar 1-3, 2025",
-    ageGroups: ["U10", "U12", "U15"],
-    scholarships: true,
-    featured: false,
-  },
-]
+interface Tournament {
+  id: string
+  name: string
+  location: string
+  startDate: string
+  endDate?: string
+  prizePool?: number
+  type?: string
+  featured?: boolean
+}
 
 const PATHWAY_STAGES = [
   {
@@ -76,6 +60,49 @@ const PATHWAY_STAGES = [
 ]
 
 export function RisingStars() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchJuniorEvents()
+  }, [])
+
+  const fetchJuniorEvents = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Fetch junior/youth tournaments
+      const res = await fetch('/api/tournaments')
+      if (!res?.ok) throw new Error('Failed to fetch tournaments')
+      const data = await res?.json()
+      
+      // For now, show all tournaments (can be filtered by type='junior' if field exists)
+      setTournaments(data?.tournaments || [])
+    } catch (err) {
+      console.error('Error fetching junior events:', err)
+      setError(err?.message || 'Failed to load Rising Stars programs')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (startDate: string, endDate?: string) => {
+    if (!startDate) return 'Date TBA'
+    const start = new Date(startDate)
+    const month = start?.toLocaleDateString?.('en-US', { month: 'short' })
+    const day = start?.getDate?.()
+    const year = start?.getFullYear?.()
+    
+    if (endDate) {
+      const end = new Date(endDate)
+      const endDay = end?.getDate?.()
+      return `${month} ${day}-${endDay}, ${year}`
+    }
+    return `${month} ${day}, ${year}`
+  }
+
   return (
     <div className="min-h-screen pb-20">
       {/* Hero */}
@@ -103,81 +130,94 @@ export function RisingStars() {
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <h2 className="text-2xl font-bold text-white mb-6">Champion Development Pathway</h2>
         <div className="grid md:grid-cols-4 gap-4">
-          {PATHWAY_STAGES.map((stage, index) => (
+          {PATHWAY_STAGES?.map?.((stage, index) => (
             <motion.div
-              key={stage.stage}
+              key={stage?.stage}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
               <Card className="bg-white/5 border-white/10 h-full">
                 <CardContent className="p-5">
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stage.color} flex items-center justify-center mb-4`}>
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stage?.color} flex items-center justify-center mb-4`}>
                     <span className="text-xl font-bold text-white">{index + 1}</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-white mb-1">{stage.stage}</h3>
+                  <h3 className="text-lg font-semibold text-white mb-1">{stage?.stage}</h3>
                   <Badge variant="outline" className="border-white/20 text-gray-400 mb-2">
-                    Ages {stage.ages}
+                    Ages {stage?.ages}
                   </Badge>
-                  <p className="text-sm text-gray-400">{stage.description}</p>
+                  <p className="text-sm text-gray-400">{stage?.description}</p>
                 </CardContent>
               </Card>
             </motion.div>
-          ))}
+          )) || []}
         </div>
       </section>
 
       {/* Junior Events */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <h2 className="text-2xl font-bold text-white mb-6">Upcoming Junior Events</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {JUNIOR_EVENTS.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className={`bg-white/5 border-white/10 h-full ${
-                event.featured ? "ring-2 ring-purple-500/50" : ""
-              }`}>
-                <CardContent className="p-6">
-                  {event.featured && (
-                    <Badge className="mb-3 bg-purple-500/20 text-purple-400 border-purple-500/30">
-                      <Sparkles className="w-3 h-3 mr-1" /> Featured Event
-                    </Badge>
-                  )}
-                  <h3 className="text-lg font-semibold text-white mb-3">{event.name}</h3>
-                  <div className="flex items-center gap-3 text-sm text-gray-400 mb-4">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {event.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {event.date}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {event.ageGroups.map(age => (
-                      <Badge key={age} variant="outline" className="border-purple-500/30 text-purple-400">
-                        {age}
+        
+        {loading ? (
+          <div className="text-center py-20">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+            <p className="text-gray-400 mt-4">Loading junior events...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={fetchJuniorEvents} className="bg-champion-green hover:bg-champion-green/90">
+              Retry
+            </Button>
+          </div>
+        ) : tournaments?.length === 0 ? (
+          <div className="text-center py-12">
+            <Star className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400">No junior events available at this time. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {tournaments?.slice?.(0, 6)?.map?.((event, index) => (
+              <motion.div
+                key={event?.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className={`bg-white/5 border-white/10 h-full ${
+                  event?.featured ? "ring-2 ring-purple-500/50" : ""
+                }`}>
+                  <CardContent className="p-6">
+                    {event?.featured && (
+                      <Badge className="mb-3 bg-purple-500/20 text-purple-400 border-purple-500/30">
+                        <Sparkles className="w-3 h-3 mr-1" /> Featured Event
                       </Badge>
-                    ))}
-                  </div>
-                  {event.scholarships && (
-                    <Badge className="mb-4 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
-                      <GraduationCap className="w-3 h-3 mr-1" /> Scholarships Available
-                    </Badge>
-                  )}
-                  <Button className="w-full bg-purple-500 hover:bg-purple-600">
-                    Register <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    )}
+                    <h3 className="text-lg font-semibold text-white mb-3">{event?.name || 'Junior Tournament'}</h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-400 mb-4">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {event?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(event?.startDate, event?.endDate)}
+                      </span>
+                    </div>
+                    {event?.prizePool && (
+                      <Badge className="mb-4 bg-yellow-500/20 text-yellow-400 border-yellow-500/30">
+                        <GraduationCap className="w-3 h-3 mr-1" /> {formatPrizeMoney(event?.prizePool)}
+                      </Badge>
+                    )}
+                    <Button className="w-full bg-purple-500 hover:bg-purple-600">
+                      Register <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )) || []}
+          </div>
+        )}
       </section>
 
       {/* CTA */}
