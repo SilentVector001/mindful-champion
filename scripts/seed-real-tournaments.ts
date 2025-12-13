@@ -1,11 +1,5 @@
-import { PrismaClient } from '@prisma/client'
-import * as dotenv from 'dotenv'
-import * as path from 'path'
-
-// Load environment variables from .env.local
-dotenv.config({ path: path.join(__dirname, '../.env.local') })
-
-const prisma = new PrismaClient()
+import { TournamentStatus, TournamentFormat, SkillLevel } from '@prisma/client'
+import { prisma } from '../lib/db'
 
 // REAL US Pickleball Tournaments - December 2025 to June 2026
 // From PPA Tour, APP Tour, MLP, and USA Pickleball
@@ -24,8 +18,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2025-12-15'),
     registrationStart: new Date('2025-10-01'),
     registrationEnd: new Date('2025-12-09'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 1000,
     entryFee: 125,
     prizePool: 283000,
@@ -33,7 +27,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/championship-finals/',
     latitude: 36.0914,
     longitude: -115.1761,
-    status: 'IN_PROGRESS',
+    status: TournamentStatus.IN_PROGRESS,
     imageUrl: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
   },
   {
@@ -50,8 +44,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2025-12-22'),
     registrationStart: new Date('2025-10-15'),
     registrationEnd: new Date('2025-12-15'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 600,
     entryFee: 95,
     prizePool: 125000,
@@ -59,7 +53,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.theapp.global/tour/fort-lauderdale-open',
     latitude: 26.1223,
     longitude: -80.1434,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/K2RcRe2aUUc/maxresdefault.jpg',
   },
   {
@@ -76,8 +70,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-01-12'),
     registrationStart: new Date('2025-11-01'),
     registrationEnd: new Date('2026-01-03'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 800,
     entryFee: 95,
     prizePool: 175000,
@@ -85,7 +79,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/the-masters/',
     latitude: 33.7583,
     longitude: -116.4347,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/pthJ1IQPqGE/maxresdefault.jpg',
   },
   {
@@ -102,8 +96,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-01-13'),
     registrationStart: new Date('2025-11-01'),
     registrationEnd: new Date('2026-01-07'),
-    format: ['DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO'],
+    format: [TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO],
     maxParticipants: 200,
     entryFee: 0,
     prizePool: 500000,
@@ -111,7 +105,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.majorleaguepickleball.net',
     latitude: 25.9580,
     longitude: -80.2389,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
   },
   {
@@ -128,8 +122,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-01-19'),
     registrationStart: new Date('2025-11-15'),
     registrationEnd: new Date('2026-01-12'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 800,
     entryFee: 85,
     prizePool: 100000,
@@ -137,7 +131,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.theapp.global/tour/daytona-beach-open',
     latitude: 29.2395,
     longitude: -81.0345,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://images.pickleball.com/news/1724094389936/KC_TYSON%20X%20JAUME_MD-3.jpg',
   },
   {
@@ -154,8 +148,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-01-26'),
     registrationStart: new Date('2025-11-15'),
     registrationEnd: new Date('2026-01-18'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 750,
     entryFee: 95,
     prizePool: 150000,
@@ -163,7 +157,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/southern-california-open/',
     latitude: 33.7038,
     longitude: -117.9627,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://media.istockphoto.com/id/1412985102/photo/top-down-aerial-view-of-doubles-pickleball-game.jpg?s=612x612&w=0&k=20&c=C9dA_XoJs_6CtwDXCRd3oQSSR2iC9fw6KLjQVF-yd9U=',
   },
   {
@@ -180,8 +174,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-02-08'),
     registrationStart: new Date('2025-11-01'),
     registrationEnd: new Date('2026-01-25'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 3000,
     entryFee: 110,
     prizePool: 350000,
@@ -189,7 +183,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://usopenpickleball.com/registration',
     latitude: 26.1167,
     longitude: -81.7739,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/7ZMCHKi5m3I/maxresdefault.jpg',
   },
   {
@@ -206,8 +200,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-02-16'),
     registrationStart: new Date('2025-12-01'),
     registrationEnd: new Date('2026-02-07'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 900,
     entryFee: 100,
     prizePool: 200000,
@@ -215,7 +209,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/arizona-grand-slam/',
     latitude: 33.5321,
     longitude: -111.8794,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/053RBKEHn0k/maxresdefault.jpg',
   },
   {
@@ -232,8 +226,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-02-23'),
     registrationStart: new Date('2025-12-15'),
     registrationEnd: new Date('2026-02-17'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 500,
     entryFee: 85,
     prizePool: 100000,
@@ -241,7 +235,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.theapp.global/tour/atlanta-open',
     latitude: 33.9167,
     longitude: -84.3356,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/yCl5bnm1tes/maxresdefault.jpg',
   },
   {
@@ -258,8 +252,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-03-08'),
     registrationStart: new Date('2026-01-01'),
     registrationEnd: new Date('2026-02-27'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 700,
     entryFee: 95,
     prizePool: 175000,
@@ -267,7 +261,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/texas-open/',
     latitude: 30.2500,
     longitude: -97.8522,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
   },
   {
@@ -284,8 +278,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-03-19'),
     registrationStart: new Date('2026-01-15'),
     registrationEnd: new Date('2026-03-12'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 600,
     entryFee: 90,
     prizePool: 110000,
@@ -293,7 +287,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.theapp.global/tour/chicago-open',
     latitude: 41.9244,
     longitude: -87.6631,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/mIzddYkHV6Q/maxresdefault.jpg',
   },
   {
@@ -310,8 +304,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-04-12'),
     registrationStart: new Date('2026-02-01'),
     registrationEnd: new Date('2026-04-02'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 1000,
     entryFee: 120,
     prizePool: 250000,
@@ -319,7 +313,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/new-york-city-open/',
     latitude: 40.7498,
     longitude: -73.8469,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/eN2i2Ub0eWw/sddefault.jpg',
   },
   {
@@ -336,8 +330,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-04-24'),
     registrationStart: new Date('2026-02-15'),
     registrationEnd: new Date('2026-04-17'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 500,
     entryFee: 85,
     prizePool: 100000,
@@ -345,7 +339,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.theapp.global/tour/seattle-open',
     latitude: 47.6167,
     longitude: -122.3089,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/JrpVTgHRYcc/maxresdefault.jpg',
   },
   {
@@ -362,8 +356,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-05-10'),
     registrationStart: new Date('2026-03-01'),
     registrationEnd: new Date('2026-05-01'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['PRO', 'ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.PRO, SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 600,
     entryFee: 95,
     prizePool: 150000,
@@ -371,7 +365,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://www.ppatour.com/tournament/denver-open/',
     latitude: 39.7105,
     longitude: -104.9499,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/I1gtR70ZZ9Y/maxresdefault.jpg',
   },
   {
@@ -388,8 +382,8 @@ const REAL_TOURNAMENTS = [
     endDate: new Date('2026-05-24'),
     registrationStart: new Date('2026-03-01'),
     registrationEnd: new Date('2026-05-10'),
-    format: ['SINGLES', 'DOUBLES', 'MIXED_DOUBLES'],
-    skillLevels: ['ADVANCED', 'INTERMEDIATE', 'BEGINNER'],
+    format: [TournamentFormat.SINGLES, TournamentFormat.DOUBLES, TournamentFormat.MIXED_DOUBLES],
+    skillLevels: [SkillLevel.ADVANCED, SkillLevel.INTERMEDIATE, SkillLevel.BEGINNER],
     maxParticipants: 2500,
     entryFee: 100,
     prizePool: 200000,
@@ -397,7 +391,7 @@ const REAL_TOURNAMENTS = [
     registrationUrl: 'https://usapickleball.org/nationals/',
     latitude: 33.7230,
     longitude: -116.3035,
-    status: 'REGISTRATION_OPEN',
+    status: TournamentStatus.REGISTRATION_OPEN,
     imageUrl: 'https://i.ytimg.com/vi/brXy4jmw-Ys/maxresdefault.jpg',
   },
 ]
@@ -412,10 +406,7 @@ async function main() {
   // Create new tournaments
   for (const tournament of REAL_TOURNAMENTS) {
     const created = await prisma.tournament.create({
-      data: {
-        ...tournament,
-        prizePool: tournament.prizePool.toString(),
-      },
+      data: tournament,
     })
     console.log(`✅ Created: ${created.name} - ${created.city}, ${created.state} (${tournament.startDate.toLocaleDateString()})`)
   }
