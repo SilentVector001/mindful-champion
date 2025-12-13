@@ -50,6 +50,8 @@ import {
   Watch,
   Activity,
   Bell,
+  Star,
+  Heart,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -538,6 +540,170 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* TOURNAMENTS Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2 font-medium transition-all",
+                    isActive("/tournaments")
+                      ? "bg-champion-green/10 text-champion-green"
+                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
+                  )}
+                  title="Discover tournaments across the nation"
+                >
+                  <Trophy className="w-4 h-4" />
+                  Tournaments
+                  <ChevronDown className="w-3 h-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
+                <DropdownMenuLabel className="flex items-center gap-2 text-champion-green">
+                  <Trophy className="w-4 h-4" />
+                  Tournament Hub
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <InfoTooltip content="Browse all tournaments and find events near you" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Calendar className="w-4 h-4 text-champion-green" />
+                      <div>
+                        <p className="font-medium">Tournament Scout</p>
+                        <p className="text-xs text-gray-500">Find events nationwide</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Elite pro tournaments with prize money" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments/championship" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Award className="w-4 h-4 text-yellow-500" />
+                      <div>
+                        <p className="font-medium">Championship Events</p>
+                        <p className="text-xs text-gray-500">Grand Slam Series</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Tournaments for all skill levels" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments/amateur" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Target className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="font-medium">Amateur Competitions</p>
+                        <p className="text-xs text-gray-500">Open to all levels</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Junior development programs" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments/rising-stars" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Star className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="font-medium">Rising Stars Program</p>
+                        <p className="text-xs text-gray-500">Junior tournaments</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Grassroots team competitions" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments/community-leagues" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Users className="w-4 h-4 text-green-500" />
+                      <div>
+                        <p className="font-medium">Community Leagues</p>
+                        <p className="text-xs text-gray-500">Team competitions</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Charity events - play with purpose" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/tournaments/pickleball-for-purpose" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Heart className="w-4 h-4 text-pink-500" />
+                      <div>
+                        <p className="font-medium">Pickleball for Purpose</p>
+                        <p className="text-xs text-gray-500">Charity tournaments</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* MEDIA CENTER Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className={cn(
+                    "gap-2 font-medium transition-all",
+                    isActive("/media")
+                      ? "bg-champion-green/10 text-champion-green"
+                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
+                  )}
+                  title="Live streams, highlights, podcasts and more"
+                >
+                  <PlayCircle className="w-4 h-4" />
+                  Media Center
+                  <ChevronDown className="w-3 h-3 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
+                <DropdownMenuLabel className="flex items-center gap-2 text-champion-green">
+                  <PlayCircle className="w-4 h-4" />
+                  Media Hub
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <InfoTooltip content="All media content in one place" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/media" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <PlayCircle className="w-4 h-4 text-champion-green" />
+                      <div>
+                        <p className="font-medium">Media Hub</p>
+                        <p className="text-xs text-gray-500">All content</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Watch live tournament streams" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/media/streaming" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Activity className="w-4 h-4 text-red-500" />
+                      <div>
+                        <p className="font-medium">Live Coverage</p>
+                        <p className="text-xs text-gray-500">Tournament streams</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Browse upcoming events" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/media/events" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Calendar className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="font-medium">Events</p>
+                        <p className="text-xs text-gray-500">Upcoming events</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                <InfoTooltip content="Listen to pickleball podcasts" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/media/podcasts" className="flex items-center gap-3 py-3 cursor-pointer">
+                      <Watch className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="font-medium">Podcasts & Shows</p>
+                        <p className="text-xs text-gray-500">Audio content</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
             {/* My Rewards */}
             <InfoTooltip content="Redeem your achievement points for exclusive sponsor rewards">
               <Link href="/marketplace">
@@ -550,26 +716,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                 >
-                  <Trophy className="w-4 h-4" />
-                  My Rewards
-                </Button>
-              </Link>
-            </InfoTooltip>
-
-            {/* Media Hub */}
-            <InfoTooltip content="Discover live tournaments, podcasts, events, and more">
-              <Link href="/media">
-                <Button
-                  variant="ghost"
-                  className={cn(
-                    "gap-2 font-medium transition-all",
-                    isActive("/media")
-                      ? "bg-champion-green/10 text-champion-green"
-                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
-                  )}
-                >
-                  <PlayCircle className="w-4 h-4" />
-                  Media Hub
+                  <Award className="w-4 h-4" />
+                  Rewards
                 </Button>
               </Link>
             </InfoTooltip>

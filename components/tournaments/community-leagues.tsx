@@ -1,0 +1,163 @@
+"use client"
+
+import { motion } from "framer-motion"
+import Link from "next/link"
+import {
+  Users,
+  Calendar,
+  MapPin,
+  ChevronLeft,
+  Trophy,
+  UserPlus,
+  ArrowRight,
+  Shield,
+} from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Card, CardContent } from "@/components/ui/card"
+
+const LEAGUES = [
+  {
+    id: "l1",
+    name: "Northeast League Network",
+    location: "Boston, MA",
+    teams: 24,
+    season: "Winter 2025",
+    registrationOpen: true,
+    format: "8-week season",
+  },
+  {
+    id: "l2",
+    name: "SoCal Community League",
+    location: "San Diego, CA",
+    teams: 32,
+    season: "Spring 2025",
+    registrationOpen: true,
+    format: "10-week season",
+  },
+  {
+    id: "l3",
+    name: "Texas Team Circuit",
+    location: "Austin, TX",
+    teams: 28,
+    season: "Winter 2025",
+    registrationOpen: false,
+    format: "8-week season",
+  },
+  {
+    id: "l4",
+    name: "Midwest League Alliance",
+    location: "Chicago, IL",
+    teams: 20,
+    season: "Spring 2025",
+    registrationOpen: true,
+    format: "12-week season",
+  },
+]
+
+export function CommunityLeagues() {
+  return (
+    <div className="min-h-screen pb-20">
+      {/* Hero */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-green-500/10 via-transparent to-emerald-500/10" />
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-12">
+          <Link href="/tournaments" className="inline-flex items-center text-gray-400 hover:text-white mb-6 transition-colors">
+            <ChevronLeft className="w-4 h-4 mr-1" />
+            Back to Tournament Hub
+          </Link>
+
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-green-500 to-emerald-600 flex items-center justify-center">
+              <Users className="w-8 h-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold text-white">Community League Network</h1>
+              <p className="text-gray-400">Grassroots team competitions across the nation</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Actions */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <div className="grid md:grid-cols-2 gap-4">
+          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                <UserPlus className="w-6 h-6 text-green-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-white">Looking for a Team?</h3>
+                <p className="text-sm text-gray-400">Find players in your area</p>
+              </div>
+              <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                Find Players
+              </Button>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/30">
+            <CardContent className="p-6 flex items-center gap-4">
+              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                <Shield className="w-6 h-6 text-emerald-400" />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-white">Start a League</h3>
+                <p className="text-sm text-gray-400">Organize in your community</p>
+              </div>
+              <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
+                Learn More
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* Leagues List */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Active Leagues</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          {LEAGUES.map((league, index) => (
+            <motion.div
+              key={league.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1 }}
+            >
+              <Card className="bg-white/5 border-white/10 hover:border-green-500/30 transition-all">
+                <CardContent className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <Badge className={league.registrationOpen ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}>
+                        {league.registrationOpen ? "Registration Open" : "Season In Progress"}
+                      </Badge>
+                    </div>
+                    <Badge variant="outline" className="border-white/20 text-gray-300">
+                      {league.teams} teams
+                    </Badge>
+                  </div>
+                  <h3 className="text-lg font-semibold text-white mb-2">{league.name}</h3>
+                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                    <span className="flex items-center gap-1">
+                      <MapPin className="w-4 h-4" />
+                      {league.location}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-4 h-4" />
+                      {league.season}
+                    </span>
+                  </div>
+                  <p className="text-sm text-gray-400 mb-4">{league.format}</p>
+                  <Button className="w-full bg-green-500 hover:bg-green-600" disabled={!league.registrationOpen}>
+                    {league.registrationOpen ? "Join League" : "View Standings"}
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+    </div>
+  )
+}
