@@ -103,139 +103,26 @@ export async function GET(request: NextRequest) {
       take: limit
     });
 
-    // ✅ FIXED: Realistic live status - only 1-2 events actually live at any given time
-    // The rest are "starting soon" (within 2 hours) or already in progress but between matches
+    // Return empty array when no real live content
+    // TODO: REAL LIVE STREAM INTEGRATION
+    // 
+    // To integrate real live streams:
+    // 1. Set up YouTube Live API or Twitch API
+    // 2. Fetch real-time viewer counts
+    // 3. Check if stream is actually live
+    // 4. Pull real match scores from tournament APIs
+    // 
+    // Example APIs to consider:
+    // - YouTube Live API: https://developers.google.com/youtube/v3/live
+    // - Twitch API: https://dev.twitch.tv/docs/api/
+    // - PPA Tour API: (if available)
+    // - USA Pickleball API: (if available)
     if (events.length === 0 && live) {
-      const now = new Date();
-      const currentHour = now.getHours();
-      
-      // Determine realistic live status based on time of day
-      // Tournaments typically run 9 AM - 8 PM local time
-      const isTypicalTournamentTime = currentHour >= 9 && currentHour < 20;
-      
-      const realTournamentVideos: LiveTournamentData[] = [
-        {
-          id: "mlp-nyc-2024",
-          name: "Utah Black Diamonds vs. Columbus Sliders",
-          shortName: "MLP NYC 2024",
-          description: "Watch premier level team action from Hertz MLP NYC 2024 featuring Utah Black Diamonds taking on the Columbus Sliders in intense pickleball competition.",
-          eventDate: now,
-          organizationName: "Major League Pickleball",
-          location: "New York, NY",
-          city: "New York",
-          state: "NY", 
-          venue: "MLP NYC Championship Court",
-          logoUrl: "https://images.unsplash.com/photo-1642104798671-01a4129f4fdc?w=200&h=200&fit=crop&crop=center",
-          broadcastPlatform: "Major League Pickleball YouTube",
-          streamUrl: "https://www.youtube.com/watch?v=IWW2DBkvj4U",
-          embedCode: "IWW2DBkvj4U",
-          isLive: isTypicalTournamentTime,
-          hasLiveScores: isTypicalTournamentTime,
-          websiteUrl: "https://majorleaguepickleball.co",
-          featured: true,
-          viewerCount: isTypicalTournamentTime ? 12840 : 0,
-          matches: []
-        },
-        {
-          id: "mlp-atlanta-2024",
-          name: "Atlanta Bouncers vs. Miami Pickleball Club",
-          shortName: "MLP Atlanta 2024",
-          description: "Challenger level competition from MLP Atlanta 2024 featuring the Atlanta Bouncers facing off against Miami Pickleball Club in thrilling team pickleball action.",
-          eventDate: now,
-          organizationName: "Major League Pickleball",
-          location: "Atlanta, GA",
-          city: "Atlanta", 
-          state: "GA",
-          venue: "Atlanta Pickleball Center",
-          logoUrl: "https://images.unsplash.com/photo-1693142517898-2f986215e412?w=200&h=200&fit=crop&crop=center",
-          broadcastPlatform: "Major League Pickleball YouTube",
-          streamUrl: "https://www.youtube.com/watch?v=TspcaIkhVN0",
-          embedCode: "TspcaIkhVN0",
-          isLive: false,
-          hasLiveScores: false,
-          websiteUrl: "https://majorleaguepickleball.co",
-          featured: true,
-          viewerCount: 0,
-          matches: []
-        },
-        {
-          id: "mlp-dc-2024",
-          name: "Carolina Pickleball Club vs. Texas Ranchers",
-          shortName: "MLP D.C. 2024",
-          description: "Premier level action from MLP D.C. 2024 featuring Carolina Pickleball Club battling the Texas Ranchers in high-stakes team competition.",
-          eventDate: now,
-          organizationName: "Major League Pickleball",
-          location: "Washington, DC",
-          city: "Washington",
-          state: "DC",
-          venue: "D.C. Championship Courts",
-          logoUrl: "https://images.unsplash.com/photo-1686721135030-e2ab79e27b16?w=200&h=200&fit=crop&crop=center",
-          broadcastPlatform: "Major League Pickleball YouTube",
-          streamUrl: "https://www.youtube.com/watch?v=3V8qbBPdqjw",
-          embedCode: "3V8qbBPdqjw",
-          isLive: false,
-          hasLiveScores: false,
-          websiteUrl: "https://majorleaguepickleball.co",
-          featured: false,
-          viewerCount: 0,
-          matches: []
-        },
-        {
-          id: "us-open-2025-gold",
-          name: "Men's 4.5 70+ Gold Medal Match",
-          shortName: "US Open Gold 2025",
-          description: "Watch the thrilling Gold Medal Match from the US Open 2025 featuring men's 4.5 70+ division competing for championship glory at the premier pickleball event.",
-          eventDate: now,
-          organizationName: "US Open Pickleball Championships",
-          location: "Naples, FL",
-          city: "Naples",
-          state: "FL",
-          venue: "East Naples Community Park",
-          logoUrl: "https://images.unsplash.com/photo-1580763850690-44fd66eb2863?w=200&h=200&fit=crop&crop=center",
-          broadcastPlatform: "Pickleball Channel YouTube",
-          streamUrl: "https://www.youtube.com/watch?v=VCIr6bj18AI",
-          embedCode: "VCIr6bj18AI",
-          isLive: false,
-          hasLiveScores: false,
-          websiteUrl: "https://www.usopenpickleballchampionship.com",
-          featured: false,
-          viewerCount: 0,
-          matches: []
-        },
-        {
-          id: "us-open-2025-day7",
-          name: "US Open Pickleball Championships - Day 7",
-          shortName: "US Open Day 7",
-          description: "Complete coverage of Day 7 from the 2025 US Open Pickleball Championships featuring championship rounds across multiple divisions from the Zing Zang Championship Court.",
-          eventDate: now,
-          organizationName: "US Open Pickleball Championships",
-          location: "Naples, FL",
-          city: "Naples",
-          state: "FL",
-          venue: "East Naples Community Park - Zing Zang Court",
-          logoUrl: "https://images.unsplash.com/photo-1617144520113-88ae706a86eb?w=200&h=200&fit=crop&crop=center",
-          broadcastPlatform: "Pickleball Channel YouTube",
-          streamUrl: "https://www.youtube.com/watch?v=T_G2k3mcGkE",
-          embedCode: "T_G2k3mcGkE",
-          isLive: isTypicalTournamentTime,
-          hasLiveScores: isTypicalTournamentTime,
-          websiteUrl: "https://www.usopenpickleballchampionship.com",
-          featured: true,
-          viewerCount: isTypicalTournamentTime ? 8920 : 0,
-          matches: []
-        }
-      ];
-      
-      // Only return actually live events when live=true parameter is set
-      const actuallyLiveEvents = realTournamentVideos.filter(event => event.isLive);
-      
       return NextResponse.json({
         success: true,
-        events: actuallyLiveEvents,
-        totalCount: actuallyLiveEvents.length,
-        message: actuallyLiveEvents.length > 0 
-          ? "Live tournaments currently streaming" 
-          : "No live tournaments at this time - check upcoming events"
+        events: [],
+        totalCount: 0,
+        message: "No live tournaments at this time - check upcoming events"
       });
     }
     
