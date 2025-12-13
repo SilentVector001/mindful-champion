@@ -17,7 +17,7 @@
       "NEXT_TELEMETRY_DISABLED": "1",
       "SKIP_TYPE_CHECK": "true",
       "SKIP_ENV_VALIDATION": "true",
-      "NODE_OPTIONS": "--max-old-space-size=4096"
+      "NODE_OPTIONS": "--max-old-space-size=6144"
     }
   },
   

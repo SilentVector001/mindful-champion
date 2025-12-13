@@ -39,6 +39,17 @@
   "exclude": [
     "node_modules",
     "check_db.ts",
-    "scripts/**/*"
+    "scripts/**/*",
+    ".next",
+    ".build",
+    "dist",
+    "build",
+    "out",
+    "public/uploads/**/*",
+    "public/videos/**/*",
+    "*.spec.ts",
+    "*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.tsx"
   ]
 }
