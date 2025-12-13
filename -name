@@ -1,9 +1,2 @@
-find: ‘.next’: No such file or directory
-find: ‘echo’: No such file or directory
-find: ‘Starting’: No such file or directory
-find: ‘dev’: No such file or directory
-find: ‘server...’: No such file or directory
-find: ‘nohup’: No such file or directory
-find: ‘npx’: No such file or directory
-find: ‘next’: No such file or directory
-find: ‘dev’: No such file or directory
+find: ‘node_modules’: No such file or directory
+find: ‘.yarn/cache’: No such file or directory
