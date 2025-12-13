@@ -54,11 +54,11 @@ export function getResendClient(): Resend {
     console.log(`   API Key: ${apiKey.substring(0, 7)}...`);
     console.log(`   Environment: ${process.env.NODE_ENV || 'unknown'}`);
     
-    // Log domain configuration reminder
+    // Log domain configuration
     console.log('');
     console.log('📧 Email Domain Configuration:');
-    console.log('   ⚠️  Using sandbox domains (@resend.dev)');
-    console.log('   💡 For production, verify custom domain at: https://resend.com/domains');
+    console.log('   ✅ Using production domain: @mindfulchampion.com');
+    console.log('   📊 Check delivery status at: https://resend.com/emails');
     console.log('');
   }
   

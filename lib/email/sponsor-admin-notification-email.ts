@@ -282,7 +282,7 @@ Mindful Champion - Sponsor Management System
     console.log(`📧 Sending admin notification email to ${adminEmail}...`);
     
     const result = await resend.emails.send({
-      from: 'Mindful Champion <partnerships@resend.dev>',
+      from: 'Mindful Champion Partners <partners@mindfulchampion.com>',
       to: [adminEmail],
       subject: `🔔 New ${data.interestedTier} Sponsor Application - ${data.companyName}`,
       html: htmlContent,
