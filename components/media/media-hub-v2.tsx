@@ -81,9 +81,9 @@ const PICKLEBALL_CONTENT = {
       date: 'Dec 15, 2025',
       location: 'Las Vegas, NV',
       image: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
-      isLive: true,
-      isUpcoming: false,
-      viewerCount: 12453,
+      isLive: false,
+      isUpcoming: true,
+      viewerCount: 0,
       organization: 'PPA Tour',
       streamUrl: 'https://www.ppatour.com/watch'
     },
@@ -94,9 +94,9 @@ const PICKLEBALL_CONTENT = {
       date: 'Dec 18, 2025',
       location: 'Fort Lauderdale, FL',
       image: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
-      isLive: true,
-      isUpcoming: false,
-      viewerCount: 8721,
+      isLive: false,
+      isUpcoming: true,
+      viewerCount: 0,
       organization: 'APP Tour',
       streamUrl: 'https://www.theapp.global'
     },
@@ -152,24 +152,8 @@ const PICKLEBALL_CONTENT = {
       isPickleball: true
     }
   ],
-  liveScores: [
-    {
-      id: 's1',
-      tournament: 'PPA Championship',
-      match: 'Ben Johns vs Tyson McGuffin',
-      score: '11-9, 8-11, 7-5',
-      status: 'Game 3',
-      court: 'Championship Court'
-    },
-    {
-      id: 's2',
-      tournament: 'MLP Team Event',
-      match: 'Team Florida vs Team California',
-      score: '2-1',
-      status: 'Match 4',
-      court: 'Center Court'
-    }
-  ],
+  // liveScores removed - will fetch real data from API only
+  liveScores: [],
   podcasts: [
     {
       id: 'p1',
@@ -197,10 +181,10 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [liveData, setLiveData] = useState({
-    liveStreams: 2,
-    activeMatches: 5,
-    upcomingEvents: 14,
-    totalViewers: 21174
+    liveStreams: 0,
+    activeMatches: 0,
+    upcomingEvents: 0,
+    totalViewers: 0
   });
   const [lastUpdated, setLastUpdated] = useState(new Date());
 
@@ -217,8 +201,8 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
 
       setLiveData({
         liveStreams: liveEvents.events?.filter((e: any) => e.isLive)?.length || 0,
-        activeMatches: scores.matches?.filter((m: any) => m.isLive)?.length || 3,
-        upcomingEvents: liveEvents.events?.filter((e: any) => !e.isLive)?.length || 14,
+        activeMatches: scores.matches?.filter((m: any) => m.isLive)?.length || 0,
+        upcomingEvents: liveEvents.events?.filter((e: any) => !e.isLive)?.length || 0,
         totalViewers: liveEvents.events?.reduce((sum: number, e: any) => sum + (e.viewerCount || 0), 0) || 0
       });
       setLastUpdated(new Date());
@@ -728,35 +712,10 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
 
 // Sub-components for each tab
 function LiveStreamsContent({ liveData }: { liveData: any }) {
-  // Mock live stream data - 2 live tournament streams
-  const liveStreams = [
-    {
-      id: 'live-1',
-      title: 'PPA Tour Championship - Championship Court',
-      tournament: 'PPA Tour Championship Finals',
-      court: 'Championship Court',
-      match: 'Ben Johns vs Tyson McGuffin',
-      score: '11-9, 8-11, 7-5',
-      status: 'Game 3 - Live',
-      viewers: 12453,
-      thumbnail: 'https://ppatour.com/wp-content/uploads/2023/12/TX-Open-DJI-Watermarked-scaled-1.webp',
-      streamUrl: 'https://www.ppatour.com/watch',
-      isLive: true
-    },
-    {
-      id: 'live-2',
-      title: 'MLP Miami - Court 2',
-      tournament: 'Major League Pickleball Miami Slam',
-      court: 'Center Court',
-      match: 'Anna Leigh Waters vs Catherine Parenteau',
-      score: '11-7, 9-11, 5-3',
-      status: 'Game 3 - Live',
-      viewers: 8721,
-      thumbnail: 'https://ppatour.com/wp-content/uploads/2024/07/PPA-Grows-Internationally.webp',
-      streamUrl: 'https://www.majorleaguepickleball.net',
-      isLive: true
-    }
-  ];
+  // Real live stream data - fetched from API only when actually live
+  // TODO: Integrate with YouTube Live API, Twitch API, or tournament streaming platforms
+  // For now, show empty state - no fake data
+  const liveStreams: any[] = [];
 
   return (
     <div className="space-y-6">
