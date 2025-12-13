@@ -26,8 +26,8 @@ async function main() {
         externalId: 'us_open_2023_mixed_gold'
       },
       {
-        title: 'MLP Match - Columbus Sliders vs Carolina Pickleball Club',
-        description: 'Major League Pickleball match from MLP Las Vegas 2024 featuring intense team competition. Verified working video.',
+        title: 'MLP Match - Las Vegas 2024 Team Championship',
+        description: 'Major League Pickleball match from MLP Las Vegas 2024 featuring intense team competition. Real tournament coverage.',
         platform: 'YOUTUBE',
         streamUrl: 'https://www.youtube.com/watch?v=ReYFtwdLzRI',
         thumbnailUrl: 'https://i.ytimg.com/vi/ReYFtwdLzRI/maxresdefault.jpg',
