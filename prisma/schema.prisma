@@ -3233,3 +3233,69 @@ enum NotificationSource {
   USER
   COACH_KAI
 }
+// ==========================================
+// MEDIA CENTER MODELS
+// ==========================================
+
+model CommunityStory {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   @db.Text
+  excerpt     String?
+  authorName  String
+  authorEmail String
+  photoUrl    String?
+  location    String?
+  skillLevel  String?
+  category    String?  // "success", "tournament", "training", "community"
+  approved    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  @@index([approved])
+  @@index([featured])
+  @@index([category])
+}
+
+model PlayerSpotlight {
+  id           String   @id @default(cuid())
+  name         String
+  photoUrl     String
+  ranking      String?
+  rating       Float?
+  bio          String   @db.Text
+  achievements Json?    // Array of achievements
+  stats        Json?    // Win/loss, titles, etc.
+  socialLinks  Json?    // Twitter, Instagram, etc.
+  organization String?  // PPA, APP, MLP
+  featured     Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  
+  @@index([featured])
+  @@index([displayOrder])
+}
+
+model MediaPhoto {
+  id              String   @id @default(cuid())
+  title           String
+  description     String?
+  url             String
+  category        String   // "tournament", "training", "community", "facilities"
+  tags            Json?    // Array of tags
+  tournamentId    String?
+  uploadedBy      String
+  uploadedByName  String?
+  featured        Boolean  @default(false)
+  views           Int      @default(0)
+  likes           Int      @default(0)
+  createdAt       DateTime @default(now())
+  
+  @@index([category])
+  @@index([featured])
+  @@index([tournamentId])
+}
