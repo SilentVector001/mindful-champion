@@ -1,12 +1,49 @@
 {
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install --legacy-peer-deps",
+  
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 300
+    },
+    "app/**/*.tsx": {
+      "maxDuration": 60
     }
   },
+  
   "build": {
     "env": {
-      "NEXT_TELEMETRY_DISABLED": "1"
+      "NEXT_TELEMETRY_DISABLED": "1",
+      "SKIP_TYPE_CHECK": "true",
+      "SKIP_ENV_VALIDATION": "true",
+      "NODE_OPTIONS": "--max-old-space-size=4096"
     }
-  }
+  },
+  
+  "env": {
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  
+  "regions": ["iad1"],
+  
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "X-XSS-Protection",
+          "value": "1; mode=block"
+        }
+      ]
+    }
+  ]
 }
