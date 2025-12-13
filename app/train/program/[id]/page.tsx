@@ -4,7 +4,7 @@ import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/auth'
 import { prisma as db } from '@/lib/db'
 import MainNavigation from '@/components/navigation/main-navigation'
-import PremiumProgramViewer from '@/components/train/premium-program-viewer'
+import InteractiveProgramViewer from '@/components/train/interactive-program-viewer'
 import AvatarCoach from '@/components/avatar/avatar-coach'
 
 export const dynamic = 'force-dynamic'
@@ -216,37 +216,6 @@ export default async function TrainingProgramPage({ params }: TrainingProgramPag
     difficulty: Math.min(Math.max(Math.floor(Math.random() * 3) + 1, 1), 3)
   }))
 
-  // Action handlers (these would be client-side in a real implementation)
-  const handleStartProgram = async () => {
-    'use server'
-    // This would be implemented client-side
-  }
-
-  const handleVideoClick = async (videoId: string) => {
-    'use server'
-    redirect(`/train/video/${videoId}`)
-  }
-
-  const handleMarkDayComplete = async (day: number) => {
-    'use server'
-    // This would be implemented client-side
-  }
-
-  const handlePauseProgram = async () => {
-    'use server'
-    // This would be implemented client-side
-  }
-
-  const handleResumeProgram = async () => {
-    'use server'
-    // This would be implemented client-side
-  }
-
-  const handleUpdateNotes = async (notes: string) => {
-    'use server'
-    // This would be implemented client-side
-  }
-
   const firstName = user?.firstName || user?.name?.split(' ')[0] || 'Champion'
 
   return (
@@ -254,17 +223,11 @@ export default async function TrainingProgramPage({ params }: TrainingProgramPag
       <MainNavigation user={user} />
       
       <main>
-        <PremiumProgramViewer
+        <InteractiveProgramViewer
           program={program}
           userProgram={userProgram}
           videos={videos}
           user={user}
-          onStartProgram={handleStartProgram}
-          onVideoClick={handleVideoClick}
-          onMarkDayComplete={handleMarkDayComplete}
-          onPauseProgram={handlePauseProgram}
-          onResumeProgram={handleResumeProgram}
-          onUpdateNotes={handleUpdateNotes}
         />
       </main>
 
