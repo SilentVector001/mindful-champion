@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import {
@@ -13,88 +13,83 @@ import {
   Filter,
   Search,
   ArrowRight,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatPrizeMoney } from "@/lib/utils/currency"
 
 const SKILL_LEVELS = ["2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
 
-const AMATEUR_EVENTS = [
-  {
-    id: "a1",
-    name: "Community Open - Seattle",
-    location: "Seattle, WA",
-    date: "Dec 28-29, 2024",
-    skillLevels: ["3.0", "3.5", "4.0"],
-    entryFee: "$75",
-    spotsLeft: 48,
-    format: "Round Robin",
-  },
-  {
-    id: "a2",
-    name: "Weekend Warriors Classic",
-    location: "Denver, CO",
-    date: "Jan 4-5, 2025",
-    skillLevels: ["3.5", "4.0", "4.5"],
-    entryFee: "$85",
-    spotsLeft: 32,
-    format: "Double Elimination",
-  },
-  {
-    id: "a3",
-    name: "New Year Smash",
-    location: "Phoenix, AZ",
-    date: "Jan 11-12, 2025",
-    skillLevels: ["2.5", "3.0", "3.5"],
-    entryFee: "$65",
-    spotsLeft: 64,
-    format: "Round Robin",
-  },
-  {
-    id: "a4",
-    name: "Winter Warm-Up Tournament",
-    location: "Austin, TX",
-    date: "Jan 18-19, 2025",
-    skillLevels: ["3.0", "3.5", "4.0", "4.5"],
-    entryFee: "$80",
-    spotsLeft: 24,
-    format: "Double Elimination",
-  },
-  {
-    id: "a5",
-    name: "Coastal Classic",
-    location: "San Diego, CA",
-    date: "Jan 25-26, 2025",
-    skillLevels: ["3.5", "4.0"],
-    entryFee: "$90",
-    spotsLeft: 16,
-    format: "Pool Play",
-  },
-  {
-    id: "a6",
-    name: "Beginner Bash",
-    location: "Tampa, FL",
-    date: "Feb 1-2, 2025",
-    skillLevels: ["2.5", "3.0"],
-    entryFee: "$55",
-    spotsLeft: 80,
-    format: "Round Robin",
-  },
-]
+interface Tournament {
+  id: string
+  name: string
+  location: string
+  startDate: string
+  endDate?: string
+  prizePool?: number
+  entryFee?: number
+  type?: string
+}
 
 export function AmateurCompetitions() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedLevel, setSelectedLevel] = useState("all")
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  const filteredEvents = AMATEUR_EVENTS.filter(event => {
-    const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      event.location.toLowerCase().includes(searchQuery.toLowerCase())
-    const matchesLevel = selectedLevel === "all" || event.skillLevels.includes(selectedLevel)
-    return matchesSearch && matchesLevel
-  })
+  useEffect(() => {
+    fetchAmateurEvents()
+  }, [])
+
+  const fetchAmateurEvents = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Fetch all tournaments and filter for amateur level (prize pool < $50k)
+      const res = await fetch('/api/tournaments')
+      if (!res?.ok) throw new Error('Failed to fetch tournaments')
+      const data = await res?.json()
+      
+      // Filter for amateur level tournaments
+      const amateur = data?.tournaments?.filter?.((t: Tournament) => 
+        !t?.prizePool || t?.prizePool < 50000
+      ) || []
+      
+      setTournaments(amateur)
+    } catch (err) {
+      console.error('Error fetching amateur events:', err)
+      setError(err?.message || 'Failed to load amateur competitions')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (startDate: string, endDate?: string) => {
+    if (!startDate) return 'Date TBA'
+    const start = new Date(startDate)
+    const month = start?.toLocaleDateString?.('en-US', { month: 'short' })
+    const day = start?.getDate?.()
+    const year = start?.getFullYear?.()
+    
+    if (endDate) {
+      const end = new Date(endDate)
+      const endDay = end?.getDate?.()
+      return `${month} ${day}-${endDay}, ${year}`
+    }
+    return `${month} ${day}, ${year}`
+  }
+
+  const filteredEvents = tournaments?.filter?.(event => {
+    const matchesSearch = event?.name?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '') ||
+      event?.location?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '')
+    return matchesSearch
+  }) || []
 
   return (
     <div className="min-h-screen pb-20">
@@ -121,7 +116,7 @@ export function AmateurCompetitions() {
           <div className="bg-white/5 rounded-xl border border-white/10 p-4 mb-8">
             <h3 className="text-sm font-medium text-white mb-3">Skill Level Guide</h3>
             <div className="flex flex-wrap gap-2">
-              {SKILL_LEVELS.map(level => (
+              {SKILL_LEVELS?.map?.(level => (
                 <Badge
                   key={level}
                   variant="outline"
@@ -137,7 +132,7 @@ export function AmateurCompetitions() {
                     parseFloat(level) <= 4.5 ? "Competitive" : "Elite"
                   }
                 </Badge>
-              ))}
+              )) || []}
             </div>
           </div>
 
@@ -148,7 +143,7 @@ export function AmateurCompetitions() {
               <Input
                 placeholder="Search events or locations..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e?.target?.value || '')}
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
               />
             </div>
@@ -158,9 +153,9 @@ export function AmateurCompetitions() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Levels</SelectItem>
-                {SKILL_LEVELS.map(level => (
+                {SKILL_LEVELS?.map?.(level => (
                   <SelectItem key={level} value={level}>{level}</SelectItem>
-                ))}
+                )) || []}
               </SelectContent>
             </Select>
           </div>
@@ -169,63 +164,66 @@ export function AmateurCompetitions() {
 
       {/* Events List */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6">
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredEvents.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="bg-white/5 border-white/10 hover:border-blue-500/30 transition-all h-full">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
-                      {event.format}
-                    </Badge>
-                    <span className="text-lg font-bold text-white">{event.entryFee}</span>
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{event.name}</h3>
-                  <div className="flex items-center gap-3 text-sm text-gray-400 mb-3">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {event.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {event.date}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-1 mb-4">
-                    {event.skillLevels.map(level => (
-                      <Badge key={level} variant="outline" className="border-white/20 text-gray-300 text-xs">
-                        {level}
-                      </Badge>
-                    ))}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <Badge className={`${
-                      event.spotsLeft > 30 ? "bg-green-500/20 text-green-400" :
-                      event.spotsLeft > 10 ? "bg-yellow-500/20 text-yellow-400" :
-                      "bg-red-500/20 text-red-400"
-                    }`}>
-                      {event.spotsLeft} spots left
-                    </Badge>
-                    <Button size="sm" className="bg-blue-500 hover:bg-blue-600">
-                      Register <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
+        {loading ? (
+          <div className="text-center py-20">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+            <p className="text-gray-400 mt-4">Loading amateur competitions...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={fetchAmateurEvents} className="bg-champion-green hover:bg-champion-green/90">
+              Retry
+            </Button>
+          </div>
+        ) : filteredEvents?.length === 0 ? (
           <div className="text-center py-12">
             <Target className="w-12 h-12 text-gray-500 mx-auto mb-4" />
             <h3 className="text-xl font-medium text-white mb-2">No events found</h3>
             <p className="text-gray-400">Try adjusting your filters or search terms</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents?.map?.((event, index) => (
+              <motion.div
+                key={event?.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="bg-white/5 border-white/10 hover:border-blue-500/30 transition-all h-full">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
+                        Amateur
+                      </Badge>
+                      <span className="text-lg font-bold text-white">
+                        {event?.entryFee ? formatPrizeMoney(event?.entryFee) : 'Free'}
+                      </span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{event?.name || 'Untitled Tournament'}</h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-400 mb-3">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {event?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(event?.startDate, event?.endDate)}
+                      </span>
+                    </div>
+                    {event?.prizePool && (
+                      <div className="text-sm text-gray-400 mb-4">
+                        Prize Pool: <span className="text-blue-400 font-semibold">{formatPrizeMoney(event?.prizePool)}</span>
+                      </div>
+                    )}
+                    <Button size="sm" className="w-full bg-blue-500 hover:bg-blue-600">
+                      Register <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )) || []}
           </div>
         )}
       </section>

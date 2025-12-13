@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Radio,
   TrendingUp,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -30,6 +31,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { formatPrizeMoney } from "@/lib/utils/currency"
 
 const US_STATES = [
   { abbr: "AL", name: "Alabama", events: 12 },
@@ -82,75 +84,6 @@ const US_STATES = [
   { abbr: "WV", name: "West Virginia", events: 5 },
   { abbr: "WI", name: "Wisconsin", events: 14 },
   { abbr: "WY", name: "Wyoming", events: 3 },
-]
-
-const FEATURED_TOURNAMENTS = [
-  {
-    id: "1",
-    name: "Grand Slam Championship - Miami Open",
-    location: "Miami, FL",
-    date: "Jan 15-19, 2025",
-    type: "championship",
-    prizePool: "$250,000",
-    participants: 512,
-    image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800",
-    isLive: true,
-    skillLevels: ["Pro", "5.0+"],
-  },
-  {
-    id: "2",
-    name: "Southwest Regional Championship",
-    location: "Phoenix, AZ",
-    date: "Jan 22-24, 2025",
-    type: "championship",
-    prizePool: "$75,000",
-    participants: 256,
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800",
-    isLive: false,
-    skillLevels: ["4.0+", "4.5+", "5.0+"],
-  },
-  {
-    id: "3",
-    name: "Rising Stars Junior National",
-    location: "Dallas, TX",
-    date: "Feb 1-3, 2025",
-    type: "rising-stars",
-    prizePool: "Scholarships",
-    participants: 128,
-    image: "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=800",
-    isLive: false,
-    skillLevels: ["U12", "U15", "U18"],
-  },
-]
-
-const UPCOMING_EVENTS = [
-  {
-    id: "4",
-    name: "Community Open - Seattle",
-    location: "Seattle, WA",
-    date: "Dec 28-29, 2024",
-    type: "amateur",
-    registrationOpen: true,
-    spotsLeft: 48,
-  },
-  {
-    id: "5",
-    name: "Pickleball for Purpose - Cancer Research",
-    location: "Los Angeles, CA",
-    date: "Jan 5, 2025",
-    type: "charity",
-    registrationOpen: true,
-    spotsLeft: 120,
-  },
-  {
-    id: "6",
-    name: "League Night Finals - Northeast",
-    location: "Boston, MA",
-    date: "Jan 8, 2025",
-    type: "league",
-    registrationOpen: false,
-    spotsLeft: 0,
-  },
 ]
 
 const CATEGORIES = [
@@ -210,27 +143,97 @@ const CATEGORIES = [
   },
 ]
 
-const STATS = [
-  { label: "Total Events", value: "594", icon: Calendar },
-  { label: "States Covered", value: "50", icon: Globe },
-  { label: "Active Players", value: "125K+", icon: Users },
-  { label: "Prize Money", value: "$2.5M+", icon: Award },
-]
+interface Tournament {
+  id: string
+  name: string
+  location: string
+  startDate: string
+  endDate?: string
+  prizePool?: number
+  type?: string
+  featured?: boolean
+  registrationOpen?: boolean
+}
+
+interface TournamentStats {
+  totalTournaments: number
+  totalPrize: number
+  statesCovered: number
+  dateRange?: string
+}
 
 export function TournamentHub() {
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState("all")
   const [isClient, setIsClient] = useState(false)
+  const [featuredTournaments, setFeaturedTournaments] = useState<Tournament[]>([])
+  const [upcomingEvents, setUpcomingEvents] = useState<Tournament[]>([])
+  const [stats, setStats] = useState<TournamentStats | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     setIsClient(true)
+    fetchTournamentData()
   }, [])
 
-  const filteredStates = US_STATES.filter(state =>
-    state.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    state.abbr.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const fetchTournamentData = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+
+      // Fetch featured tournaments
+      const featuredRes = await fetch('/api/tournaments/featured')
+      if (!featuredRes?.ok) throw new Error('Failed to fetch featured tournaments')
+      const featuredData = await featuredRes?.json()
+      setFeaturedTournaments(featuredData?.tournaments || [])
+
+      // Fetch stats
+      const statsRes = await fetch('/api/tournaments/stats')
+      if (!statsRes?.ok) throw new Error('Failed to fetch stats')
+      const statsData = await statsRes?.json()
+      setStats(statsData || null)
+
+      // Fetch upcoming events (first 3 tournaments)
+      const upcomingRes = await fetch('/api/tournaments?limit=3')
+      if (!upcomingRes?.ok) throw new Error('Failed to fetch upcoming events')
+      const upcomingData = await upcomingRes?.json()
+      setUpcomingEvents(upcomingData?.tournaments || [])
+    } catch (err) {
+      console.error('Error fetching tournament data:', err)
+      setError(err?.message || 'Failed to load tournament data')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filteredStates = US_STATES?.filter?.(state =>
+    state?.name?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '') ||
+    state?.abbr?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '')
+  ) || []
+
+  const formatDate = (startDate: string, endDate?: string) => {
+    if (!startDate) return 'Date TBA'
+    const start = new Date(startDate)
+    const month = start?.toLocaleDateString?.('en-US', { month: 'short' })
+    const day = start?.getDate?.()
+    const year = start?.getFullYear?.()
+    
+    if (endDate) {
+      const end = new Date(endDate)
+      const endDay = end?.getDate?.()
+      return `${month} ${day}-${endDay}, ${year}`
+    }
+    return `${month} ${day}, ${year}`
+  }
+
+  const STATS_DISPLAY = [
+    { label: "Total Events", value: stats?.totalTournaments?.toString?.() || "0", icon: Calendar },
+    { label: "States Covered", value: stats?.statesCovered?.toString?.() || "0", icon: Globe },
+    { label: "Active Players", value: "125K+", icon: Users },
+    { label: "Prize Money", value: stats?.totalPrize ? formatPrizeMoney(stats?.totalPrize) : "$0", icon: Award },
+  ]
 
   return (
     <div className="min-h-screen pb-20">
@@ -250,7 +253,7 @@ export function TournamentHub() {
           >
             <Badge className="mb-4 bg-champion-green/20 text-champion-green border-champion-green/30">
               <Radio className="w-3 h-3 mr-1 animate-pulse" />
-              Live Tournaments Now
+              Live Tournament Data
             </Badge>
             <h1 className="text-4xl md:text-6xl font-bold text-white mb-4">
               Tournament <span className="bg-gradient-to-r from-champion-green to-champion-gold bg-clip-text text-transparent">Hub</span>
@@ -267,16 +270,23 @@ export function TournamentHub() {
             transition={{ delay: 0.2 }}
             className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-12"
           >
-            {STATS.map((stat, index) => (
-              <div
-                key={stat.label}
-                className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center"
-              >
-                <stat.icon className="w-5 h-5 text-champion-green mx-auto mb-2" />
-                <div className="text-2xl md:text-3xl font-bold text-white">{stat.value}</div>
-                <div className="text-sm text-gray-400">{stat.label}</div>
+            {loading ? (
+              <div className="col-span-full text-center py-8">
+                <Loader2 className="w-8 h-8 text-champion-green mx-auto animate-spin" />
+                <p className="text-gray-400 mt-2">Loading tournament data...</p>
               </div>
-            ))}
+            ) : (
+              STATS_DISPLAY?.map?.((stat, index) => (
+                <div
+                  key={stat?.label}
+                  className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/10 text-center"
+                >
+                  <stat.icon className="w-5 h-5 text-champion-green mx-auto mb-2" />
+                  <div className="text-2xl md:text-3xl font-bold text-white">{stat?.value}</div>
+                  <div className="text-sm text-gray-400">{stat?.label}</div>
+                </div>
+              )) || []
+            )}
           </motion.div>
 
           {/* Search & Filter */}
@@ -291,7 +301,7 @@ export function TournamentHub() {
               <Input
                 placeholder="Search tournaments, locations, or events..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e?.target?.value || '')}
                 className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-gray-400 h-12"
               />
             </div>
@@ -330,61 +340,67 @@ export function TournamentHub() {
           </Link>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
-          {FEATURED_TOURNAMENTS.map((tournament, index) => (
-            <motion.div
-              key={tournament.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="bg-white/5 border-white/10 overflow-hidden group hover:border-champion-green/50 transition-all">
-                <div className="relative h-48">
-                  <img
-                    src={tournament.image}
-                    alt={tournament.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
-                  {tournament.isLive && (
-                    <Badge className="absolute top-3 left-3 bg-red-500 text-white animate-pulse">
-                      <Radio className="w-3 h-3 mr-1" /> LIVE
-                    </Badge>
-                  )}
-                  <div className="absolute bottom-3 left-3 right-3">
-                    <div className="flex flex-wrap gap-1">
-                      {tournament.skillLevels.map(level => (
-                        <Badge key={level} variant="outline" className="text-xs border-white/30 text-white">
-                          {level}
-                        </Badge>
-                      ))}
+        {loading ? (
+          <div className="text-center py-12">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+          </div>
+        ) : error ? (
+          <div className="text-center py-12">
+            <p className="text-red-400">{error}</p>
+            <Button onClick={fetchTournamentData} className="mt-4 bg-champion-green hover:bg-champion-green/90">
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-3 gap-6">
+            {featuredTournaments?.slice?.(0, 3)?.map?.((tournament, index) => (
+              <motion.div
+                key={tournament?.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="bg-white/5 border-white/10 overflow-hidden group hover:border-champion-green/50 transition-all">
+                  <div className="relative h-48">
+                    <img
+                      src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800"
+                      alt={tournament?.name || 'Tournament'}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
+                    {tournament?.featured && (
+                      <Badge className="absolute top-3 left-3 bg-champion-green text-white">
+                        <Star className="w-3 h-3 mr-1" /> FEATURED
+                      </Badge>
+                    )}
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold text-white mb-2 line-clamp-1">{tournament?.name || 'Untitled Tournament'}</h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {tournament?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(tournament?.startDate, tournament?.endDate)}
+                      </span>
                     </div>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold text-white mb-2 line-clamp-1">{tournament.name}</h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {tournament.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {tournament.date}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-champion-gold font-semibold">{tournament.prizePool}</div>
-                    <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
-                      {tournament.isLive ? "Watch Live" : "Register"}
-                      <ArrowRight className="w-4 h-4 ml-1" />
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    <div className="flex items-center justify-between">
+                      <div className="text-champion-gold font-semibold">
+                        {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
+                      </div>
+                      <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
+                        Register
+                        <ArrowRight className="w-4 h-4 ml-1" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )) || []}
+          </div>
+        )}
       </section>
 
       {/* Tournament Categories */}
@@ -395,24 +411,24 @@ export function TournamentHub() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {CATEGORIES.map((category, index) => (
+          {CATEGORIES?.map?.((category, index) => (
             <motion.div
-              key={category.id}
+              key={category?.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
-              <Link href={category.href}>
+              <Link href={category?.href || '#'}>
                 <Card className="bg-white/5 border-white/10 hover:border-white/30 transition-all group cursor-pointer h-full">
                   <CardContent className="p-6">
-                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                    <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${category?.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
                       <category.icon className="w-6 h-6 text-white" />
                     </div>
-                    <h3 className="text-lg font-semibold text-white mb-2">{category.title}</h3>
-                    <p className="text-sm text-gray-400 mb-4">{category.description}</p>
+                    <h3 className="text-lg font-semibold text-white mb-2">{category?.title}</h3>
+                    <p className="text-sm text-gray-400 mb-4">{category?.description}</p>
                     <div className="flex items-center justify-between">
                       <Badge variant="outline" className="border-white/20 text-gray-300">
-                        {category.count} events
+                        {category?.count} events
                       </Badge>
                       <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-champion-green group-hover:translate-x-1 transition-all" />
                     </div>
@@ -420,7 +436,7 @@ export function TournamentHub() {
                 </Card>
               </Link>
             </motion.div>
-          ))}
+          )) || []}
         </div>
       </section>
 
@@ -437,27 +453,27 @@ export function TournamentHub() {
               <Input
                 placeholder="Search states..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => setSearchQuery(e?.target?.value || '')}
                 className="pl-9 bg-white/10 border-white/20 text-white placeholder:text-gray-400"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {filteredStates.slice(0, 24).map((state) => (
+            {filteredStates?.slice?.(0, 24)?.map?.((state) => (
               <button
-                key={state.abbr}
-                onClick={() => setSelectedState(state.abbr)}
+                key={state?.abbr}
+                onClick={() => setSelectedState(state?.abbr || null)}
                 className={`p-3 rounded-lg border transition-all text-center ${
-                  selectedState === state.abbr
+                  selectedState === state?.abbr
                     ? "bg-champion-green border-champion-green text-white"
                     : "bg-white/5 border-white/10 text-gray-300 hover:border-champion-green/50 hover:bg-white/10"
                 }`}
               >
-                <div className="text-lg font-bold">{state.abbr}</div>
-                <div className="text-xs text-gray-400">{state.events} events</div>
+                <div className="text-lg font-bold">{state?.abbr}</div>
+                <div className="text-xs text-gray-400">{state?.events} events</div>
               </button>
-            ))}
+            )) || []}
           </div>
 
           <div className="mt-6 text-center">
@@ -485,61 +501,60 @@ export function TournamentHub() {
           </Link>
         </div>
 
-        <div className="space-y-4">
-          {UPCOMING_EVENTS.map((event, index) => (
-            <motion.div
-              key={event.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
-            >
-              <div className="flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${
-                  event.type === "charity" ? "bg-pink-500/20" :
-                  event.type === "league" ? "bg-green-500/20" : "bg-blue-500/20"
-                }`}>
-                  {
-                    event.type === "charity" ? <Heart className="w-6 h-6 text-pink-400" /> :
-                    event.type === "league" ? <Users className="w-6 h-6 text-green-400" /> :
+        {loading ? (
+          <div className="text-center py-12">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {upcomingEvents?.map?.((event, index) => (
+              <motion.div
+                key={event?.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
                     <Trophy className="w-6 h-6 text-blue-400" />
-                  }
-                </div>
-                <div>
-                  <h3 className="font-semibold text-white">{event.name}</h3>
-                  <div className="flex items-center gap-3 text-sm text-gray-400">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-3 h-3" />
-                      {event.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      {event.date}
-                    </span>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {event?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(event?.startDate, event?.endDate)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-4">
-                {event.registrationOpen ? (
-                  <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                    {event.spotsLeft} spots left
-                  </Badge>
-                ) : (
-                  <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
-                    Registration Closed
-                  </Badge>
-                )}
-                <Button
-                  size="sm"
-                  disabled={!event.registrationOpen}
-                  className={event.registrationOpen ? "bg-champion-green hover:bg-champion-green/90" : ""}
-                >
-                  {event.registrationOpen ? "Register" : "View Details"}
-                </Button>
-              </div>
-            </motion.div>
-          ))}
-        </div>
+                <div className="flex items-center gap-4">
+                  {event?.registrationOpen ? (
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      Open for Registration
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                      Registration Closed
+                    </Badge>
+                  )}
+                  <Button
+                    size="sm"
+                    disabled={!event?.registrationOpen}
+                    className={event?.registrationOpen ? "bg-champion-green hover:bg-champion-green/90" : ""}
+                  >
+                    {event?.registrationOpen ? "Register" : "View Details"}
+                  </Button>
+                </div>
+              </motion.div>
+            )) || []}
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
@@ -565,6 +580,14 @@ export function TournamentHub() {
               </Button>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Data Source Footer */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+        <div className="text-center text-sm text-gray-500">
+          <p>Tournament data from official pickleball organizations</p>
+          <p className="mt-1">Last updated: {new Date()?.toLocaleDateString?.()}</p>
         </div>
       </section>
     </div>

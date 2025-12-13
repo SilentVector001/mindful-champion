@@ -1,5 +1,6 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
 import {
@@ -11,51 +12,67 @@ import {
   UserPlus,
   ArrowRight,
   Shield,
+  Loader2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
+import { formatPrizeMoney } from "@/lib/utils/currency"
 
-const LEAGUES = [
-  {
-    id: "l1",
-    name: "Northeast League Network",
-    location: "Boston, MA",
-    teams: 24,
-    season: "Winter 2025",
-    registrationOpen: true,
-    format: "8-week season",
-  },
-  {
-    id: "l2",
-    name: "SoCal Community League",
-    location: "San Diego, CA",
-    teams: 32,
-    season: "Spring 2025",
-    registrationOpen: true,
-    format: "10-week season",
-  },
-  {
-    id: "l3",
-    name: "Texas Team Circuit",
-    location: "Austin, TX",
-    teams: 28,
-    season: "Winter 2025",
-    registrationOpen: false,
-    format: "8-week season",
-  },
-  {
-    id: "l4",
-    name: "Midwest League Alliance",
-    location: "Chicago, IL",
-    teams: 20,
-    season: "Spring 2025",
-    registrationOpen: true,
-    format: "12-week season",
-  },
-]
+interface Tournament {
+  id: string
+  name: string
+  location: string
+  startDate: string
+  endDate?: string
+  prizePool?: number
+  type?: string
+}
 
 export function CommunityLeagues() {
+  const [tournaments, setTournaments] = useState<Tournament[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchLeagueEvents()
+  }, [])
+
+  const fetchLeagueEvents = async () => {
+    try {
+      setLoading(true)
+      setError(null)
+      
+      // Fetch league tournaments
+      const res = await fetch('/api/tournaments')
+      if (!res?.ok) throw new Error('Failed to fetch tournaments')
+      const data = await res?.json()
+      
+      // For now, show all tournaments (can be filtered by type='league' if field exists)
+      setTournaments(data?.tournaments || [])
+    } catch (err) {
+      console.error('Error fetching league events:', err)
+      setError(err?.message || 'Failed to load community leagues')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const formatDate = (startDate: string, endDate?: string) => {
+    if (!startDate) return 'Date TBA'
+    const start = new Date(startDate)
+    const month = start?.toLocaleDateString?.('en-US', { month: 'short' })
+    const day = start?.getDate?.()
+    const year = start?.getFullYear?.()
+    
+    if (endDate) {
+      const end = new Date(endDate)
+      const endDay = end?.getDate?.()
+      return `${month} ${day}-${endDay}, ${year}`
+    }
+    return `${month} ${day}, ${year}`
+  }
+
   return (
     <div className="min-h-screen pb-20">
       {/* Hero */}
@@ -115,48 +132,69 @@ export function CommunityLeagues() {
 
       {/* Leagues List */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <h2 className="text-2xl font-bold text-white mb-6">Active Leagues</h2>
-        <div className="grid md:grid-cols-2 gap-6">
-          {LEAGUES.map((league, index) => (
-            <motion.div
-              key={league.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="bg-white/5 border-white/10 hover:border-green-500/30 transition-all">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <div>
-                      <Badge className={league.registrationOpen ? "bg-green-500/20 text-green-400" : "bg-gray-500/20 text-gray-400"}>
-                        {league.registrationOpen ? "Registration Open" : "Season In Progress"}
-                      </Badge>
+        <h2 className="text-2xl font-bold text-white mb-6">Active Leagues & Tournaments</h2>
+        
+        {loading ? (
+          <div className="text-center py-20">
+            <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
+            <p className="text-gray-400 mt-4">Loading community leagues...</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-20">
+            <p className="text-red-400 mb-4">{error}</p>
+            <Button onClick={fetchLeagueEvents} className="bg-champion-green hover:bg-champion-green/90">
+              Retry
+            </Button>
+          </div>
+        ) : tournaments?.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="w-12 h-12 text-gray-500 mx-auto mb-4" />
+            <p className="text-gray-400">No community leagues available at this time. Check back soon!</p>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 gap-6">
+            {tournaments?.map?.((league, index) => (
+              <motion.div
+                key={league?.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="bg-white/5 border-white/10 hover:border-green-500/30 transition-all">
+                  <CardContent className="p-6">
+                    <div className="flex items-start justify-between mb-4">
+                      <div>
+                        <Badge className="bg-green-500/20 text-green-400">
+                          Community League
+                        </Badge>
+                      </div>
+                      {league?.prizePool && (
+                        <Badge variant="outline" className="border-white/20 text-gray-300">
+                          {formatPrizeMoney(league?.prizePool)}
+                        </Badge>
+                      )}
                     </div>
-                    <Badge variant="outline" className="border-white/20 text-gray-300">
-                      {league.teams} teams
-                    </Badge>
-                  </div>
-                  <h3 className="text-lg font-semibold text-white mb-2">{league.name}</h3>
-                  <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
-                    <span className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
-                      {league.location}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {league.season}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-400 mb-4">{league.format}</p>
-                  <Button className="w-full bg-green-500 hover:bg-green-600" disabled={!league.registrationOpen}>
-                    {league.registrationOpen ? "Join League" : "View Standings"}
-                    <ArrowRight className="w-4 h-4 ml-1" />
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+                    <h3 className="text-lg font-semibold text-white mb-2">{league?.name || 'Community League'}</h3>
+                    <div className="flex items-center gap-4 text-sm text-gray-400 mb-4">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {league?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-4 h-4" />
+                        {formatDate(league?.startDate, league?.endDate)}
+                      </span>
+                    </div>
+                    <Button className="w-full bg-green-500 hover:bg-green-600">
+                      Join League
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )) || []}
+          </div>
+        )}
       </section>
     </div>
   )
