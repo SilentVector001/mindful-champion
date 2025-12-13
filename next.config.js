@@ -11,6 +11,10 @@ const nextConfig = {
     // Reduce memory usage during build
     workerThreads: false,
     cpus: 1,
+    // Optimize for faster builds
+    optimizeCss: false,
+    // Reduce memory usage by not caching during build
+    isrMemoryCacheSize: 0,
   },
   
   // Skip linting during build (Vercel has memory/time limits)
@@ -37,7 +41,7 @@ const nextConfig = {
   swcMinify: true,
   
   // Webpack optimization for smaller bundles and less memory usage
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, dev }) => {
     // Reduce bundle size by excluding unnecessary polyfills for client-side builds
     if (!isServer) {
       config.resolve.fallback = {
@@ -48,6 +52,27 @@ const nextConfig = {
         crypto: false,
       };
     }
+    
+    // Optimize memory usage during build
+    if (!dev) {
+      config.optimization = {
+        ...config.optimization,
+        minimize: true,
+        // Reduce memory footprint
+        moduleIds: 'deterministic',
+        // Split chunks more aggressively to reduce memory usage
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: false,
+            vendors: false,
+          },
+        },
+      };
+    }
+    
+    // Limit parallel processing to reduce memory usage
+    config.parallelism = 1;
     
     return config;
   },
