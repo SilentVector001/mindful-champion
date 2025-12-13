@@ -10,10 +10,17 @@
  * - Video playback
  */
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import PremiumProgramViewer from './premium-program-viewer'
+import { 
+  celebrateDayComplete, 
+  celebrateMilestone, 
+  celebrateProgramComplete,
+  celebrateStreak,
+  showAchievementToast 
+} from '@/lib/celebrations'
 
 interface InteractiveProgramViewerProps {
   program: any
@@ -98,11 +105,42 @@ export default function InteractiveProgramViewer({
       if (response.ok) {
         const data = await response.json()
         
-        toast.success(
-          data.isCompleted 
-            ? '🎉 Program completed! Amazing work!' 
-            : `✅ Day ${day} completed! Keep up the great work!`
-        )
+        // Trigger celebration animations
+        if (data.isCompleted) {
+          // Program completed!
+          celebrateProgramComplete()
+          showAchievementToast(
+            'Program Completed! 🏆',
+            'Congratulations on completing your training program!',
+            '🏆'
+          )
+          toast.success('🎉 Program completed! Amazing work!')
+        } else {
+          // Day completed
+          celebrateDayComplete()
+          
+          // Check for milestones
+          const completionPercentage = Math.round((data.userProgram.completedDays.length / program.durationDays) * 100)
+          if (completionPercentage === 25 || completionPercentage === 50 || completionPercentage === 75) {
+            setTimeout(() => {
+              celebrateMilestone()
+              showAchievementToast(
+                `${completionPercentage}% Milestone! ⭐`,
+                `You're ${completionPercentage}% through your training!`,
+                '⭐'
+              )
+            }, 1000)
+          }
+          
+          // Check for streaks
+          if (data.streak && data.streak >= 3) {
+            setTimeout(() => {
+              celebrateStreak(data.streak)
+            }, 2000)
+          }
+          
+          toast.success(`✅ Day ${day} completed! Keep up the great work!`)
+        }
         
         // Update local state
         setUserProgram(data.userProgram)

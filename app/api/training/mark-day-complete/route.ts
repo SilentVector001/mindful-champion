@@ -55,11 +55,53 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Program not found' }, { status: 404 })
     }
 
+    // Get current completed days array
+    const completedDaysArray = Array.isArray(userProgram.completedDays) 
+      ? userProgram.completedDays 
+      : []
+    
+    // Add current day to completed days if not already there
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    
+    const alreadyCompletedToday = completedDaysArray.some((date: any) => {
+      const completedDate = new Date(date)
+      completedDate.setHours(0, 0, 0, 0)
+      return completedDate.getTime() === today.getTime()
+    })
+    
+    let updatedCompletedDays = [...completedDaysArray]
+    if (!alreadyCompletedToday) {
+      updatedCompletedDays.push(today)
+    }
+
     const newCurrentDay = Math.min(day + 1, program.durationDays + 1)
-    const completionPercentage = (day / program.durationDays) * 100
+    const completionPercentage = (updatedCompletedDays.length / program.durationDays) * 100
 
     // Check if program is completed
-    const isCompleted = day >= program.durationDays
+    const isCompleted = updatedCompletedDays.length >= program.durationDays
+
+    // Calculate streak
+    let streak = 0
+    const sortedDays = updatedCompletedDays
+      .map((d: any) => {
+        const date = new Date(d)
+        date.setHours(0, 0, 0, 0)
+        return date
+      })
+      .sort((a: Date, b: Date) => b.getTime() - a.getTime())
+    
+    for (let i = 0; i < sortedDays.length; i++) {
+      const dayAgo = new Date(today)
+      dayAgo.setDate(dayAgo.getDate() - i)
+      
+      const hasDay = sortedDays.some((d: Date) => d.getTime() === dayAgo.getTime())
+      if (hasDay) {
+        streak++
+      } else {
+        break
+      }
+    }
     
     const updatedProgram = await prisma.userProgram.update({
       where: {
@@ -71,6 +113,8 @@ export async function POST(request: Request) {
       data: {
         currentDay: newCurrentDay,
         completionPercentage: completionPercentage,
+        completedDays: updatedCompletedDays,
+        lastTrainedAt: new Date(),
         status: isCompleted ? 'COMPLETED' : 'IN_PROGRESS',
         completedAt: isCompleted ? new Date() : undefined
       }
@@ -79,7 +123,8 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       success: true, 
       userProgram: updatedProgram,
-      isCompleted 
+      isCompleted,
+      streak 
     })
   } catch (error) {
     console.error('Error marking day complete:', error)
