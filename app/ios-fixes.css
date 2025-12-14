@@ -97,3 +97,42 @@ button, a, [role="button"] {
     padding-top: max(env(safe-area-inset-top), 0px);
   }
 }
+
+/* CRITICAL: iPhone-specific header visibility fix */
+@media (max-width: 428px) {
+  /* Force header to be visible on iPhone screens */
+  header, nav {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-height: 64px !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+  }
+  
+  /* Ensure header content is visible */
+  header > *, nav > * {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  
+  /* Force hamburger menu to be visible */
+  header button[aria-label="Open navigation menu"],
+  button[aria-label*="menu"] {
+    display: inline-flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    min-width: 56px !important;
+    min-height: 56px !important;
+    z-index: 10000 !important;
+  }
+  
+  /* Force logo to be visible */
+  header a[href="/dashboard"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+}

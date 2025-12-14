@@ -203,7 +203,8 @@ export default function RedesignedHomeDashboard({
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
       <MainNavigation user={user} />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8">
+      {/* CRITICAL: Add top padding on mobile to ensure content doesn't overlap header */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8 py-4 sm:py-6 md:py-8 pt-4 sm:pt-6 md:pt-8">
         {/* Enhanced Personalized Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
