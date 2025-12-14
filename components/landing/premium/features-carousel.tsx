@@ -88,11 +88,7 @@ const features = [
   }
 ]
 
-interface FeaturesCarouselProps {
-  onVideoDemo?: () => void
-}
-
-export default function FeaturesCarousel({ onVideoDemo }: FeaturesCarouselProps) {
+export default function FeaturesCarousel() {
   const [currentIndex, setCurrentIndex] = useState(0)
   const scrollRef = useRef<HTMLDivElement>(null)
 
@@ -185,18 +181,7 @@ export default function FeaturesCarousel({ onVideoDemo }: FeaturesCarouselProps)
                       </div>
 
                       {/* Icon */}
-                      <div 
-                        className={`absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg ${
-                          feature.id === "video-analysis" ? "cursor-pointer hover:scale-110 transition-transform" : ""
-                        }`}
-                        onClick={(e) => {
-                          if (feature.id === "video-analysis" && onVideoDemo) {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            onVideoDemo()
-                          }
-                        }}
-                      >
+                      <div className="absolute bottom-4 right-4 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg">
                         <Icon className="w-6 h-6 text-teal-600" />
                       </div>
                     </div>

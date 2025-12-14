@@ -120,9 +120,9 @@ async function testEmailDelivery() {
     console.log('   4. Check network connectivity\n');
   }
   
-  console.log('=''.repeat(60));
+  console.log('='.repeat(60));
   console.log('📋 SUMMARY');
-  console.log('=''.repeat(60));
+  console.log('='.repeat(60));
   console.log('\nTo use email system in production:');
   console.log('1. ✅ Set RESEND_API_KEY in Vercel environment variables');
   console.log('2. ⚠️  Verify custom domain in Resend dashboard');
