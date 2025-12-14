@@ -1,13 +1,7 @@
-const path = require('path');
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  distDir: process.env.NEXT_DIST_DIR || '.next',
-  output: process.env.NEXT_OUTPUT_MODE,
-  
   // Optimize for Vercel deployment - reduce memory usage
   experimental: {
-    outputFileTracingRoot: path.join(__dirname, '../'),
     // Reduce memory usage during build
     workerThreads: false,
     cpus: 1,
