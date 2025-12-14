@@ -150,3 +150,53 @@ export async function getEmailsByRecipient(recipientEmail: string) {
     return [];
   }
 }
+
+/**
+ * Log an email notification to the database
+ * Simplified version for use by unified-email-service
+ */
+export async function logEmailNotification(params: {
+  userId?: string;
+  type: EmailNotificationType;
+  recipientEmail: string;
+  recipientName?: string;
+  subject: string;
+  htmlContent: string;
+  textContent?: string;
+  status: EmailStatus;
+  resendEmailId?: string;
+  sponsorApplicationId?: string;
+  videoAnalysisId?: string;
+  error?: string;
+  metadata?: any;
+}) {
+  try {
+    const emailLog = await prisma.emailNotification.create({
+      data: {
+        type: params.type,
+        recipientEmail: params.recipientEmail,
+        recipientName: params.recipientName || null,
+        subject: params.subject,
+        htmlContent: params.htmlContent,
+        textContent: params.textContent || null,
+        status: params.status,
+        sentAt: params.status === 'SENT' ? new Date() : null,
+        failedAt: params.status === 'FAILED' ? new Date() : null,
+        error: params.error || null,
+        metadata: params.metadata || {},
+        resendEmailId: params.resendEmailId || null,
+        userId: params.userId || null,
+        sponsorApplicationId: params.sponsorApplicationId || null,
+        videoAnalysisId: params.videoAnalysisId || null,
+        retryCount: 0,
+      },
+    });
+
+    console.log(`📧 Email notification logged to database: ${emailLog.id} (${params.status})`);
+    return emailLog;
+  } catch (error: any) {
+    console.error('❌ Failed to log email notification to database:', error);
+    // Don't throw - logging failure shouldn't break the email send
+    return null;
+  }
+}
