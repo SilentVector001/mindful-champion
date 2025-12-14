@@ -68,6 +68,7 @@ export default function EmailNotificationsPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [settings, setSettings] = useState<EmailSettings | null>(null)
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedNotification, setSelectedNotification] = useState<EmailNotification | null>(null)
   const [showSettings, setShowSettings] = useState(false)
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null)
@@ -86,6 +87,7 @@ export default function EmailNotificationsPage() {
 
   const fetchData = async () => {
     setLoading(true)
+    setError(null)
     try {
       // Fetch notifications
       const params = new URLSearchParams({
@@ -102,16 +104,46 @@ export default function EmailNotificationsPage() {
         fetch('/api/admin/email-notifications/settings'),
       ])
 
+      // Check for errors and parse responses
+      if (!notificationsRes.ok) {
+        const errorData = await notificationsRes.json().catch(() => ({ error: 'Failed to fetch notifications' }))
+        
+        // Check for authorization error
+        if (notificationsRes.status === 401) {
+          throw new Error('You are not authorized to view this page. Please ensure you are logged in as an admin.')
+        }
+        
+        throw new Error(errorData.error || `Failed to fetch notifications (HTTP ${notificationsRes.status})`)
+      }
+
+      if (!statsRes.ok) {
+        console.warn('Failed to fetch stats:', statsRes.status)
+        // Continue without stats - this is non-critical
+      }
+
+      if (!settingsRes.ok) {
+        console.warn('Failed to fetch settings:', settingsRes.status)
+        // Continue without settings - this is non-critical
+      }
+
       const notificationsData = await notificationsRes.json()
-      const statsData = await statsRes.json()
-      const settingsData = await settingsRes.json()
+      const statsData = statsRes.ok ? await statsRes.json() : null
+      const settingsData = settingsRes.ok ? await settingsRes.json() : null
 
       setNotifications(notificationsData.notifications || [])
       setTotalPages(notificationsData.pagination?.totalPages || 1)
-      setStats(statsData)
-      setSettings(settingsData.settings)
-    } catch (error) {
-      console.error('Failed to fetch data:', error)
+      
+      if (statsData) {
+        setStats(statsData)
+      }
+      
+      if (settingsData && settingsData.settings) {
+        setSettings(settingsData.settings)
+      }
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error occurred'
+      console.error('Failed to fetch data:', err)
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -203,6 +235,33 @@ export default function EmailNotificationsPage() {
             Settings
           </button>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-900 mb-1">Error Loading Email Data</h3>
+              <p className="text-sm text-red-700">{error}</p>
+              <button
+                onClick={() => {
+                  setError(null)
+                  fetchData()
+                }}
+                className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Retry
+              </button>
+            </div>
+            <button
+              onClick={() => setError(null)}
+              className="text-red-400 hover:text-red-600"
+            >
+              <XCircle className="w-5 h-5" />
+            </button>
+          </div>
+        )}
 
         {/* Stats Cards */}
         {stats && (
