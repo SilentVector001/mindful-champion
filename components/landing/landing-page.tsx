@@ -1,7 +1,7 @@
 "use client"
 
 import HeroSection from "./premium/hero-section"
-import WelcomeVideoCarousel from "./welcome-video-carousel"
+import WelcomeVideoCarousel, { WelcomeVideoCarouselRef } from "./welcome-video-carousel"
 import FeaturesCarousel from "./premium/features-carousel"
 import VideoLearningSection from "./premium/video-learning-section"
 import StatsSection from "./premium/stats-section"
@@ -9,11 +9,24 @@ import PricingCTASection from "./premium/pricing-cta-section"
 import PartnerBenefitsSection from "./premium/partner-benefits-section"
 import { Button } from "@/components/ui/button"
 import { Menu, X, Trophy, ArrowRight, Sparkles } from "lucide-react"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import Link from "next/link"
 
 export default function LandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const videoCarouselRef = useRef<HTMLDivElement>(null)
+  const videoCarouselComponentRef = useRef<WelcomeVideoCarouselRef>(null)
+
+  const scrollToVideoCarousel = () => {
+    videoCarouselRef.current?.scrollIntoView({ 
+      behavior: 'smooth',
+      block: 'center'
+    })
+    // Trigger video playback after scrolling
+    setTimeout(() => {
+      videoCarouselComponentRef.current?.playVideo()
+    }, 500)
+  }
 
   return (
     <div className="min-h-screen pb-20 md:pb-0">
@@ -130,9 +143,8 @@ export default function LandingPage() {
 
       {/* Page Sections */}
       <HeroSection />
-      <WelcomeVideoCarousel />
       <div id="features">
-        <FeaturesCarousel />
+        <FeaturesCarousel onVideoDemo={scrollToVideoCarousel} />
       </div>
       <div id="video-learning">
         <VideoLearningSection />
@@ -141,6 +153,9 @@ export default function LandingPage() {
       <PartnerBenefitsSection />
       <div id="pricing">
         <PricingCTASection />
+      </div>
+      <div ref={videoCarouselRef}>
+        <WelcomeVideoCarousel ref={videoCarouselComponentRef} />
       </div>
 
       {/* Footer */}

@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef, useState, useEffect } from "react"
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from "react"
 import { useSession } from "next-auth/react"
 import { Volume2, VolumeX, RotateCcw, Play, Pause } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -10,7 +10,11 @@ const videos = [
   "/videos/welcome-2.mp4"
 ]
 
-export default function WelcomeVideoCarousel() {
+export interface WelcomeVideoCarouselRef {
+  playVideo: () => void
+}
+
+const WelcomeVideoCarousel = forwardRef<WelcomeVideoCarouselRef>((props, ref) => {
   const { data: session, status } = useSession() || {}
   const videoRef = useRef<HTMLVideoElement>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -18,6 +22,18 @@ export default function WelcomeVideoCarousel() {
   const [isPlaying, setIsPlaying] = useState(false)
   const [isEnded, setIsEnded] = useState(false)
   const [mounted, setMounted] = useState(false)
+
+  // Expose playVideo method to parent components
+  useImperativeHandle(ref, () => ({
+    playVideo: () => {
+      if (videoRef.current) {
+        setIsEnded(false)
+        setCurrentIndex(0)
+        videoRef.current.currentTime = 0
+        videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {})
+      }
+    }
+  }))
 
   useEffect(() => {
     setMounted(true)
@@ -151,4 +167,8 @@ export default function WelcomeVideoCarousel() {
       </div>
     </section>
   )
-}
+})
+
+WelcomeVideoCarousel.displayName = "WelcomeVideoCarousel"
+
+export default WelcomeVideoCarousel
