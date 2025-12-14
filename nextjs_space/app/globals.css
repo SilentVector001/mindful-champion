@@ -1,0 +1,354 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Mobile Optimization - Touch Targets */
+@media (max-width: 768px) {
+  button,
+  button[type="button"],
+  button[type="submit"],
+  [role="button"],
+  a[role="button"] {
+    min-height: 48px !important;
+  }
+  
+  button[aria-label="Toggle menu"] {
+    min-height: 48px !important;
+    min-width: 48px !important;
+  }
+  
+  /* Prevent horizontal scrolling */
+  body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  /* CRITICAL FIX: Ensure header is always visible on mobile */
+  header[class*="sticky"] {
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 9999 !important;
+    /* iOS safe area - add padding at top for notch */
+    padding-top: env(safe-area-inset-top, 0px) !important;
+    /* Prevent header from being hidden */
+    transform: none !important;
+    -webkit-transform: none !important;
+    /* Ensure header is above all content */
+    isolation: isolate !important;
+  }
+  
+  /* Ensure body content doesn't overlap header */
+  body {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+  
+  /* Ensure main content starts below header */
+  main, [role="main"] {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+  }
+}
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+ 
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+ 
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+ 
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+ 
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+ 
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+ 
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+ 
+    --radius: 0.5rem;
+    
+    /* Coach Kai Brand Colors - Light Mode */
+    --kai-primary: 188 100% 41%; /* Teal/Cyan #00D084 */
+    --kai-secondary: 218 100% 59%; /* Blue #4A90E2 */
+    --kai-accent: 45 100% 51%; /* Gold #FFB800 */
+    --kai-glow: 188 100% 41%; /* Matching primary for glow */
+  }
+ 
+  .dark {
+    --background: 220 25% 8%; /* Deeper, richer dark */
+    --foreground: 210 40% 98%;
+ 
+    --card: 220 20% 12%; /* Slightly lighter than background */
+    --card-foreground: 210 40% 98%;
+ 
+    --popover: 220 25% 10%;
+    --popover-foreground: 210 40% 98%;
+ 
+    --primary: 188 100% 50%; /* Coach Kai Teal */
+    --primary-foreground: 220 25% 8%;
+ 
+    --secondary: 220 20% 18%;
+    --secondary-foreground: 210 40% 98%;
+ 
+    --muted: 220 15% 15%;
+    --muted-foreground: 215 20.2% 65.1%;
+ 
+    --accent: 218 100% 59%; /* Coach Kai Blue */
+    --accent-foreground: 210 40% 98%;
+ 
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+ 
+    --border: 220 15% 20%;
+    --input: 220 20% 16%;
+    --ring: 188 100% 50%; /* Teal ring for focus states */
+    
+    /* Coach Kai Brand Colors - Dark Mode (enhanced vibrancy) */
+    --kai-primary: 188 100% 50%; /* Brighter Teal #00E896 */
+    --kai-secondary: 218 100% 65%; /* Brighter Blue #5FA3FF */
+    --kai-accent: 45 100% 55%; /* Brighter Gold #FFC419 */
+    --kai-glow: 188 100% 50%; /* Matching primary for glow effects */
+  }
+}
+ 
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Responsive Design Utilities */
+@layer utilities {
+  /* Ensure smooth scroll behavior only when explicitly requested */
+  html {
+    scroll-behavior: auto;
+  }
+  
+  /* Prevent scroll restoration issues and horizontal overflow */
+  body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  }
+  
+  /* When smooth scrolling is needed */
+  .smooth-scroll {
+    scroll-behavior: smooth;
+  }
+  
+  /* Mobile-friendly touch targets */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* Responsive text utilities */
+  .text-responsive-xs {
+    @apply text-xs sm:text-sm;
+  }
+  
+  .text-responsive-sm {
+    @apply text-sm sm:text-base;
+  }
+  
+  .text-responsive-base {
+    @apply text-sm sm:text-base md:text-lg;
+  }
+  
+  .text-responsive-lg {
+    @apply text-base sm:text-lg md:text-xl;
+  }
+  
+  .text-responsive-xl {
+    @apply text-lg sm:text-xl md:text-2xl;
+  }
+  
+  .text-responsive-2xl {
+    @apply text-xl sm:text-2xl md:text-3xl;
+  }
+  
+  .text-responsive-3xl {
+    @apply text-2xl sm:text-3xl md:text-4xl;
+  }
+  
+  /* Responsive spacing utilities */
+  .space-responsive-sm {
+    @apply space-y-2 sm:space-y-3 md:space-y-4;
+  }
+  
+  .space-responsive-md {
+    @apply space-y-3 sm:space-y-4 md:space-y-6;
+  }
+  
+  .space-responsive-lg {
+    @apply space-y-4 sm:space-y-6 md:space-y-8;
+  }
+  
+  /* Responsive padding utilities */
+  .p-responsive-sm {
+    @apply p-3 sm:p-4 md:p-6;
+  }
+  
+  .p-responsive-md {
+    @apply p-4 sm:p-6 md:p-8;
+  }
+  
+  .p-responsive-lg {
+    @apply p-6 sm:p-8 md:p-12;
+  }
+  
+  /* Prevent text overflow */
+  .text-truncate-responsive {
+    @apply truncate sm:whitespace-normal;
+  }
+  
+  /* Responsive grid utilities */
+  .grid-responsive-1-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+  
+  .grid-responsive-1-2-3 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4;
+  }
+  
+  .grid-responsive-1-2-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4;
+  }
+  
+  /* Hide scrollbar but keep functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  
+  /* Custom scrollbar for mobile */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(0, 208, 132, 0.3) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 208, 132, 0.3);
+    border-radius: 2px;
+  }
+  
+  /* Mobile-friendly container */
+  .container-mobile {
+    @apply w-full px-4 sm:px-6 lg:px-8 mx-auto;
+  }
+  
+  /* Responsive aspect ratios */
+  .aspect-video-responsive {
+    @apply aspect-video w-full;
+  }
+  
+  .aspect-square-responsive {
+    @apply aspect-square w-full;
+  }
+}
+
+/* Tailwind custom animations */
+@layer utilities {
+  @keyframes slide-up-fade {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up-fade {
+    animation: slide-up-fade 0.2s ease-out;
+  }
+}
+
+
+
+/* Mobile Overlay Fixes - Prevent white panel overlaps */
+@media (max-width: 768px) {
+  /* Ensure portals and overlays don't create persistent white panels */
+  [data-radix-portal] {
+    position: fixed !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Prevent Select dropdowns from staying visible */
+  [data-radix-select-content] {
+    max-width: calc(100vw - 2rem) !important;
+    left: 1rem !important;
+    right: 1rem !important;
+  }
+  
+  /* Ensure proper z-index layering on mobile */
+  [data-radix-select-content],
+  [data-radix-dialog-content] {
+    z-index: 9999 !important;
+  }
+  
+  /* Fix for sticky/persistent overlays */
+  [data-state="closed"] {
+    display: none !important;
+  }
+  
+  /* Prevent horizontal scroll and overflow */
+  body, html {
+    overflow-x: hidden !important;
+    max-width: 100vw !important;
+  }
+  
+  /* Container overflow fix */
+  .container {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+  }
+}
+
+/* Ensure dialogs and modals work properly */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9998;
+}
+
+[data-radix-dialog-content] {
+  z-index: 9999;
+}
+
+/* Fix for Select component mobile positioning */
+@media (max-width: 640px) {
+  [role="listbox"] {
+    max-width: 90vw !important;
+  }
+}
