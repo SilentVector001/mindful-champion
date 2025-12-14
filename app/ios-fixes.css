@@ -65,6 +65,10 @@ button, a, [role="button"] {
   .ios-safe-area-top > * {
     padding-top: 0; /* Reset for children */
   }
+  
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
 }
 
 /* Force navigation to be visible on iOS Safari */

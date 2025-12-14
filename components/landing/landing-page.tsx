@@ -110,18 +110,18 @@ export default function LandingPage() {
       </nav>
 
       {/* Sticky Bottom Mobile Navigation - ONLY on landing page */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-2xl">
-        <div className="px-4 py-3 flex items-center gap-3">
-          <Link href="/auth/signup" className="flex-1">
-            <Button className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white min-h-[48px] text-base font-semibold shadow-lg">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-slate-200 shadow-2xl safe-area-bottom">
+        <div className="px-4 py-3 flex flex-col gap-2">
+          <Link href="/auth/signup" className="w-full">
+            <Button className="w-full bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white min-h-[52px] text-base font-semibold shadow-lg">
               <Sparkles className="w-5 h-5 mr-2" />
-              Start Free Trial
+              Start Free 7-Day Trial
               <ArrowRight className="w-5 h-5 ml-2" />
             </Button>
           </Link>
-          <Link href="/auth/signin">
-            <Button variant="outline" className="min-h-[48px] px-6 text-base font-medium border-slate-300">
-              Sign In
+          <Link href="/auth/signin" className="w-full">
+            <Button variant="outline" className="w-full min-h-[44px] text-base font-semibold border-2 border-teal-500 text-teal-700 hover:bg-teal-50">
+              Already have an account? Sign In
             </Button>
           </Link>
         </div>

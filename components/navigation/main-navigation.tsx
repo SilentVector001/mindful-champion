@@ -127,13 +127,15 @@ export default function MainNavigation({ user }: MainNavigationProps) {
   return (
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <header 
-        className="sticky top-0 z-[60] w-full backdrop-blur-xl bg-white dark:bg-champion-charcoal border-b border-gray-200 dark:border-champion-green/10 shadow-md ios-safe-area-top"
+        className="sticky top-0 z-[60] w-full backdrop-blur-xl bg-white dark:bg-champion-charcoal border-b border-gray-200 dark:border-champion-green/10 shadow-md"
         style={{
           WebkitBackdropFilter: 'blur(20px)',
-          WebkitTransform: 'translate3d(0,0,0)', // Force hardware acceleration on iOS
+          WebkitTransform: 'translate3d(0,0,0)',
           transform: 'translate3d(0,0,0)',
-          willChange: 'transform', // Optimize for iOS rendering
-          isolation: 'isolate' // Create stacking context
+          willChange: 'transform',
+          isolation: 'isolate',
+          paddingTop: 'max(env(safe-area-inset-top, 0px), 0px)',
+          minHeight: '64px',
         }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6">
