@@ -50,7 +50,7 @@ const tiers = [
   {
     name: "Premium",
     description: "Ideal for dedicated players seeking improvement",
-    monthlyPrice: 29,
+    monthlyPrice: 29.99,
     annualPrice: 191,
     priceId: "price_1SKk9Z3ZJvYimaqqDm90FY5e",
     icon: Zap,
@@ -74,7 +74,7 @@ const tiers = [
   {
     name: "Pro",
     description: "For competitive players who demand excellence",
-    monthlyPrice: 49,
+    monthlyPrice: 49.99,
     annualPrice: 323,
     priceId: "price_1SKk9Z3ZJvYimaqqfqqeKzkm",
     icon: Crown,
