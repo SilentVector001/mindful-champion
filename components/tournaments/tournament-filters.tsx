@@ -59,7 +59,9 @@ export function TournamentFilters({ onFilterChange, states = [] }: TournamentFil
   }, [filters]);
 
   const handleFilterChange = (key: keyof FilterState, value: string) => {
-    const newFilters = { ...filters, [key]: value };
+    // Convert "all" to empty string for state, skillLevel, and format filters
+    const actualValue = (value === 'all') ? '' : value;
+    const newFilters = { ...filters, [key]: actualValue };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
@@ -150,14 +152,14 @@ export function TournamentFilters({ onFilterChange, states = [] }: TournamentFil
             <MapPin className="w-4 h-4" />
             State
           </label>
-          <Select value={filters?.state ?? ''} onValueChange={(value) => handleFilterChange('state', value)}>
+          <Select value={filters?.state || 'all'} onValueChange={(value) => handleFilterChange('state', value)}>
             <SelectTrigger>
               <SelectValue placeholder="All states" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All states</SelectItem>
-              {(states ?? []).map((state) => (
-                <SelectItem key={state} value={state ?? ''}>
+              <SelectItem value="all">All states</SelectItem>
+              {(states ?? []).filter(state => state && state.trim() !== '').map((state) => (
+                <SelectItem key={state} value={state}>
                   {state}
                 </SelectItem>
               ))}
@@ -171,12 +173,12 @@ export function TournamentFilters({ onFilterChange, states = [] }: TournamentFil
             <Trophy className="w-4 h-4" />
             Skill Level
           </label>
-          <Select value={filters?.skillLevel ?? ''} onValueChange={(value) => handleFilterChange('skillLevel', value)}>
+          <Select value={filters?.skillLevel || 'all'} onValueChange={(value) => handleFilterChange('skillLevel', value)}>
             <SelectTrigger>
               <SelectValue placeholder="All levels" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All levels</SelectItem>
+              <SelectItem value="all">All levels</SelectItem>
               {skillLevels.map((level) => (
                 <SelectItem key={level} value={level}>
                   {level}
@@ -192,12 +194,12 @@ export function TournamentFilters({ onFilterChange, states = [] }: TournamentFil
             <Users className="w-4 h-4" />
             Format
           </label>
-          <Select value={filters?.format ?? ''} onValueChange={(value) => handleFilterChange('format', value)}>
+          <Select value={filters?.format || 'all'} onValueChange={(value) => handleFilterChange('format', value)}>
             <SelectTrigger>
               <SelectValue placeholder="All formats" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All formats</SelectItem>
+              <SelectItem value="all">All formats</SelectItem>
               {formats.map((format) => (
                 <SelectItem key={format} value={format}>
                   {format?.replace('_', ' ') ?? ''}
