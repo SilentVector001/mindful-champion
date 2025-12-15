@@ -722,6 +722,26 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
+            {/* Tournaments */}
+            <InfoTooltip content="Find and register for pickleball tournaments across the United States">
+              <Link href="/tournaments">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
+                    isActive("/tournaments")
+                      ? "bg-champion-green/10 text-champion-green"
+                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
+                  )}
+                >
+                  <Trophy className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
+                  <span className="hidden xl:inline">Tournaments</span>
+                  <span className="xl:hidden">Tourns</span>
+                </Button>
+              </Link>
+            </InfoTooltip>
+
             {/* My Rewards */}
             <InfoTooltip content="Redeem your achievement points for exclusive sponsor rewards">
               <Link href="/marketplace">
@@ -1087,10 +1107,10 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 </Link>
                 */}
 
-                <Link href="/connect/tournaments" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <Trophy className="w-5 h-5 text-champion-blue" />
-                    Tournament Hub
+                <Link href="/tournaments" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-teal-50 to-blue-50 hover:from-teal-100 hover:to-blue-100">
+                    <Trophy className="w-5 h-5 text-teal-600" />
+                    <span className="font-semibold text-teal-700">Tournaments</span>
                   </Button>
                 </Link>
 
