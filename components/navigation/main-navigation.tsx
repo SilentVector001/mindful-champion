@@ -140,19 +140,19 @@ export default function MainNavigation({ user }: MainNavigationProps) {
           opacity: 1,
         }}
       >
-        <nav className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="flex items-center justify-between h-16 gap-4 min-h-[64px]">
+        <nav className="max-w-full w-full px-3 sm:px-4 lg:px-6">
+          <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-h-[64px] max-w-[100vw] overflow-hidden">
             {/* Logo - Fixed Positioning */}
             <InfoTooltip content="Return to your coaching dashboard">
-              <Link href="/dashboard" className="flex items-center gap-2 sm:gap-3 group flex-shrink-0">
-                <div className="relative">
+              <Link href="/dashboard" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
+                <div className="relative flex-shrink-0">
                   <div className="absolute inset-0 bg-gradient-to-br from-champion-green to-champion-gold rounded-xl blur-sm opacity-75 group-hover:opacity-100 transition-opacity"></div>
-                  <div className="relative w-10 h-10 bg-gradient-to-br from-champion-green to-champion-gold rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform">
-                    <Trophy className="w-6 h-6 text-white" />
+                  <div className="relative w-9 h-9 lg:w-10 lg:h-10 bg-gradient-to-br from-champion-green to-champion-gold rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform">
+                    <Trophy className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                   </div>
                 </div>
-                <div className="block">
-                  <span className="text-base sm:text-xl font-bold bg-gradient-to-r from-champion-green via-champion-gold to-champion-blue bg-clip-text text-transparent whitespace-nowrap">
+                <div className="hidden xl:block min-w-0 flex-shrink-0">
+                  <span className="text-base lg:text-lg font-bold bg-gradient-to-r from-champion-green via-champion-gold to-champion-blue bg-clip-text text-transparent whitespace-nowrap">
                     Mindful Champion
                   </span>
                 </div>
@@ -175,7 +175,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 <Button 
                   variant="default" 
                   size="icon" 
-                  className="h-14 w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-3 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80"
+                  className="h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-3 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80"
                   aria-label="Open navigation menu"
                   style={{ 
                     WebkitTapHighlightColor: 'transparent',
@@ -183,8 +183,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     WebkitUserSelect: 'none',
                     position: 'relative',
                     zIndex: 70,
-                    minWidth: '56px',
-                    minHeight: '56px',
+                    minWidth: '48px',
+                    minHeight: '48px',
                   }}
                   onClick={(e) => {
                     // Ensure the event is processed on iOS
@@ -192,28 +192,36 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     console.log('Mobile menu button clicked');
                   }}
                 >
-                  <Menu className="h-8 w-8 text-white stroke-[3.5] pointer-events-none" />
+                  <Menu className="h-6 w-6 sm:h-8 sm:w-8 text-white stroke-[3.5] pointer-events-none" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
             </div>
 
             {/* Main Navigation - Desktop Only (1024px+) */}
-            <div className="hidden lg:flex items-center gap-1">
+            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
+              style={{ 
+                maxWidth: 'calc(100vw - 600px)',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none'
+              }}
+            >
             {/* My Progress */}
             <InfoTooltip content="Your personal training hub - track progress, view stats, and personalized recommendations">
               <Link href="/dashboard">
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/dashboard")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                 >
-                  <Home className="w-4 h-4" />
-                  My Progress
+                  <Home className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
+                  <span className="hidden xl:inline">My Progress</span>
+                  <span className="xl:hidden">Progress</span>
                 </Button>
               </Link>
             </InfoTooltip>
@@ -225,17 +233,18 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/train")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                   title="Access all training tools, drills, video analysis, and practice plans"
                 >
-                  <Dumbbell className="w-4 h-4" />
+                  <Dumbbell className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
                   Train
-                  <ChevronDown className="w-3 h-3 opacity-50" />
+                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
@@ -334,17 +343,18 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/progress")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                   title="Track your improvement with stats, goals, and achievements"
                 >
-                  <TrendingUp className="w-4 h-4" />
+                  <TrendingUp className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
                   Progress
-                  <ChevronDown className="w-3 h-3 opacity-50" />
+                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
@@ -416,17 +426,18 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/connect")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                   title="Find practice partners, join tournaments, and connect with the community"
                 >
-                  <Users className="w-4 h-4" />
+                  <Users className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
                   Connect
-                  <ChevronDown className="w-3 h-3 opacity-50" />
+                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
@@ -549,17 +560,19 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/tournaments")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                   title="Discover tournaments across the nation"
                 >
-                  <Trophy className="w-4 h-4" />
-                  Tournaments
-                  <ChevronDown className="w-3 h-3 opacity-50" />
+                  <Trophy className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
+                  <span className="hidden xl:inline">Tournaments</span>
+                  <span className="xl:hidden">Tourns</span>
+                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
@@ -642,17 +655,18 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <DropdownMenuTrigger asChild>
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/media")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                   title="Live streams, highlights, podcasts and more"
                 >
-                  <PlayCircle className="w-4 h-4" />
-                  Media Center
-                  <ChevronDown className="w-3 h-3 opacity-50" />
+                  <PlayCircle className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
+                  Media
+                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
@@ -713,14 +727,15 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               <Link href="/marketplace">
                 <Button
                   variant="ghost"
+                  size="sm"
                   className={cn(
-                    "gap-2 font-medium transition-all",
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
                     isActive("/marketplace") || isActive("/rewards")
                       ? "bg-champion-green/10 text-champion-green"
                       : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
                   )}
                 >
-                  <Award className="w-4 h-4" />
+                  <Award className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
                   Rewards
                 </Button>
               </Link>
@@ -728,16 +743,20 @@ export default function MainNavigation({ user }: MainNavigationProps) {
           </div>
 
           {/* Right Side - Profile Menu - HIDDEN ON MOBILE/TABLET */}
-          <div className="hidden lg:flex items-center gap-2 flex-shrink-0 max-w-[350px] overflow-hidden">
+          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 flex-shrink-0 min-w-0"
+            style={{
+              maxWidth: 'min(350px, 30vw)'
+            }}
+          >
             {/* Reward Points Badge */}
             <InfoTooltip content="Your reward points - earn more by completing achievements!">
               <Link href="/marketplace" className="flex-shrink-0">
                 <Badge 
-                  className="flex gap-1.5 items-center bg-gradient-to-r from-champion-gold to-yellow-600 hover:shadow-lg hover:shadow-champion-gold/50 transition-all hover:scale-105 cursor-pointer px-2.5 py-1.5 whitespace-nowrap"
+                  className="flex gap-1 items-center bg-gradient-to-r from-champion-gold to-yellow-600 hover:shadow-lg hover:shadow-champion-gold/50 transition-all hover:scale-105 cursor-pointer px-1.5 lg:px-2 py-1 whitespace-nowrap text-xs"
                 >
-                  <Award className="w-3.5 h-3.5 flex-shrink-0" />
-                  <span className="font-bold text-sm">{rewardPoints.toLocaleString()}</span>
-                  <span className="text-xs opacity-90">pts</span>
+                  <Award className="w-3 h-3 flex-shrink-0" />
+                  <span className="font-bold">{rewardPoints > 999 ? `${(rewardPoints / 1000).toFixed(1)}k` : rewardPoints}</span>
+                  <span className="text-[10px] opacity-90 hidden xl:inline">pts</span>
                 </Badge>
               </Link>
             </InfoTooltip>
@@ -745,7 +764,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             {/* Subscription Badge - Always visible on md+ */}
             <Badge
               className={cn(
-                "flex gap-1 items-center transition-all hover:scale-105 whitespace-nowrap flex-shrink-0 px-2.5 py-1",
+                "flex gap-0.5 lg:gap-1 items-center transition-all hover:scale-105 whitespace-nowrap flex-shrink-0 px-1.5 lg:px-2 py-1",
                 user?.subscriptionTier === 'PRO'
                   ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:shadow-lg hover:shadow-purple-500/50'
                   : user?.subscriptionTier === 'PREMIUM'
@@ -753,30 +772,30 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   : 'bg-gray-500 hover:shadow-lg'
               )}
             >
-              {user?.role === 'ADMIN' && <Shield className="w-3 h-3 flex-shrink-0" />}
-              {user?.subscriptionTier === 'PRO' && <Crown className="w-3 h-3 flex-shrink-0" />}
-              <span className="text-xs font-medium">{user?.subscriptionTier || 'FREE'}</span>
+              {user?.role === 'ADMIN' && <Shield className="w-2.5 h-2.5 lg:w-3 lg:h-3 flex-shrink-0" />}
+              {user?.subscriptionTier === 'PRO' && <Crown className="w-2.5 h-2.5 lg:w-3 lg:h-3 flex-shrink-0" />}
+              <span className="text-[10px] lg:text-xs font-medium">{user?.subscriptionTier || 'FREE'}</span>
             </Badge>
 
             {/* User Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2 px-2 hover:bg-champion-green/5 transition-all flex-shrink-0 max-w-[140px] overflow-hidden">
-                  <Avatar className="h-8 w-8 border-2 border-champion-green/20 flex-shrink-0">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 px-1.5 lg:px-2 hover:bg-champion-green/5 transition-all flex-shrink-0 min-w-0 h-auto py-1.5">
+                  <Avatar className="h-7 w-7 lg:h-8 lg:w-8 border-2 border-champion-green/20 flex-shrink-0">
                     <AvatarImage src={session?.user?.image || ""} />
-                    <AvatarFallback className="bg-gradient-to-br from-champion-green to-champion-gold text-white font-bold">
+                    <AvatarFallback className="bg-gradient-to-br from-champion-green to-champion-gold text-white font-bold text-xs">
                       {user?.firstName?.[0] || user?.name?.[0] || session?.user?.name?.[0] || 'C'}
                     </AvatarFallback>
                   </Avatar>
-                  <div className="hidden xl:block text-left min-w-0 flex-1 overflow-hidden">
-                    <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                      {user?.firstName || session?.user?.name || 'Champion'}
+                  <div className="hidden 2xl:block text-left min-w-0 max-w-[100px] overflow-hidden">
+                    <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
+                      {user?.firstName || session?.user?.name?.split(' ')?.[0] || 'Champion'}
                     </p>
-                    <p className="text-xs text-gray-500 truncate whitespace-nowrap">
+                    <p className="text-[10px] text-gray-500 truncate whitespace-nowrap">
                       {user?.playerRating || '0.0'} Rating
                     </p>
                   </div>
-                  <ChevronDown className="h-4 w-4 text-gray-500 flex-shrink-0" />
+                  <ChevronDown className="h-3 w-3 lg:h-3.5 lg:w-3.5 text-gray-500 flex-shrink-0" />
                 </Button>
               </DropdownMenuTrigger>
 
