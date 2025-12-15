@@ -1,54 +1,45 @@
-import * as dotenv from 'dotenv';
-import * as path from 'path';
+import { PrismaClient } from '@prisma/client';
 
-// Load .env file from project root
-dotenv.config({ path: path.join(__dirname, '..', '.env.local') });
+const prisma = new PrismaClient();
 
-import { prisma } from '../lib/db';
-
-async function checkDatabase() {
+async function checkDB() {
   try {
-    console.log('\n🔍 Checking database connection...\n');
-    console.log('DATABASE_URL:', process.env.DATABASE_URL?.replace(/:[^:@]+@/, ':***@'));
+    console.log('🔍 Checking database connection...\n');
     
-    // Test connection
-    await prisma.$connect();
-    console.log('✅ Database connection successful\n');
+    // Check database URL
+    const dbUrl = process.env.DATABASE_URL || '';
+    const dbHost = dbUrl.split('@')[1]?.split('/')[0] || 'Unknown';
+    console.log('📍 Database Host:', dbHost);
+    console.log('📊 Full DATABASE_URL:', dbUrl.replace(/:[^:]*@/, ':****@'), '\n');
     
-    // Check for tables by trying to count records
-    const userCount = await prisma.user.count();
-    const emailCount = await prisma.emailNotification.count();
+    // Check tournament count
+    const tournamentCount = await prisma.tournament.count();
+    console.log('🏆 Current tournament count:', tournamentCount);
     
-    console.log('📊 Database Statistics:');
-    console.log('=======================\n');
-    console.log(`Total Users: ${userCount}`);
-    console.log(`Total Email Notifications: ${emailCount}\n`);
-    
-    if (userCount === 0) {
-      console.log('⚠️ No users found in database.');
-      console.log('This could mean:');
-      console.log('  1. This is a new/empty database');
-      console.log('  2. Users are signing up but data is being stored elsewhere');
-      console.log('  3. The production database is different from this one\n');
-    }
-    
-    // Check for any data at all
-    const modelNames = ['User', 'EmailNotification', 'PromoCode', 'BetaTester'];
-    for (const model of modelNames) {
-      try {
-        const count = await (prisma as any)[model.charAt(0).toLowerCase() + model.slice(1)].count();
-        console.log(`${model}: ${count} records`);
-      } catch (e) {
-        console.log(`${model}: Unable to count (${e.message})`);
-      }
+    if (tournamentCount > 0) {
+      const tournaments = await prisma.tournament.findMany({
+        take: 3,
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          city: true,
+          state: true,
+        }
+      });
+      console.log('\n📋 Sample tournaments:');
+      tournaments.forEach(t => {
+        console.log(`  - ${t.name} (${t.city}, ${t.state}) - ${t.status}`);
+      });
     }
     
     await prisma.$disconnect();
+    console.log('\n✅ Database check complete');
   } catch (error) {
-    console.error('❌ Database Error:', error);
+    console.error('❌ Error:', error);
     await prisma.$disconnect();
     process.exit(1);
   }
 }
 
-checkDatabase();
+checkDB();
