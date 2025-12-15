@@ -44,24 +44,6 @@ export default function DashboardAvatar() {
               Chat with Coach Kai
             </Button>
           </Link>
-          
-          {session?.user?.subscriptionTier === 'PRO' && (
-            <Link href="/avatar-settings" className="w-full">
-              <Button variant="outline" className="w-full">
-                <Settings className="w-4 h-4 mr-2" />
-                Customize Avatar
-              </Button>
-            </Link>
-          )}
-        </div>
-
-        <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700 w-full">
-          <p className="text-xs text-gray-600 dark:text-gray-400 text-center">
-            {session?.user?.subscriptionTier === 'PRO' 
-              ? '✨ Pro users can upload their own avatar photo'
-              : '⭐ Upgrade to Pro to customize your avatar'
-            }
-          </p>
         </div>
       </motion.div>
     </Card>

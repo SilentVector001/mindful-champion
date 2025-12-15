@@ -120,7 +120,6 @@ model User {
   customPrograms               CustomProgram[]
   emailNotifications           EmailNotification[]
   goals                        Goal[]
-  healthData                   HealthData[]
   matches                      Match[]
   mentalSessions               MentalSession[]
   notificationHistory          NotificationHistory[]           @relation("UserNotificationHistory")
@@ -172,9 +171,7 @@ model User {
   videoAnalyses                VideoAnalysis[]
   videoBookmarks               VideoBookmark[]
   clips                        VideoClip[]
-  videoPlaylists               VideoPlaylist[]
   videoSuggestions             VideoSuggestion[]
-  wearableDevices              WearableDevice[]
 }
 
 model VerificationToken {
@@ -605,7 +602,6 @@ model TrainingVideo {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   customPrograms    Json?
-  playlistVideos    PlaylistVideo[]
   programVideos     ProgramVideo[]
   userVideoProgress UserVideoProgress[]
   ratings           UserVideoRating[]
@@ -1732,37 +1728,6 @@ model TicketResponse {
   @@index([ticketId])
 }
 
-model VideoPlaylist {
-  id          String          @id @default(cuid())
-  userId      String
-  name        String
-  description String?
-  isPublic    Boolean         @default(false)
-  thumbnail   String?
-  videoCount  Int             @default(0)
-  createdAt   DateTime        @default(now())
-  updatedAt   DateTime        @updatedAt
-  videos      PlaylistVideo[]
-  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model PlaylistVideo {
-  id         String        @id @default(cuid())
-  playlistId String
-  videoId    String
-  order      Int           @default(0)
-  addedAt    DateTime      @default(now())
-  playlist   VideoPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
-  video      TrainingVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
-
-  @@unique([playlistId, videoId])
-  @@index([playlistId])
-  @@index([videoId])
-}
-
 model VideoBookmark {
   id        String        @id @default(cuid())
   userId    String
@@ -1873,53 +1838,6 @@ model UserVideoRating {
   @@index([userId])
   @@index([videoId])
   @@index([rating])
-}
-
-model WearableDevice {
-  id             String             @id @default(cuid())
-  userId         String
-  deviceType     WearableDeviceType
-  deviceName     String
-  manufacturer   String?
-  model          String?
-  deviceId       String             @unique
-  accessToken    String?
-  refreshToken   String?
-  tokenExpiresAt DateTime?
-  isConnected    Boolean            @default(true)
-  lastSyncedAt   DateTime?
-  syncFrequency  Int                @default(3600)
-  permissions    Json?
-  metadata       Json?
-  connectedAt    DateTime           @default(now())
-  disconnectedAt DateTime?
-  createdAt      DateTime           @default(now())
-  updatedAt      DateTime           @updatedAt
-  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([deviceType])
-  @@index([isConnected])
-  @@index([lastSyncedAt])
-}
-
-model HealthData {
-  id           String              @id @default(cuid())
-  userId       String
-  dataType     HealthDataType
-  value        Float
-  unit         String
-  deviceType   WearableDeviceType?
-  sourceDevice String?
-  recordedAt   DateTime
-  createdAt    DateTime            @default(now())
-  metadata     Json?
-  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-  @@index([dataType])
-  @@index([recordedAt])
-  @@index([deviceType])
 }
 
 model YouTubeVideo {
@@ -2558,48 +2476,6 @@ model CoachKaiReminder {
   @@index([userId])
   @@index([isActive])
   @@index([nextTrigger])
-}
-
-enum WearableDeviceType {
-  APPLE_WATCH
-  FITBIT
-  GARMIN
-  WHOOP
-  SAMSUNG_HEALTH
-  GOOGLE_FIT
-  OURA_RING
-  POLAR
-  SUUNTO
-  OTHER
-}
-
-enum HealthDataType {
-  HEART_RATE
-  HEART_RATE_VARIABILITY
-  RESTING_HEART_RATE
-  STEPS
-  DISTANCE
-  CALORIES_BURNED
-  ACTIVE_MINUTES
-  SLEEP_DURATION
-  SLEEP_QUALITY
-  SLEEP_DEEP
-  SLEEP_REM
-  SLEEP_LIGHT
-  BLOOD_OXYGEN
-  RESPIRATORY_RATE
-  BODY_TEMPERATURE
-  STRESS_LEVEL
-  RECOVERY_SCORE
-  READINESS_SCORE
-  WORKOUT_DURATION
-  WORKOUT_INTENSITY
-  WORKOUT_CALORIES
-  WEIGHT
-  BODY_FAT_PERCENTAGE
-  BLOOD_PRESSURE_SYSTOLIC
-  BLOOD_PRESSURE_DIASTOLIC
-  BLOOD_GLUCOSE
 }
 
 enum UserRole {

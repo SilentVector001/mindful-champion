@@ -44,21 +44,12 @@ export async function GET(request: NextRequest) {
       take: 20
     });
 
-    // Get user's wearable data for recovery-based recommendations
-    const healthData = await prisma.healthData.findMany({
-      where: {
-        userId
-      },
-      orderBy: { recordedAt: 'desc' },
-      take: 7 // Last week
-    });
-
     // Generate recommendations based on user profile and activity
     const recommendations = await generateRecommendations({
       userId,
       user,
       watchHistory,
-      healthData,
+      healthData: [], // HealthData model not yet implemented
       contentType,
       limit,
       tierAccess

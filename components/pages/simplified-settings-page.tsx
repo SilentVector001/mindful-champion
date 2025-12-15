@@ -26,7 +26,7 @@ import {
 } from "lucide-react"
 import Image from "next/image"
 import SimplifiedNav from "@/components/layout/simplified-nav"
-import PersistentAvatar from "@/components/avatar/persistent-avatar"
+
 import { useTheme } from "next-themes"
 import { useRouter } from "next/navigation"
 
@@ -195,15 +195,7 @@ export default function SimplifiedSettingsPage({ user }: SimplifiedSettingsPageP
               onCheckedChange={setVoiceEnabled}
             />
           </div>
-          
-          <Button 
-            onClick={() => router.push('/settings/avatar')}
-            variant="outline"
-            className="w-full"
-          >
-            <Camera className="h-4 w-4 mr-2" />
-            Customize Avatar Appearance
-          </Button>
+
         </div>
       )
     },
@@ -444,8 +436,7 @@ export default function SimplifiedSettingsPage({ user }: SimplifiedSettingsPageP
         </motion.div>
       </div>
 
-      {/* Persistent Avatar */}
-      <PersistentAvatar currentPage="settings" />
+
     </div>
   )
 }

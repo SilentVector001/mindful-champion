@@ -142,18 +142,6 @@ const features: Feature[] = [
     accentColor: 'border-rose-500',
     badge: 'Premium',
     highlights: ['Sponsor Rewards', 'Exclusive Access', 'Premium Features']
-  },
-  {
-    id: 'pro-avatar',
-    title: 'Pro Avatar',
-    description: 'Customize your digital coach persona and create personalized training experiences.',
-    icon: Palette,
-    image: '/avatars/coach-male-1.jpg',
-    path: '/avatar-studio',
-    gradient: 'from-indigo-500 via-purple-500 to-pink-500',
-    accentColor: 'border-indigo-500',
-    badge: 'Customize',
-    highlights: ['Personal Coach', 'Custom Styles', 'Interactive Experience']
   }
 ];
 

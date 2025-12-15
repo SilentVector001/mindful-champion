@@ -5,7 +5,7 @@ import FeaturesCarousel from "./premium/features-carousel"
 import VideoLearningSection from "./premium/video-learning-section"
 import StatsSection from "./premium/stats-section"
 import PricingCTASection from "./premium/pricing-cta-section"
-import PartnerBenefitsSection from "./premium/partner-benefits-section"
+
 import { Button } from "@/components/ui/button"
 import { Menu, X, Trophy, ArrowRight, Sparkles } from "lucide-react"
 import { useState } from "react"
@@ -136,7 +136,7 @@ export default function LandingPage() {
         <VideoLearningSection />
       </div>
       <StatsSection />
-      <PartnerBenefitsSection />
+
       <div id="pricing">
         <PricingCTASection />
       </div>
@@ -171,7 +171,6 @@ export default function LandingPage() {
               <ul className="space-y-2 text-sm text-slate-400">
                 <li><Link href="/train/coach" className="hover:text-white">AI Coach</Link></li>
                 <li><Link href="/train/video" className="hover:text-white">Video Analysis</Link></li>
-                <li><Link href="/avatar-studio" className="hover:text-white">Pro Avatar</Link></li>
                 <li><Link href="/train/drills" className="hover:text-white">Drill Library</Link></li>
               </ul>
             </div>

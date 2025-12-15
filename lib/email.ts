@@ -188,25 +188,6 @@ export async function sendWelcomeEmail({ to, name, firstName }: WelcomeEmailOpti
               </table>
 
               <!-- Feature 3 -->
-              <table role="presentation" style="width: 100%; border-collapse: collapse; margin-bottom: 16px;">
-                <tr>
-                  <td style="width: 50px; vertical-align: top; padding-right: 12px;">
-                    <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px;">
-                      👤
-                    </div>
-                  </td>
-                  <td style="vertical-align: top;">
-                    <h4 style="margin: 0 0 6px 0; color: #1f2937; font-size: 16px; font-weight: 600;">
-                      Pro Avatar Feature (Coming Soon!)
-                    </h4>
-                    <p style="margin: 0; color: #6b7280; font-size: 14px; line-height: 1.5;">
-                      Customize your AI coaching companion with voice and visual preferences
-                    </p>
-                  </td>
-                </tr>
-              </table>
-
-              <!-- Feature 4 -->
               <table role="presentation" style="width: 100%; border-collapse: collapse;">
                 <tr>
                   <td style="width: 50px; vertical-align: top; padding-right: 12px;">
@@ -279,7 +260,6 @@ Your 7-day free trial starts right now, giving you full access to all Pro featur
 ✨ What You Get With Your Trial:
 - 🤖 AI-Powered Coaching: Get personalized insights and recommendations
 - 📊 Training Plans & Analytics: Track your progress with detailed stats
-- 👤 Pro Avatar Feature (Coming Soon!): Customize your AI coaching companion
 - ⏱️ 7-Day Free Trial: Full access to all Pro features - no credit card required!
 
 Go to Dashboard: https://mindfulchampionpro.abacusai.app/dashboard

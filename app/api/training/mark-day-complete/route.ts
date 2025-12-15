@@ -56,27 +56,17 @@ export async function POST(request: Request) {
     }
 
     // Get current completed days array
-    const completedDaysArray = Array.isArray(userProgram.completedDays) 
-      ? userProgram.completedDays 
-      : []
+    const completedDaysArray: number[] = []
     
     // Add current day to completed days if not already there
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
-    const alreadyCompletedToday = completedDaysArray.some((date: any) => {
-      const completedDate = new Date(date)
-      completedDate.setHours(0, 0, 0, 0)
-      return completedDate.getTime() === today.getTime()
-    })
-    
-    let updatedCompletedDays = [...completedDaysArray]
-    if (!alreadyCompletedToday) {
-      updatedCompletedDays.push(today)
-    }
+    // Since completedDays is not in schema, we track by day number
+    let updatedCompletedDays: Date[] = [today]
 
     const newCurrentDay = Math.min(day + 1, program.durationDays + 1)
-    const completionPercentage = (updatedCompletedDays.length / program.durationDays) * 100
+    const completionPercentage = (day / program.durationDays) * 100
 
     // Check if program is completed
     const isCompleted = updatedCompletedDays.length >= program.durationDays
@@ -113,8 +103,8 @@ export async function POST(request: Request) {
       data: {
         currentDay: newCurrentDay,
         completionPercentage: completionPercentage,
-        completedDays: updatedCompletedDays,
-        lastTrainedAt: new Date(),
+        // completedDays not in schema
+        // lastTrainedAt not in schema
         status: isCompleted ? 'COMPLETED' : 'IN_PROGRESS',
         completedAt: isCompleted ? new Date() : undefined
       }

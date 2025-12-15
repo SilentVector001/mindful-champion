@@ -42,17 +42,7 @@ const features = [
     badgeColor: "bg-teal-500/20 text-teal-300 border-teal-500/30",
     link: "/train/coach"
   },
-  {
-    id: "pro-avatar",
-    icon: Crown,
-    title: "Pro Avatar Companion",
-    subtitle: "Your personal coaching partner",
-    description: "Create a photo-realistic avatar that becomes your training companion. Communicate naturally, track progress together, and get real-time feedback during practice.",
-    image: "https://cdn.abacus.ai/images/d46a7758-55bf-456a-9a65-6e7d0567ad2b.png",
-    badge: "Pro Only",
-    badgeColor: "bg-purple-500/20 text-purple-300 border-purple-500/30",
-    link: "/avatar-studio"
-  },
+
   {
     id: "performance",
     icon: TrendingUp,

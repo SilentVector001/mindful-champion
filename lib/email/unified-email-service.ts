@@ -13,7 +13,7 @@
 import { getResendClient } from './resend-client';
 import { EMAIL_CONFIG, getFromEmail } from './config';
 import { prisma } from '@/lib/db';
-import { logEmailNotification } from './log-email';
+import { logEmail } from './log-email';
 
 // Import all email templates
 import { generateWelcomeEmail } from './templates/welcome-email';
@@ -401,7 +401,7 @@ export class UnifiedEmailService {
       
       // Log to database
       try {
-        await logEmailNotification({
+        await logEmail({
           userId: params.userId,
           type: params.type as any,
           recipientEmail: params.recipientEmail,
@@ -409,9 +409,8 @@ export class UnifiedEmailService {
           subject: emailContent.subject,
           htmlContent: emailContent.html,
           textContent: emailContent.text,
-          status: 'SENT',
           resendEmailId: result.data?.id,
-        });
+        }, { success: true });
       } catch (logError) {
         console.error('Failed to log email notification:', logError);
         // Don't fail the email send if logging fails
@@ -425,7 +424,7 @@ export class UnifiedEmailService {
       
       // Log failed email
       try {
-        await logEmailNotification({
+        await logEmail({
           userId: params.userId,
           type: params.type as any,
           recipientEmail: params.recipientEmail,
@@ -433,9 +432,7 @@ export class UnifiedEmailService {
           subject: 'subject' in params ? params.subject : 'Email',
           htmlContent: 'html' in params ? params.html : '',
           textContent: 'text' in params ? params.text : '',
-          status: 'FAILED',
-          error: error.message || 'Unknown error',
-        });
+        }, { success: false, error: error.message || 'Unknown error' });
       } catch (logError) {
         console.error('Failed to log failed email:', logError);
       }
@@ -518,11 +515,11 @@ export const EmailSender = {
   
   // Admin alerts
   adminNewUser: (userName: string, userEmail: string, userId: string, signupDate: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_NEW_USER', userName, userEmail, userId, signupDate }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_NEW_USER', userName, userEmail, userId, signupDate } as any),
     
   adminPayment: (userName: string, userEmail: string, amount: number, planName: string, transactionId: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_PAYMENT', userName, userEmail, amount, planName, transactionId }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_PAYMENT', userName, userEmail, amount, planName, transactionId } as any),
     
   adminError: (errorType: string, errorMessage: string, errorStack: string, userId?: string, timestamp?: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_ERROR', errorType, errorMessage, errorStack, userId, timestamp }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_ERROR', errorType, errorMessage, errorStack, userId, timestamp } as any),
 };

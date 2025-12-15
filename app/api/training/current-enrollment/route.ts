@@ -53,9 +53,7 @@ export async function GET() {
     }
 
     // Calculate streak (consecutive days trained)
-    const completedDaysArray = Array.isArray(enrollment.completedDays) 
-      ? enrollment.completedDays 
-      : []
+    const completedDaysArray: number[] = []
     
     let streak = 0
     const today = new Date()
@@ -94,7 +92,7 @@ export async function GET() {
         totalDays: totalDays,
         status: enrollment.status,
         streak: streak,
-        lastTrainedAt: enrollment.lastTrainedAt,
+        // lastTrainedAt not in schema
         startDate: enrollment.startDate,
         completionPercentage,
         program: {

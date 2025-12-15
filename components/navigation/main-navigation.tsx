@@ -267,17 +267,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
-                <InfoTooltip content="View and manage your analyzed videos" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/train/analysis-library" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <History className="w-4 h-4 text-purple-500" />
-                      <div>
-                        <p className="font-medium">My Analyses</p>
-                        <p className="text-xs text-gray-500">Your video history</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
                 <InfoTooltip content="Browse drills organized by skill level and focus area" side="right">
                   <DropdownMenuItem asChild>
                     <Link href="/train/drills" className="flex items-center gap-3 py-3 cursor-pointer">
@@ -799,16 +788,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
 
-                <InfoTooltip content="Connect your wearable devices (Apple Watch, Fitbit, Garmin, Whoop)" side="left">
-                  <DropdownMenuItem asChild>
-                    <Link href="/settings/devices" className="flex items-center gap-3 py-2 cursor-pointer">
-                      <Watch className="w-4 h-4 text-champion-blue" />
-                      <span>Connect Devices</span>
-                      <Badge className="ml-auto bg-champion-green/10 text-champion-green">New</Badge>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-
                 <InfoTooltip content="Manage your reminders and notification settings" side="left">
                   <DropdownMenuItem asChild>
                     <Link href="/dashboard/reminders" className="flex items-center gap-3 py-2 cursor-pointer">
@@ -818,28 +797,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
 
-                {user?.subscriptionTier === 'PRO' && (
-                  <InfoTooltip content="Customize your AI coach's appearance and personality" side="left">
-                    <DropdownMenuItem asChild>
-                      <Link href="/avatar-studio" className="flex items-center gap-3 py-2 cursor-pointer">
-                        <Sparkles className="w-4 h-4 text-champion-green" />
-                        <span>Avatar Studio</span>
-                        <Badge className="ml-auto bg-gradient-to-r from-purple-500 to-pink-500">Pro</Badge>
-                      </Link>
-                    </DropdownMenuItem>
-                  </InfoTooltip>
-                )}
 
-                {user?.role === 'ADMIN' && (
-                  <InfoTooltip content="Access admin dashboard for user management" side="left">
-                    <DropdownMenuItem asChild>
-                      <Link href="/admin" className="flex items-center gap-3 py-2 cursor-pointer">
-                        <Shield className="w-4 h-4 text-emotion-info" />
-                        Admin Dashboard
-                      </Link>
-                    </DropdownMenuItem>
-                  </InfoTooltip>
-                )}
 
                 <InfoTooltip content="Manage your plan, billing, and premium features" side="left">
                   <DropdownMenuItem asChild>
@@ -855,15 +813,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     <Link href="/settings" className="flex items-center gap-3 py-2 cursor-pointer">
                       <Settings className="w-4 h-4" />
                       Settings
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-
-                <InfoTooltip content="Get help, watch tutorials, and contact support" side="left">
-                  <DropdownMenuItem asChild>
-                    <Link href="/help" className="flex items-center gap-3 py-2 cursor-pointer">
-                      <HelpCircle className="w-4 h-4" />
-                      Help & Support
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
@@ -955,13 +904,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     </div>
                     <span className="font-semibold">Video Analysis Lab</span>
                     <Badge className="ml-auto bg-champion-gold/20 text-champion-gold text-xs">Featured</Badge>
-                  </Button>
-                </Link>
-
-                <Link href="/train/analysis-library" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <History className="w-5 h-5 text-purple-500" />
-                    My Analyses
                   </Button>
                 </Link>
 
@@ -1135,14 +1077,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-                <Link href="/settings/devices" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <Watch className="w-5 h-5 text-champion-blue" />
-                    <span>Connect Devices</span>
-                    <Badge className="ml-2 bg-champion-green/10 text-champion-green text-xs">New</Badge>
-                  </Button>
-                </Link>
-
                 <Link href="/dashboard/reminders" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Bell className="w-5 h-5 text-teal-600" />
@@ -1150,24 +1084,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-                {user?.subscriptionTier === 'PRO' && (
-                  <Link href="/avatar-studio" onClick={closeMobileMenu}>
-                    <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                      <Sparkles className="w-5 h-5 text-champion-green" />
-                      <span>Avatar Studio</span>
-                      <Badge className="ml-auto bg-gradient-to-r from-purple-500 to-pink-500">Pro</Badge>
-                    </Button>
-                  </Link>
-                )}
 
-                {user?.role === 'ADMIN' && (
-                  <Link href="/admin" onClick={closeMobileMenu}>
-                    <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                      <Shield className="w-5 h-5 text-blue-500" />
-                      Admin Dashboard
-                    </Button>
-                  </Link>
-                )}
 
                 <Link href="/pricing" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
@@ -1180,13 +1097,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Settings className="w-5 h-5" />
                     Settings
-                  </Button>
-                </Link>
-
-                <Link href="/help" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <HelpCircle className="w-5 h-5" />
-                    Help & Support
                   </Button>
                 </Link>
               </div>

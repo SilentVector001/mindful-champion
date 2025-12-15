@@ -31,8 +31,6 @@ export {
   LiveStreamStatus,
   LiveStreamPlatform,
   ExternalEventType,
-  WearableDeviceType,
-  HealthDataType,
   VideoInteractionType,
   DrillStatus,
   NewsCategory,
