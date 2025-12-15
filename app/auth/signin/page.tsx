@@ -4,7 +4,6 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma as db } from "@/lib/db"
 import SignInForm from "@/components/auth/signin-form"
-import PremiumIntroVideo from "@/components/intro/premium-intro-video"
 
 export default async function SignInPage() {
   const session = await getServerSession(authOptions)
@@ -42,35 +41,20 @@ export default async function SignInPage() {
   console.log('[SignIn] No session, showing signin form')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Premium Intro Video Section */}
-      <div className="relative w-full">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <PremiumIntroVideo 
-            variant="compact"
-            autoPlay={true}
-            className="rounded-2xl shadow-2xl ring-1 ring-white/10"
-          />
-        </div>
-      </div>
-
-      {/* Welcome Back Message */}
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="text-center mb-4">
-          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center">
+      <div className="max-w-md w-full mx-auto px-4 py-8">
+        {/* Welcome Back Message */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl lg:text-4xl font-bold text-white mb-3">
             Welcome Back, Champion! 🏓
           </h1>
-          <p className="text-base text-white/80">
+          <p className="text-lg text-white/80">
             Continue your AI-powered pickleball journey
           </p>
         </div>
-      </div>
 
-      {/* Sign In Form Section */}
-      <div className="max-w-7xl mx-auto px-4 pb-8">
-        <div className="flex justify-center">
-          <SignInForm />
-        </div>
+        {/* Sign In Form Section */}
+        <SignInForm />
       </div>
     </div>
   )
