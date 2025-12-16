@@ -25,7 +25,6 @@ const routeLabels: Record<string, string> = {
   "/train/coach": "Coach Kai",
   "/train/video": "Video Analysis",
   "/train/drills": "Drill Library",
-  "/train/library": "Video Library",
   "/progress": "Progress",
   "/progress/goals": "Goals",
   "/progress/matches": "Match History",

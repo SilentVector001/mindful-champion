@@ -460,11 +460,11 @@ export default function IntelligentHomeDashboard({
                     <Video className="w-8 h-8 text-cyan-400" />
                   </div>
                   <div>
-                    <p className="text-sm text-gray-600 mb-2">No training videos yet</p>
-                    <p className="text-xs text-gray-500">Start watching videos to track your progress</p>
+                    <p className="text-sm text-gray-600 mb-2">No training activity yet</p>
+                    <p className="text-xs text-gray-500">Start training to track your progress</p>
                   </div>
-                  <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={() => router.push('/train/library')}>
-                    Browse Videos
+                  <Button size="sm" className="bg-gradient-to-r from-cyan-500 to-blue-500" onClick={() => router.push('/train')}>
+                    Start Training
                   </Button>
                 </div>
               )}

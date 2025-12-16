@@ -1840,32 +1840,6 @@ model UserVideoRating {
   @@index([rating])
 }
 
-model YouTubeVideo {
-  id           String   @id @default(cuid())
-  videoId      String   @unique
-  title        String
-  description  String?
-  thumbnailUrl String?
-  channelName  String
-  channelId    String?
-  duration     Int?
-  publishedAt  DateTime
-  category     String   @default("Pickleball")
-  tags         Json?
-  viewCount    Int      @default(0)
-  featured     Boolean  @default(false)
-  orderIndex   Int      @default(0)
-  isActive     Boolean  @default(true)
-  embedUrl     String?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  @@index([videoId])
-  @@index([featured])
-  @@index([isActive])
-  @@index([orderIndex])
-  @@index([category])
-}
 
 model PickleballEvent {
   id                String            @id @default(cuid())

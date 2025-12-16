@@ -85,16 +85,6 @@ export async function GET(request: NextRequest) {
         icon: '🎉'
       },
       {
-        id: 'training-1',
-        type: 'training',
-        title: 'New Pro Technique Videos',
-        subtitle: '5 new advanced shot tutorials added',
-        priority: 'medium',
-        link: '/train/library',
-        icon: '📹',
-        timeAgo: 1
-      },
-      {
         id: 'tournament-2',
         type: 'tournament',
         title: 'APP Tour - Major Event',

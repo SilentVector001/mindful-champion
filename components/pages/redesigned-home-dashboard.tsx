@@ -925,11 +925,11 @@ export default function RedesignedHomeDashboard({
                 <CardContent className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                   {[
                     { name: 'Train', icon: Dumbbell, path: '/train', color: 'bg-champion-blue', description: 'Start training' },
-                    { name: 'Videos', icon: Video, path: '/train/library', color: 'bg-champion-green', description: 'Watch videos' },
                     { name: 'Analyze', icon: BarChart3, path: '/train/video', color: 'bg-purple-500', description: 'Upload video' },
                     { name: 'Connect', icon: Users, path: '/connect', color: 'bg-champion-gold', description: 'Find partners' },
                     { name: 'Media', icon: Headphones, path: '/media', color: 'bg-pink-500', description: 'Browse content' },
-                    { name: 'Progress', icon: TrendingUp, path: '/progress', color: 'bg-cyan-500', description: 'View stats' }
+                    { name: 'Progress', icon: TrendingUp, path: '/progress', color: 'bg-cyan-500', description: 'View stats' },
+                    { name: 'Drills', icon: Target, path: '/train/drills', color: 'bg-champion-green', description: 'Practice drills' }
                   ].map((action, index) => {
                     const Icon = action.icon
                     return (

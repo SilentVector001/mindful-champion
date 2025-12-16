@@ -2,12 +2,12 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import MainNavigation from "@/components/navigation/main-navigation"
-import { TournamentHub } from "@/components/tournaments/new-tournament-hub"
+import { TournamentDiscovery } from "@/components/tournaments/tournament-discovery"
 import { prisma } from "@/lib/db"
 
 export const metadata = {
-  title: 'Tournament Hub | Mindful Champion',
-  description: 'Discover pickleball tournaments across the nation - Championship Events, Amateur Competitions, Rising Stars, and Community Leagues',
+  title: 'Find Your Next Tournament | Mindful Champion',
+  description: 'Discover pickleball tournaments across the nation. Search by location, skill level, and format. Compete at your level and elevate your game.',
 }
 
 export default async function TournamentsPage() {
@@ -40,7 +40,7 @@ export default async function TournamentsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={user} />
-      <TournamentHub />
+      <TournamentDiscovery />
     </div>
   )
 }

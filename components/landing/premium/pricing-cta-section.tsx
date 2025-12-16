@@ -37,7 +37,7 @@ const plans = [
       "Unlimited drills library",
       "Full video analysis",
       "Advanced analytics",
-      "Full video library",
+      "Full training programs library",
       "Priority support"
     ],
     cta: "Start 7-Day Trial",

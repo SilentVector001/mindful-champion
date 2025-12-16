@@ -328,7 +328,7 @@ export function generateVideoAnalysisCompleteEmail(data: VideoAnalysisEmailData)
                 <table style="margin:0 auto;" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
                     <td style="padding:0 8px;">
-                      <a href="${baseUrl || 'https://mindful-champion-2hzb4j.abacusai.app'}/train/video" style="color:#10B981;text-decoration:none;font-size:12px;">Video Library</a>
+                      <a href="${baseUrl || 'https://mindful-champion-2hzb4j.abacusai.app'}/train/video" style="color:#10B981;text-decoration:none;font-size:12px;">Video Analysis</a>
                     </td>
                     <td style="padding:0 8px;color:#D1D5DB;">|</td>
                     <td style="padding:0 8px;">

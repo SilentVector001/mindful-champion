@@ -1,20 +1,24 @@
 import { PrismaClient } from '@prisma/client';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+config({ path: resolve(__dirname, '../.env.local') });
 
 const prisma = new PrismaClient();
 
 async function checkSyncResults() {
   const liveStreams = await prisma.liveStream.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' },
     take: 5
   });
   
   const podcasts = await prisma.podcastShow.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' },
     take: 5
   });
   
   const events = await prisma.externalEvent.findMany({
-    orderBy: { createdAt: 'desc' },
+    orderBy: { updatedAt: 'desc' },
     take: 5
   });
 

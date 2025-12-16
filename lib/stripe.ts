@@ -36,7 +36,7 @@ export const SUBSCRIPTION_TIERS = {
     price: 29,
     priceId: process.env.STRIPE_PREMIUM_PRICE_ID || '',
     features: [
-      'Full training video library',
+      'Full training programs library',
       'Advanced drill programs',
       'Video analysis (5/month)',
       'AI coaching sessions',

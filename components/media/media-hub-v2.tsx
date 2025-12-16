@@ -553,22 +553,6 @@ export function MediaHubV2({ initialTab = 'home' }: MediaHubV2Props) {
                 </Card>
               </Link>
 
-              {/* Training Library Card */}
-              <Link href="/train/library">
-                <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-100 hover:shadow-lg transition-shadow cursor-pointer group h-full">
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="p-2 bg-emerald-100 rounded-xl group-hover:bg-emerald-200 transition-colors">
-                        <BookOpen className="w-6 h-6 text-emerald-600" />
-                      </div>
-                      <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800 mb-1">Training Library</h3>
-                    <p className="text-sm text-slate-500">Improve your game</p>
-                  </CardContent>
-                </Card>
-              </Link>
-
               {/* Community Card */}
               <Link href="/connect">
                 <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-100 hover:shadow-lg transition-shadow cursor-pointer group h-full">

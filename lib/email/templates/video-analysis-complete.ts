@@ -873,7 +873,7 @@ export function generateVideoAnalysisCompleteEmail(data: VideoAnalysisEmailData)
                 <table style="margin:0 auto 20px auto;" cellpadding="0" cellspacing="0" role="presentation">
                   <tr>
                     <td style="padding:0 12px;">
-                      <a href="${appUrl}/train/video" style="color:#14B8A6;text-decoration:none;font-size:13px;font-weight:500;">Video Library</a>
+                      <a href="${appUrl}/train/video" style="color:#14B8A6;text-decoration:none;font-size:13px;font-weight:500;">Video Analysis</a>
                     </td>
                     <td style="padding:0 4px;color:#D1D5DB;">•</td>
                     <td style="padding:0 12px;">

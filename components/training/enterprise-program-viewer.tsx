@@ -396,8 +396,8 @@ export default function EnterpriseProgramViewer({ program, userProgram, userId }
                     <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
                       <Video className="w-5 h-5 text-blue-600" />
                     </div>
-                    <h4 className="font-bold text-gray-900 mb-2">2. Video Library</h4>
-                    <p className="text-sm text-gray-700">88+ on-demand videos for targeted practice anytime</p>
+                    <h4 className="font-bold text-gray-900 mb-2">2. Training Programs</h4>
+                    <p className="text-sm text-gray-700">Structured programs with day-by-day training plans</p>
                   </div>
                   <div className="bg-white rounded-xl p-5 border-2 border-amber-200">
                     <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center mb-3">

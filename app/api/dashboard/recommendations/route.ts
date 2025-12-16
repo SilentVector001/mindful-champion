@@ -89,14 +89,14 @@ export async function GET(request: NextRequest) {
     if (user.skillLevel === 'BEGINNER') {
       recommendations.push({
         id: 'beginner-fundamentals',
-        type: 'video',
+        type: 'training',
         priority: 'high',
         title: 'Master the Fundamentals',
         description: 'Essential techniques for new players',
         action: {
           type: 'navigate',
-          path: '/train/library?skill=beginner',
-          buttonText: 'Watch Videos'
+          path: '/train',
+          buttonText: 'Start Training'
         }
       })
     } else if (user.skillLevel === 'INTERMEDIATE') {

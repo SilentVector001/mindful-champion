@@ -70,9 +70,9 @@ export default async function VideoDetailPage({ params }: { params: { videoId: s
             variant="ghost"
             asChild
           >
-            <Link href="/train/library">
+            <Link href="/train/video">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Video Library
+              Back to Video Analysis
             </Link>
           </Button>
         </div>

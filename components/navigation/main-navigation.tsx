@@ -289,17 +289,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
-                <InfoTooltip content="Browse 88 high-quality pickleball training videos from top coaches" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/train/library" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Video className="w-4 h-4 text-champion-blue" />
-                      <div>
-                        <p className="font-medium">Video Library</p>
-                        <p className="text-xs text-gray-500">88 YouTube videos</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
                 <InfoTooltip content="Start a quick 15-minute training session right now" side="right">
                   <DropdownMenuItem asChild>
                     <Link href="/train/quick" className="flex items-center gap-3 py-3 cursor-pointer">
@@ -921,12 +910,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-                <Link href="/train/library" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <Video className="w-5 h-5 text-champion-blue" />
-                    Video Library
-                  </Button>
-                </Link>
 
                 <Link href="/train/quick" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">

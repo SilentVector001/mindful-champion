@@ -1,53 +1,63 @@
 import { PrismaClient } from '@prisma/client';
+import { config } from 'dotenv';
+import { resolve } from 'path';
+
+config({ path: resolve(__dirname, '../.env.local') });
 
 const prisma = new PrismaClient();
 
-async function verifySyncData() {
+async function verifySyncResults() {
   try {
     const liveStreams = await prisma.liveStream.count();
     const podcasts = await prisma.podcastShow.count();
     const events = await prisma.externalEvent.count();
     
-    console.log('Database Verification:');
-    console.log('═'.repeat(40));
-    console.log(`Live Streams: ${liveStreams} records`);
-    console.log(`Podcast Shows: ${podcasts} records`);
-    console.log(`External Events: ${events} records`);
-    console.log('═'.repeat(40));
+    console.log('\n📊 Database Verification:');
+    console.log('═'.repeat(50));
+    console.log(`Live Streams in DB: ${liveStreams}`);
+    console.log(`Podcast Shows in DB: ${podcasts}`);
+    console.log(`External Events in DB: ${events}`);
+    console.log('═'.repeat(50));
     
-    // Show latest synced items
+    // Show latest records
     const latestStreams = await prisma.liveStream.findMany({
       take: 3,
       orderBy: { updatedAt: 'desc' },
-      select: { title: true, platform: true, status: true }
+      select: { title: true, platform: true, status: true, updatedAt: true }
     });
     
-    console.log('\nLatest Live Streams:');
-    latestStreams.forEach(s => console.log(`  - ${s.title} (${s.platform}, ${s.status})`));
+    console.log('\n🎥 Latest Live Streams:');
+    latestStreams.forEach(s => {
+      console.log(`  - ${s.title} (${s.platform}, ${s.status})`);
+    });
     
     const latestPodcasts = await prisma.podcastShow.findMany({
       take: 3,
       orderBy: { updatedAt: 'desc' },
-      select: { title: true, author: true }
+      select: { title: true, author: true, updatedAt: true }
     });
     
-    console.log('\nLatest Podcasts:');
-    latestPodcasts.forEach(p => console.log(`  - ${p.title} by ${p.author}`));
+    console.log('\n🎙️ Latest Podcasts:');
+    latestPodcasts.forEach(p => {
+      console.log(`  - ${p.title} by ${p.author}`);
+    });
     
     const latestEvents = await prisma.externalEvent.findMany({
-      take: 2,
+      take: 3,
       orderBy: { updatedAt: 'desc' },
       select: { title: true, location: true, startDate: true }
     });
     
-    console.log('\nUpcoming Events:');
-    latestEvents.forEach(e => console.log(`  - ${e.title} at ${e.location} (${e.startDate.toLocaleDateString()})`));
+    console.log('\n🏆 Latest Events:');
+    latestEvents.forEach(e => {
+      console.log(`  - ${e.title} at ${e.location} (${e.startDate.toLocaleDateString()})`);
+    });
     
   } catch (error) {
-    console.error('Error verifying sync data:', error);
+    console.error('Error verifying sync results:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-verifySyncData();
+verifySyncResults();

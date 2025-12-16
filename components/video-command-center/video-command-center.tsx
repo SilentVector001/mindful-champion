@@ -13,14 +13,13 @@ import {
   ListMusic,
   Trophy,
 } from 'lucide-react';
-import TrainingLibrary from './training-library';
 import PodcastStudio from './podcast-studio';
 import LivePickleballFeed from './live-pickleball-feed';
 import MyMediaLibrary from './my-media-library';
 import LiveTournamentScoreboard from './live-tournament-scoreboard';
 
 export default function VideoCommandCenter() {
-  const [activeTab, setActiveTab] = useState('training');
+  const [activeTab, setActiveTab] = useState('podcasts');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-green-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-900 py-8 px-4">
@@ -43,15 +42,7 @@ export default function VideoCommandCenter() {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <Card className="p-2 mb-6 shadow-lg">
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-2">
-              <TabsTrigger
-                value="training"
-                className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-blue-500 data-[state=active]:to-blue-600 data-[state=active]:text-white"
-              >
-                <Video className="h-4 w-4" />
-                <span className="hidden sm:inline">Training Library</span>
-                <span className="sm:hidden">Training</span>
-              </TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 gap-2">
               <TabsTrigger
                 value="podcasts"
                 className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white"
@@ -88,10 +79,6 @@ export default function VideoCommandCenter() {
           </Card>
 
           {/* Tab Content */}
-          <TabsContent value="training" className="mt-0">
-            <TrainingLibrary />
-          </TabsContent>
-
           <TabsContent value="podcasts" className="mt-0">
             <PodcastStudio />
           </TabsContent>
