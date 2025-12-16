@@ -33,7 +33,7 @@ export const SUBSCRIPTION_TIERS = {
   },
   PREMIUM: {
     name: 'Premium',
-    price: 29,
+    price: 29.99,
     priceId: process.env.STRIPE_PREMIUM_PRICE_ID || '',
     features: [
       'Full training programs library',
@@ -46,7 +46,7 @@ export const SUBSCRIPTION_TIERS = {
   },
   PRO: {
     name: 'Pro',
-    price: 49,
+    price: 49.99,
     priceId: process.env.STRIPE_PRO_PRICE_ID || '',
     features: [
       'Everything in Premium',

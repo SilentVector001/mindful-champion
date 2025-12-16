@@ -1,41 +1,32 @@
 const { PrismaClient } = require('@prisma/client');
+
 const prisma = new PrismaClient();
 
-async function checkAdmin() {
+async function checkAdmins() {
   try {
-    const adminUsers = await prisma.user.findMany({
+    const admins = await prisma.user.findMany({
       where: { role: 'ADMIN' },
       select: {
         id: true,
         email: true,
-        name: true,
         role: true,
-        createdAt: true
-      }
+        firstName: true,
+        lastName: true,
+      },
     });
-    
-    console.log('\n=== ADMIN USERS ===');
-    console.log(JSON.stringify(adminUsers, null, 2));
-    
-    // Also check jay@aol.com
-    const jayUser = await prisma.user.findUnique({
-      where: { email: 'jay@aol.com' },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true
-      }
-    });
-    
-    console.log('\n=== JAY@AOL.COM USER ===');
-    console.log(JSON.stringify(jayUser, null, 2));
-    
+
+    console.log('Admin users found:', admins.length);
+    console.log(JSON.stringify(admins, null, 2));
+
+    // Also check total users
+    const totalUsers = await prisma.user.count();
+    console.log('\nTotal users in database:', totalUsers);
+
   } catch (error) {
-    console.error('Error:', error.message);
+    console.error('Error:', error);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-checkAdmin();
+checkAdmins();

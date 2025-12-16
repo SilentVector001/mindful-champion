@@ -28,7 +28,7 @@ const plans = [
   },
   {
     name: "Premium",
-    price: "$19",
+    price: "$29.99",
     period: "/month",
     description: "For serious players",
     badge: "Most Popular",
@@ -47,7 +47,7 @@ const plans = [
   },
   {
     name: "Pro",
-    price: "$39",
+    price: "$49.99",
     period: "/month",
     description: "Maximum performance",
     badge: "Pro",
@@ -96,29 +96,24 @@ export default function PricingCTASection() {
               viewport={{ once: true }}
               transition={{ delay: index * 0.1 }}
             >
-              <Card className={`relative overflow-hidden h-full ${
-                plan.popular 
-                  ? "bg-slate-800 border-teal-500 border-2" 
-                  : "bg-slate-800/50 border-slate-700"
-              }`}>
-                {plan.badge && (
-                  <div className="absolute top-0 right-0 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-4 py-1 text-sm font-semibold rounded-bl-lg">
-                    {plan.badge}
-                  </div>
-                )}
+              <Link href={plan.href} className="block h-full group">
+                <Card className={`relative overflow-hidden h-full transition-all duration-300 ${
+                  plan.popular 
+                    ? "bg-slate-800 border-teal-500 border-2 hover:border-teal-400 hover:shadow-2xl hover:shadow-teal-500/20" 
+                    : "bg-slate-800/50 border-slate-700 hover:border-slate-600 hover:shadow-xl"
+                } cursor-pointer`}>
+                  {plan.badge && (
+                    <div className="absolute top-0 right-0 bg-gradient-to-r from-teal-500 to-emerald-500 text-white px-4 py-1 text-sm font-semibold rounded-bl-lg">
+                      {plan.badge}
+                    </div>
+                  )}
 
-                <div className="p-8 space-y-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-white mb-2">{plan.name}</h3>
-                    <p className="text-slate-400">{plan.description}</p>
-                  </div>
+                  <div className="p-8 space-y-6">
+                    <div>
+                      <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-teal-400 transition-colors">{plan.name}</h3>
+                      <p className="text-slate-400">{plan.description}</p>
+                    </div>
 
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-bold text-white">{plan.price}</span>
-                    <span className="text-slate-400">{plan.period}</span>
-                  </div>
-
-                  <Link href={plan.href}>
                     <Button
                       size="lg"
                       className={`w-full ${
@@ -129,20 +124,20 @@ export default function PricingCTASection() {
                     >
                       {plan.cta}
                     </Button>
-                  </Link>
 
-                  <ul className="space-y-4">
-                    {plan.features.map((feature, idx) => (
-                      <li key={idx} className="flex items-start gap-3">
-                        <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r ${plan.gradient}`}>
-                          <Check className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-slate-300">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </Card>
+                    <ul className="space-y-4">
+                      {plan.features.map((feature, idx) => (
+                        <li key={idx} className="flex items-start gap-3">
+                          <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 bg-gradient-to-r ${plan.gradient}`}>
+                            <Check className="w-3 h-3 text-white" />
+                          </div>
+                          <span className="text-slate-300">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </Card>
+              </Link>
             </motion.div>
           ))}
         </div>

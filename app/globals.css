@@ -36,12 +36,24 @@
     -webkit-transform: none !important;
     /* Ensure header is above all content */
     isolation: isolate !important;
+    /* PREVENT HORIZONTAL OVERFLOW */
+    max-width: 100vw !important;
+    width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+  }
+  
+  /* Ensure nav elements respect viewport width */
+  header nav, header nav > div {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   /* Ensure body content doesn't overlap header */
   body {
     padding-top: 0 !important;
     margin-top: 0 !important;
+    overflow-x: hidden !important;
   }
   
   /* Ensure main content starts below header */
@@ -351,4 +363,14 @@
   [role="listbox"] {
     max-width: 90vw !important;
   }
+}
+
+/* Scrollbar hide utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
