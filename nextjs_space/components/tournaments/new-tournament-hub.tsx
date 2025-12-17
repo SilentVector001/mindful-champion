@@ -482,10 +482,12 @@ export function TournamentHub() {
                       <div className="text-champion-gold font-semibold">
                         {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
                       </div>
-                      <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
-                        Register
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+                        <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Register
+                        </Button>
+                      </a>
                     </div>
                   </CardContent>
                 </Card>
@@ -677,13 +679,15 @@ export function TournamentHub() {
                       Registration Closed
                     </Badge>
                   )}
-                  <Button
-                    size="sm"
-                    disabled={!event?.registrationOpen}
-                    className={event?.registrationOpen ? "bg-champion-green hover:bg-champion-green/90" : ""}
-                  >
-                    {event?.registrationOpen ? "Register" : "View Details"}
-                  </Button>
+                  <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+                    <Button
+                      size="sm"
+                      className="bg-champion-green hover:bg-champion-green/90"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      {event?.registrationOpen ? "Register" : "View Details"}
+                    </Button>
+                  </a>
                 </div>
               </motion.div>
             )) || []}
@@ -713,6 +717,40 @@ export function TournamentHub() {
                 Find My Level
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Links to Tournament Finders */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="bg-white/5 rounded-xl border border-white/10 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Sites</h3>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-champion-green/50 text-champion-green hover:bg-champion-green/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PickleballTournaments.com
+              </Button>
+            </a>
+            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PickleballBrackets.com
+              </Button>
+            </a>
+            <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
+              </Button>
+            </a>
+            <a href="https://www.theapp.global/schedule" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
+              </Button>
+            </a>
+            <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> USA Pickleball
+              </Button>
+            </a>
           </div>
         </div>
       </section>
