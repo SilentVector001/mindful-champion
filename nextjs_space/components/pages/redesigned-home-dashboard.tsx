@@ -17,7 +17,6 @@ import { AchievementToast, useAchievementNotifications } from "@/components/rewa
 // Import new dashboard components
 import NewsTicker from "@/components/dashboard/news-ticker"
 import StatsOverview from "@/components/dashboard/stats-overview"
-import MediaCenterAlerts from "@/components/dashboard/media-center-alerts"
 import ProgressCharts from "@/components/dashboard/progress-charts"
 import GettingStartedGuide from "@/components/dashboard/getting-started-guide"
 
@@ -333,100 +332,6 @@ export default function RedesignedHomeDashboard({
           className="mb-8"
         >
           <NewsTicker />
-        </motion.div>
-
-        {/* Live Tournaments Cross-Link Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.11 }}
-          className="mb-8"
-        >
-          <Link href="/media">
-            <Card className="border-0 shadow-xl bg-gradient-to-br from-red-600 via-red-700 to-orange-600 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300 hover:scale-[1.01]">
-              {/* Decorative background elements */}
-              <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-white/10 to-transparent rounded-full blur-3xl" />
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-orange-400/20 to-transparent rounded-full blur-3xl" />
-              
-              {/* Animated pulse effect */}
-              <motion.div
-                className="absolute top-6 right-6 text-white/30"
-                animate={{ 
-                  scale: [1, 1.2, 1],
-                  opacity: [0.3, 0.6, 0.3]
-                }}
-                transition={{ duration: 2, repeat: Infinity }}
-              >
-                <Globe className="w-8 h-8" />
-              </motion.div>
-              
-              <CardContent className="p-6 sm:p-8 relative z-10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                  {/* Left: Tournament Message */}
-                  <div className="flex-1 text-center md:text-left space-y-3 w-full">
-                    {/* Tournament Icon */}
-                    <div className="flex items-center justify-center md:justify-start gap-3">
-                      <motion.div
-                        className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-2xl"
-                        animate={{ 
-                          scale: [1, 1.05, 1],
-                        }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      >
-                        <Trophy className="w-8 h-8 text-red-600" />
-                      </motion.div>
-                      <Badge className="bg-white/20 text-white text-xs uppercase tracking-wide animate-pulse">
-                        LIVE NOW
-                      </Badge>
-                    </div>
-                    
-                    {/* Headline */}
-                    <div>
-                      <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
-                        Explore Live Tournaments
-                      </h2>
-                      <p className="text-base sm:text-lg text-red-100">
-                        Watch live matches, discover local tournaments, and follow the action on our interactive map
-                      </p>
-                    </div>
-                    
-                    {/* Features List */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4">
-                      {[
-                        { icon: Play, text: 'Watch Live Streams' },
-                        { icon: Globe, text: 'Tournament Map' },
-                        { icon: Calendar, text: 'Upcoming Events' }
-                      ].map((feature, index) => {
-                        const Icon = feature.icon
-                        return (
-                          <div
-                            key={feature.text}
-                            className="flex items-center gap-2 text-white/90"
-                          >
-                            <div className="w-6 h-6 bg-white/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <span className="text-sm font-medium">{feature.text}</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                  
-                  {/* Right: CTA Button */}
-                  <div className="flex flex-col items-center gap-4">
-                    <Button
-                      size="lg"
-                      className="bg-white text-red-600 hover:bg-gray-100 text-lg font-bold px-8 py-6 rounded-2xl shadow-2xl group-hover:scale-110 transition-transform"
-                    >
-                      View Tournaments
-                      <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
         </motion.div>
 
         {/* Getting Started Guide - Show for new users */}
@@ -901,15 +806,6 @@ export default function RedesignedHomeDashboard({
 
           {/* Right Column - Sidebar */}
           <div className="space-y-6">
-            {/* Media Center Alerts */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.3 }}
-            >
-              <MediaCenterAlerts />
-            </motion.div>
-
             {/* Quick Actions */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
@@ -926,11 +822,10 @@ export default function RedesignedHomeDashboard({
                 <CardContent className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-2 sm:gap-3">
                   {[
                     { name: 'Train', icon: Dumbbell, path: '/train', color: 'bg-champion-blue', description: 'Start training' },
-                    { name: 'Videos', icon: Video, path: '/train/library', color: 'bg-champion-green', description: 'Watch videos' },
                     { name: 'Analyze', icon: BarChart3, path: '/train/video', color: 'bg-purple-500', description: 'Upload video' },
                     { name: 'Connect', icon: Users, path: '/connect', color: 'bg-champion-gold', description: 'Find partners' },
-                    { name: 'Media', icon: Headphones, path: '/media', color: 'bg-pink-500', description: 'Browse content' },
-                    { name: 'Progress', icon: TrendingUp, path: '/progress', color: 'bg-cyan-500', description: 'View stats' }
+                    { name: 'Progress', icon: TrendingUp, path: '/progress', color: 'bg-cyan-500', description: 'View stats' },
+                    { name: 'Drills', icon: Target, path: '/train/drills', color: 'bg-champion-green', description: 'Practice drills' }
                   ].map((action, index) => {
                     const Icon = action.icon
                     return (
