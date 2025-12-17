@@ -14,8 +14,7 @@ import {
   Trophy,
   Crown,
   Menu,
-  X,
-  PlayCircle
+  X
 } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
@@ -37,13 +36,6 @@ const navigationItems = [
     icon: Target,
     description: 'Drills, video analysis & practice',
     gradient: 'from-green-500 to-emerald-500'
-  },
-  {
-    name: 'Media',
-    href: '/media-center',
-    icon: PlayCircle,
-    description: 'Videos, podcasts & news',
-    gradient: 'from-red-500 to-orange-500'
   },
   {
     name: 'Progress',
@@ -81,10 +73,9 @@ export default function SimplifiedNav({ className }: SimplifiedNavProps) {
 
   const getActiveIndex = () => {
     if (pathname?.includes('/train')) return 1
-    if (pathname?.includes('/media-center')) return 2
-    if (pathname?.includes('/progress')) return 3  
-    if (pathname?.includes('/connect')) return 4
-    if (pathname?.includes('/settings')) return 5
+    if (pathname?.includes('/progress')) return 2  
+    if (pathname?.includes('/connect')) return 3
+    if (pathname?.includes('/settings')) return 4
     return 0 // Home/Dashboard
   }
 

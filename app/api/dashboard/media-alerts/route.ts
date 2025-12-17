@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Generate dynamic media alerts with mix of real-time and upcoming events
+    // Generate dynamic alerts with mix of real-time and upcoming events
     const alerts = [
       {
         id: 'ppa-live-1',
@@ -32,7 +32,7 @@ export async function GET(request: NextRequest) {
         type: 'tournament',
         title: 'Golden Ticket Tournament',
         description: 'Register for the upcoming qualifier event in your area',
-        link: '/media?tab=events',
+        link: '/connect/tournaments',
         status: 'register',
         priority: 'high',
         metadata: {
@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
         type: 'podcast',
         title: 'The Dink Podcast - Episode 342',
         description: 'Pro player interview: Mental game strategies',
-        link: '/media?tab=podcasts',
+        link: 'https://www.youtube.com/@TheDinkPickleball/podcasts',
         status: 'upcoming',
         priority: 'medium',
         metadata: {
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         type: 'event',
         title: 'MLP Team Tryouts',
         description: 'Open tryouts for the new MLP season',
-        link: '/media?tab=events',
+        link: '/connect/tournaments',
         status: 'register',
         priority: 'high',
         metadata: {
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
         type: 'news',
         title: 'New USA Pickleball Rules Update',
         description: '2025 rule changes announced - read the full details',
-        link: '/media',
+        link: 'https://usapickleball.org/news/',
         status: 'upcoming',
         priority: 'medium',
         metadata: {

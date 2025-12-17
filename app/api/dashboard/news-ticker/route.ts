@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
         title: 'PPA Tour Championship Finals',
         subtitle: 'Championship match streaming live now',
         priority: 'urgent',
-        link: '/media',
+        link: 'https://www.youtube.com/c/PPATour/live',
         icon: '🏆',
         status: 'LIVE',
         viewers: 15000
@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
         title: 'MLP Season 4 Announcement',
         subtitle: 'New teams and player rosters revealed',
         priority: 'high',
-        link: '/media?tab=events',
+        link: '/connect/tournaments',
         icon: '📺',
         daysUntil: 2
       },
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         title: 'USA Pickleball National Championships',
         subtitle: 'Registration opens for all skill divisions',
         priority: 'high',
-        link: '/media?tab=events',
+        link: '/connect/tournaments',
         icon: '🎯',
         daysUntil: 15
       },
@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
         title: 'Golden Ticket Qualifier Events',
         subtitle: '12 spots remaining for regional qualifiers',
         priority: 'high',
-        link: '/media?tab=events',
+        link: '/connect/tournaments',
         icon: '🎫',
         daysUntil: 7
       },
@@ -61,7 +61,7 @@ export async function GET(request: NextRequest) {
         title: 'The Dink Podcast - New Episode',
         subtitle: 'Pro interview with Ben Johns on strategy',
         priority: 'medium',
-        link: '/media?tab=podcasts',
+        link: 'https://www.youtube.com/@TheDinkPickleball/podcasts',
         icon: '🎙️',
         timeAgo: 2
       },
@@ -71,7 +71,7 @@ export async function GET(request: NextRequest) {
         title: 'Live Tournament Scores',
         subtitle: '8 matches in progress across 3 tournaments',
         priority: 'medium',
-        link: '/media',
+        link: '/connect/tournaments',
         icon: '📊',
         activeMatches: 8
       },
@@ -90,7 +90,7 @@ export async function GET(request: NextRequest) {
         title: 'APP Tour - Major Event',
         subtitle: 'Prize pool: $200,000 - Watch live streams',
         priority: 'high',
-        link: '/media',
+        link: 'https://www.youtube.com/@AppPickleball/streams',
         icon: '💰',
         status: 'LIVE',
         viewers: 8500

@@ -67,12 +67,12 @@ const quickStartSteps = [
   },
   {
     id: 'tournaments',
-    title: 'Watch Tournaments',
-    description: 'Follow live events and professional matches',
+    title: 'Find Tournaments',
+    description: 'Discover and register for tournaments near you',
     icon: Trophy,
     color: 'from-yellow-500 to-amber-500',
-    link: '/media',
-    action: 'Explore Events'
+    link: '/connect/tournaments',
+    action: 'View Tournaments'
   },
   {
     id: 'connect',

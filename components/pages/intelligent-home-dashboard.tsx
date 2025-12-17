@@ -719,7 +719,6 @@ export default function IntelligentHomeDashboard({
                 <CardContent className="grid grid-cols-2 gap-2">
                   {[
                     { name: 'Training', icon: BookOpen, path: '/train', color: 'bg-champion-blue' },
-                    { name: 'Videos', icon: Video, path: '/media-center', color: 'bg-champion-green' },
                     { name: 'Partners', icon: Users, path: '/connect/partners', color: 'bg-champion-gold' },
                     { name: 'Progress', icon: BarChart3, path: '/progress', color: 'bg-purple-500' }
                   ].map((action) => {

@@ -18,9 +18,6 @@ interface BreadcrumbsProps {
 // Mapping of routes to their breadcrumb labels
 const routeLabels: Record<string, string> = {
   "/dashboard": "My Progress",
-  "/media": "Live Tournaments",
-  "/media/streaming": "Streaming",
-  "/media/podcasts": "Podcasts",
   "/train": "Train",
   "/train/coach": "Coach Kai",
   "/train/video": "Video Analysis",

@@ -79,11 +79,11 @@ const betaTasks = [
     path: '/connect',
   },
   {
-    id: 'watch-tournament',
-    title: 'Watch Tournament Content',
-    description: 'Learn from the pros',
+    id: 'find-tournaments',
+    title: 'Find Tournaments',
+    description: 'Discover tournaments near you',
     icon: Tv,
-    path: '/media',
+    path: '/connect/tournaments',
   },
   {
     id: 'leave-feedback',

@@ -87,22 +87,10 @@ export default function CompactNotificationCenter({
   }, [])
 
   const fetchAlerts = async () => {
-    try {
-      const response = await fetch('/api/dashboard/media-alerts')
-      if (response.ok) {
-        const data = await response.json()
-        setAlerts(data.alerts || [])
-        // Check if there are high-priority or live alerts
-        const hasHighPriority = data.alerts?.some((a: MediaAlert) => 
-          a.status === 'live' || a.priority === 'high'
-        )
-        setHasNew(hasHighPriority)
-      }
-    } catch (error) {
-      console.error('Failed to fetch media alerts:', error)
-    } finally {
-      setLoading(false)
-    }
+    // Media alerts disabled - Media Center functionality removed
+    setAlerts([])
+    setHasNew(false)
+    setLoading(false)
   }
 
   const handleAlertClick = (alert: MediaAlert) => {
@@ -223,11 +211,11 @@ export default function CompactNotificationCenter({
                   size="sm"
                   className="bg-gradient-to-r from-champion-blue to-cyan-600"
                   onClick={() => {
-                    router.push('/media')
+                    router.push('/connect/tournaments')
                     setOpen(false)
                   }}
                 >
-                  Explore Media Center
+                  Explore Tournaments
                 </Button>
               </div>
             ) : (
@@ -327,11 +315,11 @@ export default function CompactNotificationCenter({
               size="sm"
               className="w-full justify-center text-champion-blue hover:bg-champion-blue/10 hover:text-champion-blue"
               onClick={() => {
-                router.push('/media')
+                router.push('/connect/tournaments')
                 setOpen(false)
               }}
             >
-              View All in Media Center
+              View Tournaments
               <ExternalLink className="w-3 h-3 ml-1" />
             </Button>
           </div>
