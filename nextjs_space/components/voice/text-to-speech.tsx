@@ -306,33 +306,36 @@ export default function TextToSpeech({
       return;
     }
 
-    // COMPREHENSIVE CHECKS before attempting to speak
+    // PRIMARY CHECK: Use messageId if available (most reliable)
     const isNewMessageId = messageId && messageId !== lastSpokenMessageIdRef.current;
-    const isNewText = cleanedText !== lastSpokenTextRef.current;
     const isNotCurrentlySpeaking = !isSpeaking;
     const isNotLocked = !isSpeakingLockedRef.current;
     
     console.log('🔍 TTS: Auto-play effect triggered');
-    console.log('   New Message ID:', isNewMessageId, `(${messageId} vs ${lastSpokenMessageIdRef.current})`);
-    console.log('   New Text:', isNewText);
+    console.log('   Message ID:', messageId);
+    console.log('   Last spoken ID:', lastSpokenMessageIdRef.current);
+    console.log('   Is new message:', isNewMessageId);
     console.log('   Not Speaking:', isNotCurrentlySpeaking);
     console.log('   Not Locked:', isNotLocked);
     
-    // Only play if it's genuinely a new message
-    if ((isNewMessageId || isNewText) && isNotCurrentlySpeaking && isNotLocked) {
-      console.log('✅ TTS: Conditions met - will auto-play');
+    // Only play if it's genuinely a new message (rely on messageId primarily)
+    if (isNewMessageId && isNotCurrentlySpeaking && isNotLocked) {
+      console.log('✅ TTS: NEW MESSAGE DETECTED - will auto-play');
       
-      // Use a small delay to ensure the component is stable and to debounce rapid changes
+      // Use a small delay to ensure the component is stable
       const timeoutId = setTimeout(() => {
         // Final safety check before speaking
-        const stillNew = messageId ? messageId !== lastSpokenMessageIdRef.current : cleanedText !== lastSpokenTextRef.current;
+        const stillNew = messageId !== lastSpokenMessageIdRef.current;
         const stillNotSpeaking = !isSpeaking && !isSpeakingLockedRef.current;
         
         if (stillNew && stillNotSpeaking) {
           console.log('✅ TTS: Final checks passed - calling speak()');
           
-          // MOBILE FIX: Try to resume audio context before speaking
+          // MOBILE FIX: Force resume/restart speech synthesis
           if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            // Cancel any stuck speech first
+            speechSynthesis.cancel();
+            
             // Check if speech synthesis is paused/suspended (common on mobile)
             if (speechSynthesis.paused) {
               console.log('🔊 TTS: Resuming paused speech synthesis');
@@ -340,20 +343,19 @@ export default function TextToSpeech({
             }
           }
           
-          speak();
+          speak(cleanedText, messageId);
         } else {
-          console.log('🚫 TTS: Final check failed - another process took over');
+          console.log('🚫 TTS: Final check failed - state changed');
         }
-      }, 200); // Slightly longer delay for mobile stability
+      }, 150); // Short delay for stability
       
       return () => {
-        console.log('🧹 TTS: Cleaning up auto-play timeout');
         clearTimeout(timeoutId);
       };
     } else {
       console.log('🚫 TTS: Skipping auto-play');
-      if (!isNewMessageId && !isNewText) {
-        console.log('   Reason: Already spoke this message');
+      if (!isNewMessageId) {
+        console.log('   Reason: Same message ID (already spoke this)');
       }
       if (!isNotCurrentlySpeaking) {
         console.log('   Reason: Currently speaking');
