@@ -1,1 +1,0 @@
-# Mindful Champion
