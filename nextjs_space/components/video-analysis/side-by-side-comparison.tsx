@@ -306,7 +306,8 @@ export default function SideBySideComparison({
                     src={signedUserVideoUrl}
                     className="w-full h-full object-contain"
                     playsInline
-                    preload="metadata"
+                    preload="auto"
+                    controls
                   />
                 )}
                 <canvas
@@ -327,12 +328,12 @@ export default function SideBySideComparison({
                   </div>
                 )}
                 
-                {/* User Video Loading Overlay */}
-                {!userVideoLoaded && !userVideoError && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                {/* User Video Loading Overlay - Only show briefly, then fade */}
+                {!userVideoLoaded && !userVideoError && !isLoadingSignedUrl && signedUserVideoUrl && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 pointer-events-none">
                     <div className="text-center">
                       <Loader2 className="w-8 h-8 text-cyan-400 animate-spin mx-auto mb-2" />
-                      <p className="text-xs text-slate-300">Loading...</p>
+                      <p className="text-xs text-slate-300">Click play to start</p>
                     </div>
                   </div>
                 )}
@@ -390,7 +391,8 @@ export default function SideBySideComparison({
                   className="w-full h-full object-contain"
                   playsInline
                   loop
-                  preload="metadata"
+                  preload="auto"
+                  controls
                 />
                 <canvas
                   ref={proCanvasRef}
@@ -406,16 +408,17 @@ export default function SideBySideComparison({
                       <AlertCircle className="w-12 h-12 text-amber-400 mx-auto mb-3" />
                       <p className="text-sm text-slate-300 mb-2">Pro Video Unavailable</p>
                       <p className="text-xs text-slate-400">{proVideoError}</p>
+                      <p className="text-xs text-slate-500 mt-2">This is a demo comparison feature</p>
                     </div>
                   </div>
                 )}
                 
-                {/* Pro Video Loading Overlay */}
+                {/* Pro Video Loading Overlay - pointer-events-none so video is still clickable */}
                 {!proVideoLoaded && !proVideoError && (
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/80">
+                  <div className="absolute inset-0 flex items-center justify-center bg-black/60 pointer-events-none">
                     <div className="text-center">
                       <Loader2 className="w-8 h-8 text-emerald-400 animate-spin mx-auto mb-2" />
-                      <p className="text-xs text-slate-300">Loading...</p>
+                      <p className="text-xs text-slate-300">Click play to start</p>
                     </div>
                   </div>
                 )}

@@ -18,14 +18,18 @@ import {
   DollarSign,
   Loader2,
   ChevronDown,
-  Sparkles
+  Sparkles,
+  Info,
+  CheckCircle2
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { toast } from "sonner"
+import { useRouter } from "next/navigation"
 
 // Skill level options
 const SKILL_LEVELS = [
@@ -75,6 +79,8 @@ interface Tournament {
 }
 
 export function TournamentDiscovery() {
+  const router = useRouter()
+  
   // State
   const [tournaments, setTournaments] = useState<Tournament[]>([])
   const [loading, setLoading] = useState(true)
@@ -84,6 +90,8 @@ export function TournamentDiscovery() {
   const [selectedFormat, setSelectedFormat] = useState<string>("all")
   const [sortBy, setSortBy] = useState<string>("date")
   const [showFilters, setShowFilters] = useState(false)
+  const [selectedTournament, setSelectedTournament] = useState<Tournament | null>(null)
+  const [showDetailsModal, setShowDetailsModal] = useState(false)
 
   // Fetch tournaments
   useEffect(() => {
@@ -108,22 +116,14 @@ export function TournamentDiscovery() {
   // Filter tournaments
   const filteredTournaments = useMemo(() => {
     return tournaments.filter(tournament => {
-      // Search filter
       const matchesSearch = searchQuery === "" || 
         tournament.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tournament.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
         tournament.state.toLowerCase().includes(searchQuery.toLowerCase())
 
-      // State filter
       const matchesState = selectedState === "all" || tournament.state === selectedState
-
-      // Skill level filter
-      const matchesSkill = selectedSkillLevel === "all" || 
-        tournament.skillLevels.includes(selectedSkillLevel)
-
-      // Format filter
-      const matchesFormat = selectedFormat === "all" || 
-        tournament.format.includes(selectedFormat)
+      const matchesSkill = selectedSkillLevel === "all" || tournament.skillLevels.includes(selectedSkillLevel)
+      const matchesFormat = selectedFormat === "all" || tournament.format.includes(selectedFormat)
 
       return matchesSearch && matchesState && matchesSkill && matchesFormat
     }).sort((a, b) => {
@@ -178,9 +178,23 @@ export function TournamentDiscovery() {
     selectedFormat !== "all",
   ].filter(Boolean).length
 
+  const handleViewDetails = (tournament: Tournament) => {
+    setSelectedTournament(tournament)
+    setShowDetailsModal(true)
+  }
+
+  const handleRegister = (tournament: Tournament) => {
+    if (tournament.registrationUrl) {
+      window.open(tournament.registrationUrl, '_blank')
+      toast.success(`Opening registration for ${tournament.name}`)
+    } else {
+      toast.info("Registration link coming soon!")
+    }
+  }
+
   return (
     <div className="min-h-screen pb-20">
-      {/* Hero Section - Stunning & Eye-Catching */}
+      {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-950 via-slate-900 to-emerald-950">
         {/* Animated Background */}
         <div className="absolute inset-0">
@@ -224,7 +238,7 @@ export function TournamentDiscovery() {
             </p>
           </motion.div>
 
-          {/* Search Bar - Prominent & Beautiful */}
+          {/* Search Bar */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -401,7 +415,9 @@ export function TournamentDiscovery() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.1 }}
                 >
-                  <Card className="group relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-yellow-500/30 hover:border-yellow-400/50 transition-all duration-300 h-full">
+                  <Card className="group relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800 border-yellow-500/30 hover:border-yellow-400/50 transition-all duration-300 h-full cursor-pointer"
+                    onClick={() => handleViewDetails(tournament)}
+                  >
                     {/* Glow Effect */}
                     <div className="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     
@@ -448,17 +464,29 @@ export function TournamentDiscovery() {
                         })}
                       </div>
 
-                      <Button
-                        onClick={() => {
-                          if (tournament.registrationUrl) {
-                            window.open(tournament.registrationUrl, '_blank')
-                          }
-                        }}
-                        className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
-                      >
-                        Register Now
-                        <ExternalLink className="w-4 h-4 ml-2" />
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleViewDetails(tournament)
+                          }}
+                          variant="outline"
+                          className="flex-1 border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10"
+                        >
+                          <Info className="w-4 h-4 mr-2" />
+                          Details
+                        </Button>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleRegister(tournament)
+                          }}
+                          className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
+                        >
+                          Register
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                 </motion.div>
@@ -530,7 +558,9 @@ export function TournamentDiscovery() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: Math.min(index * 0.05, 0.3) }}
               >
-                <Card className="group relative overflow-hidden bg-slate-900/50 border-white/10 hover:border-blue-500/50 transition-all duration-300 h-full backdrop-blur-sm">
+                <Card className="group relative overflow-hidden bg-slate-900/50 border-white/10 hover:border-blue-500/50 transition-all duration-300 h-full backdrop-blur-sm cursor-pointer"
+                  onClick={() => handleViewDetails(tournament)}
+                >
                   {/* Hover Gradient */}
                   <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-emerald-500/0 group-hover:from-blue-500/10 group-hover:to-emerald-500/10 transition-all duration-300" />
                   
@@ -624,17 +654,25 @@ export function TournamentDiscovery() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       <Button
-                        onClick={() => {
-                          if (tournament.registrationUrl) {
-                            window.open(tournament.registrationUrl, '_blank')
-                          } else {
-                            toast.info("Registration link coming soon!")
-                          }
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleViewDetails(tournament)
+                        }}
+                        variant="outline"
+                        className="flex-1 border-slate-600 hover:border-blue-500/50 hover:bg-blue-500/10"
+                      >
+                        <Info className="w-4 h-4 mr-2" />
+                        Details
+                      </Button>
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRegister(tournament)
                         }}
                         className="flex-1 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400"
-                        disabled={tournament.status !== "REGISTRATION_OPEN"}
+                        disabled={tournament.status !== "REGISTRATION_OPEN" && tournament.status !== "UPCOMING"}
                       >
-                        {tournament.status === "REGISTRATION_OPEN" ? "Register" : "View Details"}
+                        {tournament.status === "REGISTRATION_OPEN" ? "Register" : "View"}
                         <ExternalLink className="w-4 h-4 ml-2" />
                       </Button>
                     </div>
@@ -645,6 +683,155 @@ export function TournamentDiscovery() {
           </div>
         )}
       </section>
+
+      {/* Tournament Details Modal */}
+      <Dialog open={showDetailsModal} onOpenChange={setShowDetailsModal}>
+        <DialogContent className="max-w-2xl bg-slate-900 border-slate-700 text-white">
+          {selectedTournament && (
+            <>
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold text-white flex items-center gap-3">
+                  <Trophy className="w-6 h-6 text-yellow-400" />
+                  {selectedTournament.name}
+                </DialogTitle>
+                <DialogDescription className="text-gray-400">
+                  Tournament Details & Registration
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 mt-4">
+                {/* Description */}
+                {selectedTournament.description && (
+                  <p className="text-gray-300 leading-relaxed">
+                    {selectedTournament.description}
+                  </p>
+                )}
+
+                {/* Key Details Grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 text-blue-400 mb-2">
+                      <MapPin className="w-4 h-4" />
+                      <span className="text-sm font-medium">Location</span>
+                    </div>
+                    <p className="text-white font-semibold">{selectedTournament.venueName}</p>
+                    <p className="text-gray-400 text-sm">{selectedTournament.city}, {selectedTournament.state}</p>
+                  </div>
+
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 text-emerald-400 mb-2">
+                      <Calendar className="w-4 h-4" />
+                      <span className="text-sm font-medium">Dates</span>
+                    </div>
+                    <p className="text-white font-semibold">
+                      {formatDate(selectedTournament.startDate, selectedTournament.endDate)}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 text-yellow-400 mb-2">
+                      <Award className="w-4 h-4" />
+                      <span className="text-sm font-medium">Prize Pool</span>
+                    </div>
+                    <p className="text-white font-semibold text-xl">
+                      {formatPrize(selectedTournament.prizePool)}
+                    </p>
+                  </div>
+
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 text-purple-400 mb-2">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="text-sm font-medium">Entry Fee</span>
+                    </div>
+                    <p className="text-white font-semibold">
+                      {selectedTournament.entryFee ? `$${selectedTournament.entryFee}` : 'TBA'}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Skill Levels & Formats */}
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Skill Levels</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTournament.skillLevels.map(level => {
+                        const skillConfig = SKILL_LEVELS.find(s => s.value === level)
+                        return (
+                          <Badge key={level} className={skillConfig?.color || "bg-gray-500/20 text-gray-400"}>
+                            {skillConfig?.label || level}
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-400 mb-2">Formats Available</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {selectedTournament.format.map(fmt => {
+                        const formatConfig = FORMATS.find(f => f.value === fmt)
+                        return (
+                          <Badge key={fmt} variant="outline" className="border-slate-600">
+                            {formatConfig?.icon} {formatConfig?.label || fmt}
+                          </Badge>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Registration Progress */}
+                {selectedTournament.maxParticipants && (
+                  <div className="bg-slate-800/50 rounded-lg p-4 border border-slate-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm text-gray-400">Registration Progress</span>
+                      <span className="text-sm font-medium text-white">
+                        {selectedTournament.currentRegistrations} / {selectedTournament.maxParticipants} spots filled
+                      </span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-blue-500 to-emerald-500"
+                        style={{ width: `${Math.min((selectedTournament.currentRegistrations / selectedTournament.maxParticipants) * 100, 100)}%` }}
+                      />
+                    </div>
+                    {selectedTournament.currentRegistrations >= selectedTournament.maxParticipants * 0.9 && (
+                      <p className="text-amber-400 text-xs mt-2 flex items-center gap-1">
+                        <Clock className="w-3 h-3" />
+                        Almost full! Register soon to secure your spot.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4 border-t border-slate-700">
+                  {selectedTournament.websiteUrl && (
+                    <Button
+                      variant="outline"
+                      className="flex-1 border-slate-600 hover:border-blue-500/50"
+                      onClick={() => window.open(selectedTournament.websiteUrl!, '_blank')}
+                    >
+                      Visit Website
+                      <ExternalLink className="w-4 h-4 ml-2" />
+                    </Button>
+                  )}
+                  <Button
+                    className="flex-1 bg-gradient-to-r from-blue-600 to-emerald-600 hover:from-blue-500 hover:to-emerald-500"
+                    onClick={() => {
+                      handleRegister(selectedTournament)
+                      setShowDetailsModal(false)
+                    }}
+                  >
+                    <CheckCircle2 className="w-4 h-4 mr-2" />
+                    Register Now
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
