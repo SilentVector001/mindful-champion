@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
-import { TournamentHubEnhanced } from "@/components/tournaments/tournament-hub-enhanced"
+import { TournamentDiscovery } from "@/components/tournaments/tournament-discovery"
 
 export default async function TournamentsPage() {
   const session = await getServerSession(authOptions)
@@ -10,5 +10,5 @@ export default async function TournamentsPage() {
     redirect("/auth/signin")
   }
 
-  return <TournamentHubEnhanced />
+  return <TournamentDiscovery />
 }

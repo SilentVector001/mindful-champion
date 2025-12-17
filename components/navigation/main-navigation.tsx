@@ -628,77 +628,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* MEDIA CENTER Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
-                    isActive("/media")
-                      ? "bg-champion-green/10 text-champion-green"
-                      : "text-gray-700 dark:text-gray-300 hover:text-champion-green hover:bg-champion-green/5"
-                  )}
-                  title="Live streams, highlights, podcasts and more"
-                >
-                  <PlayCircle className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
-                  Media
-                  <ChevronDown className="w-2.5 h-2.5 lg:w-3 lg:h-3 opacity-50 flex-shrink-0" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-64 animate-slide-up-fade">
-                <DropdownMenuLabel className="flex items-center gap-2 text-champion-green">
-                  <PlayCircle className="w-4 h-4" />
-                  Media Hub
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <InfoTooltip content="All media content in one place" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/media" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <PlayCircle className="w-4 h-4 text-champion-green" />
-                      <div>
-                        <p className="font-medium">Media Hub</p>
-                        <p className="text-xs text-gray-500">All content</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-                <InfoTooltip content="Watch live tournament streams" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/media/streaming" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Activity className="w-4 h-4 text-red-500" />
-                      <div>
-                        <p className="font-medium">Live Coverage</p>
-                        <p className="text-xs text-gray-500">Tournament streams</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-                <InfoTooltip content="Browse upcoming events" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/media/events" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Calendar className="w-4 h-4 text-blue-500" />
-                      <div>
-                        <p className="font-medium">Events</p>
-                        <p className="text-xs text-gray-500">Upcoming events</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-                <InfoTooltip content="Listen to pickleball podcasts" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/media/podcasts" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Watch className="w-4 h-4 text-purple-500" />
-                      <div>
-                        <p className="font-medium">Podcasts & Shows</p>
-                        <p className="text-xs text-gray-500">Audio content</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-              </DropdownMenuContent>
-            </DropdownMenu>
 
             {/* My Rewards */}
             <InfoTooltip content="Redeem your achievement points for exclusive sponsor rewards">
@@ -1052,23 +981,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 )}
               </div>
 
-              <Separator className="my-4" />
-
-              {/* Media Hub Section */}
-              <div className="space-y-1">
-                <p className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                  Media Hub
-                </p>
-
-                <Link href="/media" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <PlayCircle className="w-5 h-5 text-champion-green" />
-                    Media Hub
-                  </Button>
-                </Link>
-              </div>
-
-              <Separator className="my-4" />
 
               {/* Account Section */}
               <div className="space-y-1">
