@@ -211,10 +211,10 @@ export default function TextToSpeech({
       return;
     }
 
-    // PROTECTION 4: Cooldown check (prevent rapid-fire repetition within 2 seconds)
+    // PROTECTION 4: Cooldown check (prevent rapid-fire repetition within 1 second)
     const now = Date.now();
     const timeSinceLastSpeak = now - lastSpeakTimeRef.current;
-    if (timeSinceLastSpeak < 2000 && lastSpokenTextRef.current === cleanedText) {
+    if (timeSinceLastSpeak < 1000 && lastSpokenTextRef.current === cleanedText) {
       console.log('🚫 TTS: Cooldown active - only', timeSinceLastSpeak, 'ms since last speak');
       return;
     }
@@ -374,20 +374,25 @@ export default function TextToSpeech({
       return;
     }
 
-    // PRIMARY CHECK: Use messageId if available (most reliable)
-    const isNewMessageId = messageId && messageId !== lastSpokenMessageIdRef.current;
+    // PRIMARY CHECK: Use messageId if available, fallback to text comparison
+    // FIXED: Make messageId optional - use text comparison as fallback
+    const isNewMessageId = messageId ? (messageId !== lastSpokenMessageIdRef.current) : null;
+    const isNewText = cleanedText !== lastSpokenTextRef.current;
+    const isNewMessage = isNewMessageId !== null ? isNewMessageId : isNewText; // Use messageId if available, else text
     const isNotCurrentlySpeaking = !isSpeaking;
     const isNotLocked = !isSpeakingLockedRef.current;
     
     console.log('🔍 TTS: Auto-play effect triggered');
     console.log('   Message ID:', messageId);
     console.log('   Last spoken ID:', lastSpokenMessageIdRef.current);
-    console.log('   Is new message:', isNewMessageId);
+    console.log('   Is new message ID:', isNewMessageId);
+    console.log('   Is new text:', isNewText);
+    console.log('   Is new message (final):', isNewMessage);
     console.log('   Not Speaking:', isNotCurrentlySpeaking);
     console.log('   Not Locked:', isNotLocked);
     
-    // Only play if it's genuinely a new message (rely on messageId primarily)
-    if (isNewMessageId && isNotCurrentlySpeaking && isNotLocked) {
+    // Only play if it's genuinely a new message (use messageId OR text comparison)
+    if (isNewMessage && isNotCurrentlySpeaking && isNotLocked) {
       console.log('✅ TTS: NEW MESSAGE DETECTED - will auto-play');
       
       // Use a small delay to ensure the component is stable
@@ -422,8 +427,14 @@ export default function TextToSpeech({
       };
     } else {
       console.log('🚫 TTS: Skipping auto-play');
-      if (!isNewMessageId) {
-        console.log('   Reason: Same message ID (already spoke this)');
+      if (!isNewMessage) {
+        console.log('   Reason: Not a new message (already spoke this)');
+        if (isNewMessageId === false) {
+          console.log('   - Same message ID detected');
+        }
+        if (!isNewText) {
+          console.log('   - Same text content detected');
+        }
       }
       if (!isNotCurrentlySpeaking) {
         console.log('   Reason: Currently speaking');
