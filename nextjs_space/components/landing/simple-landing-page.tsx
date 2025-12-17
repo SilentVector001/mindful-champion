@@ -1,14 +1,34 @@
 'use client';
 
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { ArrowRight, Upload, Brain, TrendingUp, Target, Trophy, Zap, Video, Menu, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Upload, Brain, TrendingUp, Target, Trophy, Zap, Video, Menu, X, Play, Sparkles, Eye, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import WelcomeVideoCarousel from '@/components/landing/welcome-video-carousel';
 
+// Animated headline words that cycle
+const heroWords = ['Analyzed', 'Perfected', 'Elevated', 'Mastered'];
+
+// Floating stat cards for visual intrigue
+const floatingStats = [
+  { label: 'Shot Accuracy', value: '94%', color: 'from-emerald-500 to-teal-500', position: 'top-32 left-8 md:left-16' },
+  { label: 'Technique Score', value: '8.7', color: 'from-blue-500 to-cyan-500', position: 'top-48 right-8 md:right-20' },
+  { label: 'Movement', value: 'A+', color: 'from-purple-500 to-pink-500', position: 'bottom-40 left-12 md:left-24' },
+  { label: 'Improvement', value: '+23%', color: 'from-orange-500 to-red-500', position: 'bottom-32 right-12 md:right-16' },
+];
+
 export default function SimpleLandingPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [currentWordIndex, setCurrentWordIndex] = useState(0);
+
+  // Cycle through hero words
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentWordIndex((prev) => (prev + 1) % heroWords.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
@@ -67,55 +87,164 @@ export default function SimpleLandingPage() {
         )}
       </nav>
 
-      {/* HERO SECTION - Full Viewport Impact */}
-      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+      {/* HERO SECTION - Maximum Impact */}
+      <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20">
+        {/* Animated Background Gradient */}
+        <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900" />
+        
+        {/* Animated Grid Pattern */}
+        <div className="absolute inset-0 opacity-20">
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'linear-gradient(rgba(16, 185, 129, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(16, 185, 129, 0.1) 1px, transparent 1px)',
+            backgroundSize: '60px 60px'
+          }} />
+        </div>
+        
+        {/* Glowing Orb Effects */}
+        <motion.div 
+          className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/20 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1, 1.2, 1],
+            opacity: [0.3, 0.5, 0.3],
+          }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+        />
+        <motion.div 
+          className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-teal-500/20 rounded-full blur-3xl"
+          animate={{ 
+            scale: [1.2, 1, 1.2],
+            opacity: [0.4, 0.2, 0.4],
+          }}
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+        />
+
+        {/* Floating AI Analysis Stats (Desktop) */}
+        {floatingStats.map((stat, idx) => (
+          <motion.div
+            key={idx}
+            className={`hidden lg:block absolute ${stat.position} z-20`}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ 
+              opacity: 1, 
+              scale: 1,
+              y: [0, -10, 0],
+            }}
+            transition={{ 
+              duration: 0.8, 
+              delay: 1 + idx * 0.2,
+              y: { duration: 3 + idx * 0.5, repeat: Infinity, ease: "easeInOut" }
+            }}
+          >
+            <div className={`bg-gradient-to-br ${stat.color} p-[2px] rounded-xl shadow-lg`}>
+              <div className="bg-slate-900/90 backdrop-blur-md rounded-xl px-4 py-3">
+                <div className="text-xs text-gray-400 uppercase tracking-wider">{stat.label}</div>
+                <div className="text-2xl font-black text-white">{stat.value}</div>
+              </div>
+            </div>
+          </motion.div>
+        ))}
+
         {/* Hero Content */}
-        <div className="relative z-10 max-w-5xl mx-auto px-6 text-center">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 text-center">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            {/* Badge */}
-            <div className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/30 backdrop-blur-sm px-4 py-2 rounded-full mb-8">
-              <Zap className="w-4 h-4 text-emerald-400" />
-              <span className="text-emerald-400 text-sm font-semibold">AI-Powered Pickleball Training</span>
-            </div>
+            {/* Badge with Glow */}
+            <motion.div 
+              className="inline-flex items-center gap-2 bg-emerald-500/20 border border-emerald-500/40 backdrop-blur-sm px-5 py-2.5 rounded-full mb-8 shadow-lg shadow-emerald-500/20"
+              animate={{ boxShadow: ['0 0 20px rgba(16, 185, 129, 0.2)', '0 0 40px rgba(16, 185, 129, 0.4)', '0 0 20px rgba(16, 185, 129, 0.2)'] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Sparkles className="w-4 h-4 text-emerald-400" />
+              <span className="text-emerald-400 text-sm font-bold tracking-wide">AI-Powered Pickleball Coaching</span>
+            </motion.div>
 
-            {/* Main Headline - HUGE & BOLD */}
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-6 leading-[1.1] tracking-tight">
-              Your Pickleball Game,{' '}
-              <span className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">
-                Elevated by AI
+            {/* Main Headline - Maximum Impact with Animated Word */}
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black text-white mb-8 leading-[1.05] tracking-tight">
+              <span className="block mb-2">Every Shot.</span>
+              <span className="relative inline-block">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={currentWordIndex}
+                    initial={{ opacity: 0, y: 30, rotateX: -90 }}
+                    animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                    exit={{ opacity: 0, y: -30, rotateX: 90 }}
+                    transition={{ duration: 0.5 }}
+                    className="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent inline-block"
+                  >
+                    {heroWords[currentWordIndex]}.
+                  </motion.span>
+                </AnimatePresence>
               </span>
             </h1>
 
-            {/* Challenge Subheadline */}
-            <p className="text-xl md:text-2xl lg:text-3xl text-gray-300 mb-4 font-medium">
-              Don't miss out on the tools that make champions
-            </p>
+            {/* Subheadline - Curiosity Driven */}
+            <motion.p 
+              className="text-xl md:text-2xl lg:text-3xl text-gray-200 mb-4 font-medium"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+            >
+              See what the <span className="text-emerald-400 font-bold">pros</span> see. Train like a <span className="text-emerald-400 font-bold">champion</span>.
+            </motion.p>
 
-            {/* Support Text */}
-            <p className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto">
-              Transform your game with AI analysis, personalized coaching, and instant feedback
-            </p>
+            {/* Support Text with Eye Icon */}
+            <motion.div 
+              className="flex items-center justify-center gap-3 text-base md:text-lg text-gray-400 mb-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6, duration: 0.8 }}
+            >
+              <Eye className="w-5 h-5 text-emerald-500" />
+              <p>Coach Kai's AI detects every move, scores your technique, and shows exactly how to improve</p>
+            </motion.div>
 
-            {/* Primary CTA */}
+            {/* Primary CTA with Pulse Effect */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="relative inline-block"
             >
+              {/* Pulse Ring */}
+              <motion.div
+                className="absolute inset-0 bg-emerald-500/30 rounded-xl"
+                animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0, 0.5] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              />
+              
               <Link href="/auth/signup">
                 <Button 
                   size="lg" 
-                  className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl shadow-emerald-500/50 px-12 py-7 text-xl font-bold rounded-xl hover:scale-105 transition-transform"
+                  className="relative bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white shadow-2xl shadow-emerald-500/50 px-12 py-7 text-xl font-bold rounded-xl hover:scale-105 transition-transform"
                 >
+                  <Play className="w-6 h-6 mr-3 fill-current" />
                   Start Your Free Analysis
                   <ArrowRight className="w-6 h-6 ml-3" />
                 </Button>
               </Link>
               <p className="text-sm text-gray-500 mt-4">No credit card required • 7-day free trial</p>
+            </motion.div>
+
+            {/* Quick Stats Row */}
+            <motion.div 
+              className="flex flex-wrap justify-center gap-8 mt-12"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 1.2, duration: 0.8 }}
+            >
+              {[
+                { value: '10K+', label: 'Players' },
+                { value: '50K+', label: 'Videos Analyzed' },
+                { value: '95%', label: 'Accuracy' },
+              ].map((stat, idx) => (
+                <div key={idx} className="text-center">
+                  <div className="text-2xl md:text-3xl font-black text-emerald-400">{stat.value}</div>
+                  <div className="text-xs text-gray-500 uppercase tracking-wider">{stat.label}</div>
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </div>
@@ -124,16 +253,16 @@ export default function SimpleLandingPage() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
+          transition={{ duration: 1, delay: 1.5 }}
           className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10"
         >
           <div className="flex flex-col items-center gap-2 text-gray-400">
-            <span className="text-xs uppercase tracking-wider">See how it works</span>
+            <span className="text-xs uppercase tracking-wider font-medium">Meet Coach Kai</span>
             <motion.div
               animate={{ y: [0, 8, 0] }}
               transition={{ duration: 1.5, repeat: Infinity }}
             >
-              <ArrowRight className="w-5 h-5 rotate-90" />
+              <ChevronDown className="w-6 h-6 text-emerald-400" />
             </motion.div>
           </div>
         </motion.div>
