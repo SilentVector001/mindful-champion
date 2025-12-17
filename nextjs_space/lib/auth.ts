@@ -43,7 +43,12 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        console.log('[AUTH] Authorize called with email:', credentials?.email);
+        
+        if (!credentials?.email || !credentials?.password) {
+          console.log('[AUTH] Missing credentials');
+          return null;
+        }
 
         // Use case-insensitive email lookup
         const user = await prisma.user.findFirst({
@@ -55,7 +60,12 @@ export const authOptions: NextAuthOptions = {
           }
         })
 
-        if (!user || !user.password) return null
+        console.log('[AUTH] User found:', !!user, 'Has password:', !!user?.password);
+        
+        if (!user || !user.password) {
+          console.log('[AUTH] User not found or no password');
+          return null;
+        }
 
         // Check if account is locked
         const locked = await isAccountLocked(user.id)
@@ -74,7 +84,10 @@ export const authOptions: NextAuthOptions = {
           user.password
         )
 
+        console.log('[AUTH] Password valid:', isPasswordValid);
+        
         if (!isPasswordValid) {
+          console.log('[AUTH] Password mismatch for user:', user.email);
           // Failed login will be tracked in the signin callback
           return null
         }
@@ -95,6 +108,8 @@ export const authOptions: NextAuthOptions = {
           severity: SecurityEventSeverity.LOW,
           description: `User logged in successfully`,
         })
+
+        console.log('[AUTH] Login successful for user:', user.email);
 
         return {
           id: user.id,

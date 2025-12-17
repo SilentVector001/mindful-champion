@@ -1,0 +1,305 @@
+2025-12-17 21:30:15,922 - INFO - ============================================================
+2025-12-17 21:30:15,922 - INFO - Starting Tournament Data Updater
+2025-12-17 21:30:15,922 - INFO - ============================================================
+2025-12-17 21:30:16,041 - INFO - Successfully connected to database
+2025-12-17 21:30:16,041 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:30:16,126 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://www.ppatour.com/tournaments/
+2025-12-17 21:30:16,126 - INFO - Fetching MLP tournaments...
+2025-12-17 21:30:17,710 - ERROR - Error fetching MLP tournaments: 404 Client Error: Not Found for url: https://majorleaguepickleball.co/schedule
+2025-12-17 21:30:17,711 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:30:17,902 - ERROR - Error fetching APP tournaments: 404 Client Error: Not Found for url: https://www.theapp.global/tournaments
+2025-12-17 21:30:17,902 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:30:18,052 - INFO - Fetched 0 tournaments from USA Pickleball
+2025-12-17 21:30:18,052 - INFO - Total tournaments fetched: 0
+2025-12-17 21:30:18,052 - WARNING - No tournaments fetched from any source
+2025-12-17 21:30:18,052 - INFO - ============================================================
+2025-12-17 21:30:18,052 - INFO - Tournament Update Summary:
+2025-12-17 21:30:18,052 - INFO -   Fetched: 0
+2025-12-17 21:30:18,052 - INFO -   Created: 0
+2025-12-17 21:30:18,052 - INFO -   Updated: 0
+2025-12-17 21:30:18,052 - INFO -   Errors: 3
+2025-12-17 21:30:18,052 - INFO - ============================================================
+2025-12-17 21:30:18,052 - INFO - Database connection closed
+2025-12-17 21:32:01,815 - INFO - ============================================================
+2025-12-17 21:32:01,816 - INFO - Starting Tournament Data Updater
+2025-12-17 21:32:01,816 - INFO - ============================================================
+2025-12-17 21:32:01,830 - INFO - Successfully connected to database
+2025-12-17 21:32:01,830 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:32:01,863 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-17 21:32:01,863 - INFO - Fetching MLP tournaments...
+2025-12-17 21:32:01,863 - INFO - Fetched 6 tournaments from MLP
+2025-12-17 21:32:01,863 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:32:01,863 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-17 21:32:01,863 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:32:01,863 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-17 21:32:01,863 - INFO - Total tournaments fetched: 14
+2025-12-17 21:32:01,868 - ERROR - Error updating tournament MLP Orlando: column "organization" does not exist
+LINE 3: ...                   WHERE name = 'MLP Orlando' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,869 - ERROR - Error updating tournament MLP Columbus: column "organization" does not exist
+LINE 3: ...                  WHERE name = 'MLP Columbus' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,870 - ERROR - Error updating tournament MLP Austin: column "organization" does not exist
+LINE 3:                     WHERE name = 'MLP Austin' AND organizati...
+                                                          ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,871 - ERROR - Error updating tournament MLP Phoenix: column "organization" does not exist
+LINE 3: ...                   WHERE name = 'MLP Phoenix' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,872 - ERROR - Error updating tournament MLP Daytona Beach: column "organization" does not exist
+LINE 3: ...             WHERE name = 'MLP Daytona Beach' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,872 - ERROR - Error updating tournament MLP Cup: column "organization" does not exist
+LINE 3:                     WHERE name = 'MLP Cup' AND organization ...
+                                                       ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,873 - ERROR - Error updating tournament 2025 GEICO APP Tour Championships: column "organization" does not exist
+LINE 3: ...RE name = '2025 GEICO APP Tour Championships' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,874 - ERROR - Error updating tournament 2026 APP Daytona Beach Open: column "organization" does not exist
+LINE 3: ...   WHERE name = '2026 APP Daytona Beach Open' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,875 - ERROR - Error updating tournament 2026 APP Fort Lauderdale Open: column "organization" does not exist
+LINE 3: ... WHERE name = '2026 APP Fort Lauderdale Open' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,876 - ERROR - Error updating tournament 2026 Humana APP Louisville Open: column "organization" does not exist
+LINE 3: ...HERE name = '2026 Humana APP Louisville Open' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,877 - ERROR - Error updating tournament USA Pickleball National Championships: column "organization" does not exist
+LINE 3: ...ame = 'USA Pickleball National Championships' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,877 - ERROR - Error updating tournament US Open Pickleball Championships: column "organization" does not exist
+LINE 3: ...ERE name = 'US Open Pickleball Championships' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,878 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Colorado Springs: column "organization" does not exist
+LINE 3: ... Pickleball Golden Ticket - Colorado Springs' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,879 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Seattle: column "organization" does not exist
+LINE 3: ...me = 'USA Pickleball Golden Ticket - Seattle' AND organizati...
+                                                             ^
+HINT:  Perhaps you meant to reference the column "PickleballEvent.organizationId".
+
+2025-12-17 21:32:01,879 - INFO - ============================================================
+2025-12-17 21:32:01,879 - INFO - Tournament Update Summary:
+2025-12-17 21:32:01,879 - INFO -   Fetched: 14
+2025-12-17 21:32:01,879 - INFO -   Created: 0
+2025-12-17 21:32:01,879 - INFO -   Updated: 0
+2025-12-17 21:32:01,879 - INFO -   Errors: 15
+2025-12-17 21:32:01,879 - INFO - ============================================================
+2025-12-17 21:32:01,880 - INFO - Database connection closed
+2025-12-17 21:32:26,597 - INFO - ============================================================
+2025-12-17 21:32:26,597 - INFO - Starting Tournament Data Updater
+2025-12-17 21:32:26,597 - INFO - ============================================================
+2025-12-17 21:32:26,609 - INFO - Successfully connected to database
+2025-12-17 21:32:26,609 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:32:26,637 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-17 21:32:26,638 - INFO - Fetching MLP tournaments...
+2025-12-17 21:32:26,638 - INFO - Fetched 6 tournaments from MLP
+2025-12-17 21:32:26,638 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:32:26,638 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-17 21:32:26,638 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:32:26,638 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-17 21:32:26,638 - INFO - Total tournaments fetched: 14
+2025-12-17 21:32:26,642 - ERROR - Error updating tournament MLP Orlando: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Orlando, null, null, 2025-12-17 21:32:26.64, null, null, MLP, Orlando, FL, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:26.675, null).
+
+2025-12-17 21:32:26,643 - ERROR - Error updating tournament MLP Columbus: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Columbus, null, null, 2025-12-17 21:32:26.643, null, null, MLP, Columbus, OH, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:26.68, null).
+
+2025-12-17 21:32:26,645 - ERROR - Error updating tournament MLP Austin: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Austin, null, null, 2025-12-17 21:32:26.645, null, null, MLP, Austin, TX, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:26.681, null).
+
+2025-12-17 21:32:26,646 - ERROR - Error updating tournament MLP Phoenix: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Phoenix, null, null, 2025-12-17 21:32:26.646, null, null, MLP, Phoenix, AZ, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:26.682, null).
+
+2025-12-17 21:32:26,647 - ERROR - Error updating tournament MLP Daytona Beach: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Daytona Beach, null, null, 2025-12-17 21:32:26.647, null, null, MLP, Daytona Beach, FL, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:26.683, null).
+
+2025-12-17 21:32:26,648 - ERROR - Error updating tournament MLP Cup: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, MLP Cup, null, null, 2025-12-17 21:32:26.648, null, null, MLP, Dallas, TX, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/mlp-cup/, null, f, 0, 0, 2025-12-17 21:32:26.684, null).
+
+2025-12-17 21:32:26,649 - ERROR - Error updating tournament 2025 GEICO APP Tour Championships: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, 2025 GEICO APP Tour Championships, null, null, 2025-12-17 21:32:26.649, null, null, APP Tour, Fort Lauderdale, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:26.686, null).
+
+2025-12-17 21:32:26,650 - ERROR - Error updating tournament 2026 APP Daytona Beach Open: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, 2026 APP Daytona Beach Open, null, null, 2025-12-17 21:32:26.651, null, null, APP Tour, Daytona Beach, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:26.687, null).
+
+2025-12-17 21:32:26,652 - ERROR - Error updating tournament 2026 APP Fort Lauderdale Open: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, 2026 APP Fort Lauderdale Open, null, null, 2025-12-17 21:32:26.652, null, null, APP Tour, Fort Lauderdale, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:26.688, null).
+
+2025-12-17 21:32:26,653 - ERROR - Error updating tournament 2026 Humana APP Louisville Open: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, 2026 Humana APP Louisville Open, null, null, 2025-12-17 21:32:26.653, null, null, APP Tour, Louisville, KY, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:26.689, null).
+
+2025-12-17 21:32:26,655 - INFO - Updated tournament: USA Pickleball National Championships
+2025-12-17 21:32:26,657 - ERROR - Error updating tournament US Open Pickleball Championships: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, US Open Pickleball Championships, null, null, 2025-12-17 21:32:26.657, null, null, USA Pickleball, Naples, FL, null, null, null, null, null, null, null, f, f, https://www.usopenpickleball.com/, null, f, 0, 0, 2025-12-17 21:32:26.693, null).
+
+2025-12-17 21:32:26,658 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Colorado Springs: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, USA Pickleball Golden Ticket - Colorado Springs, null, null, 2025-12-17 21:32:26.658, null, null, USA Pickleball, Colorado Springs, CO, null, null, null, null, null, null, null, f, f, https://usapickleball.org/tournaments/, null, f, 0, 0, 2025-12-17 21:32:26.694, null).
+
+2025-12-17 21:32:26,659 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Seattle: null value in column "id" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (null, USA Pickleball Golden Ticket - Seattle, null, null, 2025-12-17 21:32:26.659, null, null, USA Pickleball, Seattle, WA, null, null, null, null, null, null, null, f, f, https://usapickleball.org/tournaments/, null, f, 0, 0, 2025-12-17 21:32:26.695, null).
+
+2025-12-17 21:32:26,659 - INFO - ============================================================
+2025-12-17 21:32:26,659 - INFO - Tournament Update Summary:
+2025-12-17 21:32:26,659 - INFO -   Fetched: 14
+2025-12-17 21:32:26,659 - INFO -   Created: 0
+2025-12-17 21:32:26,659 - INFO -   Updated: 1
+2025-12-17 21:32:26,659 - INFO -   Errors: 14
+2025-12-17 21:32:26,659 - INFO - ============================================================
+2025-12-17 21:32:26,660 - INFO - Database connection closed
+2025-12-17 21:32:40,109 - INFO - ============================================================
+2025-12-17 21:32:40,109 - INFO - Starting Tournament Data Updater
+2025-12-17 21:32:40,109 - INFO - ============================================================
+2025-12-17 21:32:40,122 - INFO - Successfully connected to database
+2025-12-17 21:32:40,122 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:32:40,166 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-17 21:32:40,166 - INFO - Fetching MLP tournaments...
+2025-12-17 21:32:40,166 - INFO - Fetched 6 tournaments from MLP
+2025-12-17 21:32:40,166 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:32:40,166 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-17 21:32:40,166 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:32:40,166 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-17 21:32:40,167 - INFO - Total tournaments fetched: 14
+2025-12-17 21:32:40,171 - ERROR - Error updating tournament MLP Orlando: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (ckrt8eky5b496kmuyrsqk8uke, MLP Orlando, null, null, 2025-12-17 21:32:40.169, null, null, MLP, Orlando, FL, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:40.204, null).
+
+2025-12-17 21:32:40,172 - ERROR - Error updating tournament MLP Columbus: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (ca3wuzfwtwb7fq0t3hoa8kbkq, MLP Columbus, null, null, 2025-12-17 21:32:40.172, null, null, MLP, Columbus, OH, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:40.209, null).
+
+2025-12-17 21:32:40,173 - ERROR - Error updating tournament MLP Austin: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (cbgp86v27t6xxg34ks55y1oha, MLP Austin, null, null, 2025-12-17 21:32:40.174, null, null, MLP, Austin, TX, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:40.21, null).
+
+2025-12-17 21:32:40,175 - ERROR - Error updating tournament MLP Phoenix: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (clxd3hr8hbe7jmx8i3t75tf4o, MLP Phoenix, null, null, 2025-12-17 21:32:40.175, null, null, MLP, Phoenix, AZ, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:40.212, null).
+
+2025-12-17 21:32:40,176 - ERROR - Error updating tournament MLP Daytona Beach: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (c7lerbwqnul66gfyoeezhopma, MLP Daytona Beach, null, null, 2025-12-17 21:32:40.176, null, null, MLP, Daytona Beach, FL, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/, null, f, 0, 0, 2025-12-17 21:32:40.213, null).
+
+2025-12-17 21:32:40,177 - ERROR - Error updating tournament MLP Cup: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (czswikzlvo4c0yyood0t4ctfv, MLP Cup, null, null, 2025-12-17 21:32:40.177, null, null, MLP, Dallas, TX, null, null, null, null, null, null, https://pickleballtv.com, f, f, https://majorleaguepickleball.co/events-2025/mlp-cup/, null, f, 0, 0, 2025-12-17 21:32:40.214, null).
+
+2025-12-17 21:32:40,178 - ERROR - Error updating tournament 2025 GEICO APP Tour Championships: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (chzn3gisyug4q114eb6nosdi5, 2025 GEICO APP Tour Championships, null, null, 2025-12-17 21:32:40.178, null, null, APP Tour, Fort Lauderdale, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:40.215, null).
+
+2025-12-17 21:32:40,179 - ERROR - Error updating tournament 2026 APP Daytona Beach Open: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (cru0epm7fso3owt61vb70avi8, 2026 APP Daytona Beach Open, null, null, 2025-12-17 21:32:40.18, null, null, APP Tour, Daytona Beach, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:40.216, null).
+
+2025-12-17 21:32:40,181 - ERROR - Error updating tournament 2026 APP Fort Lauderdale Open: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (cqafhjf0rqerjb2nugnltldim, 2026 APP Fort Lauderdale Open, null, null, 2025-12-17 21:32:40.181, null, null, APP Tour, Fort Lauderdale, FL, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:40.217, null).
+
+2025-12-17 21:32:40,182 - ERROR - Error updating tournament 2026 Humana APP Louisville Open: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (cmeik1yrkoeactmoarrw8hiyf, 2026 Humana APP Louisville Open, null, null, 2025-12-17 21:32:40.182, null, null, APP Tour, Louisville, KY, null, null, null, null, null, null, null, f, f, https://www.theapp.global/tour, null, f, 0, 0, 2025-12-17 21:32:40.219, null).
+
+2025-12-17 21:32:40,183 - INFO - Updated tournament: USA Pickleball National Championships
+2025-12-17 21:32:40,185 - ERROR - Error updating tournament US Open Pickleball Championships: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (c3rs1d7dcf402czexzq6hah2k, US Open Pickleball Championships, null, null, 2025-12-17 21:32:40.185, null, null, USA Pickleball, Naples, FL, null, null, null, null, null, null, null, f, f, https://www.usopenpickleball.com/, null, f, 0, 0, 2025-12-17 21:32:40.222, null).
+
+2025-12-17 21:32:40,187 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Colorado Springs: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (c8uf3vbthklr0ehaf3s75pqet, USA Pickleball Golden Ticket - Colorado Springs, null, null, 2025-12-17 21:32:40.187, null, null, USA Pickleball, Colorado Springs, CO, null, null, null, null, null, null, null, f, f, https://usapickleball.org/tournaments/, null, f, 0, 0, 2025-12-17 21:32:40.223, null).
+
+2025-12-17 21:32:40,188 - ERROR - Error updating tournament USA Pickleball Golden Ticket - Seattle: null value in column "updatedAt" of relation "PickleballEvent" violates not-null constraint
+DETAIL:  Failing row contains (cs9upye41ujjhe60imjmx7hhx, USA Pickleball Golden Ticket - Seattle, null, null, 2025-12-17 21:32:40.188, null, null, USA Pickleball, Seattle, WA, null, null, null, null, null, null, null, f, f, https://usapickleball.org/tournaments/, null, f, 0, 0, 2025-12-17 21:32:40.225, null).
+
+2025-12-17 21:32:40,188 - INFO - ============================================================
+2025-12-17 21:32:40,188 - INFO - Tournament Update Summary:
+2025-12-17 21:32:40,188 - INFO -   Fetched: 14
+2025-12-17 21:32:40,188 - INFO -   Created: 0
+2025-12-17 21:32:40,188 - INFO -   Updated: 1
+2025-12-17 21:32:40,188 - INFO -   Errors: 14
+2025-12-17 21:32:40,188 - INFO - ============================================================
+2025-12-17 21:32:40,188 - INFO - Database connection closed
+2025-12-17 21:32:52,426 - INFO - ============================================================
+2025-12-17 21:32:52,426 - INFO - Starting Tournament Data Updater
+2025-12-17 21:32:52,426 - INFO - ============================================================
+2025-12-17 21:32:52,438 - INFO - Successfully connected to database
+2025-12-17 21:32:52,439 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:32:52,474 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-17 21:32:52,474 - INFO - Fetching MLP tournaments...
+2025-12-17 21:32:52,474 - INFO - Fetched 6 tournaments from MLP
+2025-12-17 21:32:52,474 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:32:52,474 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-17 21:32:52,474 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:32:52,474 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-17 21:32:52,474 - INFO - Total tournaments fetched: 14
+2025-12-17 21:32:52,479 - INFO - Created tournament: MLP Orlando
+2025-12-17 21:32:52,482 - INFO - Created tournament: MLP Columbus
+2025-12-17 21:32:52,484 - INFO - Created tournament: MLP Austin
+2025-12-17 21:32:52,486 - INFO - Created tournament: MLP Phoenix
+2025-12-17 21:32:52,488 - INFO - Created tournament: MLP Daytona Beach
+2025-12-17 21:32:52,491 - INFO - Created tournament: MLP Cup
+2025-12-17 21:32:52,493 - INFO - Created tournament: 2025 GEICO APP Tour Championships
+2025-12-17 21:32:52,495 - INFO - Created tournament: 2026 APP Daytona Beach Open
+2025-12-17 21:32:52,497 - INFO - Created tournament: 2026 APP Fort Lauderdale Open
+2025-12-17 21:32:52,499 - INFO - Created tournament: 2026 Humana APP Louisville Open
+2025-12-17 21:32:52,501 - INFO - Updated tournament: USA Pickleball National Championships
+2025-12-17 21:32:52,504 - INFO - Created tournament: US Open Pickleball Championships
+2025-12-17 21:32:52,506 - INFO - Created tournament: USA Pickleball Golden Ticket - Colorado Springs
+2025-12-17 21:32:52,508 - INFO - Created tournament: USA Pickleball Golden Ticket - Seattle
+2025-12-17 21:32:52,509 - INFO - ============================================================
+2025-12-17 21:32:52,509 - INFO - Tournament Update Summary:
+2025-12-17 21:32:52,509 - INFO -   Fetched: 14
+2025-12-17 21:32:52,509 - INFO -   Created: 13
+2025-12-17 21:32:52,509 - INFO -   Updated: 1
+2025-12-17 21:32:52,509 - INFO -   Errors: 1
+2025-12-17 21:32:52,509 - INFO - ============================================================
+2025-12-17 21:32:52,509 - INFO - Database connection closed
+2025-12-17 21:34:39,676 - INFO - ============================================================
+2025-12-17 21:34:39,676 - INFO - Starting Tournament Data Updater
+2025-12-17 21:34:39,676 - INFO - ============================================================
+2025-12-17 21:34:39,688 - INFO - Successfully connected to database
+2025-12-17 21:34:39,688 - INFO - Fetching PPA Tour tournaments...
+2025-12-17 21:34:39,726 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-17 21:34:39,726 - INFO - Fetching MLP tournaments...
+2025-12-17 21:34:39,726 - INFO - Fetched 6 tournaments from MLP
+2025-12-17 21:34:39,726 - INFO - Fetching APP Tour tournaments...
+2025-12-17 21:34:39,726 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-17 21:34:39,726 - INFO - Fetching USA Pickleball tournaments...
+2025-12-17 21:34:39,726 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-17 21:34:39,726 - INFO - Total tournaments fetched: 14
+2025-12-17 21:34:39,729 - INFO - Updated tournament: MLP Orlando
+2025-12-17 21:34:39,731 - INFO - Updated tournament: MLP Columbus
+2025-12-17 21:34:39,733 - INFO - Updated tournament: MLP Austin
+2025-12-17 21:34:39,735 - INFO - Updated tournament: MLP Phoenix
+2025-12-17 21:34:39,737 - INFO - Updated tournament: MLP Daytona Beach
+2025-12-17 21:34:39,739 - INFO - Updated tournament: MLP Cup
+2025-12-17 21:34:39,742 - INFO - Updated tournament: 2025 GEICO APP Tour Championships
+2025-12-17 21:34:39,744 - INFO - Updated tournament: 2026 APP Daytona Beach Open
+2025-12-17 21:34:39,746 - INFO - Updated tournament: 2026 APP Fort Lauderdale Open
+2025-12-17 21:34:39,748 - INFO - Updated tournament: 2026 Humana APP Louisville Open
+2025-12-17 21:34:39,750 - INFO - Updated tournament: USA Pickleball National Championships
+2025-12-17 21:34:39,752 - INFO - Updated tournament: US Open Pickleball Championships
+2025-12-17 21:34:39,754 - INFO - Updated tournament: USA Pickleball Golden Ticket - Colorado Springs
+2025-12-17 21:34:39,756 - INFO - Updated tournament: USA Pickleball Golden Ticket - Seattle
+2025-12-17 21:34:39,758 - INFO - ============================================================
+2025-12-17 21:34:39,758 - INFO - Tournament Update Summary:
+2025-12-17 21:34:39,758 - INFO -   Fetched: 14
+2025-12-17 21:34:39,758 - INFO -   Created: 0
+2025-12-17 21:34:39,758 - INFO -   Updated: 14
+2025-12-17 21:34:39,758 - INFO -   Errors: 1
+2025-12-17 21:34:39,758 - INFO - ============================================================
+2025-12-17 21:34:39,758 - INFO - Database connection closed
