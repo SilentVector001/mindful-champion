@@ -27,12 +27,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
-// Real pickleball/sports images from Unsplash
+// REAL PICKLEBALL images from Unsplash
 const TOURNAMENT_IMAGES = [
-  "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&q=80",
-  "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80",
-  "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80",
-  "https://images.unsplash.com/photo-1546519638-68e109498ffc?w=800&q=80",
+  "https://images.unsplash.com/photo-1693142519367-e8eb86d2bb08?w=800&q=80", // Pickleball court
+  "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80", // Pickleball player
+  "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80", // Pickleball game
+  "https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=800&q=80", // Pickleball paddles
 ]
 
 // Featured championship events - real tournaments to display
@@ -41,34 +41,34 @@ const FEATURED_CHAMPIONSHIPS = [
     id: "ppa-masters-2025",
     name: "PPA Masters Championship",
     location: "Las Vegas, NV",
-    startDate: "2025-02-15",
-    endDate: "2025-02-18",
+    startDate: "2025-02-14",
+    endDate: "2025-02-17",
     prizePool: 250000,
     type: "grand-slam",
     registrationUrl: "https://ppatour.com/schedule/",
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80"
   },
   {
     id: "app-chicago-2025",
     name: "APP Chicago Open",
     location: "Chicago, IL",
-    startDate: "2025-03-08",
-    endDate: "2025-03-10",
+    startDate: "2025-03-07",
+    endDate: "2025-03-09",
     prizePool: 175000,
     type: "grand-slam",
     registrationUrl: "https://www.theapp.global/schedule",
-    image: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1693142518230-f049c9fc1ad2?w=800&q=80"
   },
   {
     id: "usap-nationals-2025",
     name: "USA Pickleball Nationals",
     location: "Indian Wells, CA",
-    startDate: "2025-04-05",
-    endDate: "2025-04-12",
+    startDate: "2025-04-04",
+    endDate: "2025-04-11",
     prizePool: 300000,
     type: "grand-slam",
     registrationUrl: "https://usapickleball.org/events/",
-    image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80"
   }
 ]
 
@@ -81,7 +81,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-01-27",
     prizePool: 75000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1693142519367-e8eb86d2bb08?w=800&q=80"
   },
   {
     id: "midwest-open",
@@ -91,7 +91,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-02-03",
     prizePool: 65000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=800&q=80"
   },
   {
     id: "southwest-championship",
@@ -101,7 +101,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-02-16",
     prizePool: 80000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1693142517898-2f986215e412?w=800&q=80"
   },
   {
     id: "northeast-classic",
@@ -111,7 +111,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-03-03",
     prizePool: 55000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1710772099352-f8fbb7b30977?w=800&q=80"
   }
 ]
 

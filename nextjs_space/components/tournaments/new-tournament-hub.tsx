@@ -455,7 +455,11 @@ export function TournamentHub() {
                 <Card className="bg-white/5 border-white/10 overflow-hidden group hover:border-champion-green/50 transition-all">
                   <div className="relative h-48">
                     <img
-                      src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800"
+                      src={[
+                        "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80",
+                        "https://images.unsplash.com/photo-1693142518230-f049c9fc1ad2?w=800&q=80",
+                        "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80"
+                      ][index % 3]}
                       alt={tournament?.name || 'Tournament'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
