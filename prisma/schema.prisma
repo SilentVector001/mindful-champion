@@ -1,6 +1,7 @@
 generator client {
     provider = "prisma-client-js"
     binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "rhel-openssl-3.0.x"]
+    output = "../node_modules/.prisma/client"
 }
 
 datasource db {
@@ -119,6 +120,7 @@ model User {
   customPrograms               CustomProgram[]
   emailNotifications           EmailNotification[]
   goals                        Goal[]
+  healthData                   HealthData[]
   matches                      Match[]
   mentalSessions               MentalSession[]
   notificationHistory          NotificationHistory[]           @relation("UserNotificationHistory")
@@ -170,7 +172,9 @@ model User {
   videoAnalyses                VideoAnalysis[]
   videoBookmarks               VideoBookmark[]
   clips                        VideoClip[]
+  videoPlaylists               VideoPlaylist[]
   videoSuggestions             VideoSuggestion[]
+  wearableDevices              WearableDevice[]
 }
 
 model VerificationToken {
@@ -601,6 +605,7 @@ model TrainingVideo {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   customPrograms    Json?
+  playlistVideos    PlaylistVideo[]
   programVideos     ProgramVideo[]
   userVideoProgress UserVideoProgress[]
   ratings           UserVideoRating[]
@@ -1458,31 +1463,29 @@ model RewardRedemption {
 }
 
 model SponsorApplication {
-  id                 String                   @id @default(cuid())
-  companyName        String
-  website            String?
-  email              String
-  phone              String?
-  contactPerson      String
-  industry           String
-  description        String
-  yearsInBusiness    Int?
-  socialMedia        Json?
-  interestedTier     String
-  proposedProducts   Json?
-  marketingGoals     String?
-  targetAudience     String?
-  status             SponsorApplicationStatus @default(PENDING)
-  reviewedAt         DateTime?
-  reviewedBy         String?
-  reviewNotes        String?
-  createdAt          DateTime                 @default(now())
-  updatedAt          DateTime                 @updatedAt
-  emailNotifications EmailNotification[]
+  id               String                   @id @default(cuid())
+  companyName      String
+  website          String?
+  email            String
+  phone            String?
+  contactPerson    String
+  industry         String
+  description      String
+  yearsInBusiness  Int?
+  socialMedia      Json?
+  interestedTier   String
+  proposedProducts Json?
+  marketingGoals   String?
+  targetAudience   String?
+  status           SponsorApplicationStatus @default(PENDING)
+  reviewedAt       DateTime?
+  reviewedBy       String?
+  reviewNotes      String?
+  createdAt        DateTime                 @default(now())
+  updatedAt        DateTime                 @updatedAt
 
   @@index([status])
   @@index([createdAt])
-  @@index([email])
 }
 
 model RewardTier {
@@ -1727,6 +1730,37 @@ model TicketResponse {
   @@index([ticketId])
 }
 
+model VideoPlaylist {
+  id          String          @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean         @default(false)
+  thumbnail   String?
+  videoCount  Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+  videos      PlaylistVideo[]
+  user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model PlaylistVideo {
+  id         String        @id @default(cuid())
+  playlistId String
+  videoId    String
+  order      Int           @default(0)
+  addedAt    DateTime      @default(now())
+  playlist   VideoPlaylist @relation(fields: [playlistId], references: [id], onDelete: Cascade)
+  video      TrainingVideo @relation(fields: [videoId], references: [id], onDelete: Cascade)
+
+  @@unique([playlistId, videoId])
+  @@index([playlistId])
+  @@index([videoId])
+}
+
 model VideoBookmark {
   id        String        @id @default(cuid())
   userId    String
@@ -1839,6 +1873,79 @@ model UserVideoRating {
   @@index([rating])
 }
 
+model WearableDevice {
+  id             String             @id @default(cuid())
+  userId         String
+  deviceType     WearableDeviceType
+  deviceName     String
+  manufacturer   String?
+  model          String?
+  deviceId       String             @unique
+  accessToken    String?
+  refreshToken   String?
+  tokenExpiresAt DateTime?
+  isConnected    Boolean            @default(true)
+  lastSyncedAt   DateTime?
+  syncFrequency  Int                @default(3600)
+  permissions    Json?
+  metadata       Json?
+  connectedAt    DateTime           @default(now())
+  disconnectedAt DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  user           User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([deviceType])
+  @@index([isConnected])
+  @@index([lastSyncedAt])
+}
+
+model HealthData {
+  id           String              @id @default(cuid())
+  userId       String
+  dataType     HealthDataType
+  value        Float
+  unit         String
+  deviceType   WearableDeviceType?
+  sourceDevice String?
+  recordedAt   DateTime
+  createdAt    DateTime            @default(now())
+  metadata     Json?
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([dataType])
+  @@index([recordedAt])
+  @@index([deviceType])
+}
+
+model YouTubeVideo {
+  id           String   @id @default(cuid())
+  videoId      String   @unique
+  title        String
+  description  String?
+  thumbnailUrl String?
+  channelName  String
+  channelId    String?
+  duration     Int?
+  publishedAt  DateTime
+  category     String   @default("Pickleball")
+  tags         Json?
+  viewCount    Int      @default(0)
+  featured     Boolean  @default(false)
+  orderIndex   Int      @default(0)
+  isActive     Boolean  @default(true)
+  embedUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([videoId])
+  @@index([featured])
+  @@index([isActive])
+  @@index([orderIndex])
+  @@index([category])
+}
 
 model PickleballEvent {
   id                String            @id @default(cuid())
@@ -1907,41 +2014,37 @@ model TournamentMatch {
 }
 
 model EmailNotification {
-  id                   String                @id @default(cuid())
-  userId               String?
-  videoAnalysisId      String?
-  sponsorApplicationId String?
-  type                 EmailNotificationType @default(VIDEO_ANALYSIS_COMPLETE)
-  recipientEmail       String
-  recipientName        String?
-  subject              String
-  htmlContent          String                @db.Text
-  textContent          String?               @db.Text
-  status               EmailStatus           @default(PENDING)
-  sentAt               DateTime?
-  deliveredAt          DateTime?
-  openedAt             DateTime?
-  clickedAt            DateTime?
-  failedAt             DateTime?
-  error                String?               @db.Text
-  metadata             Json?
-  resendEmailId        String?
-  retryCount           Int                   @default(0)
-  lastRetryAt          DateTime?
-  createdAt            DateTime              @default(now())
-  updatedAt            DateTime              @updatedAt
-  user                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
-  videoAnalysis        VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
-  sponsorApplication   SponsorApplication?   @relation(fields: [sponsorApplicationId], references: [id], onDelete: Cascade)
+  id              String                @id @default(cuid())
+  userId          String
+  videoAnalysisId String?
+  type            EmailNotificationType @default(VIDEO_ANALYSIS_COMPLETE)
+  recipientEmail  String
+  recipientName   String?
+  subject         String
+  htmlContent     String
+  textContent     String?
+  status          EmailStatus           @default(PENDING)
+  sentAt          DateTime?
+  deliveredAt     DateTime?
+  openedAt        DateTime?
+  clickedAt       DateTime?
+  failedAt        DateTime?
+  error           String?
+  metadata        Json?
+  resendEmailId   String?
+  retryCount      Int                   @default(0)
+  lastRetryAt     DateTime?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  user            User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoAnalysis   VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([videoAnalysisId])
-  @@index([sponsorApplicationId])
   @@index([status])
   @@index([type])
   @@index([sentAt])
   @@index([createdAt])
-  @@index([recipientEmail])
 }
 
 model EmailSettings {
@@ -2451,6 +2554,48 @@ model CoachKaiReminder {
   @@index([nextTrigger])
 }
 
+enum WearableDeviceType {
+  APPLE_WATCH
+  FITBIT
+  GARMIN
+  WHOOP
+  SAMSUNG_HEALTH
+  GOOGLE_FIT
+  OURA_RING
+  POLAR
+  SUUNTO
+  OTHER
+}
+
+enum HealthDataType {
+  HEART_RATE
+  HEART_RATE_VARIABILITY
+  RESTING_HEART_RATE
+  STEPS
+  DISTANCE
+  CALORIES_BURNED
+  ACTIVE_MINUTES
+  SLEEP_DURATION
+  SLEEP_QUALITY
+  SLEEP_DEEP
+  SLEEP_REM
+  SLEEP_LIGHT
+  BLOOD_OXYGEN
+  RESPIRATORY_RATE
+  BODY_TEMPERATURE
+  STRESS_LEVEL
+  RECOVERY_SCORE
+  READINESS_SCORE
+  WORKOUT_DURATION
+  WORKOUT_INTENSITY
+  WORKOUT_CALORIES
+  WEIGHT
+  BODY_FAT_PERCENTAGE
+  BLOOD_PRESSURE_SYSTOLIC
+  BLOOD_PRESSURE_DIASTOLIC
+  BLOOD_GLUCOSE
+}
+
 enum UserRole {
   USER
   ADMIN
@@ -2850,64 +2995,26 @@ enum EmailStatus {
 }
 
 enum EmailNotificationType {
-  // User Journey
+  VIDEO_ANALYSIS_COMPLETE
   WELCOME
-  PASSWORD_RESET
-  EMAIL_VERIFICATION
-  
-  // Subscriptions & Payments
-  SUBSCRIPTION_CONFIRMATION
   SUBSCRIPTION_RENEWAL
-  SUBSCRIPTION_EXPIRING
-  SUBSCRIPTION_CANCELLED
-  PAYMENT_RECEIPT
+  ACHIEVEMENT_UNLOCKED
+  MATCH_REMINDER
+  TRAINING_REMINDER
+  SYSTEM_UPDATE
+  CUSTOM
   TRIAL_EXPIRATION
   TRIAL_WARNING_7_DAYS
   TRIAL_WARNING_3_DAYS
   TRIAL_WARNING_1_DAY
   UPGRADE_REMINDER
-  
-  // Video Analysis
-  VIDEO_ANALYSIS_COMPLETE
-  VIDEO_ANALYSIS_FAILED
-  
-  // Achievements & Rewards
-  ACHIEVEMENT_UNLOCKED
-  REDEMPTION_REQUEST
-  REDEMPTION_APPROVED
-  REDEMPTION_SHIPPED
-  REWARD_TIER_UNLOCK
-  
-  // Tournaments
-  TOURNAMENT_REGISTRATION
-  TOURNAMENT_REMINDER
-  TOURNAMENT_RESULTS
-  
-  // Training & Content
-  MATCH_REMINDER
-  TRAINING_REMINDER
   EVENT_REMINDER
   PODCAST_NEW_EPISODE
   LIVE_STREAM_STARTING
-  
-  // Sponsors & Partners
-  SPONSOR_APPLICATION
-  SPONSOR_APPROVAL
-  SPONSOR_REJECTION
-  SPONSOR_ADMIN_NOTIFICATION
-  SPONSOR_OFFER_CREATED
-  SPONSOR_OFFER_APPROVED
-  
-  // Admin Alerts
-  ADMIN_NEW_USER
-  ADMIN_PAYMENT
-  ADMIN_ERROR
   ADMIN_CUSTOM
   ADMIN_TEST
-  
-  // System
-  SYSTEM_UPDATE
-  CUSTOM
+  SPONSOR_APPLICATION
+  SPONSOR_APPROVAL
 }
 
 enum LiveStreamStatus {
@@ -3081,70 +3188,4 @@ enum NotificationSource {
   SYSTEM
   USER
   COACH_KAI
-}
-// ==========================================
-// MEDIA CENTER MODELS
-// ==========================================
-
-model CommunityStory {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   @db.Text
-  excerpt     String?
-  authorName  String
-  authorEmail String
-  photoUrl    String?
-  location    String?
-  skillLevel  String?
-  category    String?  // "success", "tournament", "training", "community"
-  approved    Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
-  likes       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([approved])
-  @@index([featured])
-  @@index([category])
-}
-
-model PlayerSpotlight {
-  id           String   @id @default(cuid())
-  name         String
-  photoUrl     String
-  ranking      String?
-  rating       Float?
-  bio          String   @db.Text
-  achievements Json?    // Array of achievements
-  stats        Json?    // Win/loss, titles, etc.
-  socialLinks  Json?    // Twitter, Instagram, etc.
-  organization String?  // PPA, APP, MLP
-  featured     Boolean  @default(false)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@index([featured])
-  @@index([displayOrder])
-}
-
-model MediaPhoto {
-  id              String   @id @default(cuid())
-  title           String
-  description     String?
-  url             String
-  category        String   // "tournament", "training", "community", "facilities"
-  tags            Json?    // Array of tags
-  tournamentId    String?
-  uploadedBy      String
-  uploadedByName  String?
-  featured        Boolean  @default(false)
-  views           Int      @default(0)
-  likes           Int      @default(0)
-  createdAt       DateTime @default(now())
-  
-  @@index([category])
-  @@index([featured])
-  @@index([tournamentId])
 }
