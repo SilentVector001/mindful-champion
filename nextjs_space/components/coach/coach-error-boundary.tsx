@@ -34,8 +34,12 @@ export class CoachErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error details
-    console.error('Coach Kai Error Boundary caught an error:', error, errorInfo);
+    // Log error details - COMPREHENSIVE LOGGING FOR DEBUGGING
+    console.error('🚨 Coach Kai Error Boundary caught an error:');
+    console.error('   Error name:', error?.name);
+    console.error('   Error message:', error?.message);
+    console.error('   Error stack:', error?.stack?.slice(0, 500));
+    console.error('   Component stack:', errorInfo?.componentStack?.slice(0, 500));
     
     // Check if it's a microphone-related error
     const isMicrophoneError = 
@@ -46,10 +50,16 @@ export class CoachErrorBoundary extends Component<Props, State> {
       error.name === 'NotFoundError' ||
       error.name === 'NotAllowedError';
 
+    // Check for Safari-specific errors
+    const isSafariError = 
+      error.message?.includes('AbortError') ||
+      error.message?.includes('The operation was aborted') ||
+      error.message?.includes('User denied access');
+
     this.setState({
       error,
       errorInfo,
-      fallbackMode: isMicrophoneError ? 'text-only' : 'full'
+      fallbackMode: (isMicrophoneError || isSafariError) ? 'text-only' : 'full'
     });
   }
 
@@ -135,7 +145,7 @@ export class CoachErrorBoundary extends Component<Props, State> {
         );
       }
 
-      // For non-microphone errors, show a generic error
+      // For non-microphone errors, show a generic error with more options
       return (
         <Card className="p-6 bg-gradient-to-br from-red-50 to-rose-50 dark:from-red-950/20 dark:to-rose-950/20 border-red-200 dark:border-red-800">
           <div className="flex items-start gap-4">
@@ -154,7 +164,7 @@ export class CoachErrorBoundary extends Component<Props, State> {
                 </p>
               </div>
               
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Button
                   onClick={this.handleReset}
                   variant="outline"
@@ -164,15 +174,24 @@ export class CoachErrorBoundary extends Component<Props, State> {
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Try Again
                 </Button>
+                <Button
+                  onClick={() => window.location.reload()}
+                  variant="outline"
+                  size="sm"
+                  className="border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-300 dark:hover:bg-red-900/40"
+                >
+                  Reload Page
+                </Button>
               </div>
 
-              {process.env.NODE_ENV === 'development' && error && (
+              {/* Show error details in production too for debugging Safari issues */}
+              {error && (
                 <details className="text-xs text-red-600 dark:text-red-400 mt-4">
                   <summary className="cursor-pointer hover:underline">
-                    Technical Details (Dev Mode)
+                    Technical Details
                   </summary>
                   <pre className="mt-2 p-2 bg-white/50 dark:bg-black/30 rounded text-[10px] overflow-auto max-h-32">
-                    {error.toString()}
+                    {error.name}: {error.message}
                   </pre>
                 </details>
               )}

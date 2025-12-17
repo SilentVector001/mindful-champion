@@ -567,7 +567,11 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     // Stop any speaking immediately when user starts talking
     if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       console.log('🔇 Interrupting TTS for new voice input');
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        console.log('TTS cancel error (safe to ignore):', e);
+      }
       setIsSpeaking(false);
     }
     
@@ -615,7 +619,11 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   // Interrupt TTS - allow user to stop Coach Kai from speaking
   const interruptSpeech = useCallback(() => {
     if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        console.log('TTS cancel error (safe to ignore):', e);
+      }
       setIsSpeaking(false);
     }
   }, [isSpeaking]);

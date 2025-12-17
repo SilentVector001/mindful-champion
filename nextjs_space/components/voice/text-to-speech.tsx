@@ -226,20 +226,25 @@ export default function TextToSpeech({
     // Lock to prevent concurrent attempts
     isSpeakingLockedRef.current = true;
 
-    // Stop any current speech
-    speechSynthesis.cancel();
+    try {
+      // Stop any current speech
+      speechSynthesis.cancel();
 
-    // Create and start new utterance
-    const utterance = createUtterance(cleanedText);
-    if (utterance) {
-      utteranceRef.current = utterance;
-      textRef.current = cleanedText;
-      lastSpokenTextRef.current = cleanedText; // Track what we're speaking
-      lastSpokenMessageIdRef.current = finalMessageId; // Track message ID
-      lastSpeakTimeRef.current = now; // Track when we started
-      speechSynthesis.speak(utterance);
-    } else {
-      // Failed to create utterance, release lock
+      // Create and start new utterance
+      const utterance = createUtterance(cleanedText);
+      if (utterance) {
+        utteranceRef.current = utterance;
+        textRef.current = cleanedText;
+        lastSpokenTextRef.current = cleanedText; // Track what we're speaking
+        lastSpokenMessageIdRef.current = finalMessageId; // Track message ID
+        lastSpeakTimeRef.current = now; // Track when we started
+        speechSynthesis.speak(utterance);
+      } else {
+        // Failed to create utterance, release lock
+        isSpeakingLockedRef.current = false;
+      }
+    } catch (e) {
+      console.error('🚨 TTS speak error:', e);
       isSpeakingLockedRef.current = false;
     }
   }, [isSupported, text, messageId, createUtterance]);
@@ -250,7 +255,11 @@ export default function TextToSpeech({
     
     console.log('🛑 TTS: Manual stop triggered');
     
-    speechSynthesis.cancel();
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {
+      console.log('TTS cancel error (safe to ignore):', e);
+    }
     setIsSpeaking(false);
     setIsPaused(false);
     
@@ -266,12 +275,20 @@ export default function TextToSpeech({
   // Pause/Resume functions
   const pause = useCallback(() => {
     if (!isSupported || !isSpeaking) return;
-    speechSynthesis.pause();
+    try {
+      speechSynthesis.pause();
+    } catch (e) {
+      console.log('TTS pause error (safe to ignore):', e);
+    }
   }, [isSupported, isSpeaking]);
 
   const resume = useCallback(() => {
     if (!isSupported || !isPaused) return;
-    speechSynthesis.resume();
+    try {
+      speechSynthesis.resume();
+    } catch (e) {
+      console.log('TTS resume error (safe to ignore):', e);
+    }
   }, [isSupported, isPaused]);
 
   // iOS DETECTION
@@ -575,16 +592,20 @@ export function unlockIOSTTS(): void {
   
   console.log('🍎 [GLOBAL] Unlocking iOS TTS audio...');
   
-  // Cancel any existing speech
-  speechSynthesis.cancel();
-  
-  // Create and speak a silent utterance immediately (must be in same call stack as gesture)
-  const silentUtterance = new SpeechSynthesisUtterance(' ');
-  silentUtterance.volume = 0.01;
-  silentUtterance.rate = 2;
-  speechSynthesis.speak(silentUtterance);
-  
-  console.log('🍎 [GLOBAL] iOS TTS unlock attempted');
+  try {
+    // Cancel any existing speech
+    speechSynthesis.cancel();
+    
+    // Create and speak a silent utterance immediately (must be in same call stack as gesture)
+    const silentUtterance = new SpeechSynthesisUtterance(' ');
+    silentUtterance.volume = 0.01;
+    silentUtterance.rate = 2;
+    speechSynthesis.speak(silentUtterance);
+    
+    console.log('🍎 [GLOBAL] iOS TTS unlock attempted');
+  } catch (e) {
+    console.log('🍎 iOS TTS unlock error (safe to ignore):', e);
+  }
 }
 
 export function VoiceSettings({
