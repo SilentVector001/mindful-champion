@@ -244,9 +244,11 @@ export function TournamentCalendar() {
                           {formatPrizeMoney(event?.prizePool)}
                         </span>
                       )}
-                      <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">
-                        View Details
-                      </Button>
+                      <Link href={`/tournaments/${event?.id}`}>
+                        <Button size="sm" className="bg-indigo-500 hover:bg-indigo-600">
+                          View Details
+                        </Button>
+                      </Link>
                     </div>
                   </motion.div>
                 )

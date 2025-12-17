@@ -410,10 +410,12 @@ export function TournamentHub() {
                 <SelectItem value="charity">Charity</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="bg-champion-green hover:bg-champion-green/90 h-12">
-              <Filter className="w-4 h-4 mr-2" />
-              Find Events
-            </Button>
+            <Link href={`/tournaments/calendar${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`}>
+              <Button className="bg-champion-green hover:bg-champion-green/90 h-12">
+                <Filter className="w-4 h-4 mr-2" />
+                Find Events
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
