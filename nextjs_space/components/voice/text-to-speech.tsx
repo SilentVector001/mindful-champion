@@ -274,7 +274,22 @@ export default function TextToSpeech({
     speechSynthesis.resume();
   }, [isSupported, isPaused]);
 
-  // Auto-play effect with BULLETPROOF repetition prevention
+  // MOBILE FIX: Resume AudioContext on user interaction (critical for iOS/Safari)
+  const resumeAudioContext = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      // Cancel any pending speech to reset state
+      speechSynthesis.cancel();
+      
+      // Some browsers need a "warm-up" utterance
+      const warmUp = new SpeechSynthesisUtterance('');
+      warmUp.volume = 0;
+      speechSynthesis.speak(warmUp);
+      
+      console.log('🔊 TTS: Audio context warmed up for mobile');
+    }
+  }, []);
+
+  // Auto-play effect with BULLETPROOF repetition prevention + MOBILE FIX
   useEffect(() => {
     if (!autoPlay || !text) {
       return;
@@ -315,11 +330,21 @@ export default function TextToSpeech({
         
         if (stillNew && stillNotSpeaking) {
           console.log('✅ TTS: Final checks passed - calling speak()');
+          
+          // MOBILE FIX: Try to resume audio context before speaking
+          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            // Check if speech synthesis is paused/suspended (common on mobile)
+            if (speechSynthesis.paused) {
+              console.log('🔊 TTS: Resuming paused speech synthesis');
+              speechSynthesis.resume();
+            }
+          }
+          
           speak();
         } else {
           console.log('🚫 TTS: Final check failed - another process took over');
         }
-      }, 150); // Slightly longer delay for better stability
+      }, 200); // Slightly longer delay for mobile stability
       
       return () => {
         console.log('🧹 TTS: Cleaning up auto-play timeout');
@@ -338,6 +363,26 @@ export default function TextToSpeech({
       }
     }
   }, [text, messageId, autoPlay, isSpeaking, speak]); // Include all relevant dependencies
+  
+  // MOBILE FIX: Warm up audio on first user interaction
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const warmUpOnInteraction = () => {
+      resumeAudioContext();
+      // Remove listeners after first interaction
+      document.removeEventListener('touchstart', warmUpOnInteraction);
+      document.removeEventListener('click', warmUpOnInteraction);
+    };
+    
+    document.addEventListener('touchstart', warmUpOnInteraction, { once: true, passive: true });
+    document.addEventListener('click', warmUpOnInteraction, { once: true, passive: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', warmUpOnInteraction);
+      document.removeEventListener('click', warmUpOnInteraction);
+    };
+  }, [resumeAudioContext]);
 
   // Voice wave animation component
   const VoiceWave = () => (

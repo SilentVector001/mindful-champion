@@ -664,8 +664,8 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     });
   }, [messages]);
 
-  // Always show only last 3 messages - no expansion
-  const displayMessages = messages.slice(-3);
+  // Always show only last 5 messages - no expansion
+  const displayMessages = messages.slice(-5);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-teal-50 via-white to-cyan-50 relative overflow-hidden">
@@ -776,100 +776,102 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
 
       {/* MAIN CONTENT AREA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* PTT & INPUT SECTION - MOVED TO TOP FOR IMMEDIATE ACCESS */}
+        {/* PTT & INPUT SECTION - COMPACT DESIGN */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="shadow-2xl border-3 border-teal-200 overflow-hidden bg-gradient-to-br from-white to-teal-50">
-            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 border-b border-teal-100">
+          <Card className="shadow-xl border-2 border-teal-200 overflow-hidden bg-gradient-to-br from-white to-teal-50">
+            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 border-b border-teal-100">
               <div className="flex items-center gap-2">
-                <Mic className="h-6 w-6 text-white animate-pulse" />
-                <h2 className="text-xl font-bold text-white">Ask Coach Kai Anything</h2>
-                <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 ml-auto">
+                <Mic className="h-5 w-5 text-white animate-pulse" />
+                <h2 className="text-lg font-bold text-white">Ask Coach Kai Anything</h2>
+                <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 ml-auto text-xs">
                   Voice + Text Ready
                 </Badge>
               </div>
             </div>
             
-            <div className="p-8 bg-white">
-              {/* PTT Button - Large and Prominent */}
-              <div className="flex flex-col items-center gap-4 mb-8">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full blur-xl opacity-50 animate-pulse" />
-                  <PushToTalk
-                    onTranscript={handlePTTVoiceInput}
-                    disabled={isLoading || processingVoiceInput}
-                    language={voicePreferences.language}
-                    className="scale-125 relative z-10"
-                  />
-                </motion.div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-slate-900 mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                    Press & Hold to Talk
-                  </p>
-                  <p className="text-sm text-slate-600 flex items-center justify-center gap-1">
-                    <Sparkles className="h-4 w-4 text-teal-500" />
-                    Release when done • Coach Kai responds instantly
-                  </p>
+            <div className="p-4 sm:p-6 bg-white">
+              {/* COMPACT LAYOUT: PTT Button + Text Input Side by Side on Desktop */}
+              <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
+                {/* PTT Button - Compact */}
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  <div className="relative">
+                    <PushToTalk
+                      onTranscript={handlePTTVoiceInput}
+                      disabled={isLoading || processingVoiceInput}
+                      language={voicePreferences.language}
+                      className="relative z-10"
+                    />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-base font-bold text-slate-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                      Press & Hold to Talk
+                    </p>
+                    <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
+                      <Sparkles className="h-3 w-3 text-teal-500" />
+                      Release when done • Coach Kai responds instantly
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              {/* Divider */}
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t-2 border-gradient-to-r from-transparent via-slate-300 to-transparent" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-6 py-2 bg-white text-slate-500 font-bold text-sm rounded-full border-2 border-slate-200">
-                    Or type your question below
+                {/* Divider - Vertical on desktop, horizontal on mobile */}
+                <div className="hidden lg:flex flex-col items-center h-32">
+                  <div className="h-full w-px bg-slate-200" />
+                  <span className="px-2 py-1 bg-white text-slate-400 font-medium text-xs whitespace-nowrap -mt-1">
+                    or type
                   </span>
+                  <div className="h-full w-px bg-slate-200" />
                 </div>
-              </div>
+                <div className="lg:hidden w-full flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="px-2 py-1 bg-white text-slate-400 font-medium text-xs">
+                    Or type your question
+                  </span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
 
-              {/* Text Input - Large and Inviting */}
-              <div className="flex gap-4">
-                <Textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your question for Coach Kai... (e.g., 'How can I improve my serve?')"
-                  disabled={isLoading}
-                  className="flex-1 min-h-[100px] text-lg resize-none border-3 border-slate-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/20 rounded-2xl p-4 shadow-inner"
-                />
-                <Button
-                  onClick={() => handleSendMessage()}
-                  disabled={!input.trim() || isLoading}
-                  className="h-[100px] w-[100px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-10 w-10 animate-spin" />
-                  ) : (
-                    <Send className="h-10 w-10" />
-                  )}
-                </Button>
+                {/* Text Input - Flexible */}
+                <div className="flex gap-3 w-full lg:flex-1">
+                  <Textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Type your question for Coach Kai... (e.g., 'How can I improve my serve?')"
+                    disabled={isLoading}
+                    className="flex-1 min-h-[70px] text-sm resize-none border-2 border-slate-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 rounded-xl p-3"
+                  />
+                  <Button
+                    onClick={() => handleSendMessage()}
+                    disabled={!input.trim() || isLoading}
+                    className="h-[70px] w-[70px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex-shrink-0"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-7 w-7 animate-spin" />
+                    ) : (
+                      <Send className="h-7 w-7" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* LAST 3 CONVERSATIONS - STATIC DISPLAY */}
+        {/* LAST 5 CONVERSATIONS - STATIC DISPLAY */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
           <Card className="shadow-xl border-2 border-slate-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-3 border-b border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-teal-600" />
-                <h2 className="text-lg font-bold text-slate-900">Last 3 Conversations</h2>
+                <MessageSquare className="h-4 w-4 text-teal-600" />
+                <h2 className="text-base font-bold text-slate-900">Last 5 Conversations</h2>
                 <Badge variant="secondary" className="text-xs">
                   Latest
                 </Badge>
