@@ -274,20 +274,71 @@ export default function TextToSpeech({
     speechSynthesis.resume();
   }, [isSupported, isPaused]);
 
+  // iOS DETECTION
+  const isIOSRef = useRef<boolean>(false);
+  const iosAudioUnlockedRef = useRef<boolean>(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      isIOSRef.current = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      console.log('🍎 iOS detected:', isIOSRef.current);
+    }
+  }, []);
+
+  // iOS AUDIO UNLOCK - Must be called synchronously during user gesture
+  const unlockIOSAudio = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    
+    if (iosAudioUnlockedRef.current) {
+      console.log('🍎 iOS audio already unlocked');
+      return;
+    }
+    
+    console.log('🍎 Unlocking iOS audio with silent utterance...');
+    
+    // Cancel any existing speech
+    speechSynthesis.cancel();
+    
+    // Create a silent utterance - iOS requires this in the same call stack as user gesture
+    const silentUtterance = new SpeechSynthesisUtterance(' ');
+    silentUtterance.volume = 0.01; // Nearly silent
+    silentUtterance.rate = 2; // Fast
+    
+    silentUtterance.onend = () => {
+      console.log('🍎 iOS audio unlocked successfully');
+      iosAudioUnlockedRef.current = true;
+    };
+    
+    silentUtterance.onerror = (e) => {
+      console.log('🍎 iOS unlock error (may still work):', e.error);
+      // Mark as unlocked anyway - the unlock attempt itself sometimes works
+      iosAudioUnlockedRef.current = true;
+    };
+    
+    // Speak immediately - must be synchronous with user gesture
+    speechSynthesis.speak(silentUtterance);
+  }, []);
+
   // MOBILE FIX: Resume AudioContext on user interaction (critical for iOS/Safari)
   const resumeAudioContext = useCallback(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       // Cancel any pending speech to reset state
       speechSynthesis.cancel();
       
-      // Some browsers need a "warm-up" utterance
-      const warmUp = new SpeechSynthesisUtterance('');
-      warmUp.volume = 0;
-      speechSynthesis.speak(warmUp);
+      // iOS-specific unlock
+      if (isIOSRef.current) {
+        unlockIOSAudio();
+      } else {
+        // Non-iOS warm-up
+        const warmUp = new SpeechSynthesisUtterance('');
+        warmUp.volume = 0;
+        speechSynthesis.speak(warmUp);
+      }
       
       console.log('🔊 TTS: Audio context warmed up for mobile');
     }
-  }, []);
+  }, [unlockIOSAudio]);
 
   // Auto-play effect with BULLETPROOF repetition prevention + MOBILE FIX
   useEffect(() => {
@@ -508,6 +559,32 @@ interface VoiceSettingsProps {
   onRateChange: (rate: number) => void;
   onPitchChange: (pitch: number) => void;
   onVolumeChange: (volume: number) => void;
+}
+
+// iOS TTS UNLOCK UTILITY - Call this synchronously on user gesture (button press)
+export function unlockIOSTTS(): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (!isIOS) {
+    console.log('🔊 Not iOS, skipping iOS-specific unlock');
+    return;
+  }
+  
+  console.log('🍎 [GLOBAL] Unlocking iOS TTS audio...');
+  
+  // Cancel any existing speech
+  speechSynthesis.cancel();
+  
+  // Create and speak a silent utterance immediately (must be in same call stack as gesture)
+  const silentUtterance = new SpeechSynthesisUtterance(' ');
+  silentUtterance.volume = 0.01;
+  silentUtterance.rate = 2;
+  speechSynthesis.speak(silentUtterance);
+  
+  console.log('🍎 [GLOBAL] iOS TTS unlock attempted');
 }
 
 export function VoiceSettings({

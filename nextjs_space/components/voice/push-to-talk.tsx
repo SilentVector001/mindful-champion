@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Loader2, Radio, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { unlockIOSTTS } from '@/components/voice/text-to-speech';
 
 interface PushToTalkProps {
   onTranscript: (text: string) => void;
@@ -422,6 +423,10 @@ export default function PushToTalk({
     console.log('🎯 handlePTTStart CALLED - Event type:', event?.type);
     event.preventDefault();
     event.stopPropagation();
+    
+    // 🍎 iOS FIX: Unlock TTS audio immediately on button press (MUST be synchronous with gesture)
+    // This allows speechSynthesis to work later after the async API call
+    unlockIOSTTS();
     
     if (disabled || pttState === 'processing' || !recognitionRef.current) {
       console.log('🚫 PTT Start blocked:', { disabled, pttState, hasRecognition: !!recognitionRef.current });

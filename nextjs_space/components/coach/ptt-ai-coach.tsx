@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import InteractiveAvatar from '@/components/avatar/interactive-avatar';
 import VoiceSettingsModal, { VoicePreferences } from '@/components/voice/voice-settings-modal';
-import TextToSpeech from '@/components/voice/text-to-speech';
+import TextToSpeech, { unlockIOSTTS } from '@/components/voice/text-to-speech';
 import PushToTalk from '@/components/voice/push-to-talk';
 import { Progress } from '@/components/ui/progress';
 
@@ -629,9 +629,18 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      // 🍎 iOS FIX: Unlock TTS on user gesture before async API call
+      unlockIOSTTS();
       handleSendMessage();
     }
   };
+
+  // Wrapper for send button click that includes iOS TTS unlock
+  const handleSendClick = useCallback(() => {
+    // 🍎 iOS FIX: Unlock TTS on user gesture (button click) before async API call
+    unlockIOSTTS();
+    handleSendMessage();
+  }, [handleSendMessage]);
 
   // Calculate session stats
   const sessionStart = useRef(new Date());
@@ -845,7 +854,7 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                     className="flex-1 min-h-[70px] text-sm resize-none border-2 border-slate-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 rounded-xl p-3"
                   />
                   <Button
-                    onClick={() => handleSendMessage()}
+                    onClick={handleSendClick}
                     disabled={!input.trim() || isLoading}
                     className="h-[70px] w-[70px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex-shrink-0"
                   >
