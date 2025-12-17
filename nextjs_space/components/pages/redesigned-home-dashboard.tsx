@@ -15,10 +15,8 @@ import MainNavigation from "@/components/navigation/main-navigation"
 import { AchievementToast, useAchievementNotifications } from "@/components/rewards/achievement-toast"
 
 // Import new dashboard components
-import NewsTicker from "@/components/dashboard/news-ticker"
 import StatsOverview from "@/components/dashboard/stats-overview"
 import ProgressCharts from "@/components/dashboard/progress-charts"
-import GettingStartedGuide from "@/components/dashboard/getting-started-guide"
 
 import {
   Trophy,
@@ -208,7 +206,7 @@ export default function RedesignedHomeDashboard({
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
+          className="mb-6"
         >
           <Card className="border-0 shadow-xl bg-gradient-to-r from-white via-white to-gray-50 overflow-hidden relative">
             {/* Background decorative elements */}
@@ -324,24 +322,61 @@ export default function RedesignedHomeDashboard({
           </Card>
         </motion.div>
 
-        {/* News Ticker */}
+        {/* Tournament Discovery Section - Quick Access */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="mb-8"
+          className="mb-6"
         >
-          <NewsTicker />
-        </motion.div>
-
-        {/* Getting Started Guide - Show for new users */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.12 }}
-          className="mb-8"
-        >
-          <GettingStartedGuide userName={user?.firstName || user?.name?.split(' ')[0]} />
+          <Card className="border-0 shadow-lg bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300"
+            onClick={() => router.push('/tournaments')}
+          >
+            {/* Decorative background elements */}
+            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-white/10 to-transparent rounded-full blur-3xl" />
+            <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-yellow-400/20 to-transparent rounded-full blur-3xl" />
+            
+            <CardContent className="p-4 sm:p-6 relative z-10">
+              <div className="flex items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <motion.div
+                    className="w-14 h-14 sm:w-16 sm:h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg"
+                    animate={{ 
+                      scale: [1, 1.05, 1],
+                      rotate: [0, 5, -5, 0]
+                    }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <Trophy className="w-7 h-7 sm:w-8 sm:h-8 text-white drop-shadow-lg" />
+                  </motion.div>
+                  <div>
+                    <h3 className="text-xl sm:text-2xl font-bold text-white drop-shadow-lg">
+                      Discover Tournaments
+                    </h3>
+                    <p className="text-sm sm:text-base text-white/90 drop-shadow">
+                      Find and watch pickleball events near you
+                    </p>
+                  </div>
+                </div>
+                <motion.div
+                  whileHover={{ x: 5 }}
+                  className="flex-shrink-0 hidden sm:block"
+                >
+                  <Button
+                    size="lg"
+                    className="bg-white text-orange-600 hover:bg-white/90 font-bold shadow-xl"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      router.push('/tournaments')
+                    }}
+                  >
+                    Explore Events
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </motion.div>
+              </div>
+            </CardContent>
+          </Card>
         </motion.div>
 
         {/* Coach Kai Call-to-Action Section */}
@@ -349,7 +384,7 @@ export default function RedesignedHomeDashboard({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15 }}
-          className="mb-8"
+          className="mb-6"
         >
           <Card className="border-0 shadow-xl bg-gradient-to-br from-champion-blue via-blue-600 to-cyan-600 overflow-hidden relative group cursor-pointer hover:shadow-2xl transition-all duration-300"
             onClick={() => router.push('/train/coach')}
@@ -547,15 +582,15 @@ export default function RedesignedHomeDashboard({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="mb-8"
+          className="mb-6"
         >
           <StatsOverview stats={dashboardStats} />
         </motion.div>
 
         {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left Column - Main Content */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-6">
             {/* Personalized Recommendations */}
             {aiRecommendations?.recommendations && aiRecommendations.recommendations.length > 0 && (
               <motion.div
