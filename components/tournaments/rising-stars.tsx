@@ -220,17 +220,68 @@ export function RisingStars() {
         )}
       </section>
 
-      {/* CTA */}
+      {/* Official Junior Programs */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Official Junior Programs</h2>
+        <div className="grid md:grid-cols-2 gap-6">
+          <a href="https://ppatour.com/junior-ppa-tour/" target="_blank" rel="noopener noreferrer" className="block">
+            <Card className="bg-gradient-to-br from-orange-500/20 to-red-500/20 border-orange-500/30 hover:border-orange-500/60 transition-all h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                    <Trophy className="w-6 h-6 text-orange-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">Junior PPA Tour</h3>
+                    <Badge className="bg-orange-500/20 text-orange-400 text-xs">Ages 8-16</Badge>
+                  </div>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">Official PPA youth program with clinics, camps, and tournaments at professional venues. Compete alongside pros!</p>
+                <span className="text-orange-400 text-sm flex items-center gap-1">Visit ppatour.com <ArrowRight className="w-4 h-4" /></span>
+              </CardContent>
+            </Card>
+          </a>
+          
+          <a href="https://www.theapp.global/news/the-future-is-now" target="_blank" rel="noopener noreferrer" className="block">
+            <Card className="bg-gradient-to-br from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-500/60 transition-all h-full">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                    <Star className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">APP Junior Circuit</h3>
+                    <Badge className="bg-blue-500/20 text-blue-400 text-xs">Ages 18 & Under</Badge>
+                  </div>
+                </div>
+                <p className="text-gray-400 text-sm mb-4">APP's pathway to professional pickleball with ratings, nationals, and the Next Gen Series for ages 16-23.</p>
+                <span className="text-blue-400 text-sm flex items-center gap-1">Visit theapp.global <ArrowRight className="w-4 h-4" /></span>
+              </CardContent>
+            </Card>
+          </a>
+        </div>
+      </section>
+
+      {/* Scholarship CTA */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-2xl border border-white/10 p-8 text-center">
           <GraduationCap className="w-12 h-12 text-purple-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Scholarship Opportunities</h2>
+          <h2 className="text-2xl font-bold text-white mb-2">College Pickleball & Scholarships</h2>
           <p className="text-gray-400 max-w-2xl mx-auto mb-6">
-            Top junior players can earn college scholarships through our Rising Stars program. Start your champion journey today.
+            Pickleball is growing at the collegiate level! Utah Tech University and Drury University now offer scholarships. The APP Academy (launching 2025) helps players prepare for college programs.
           </p>
-          <Button className="bg-purple-500 hover:bg-purple-600">
-            Learn About Scholarships
-          </Button>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a href="https://www.pblegacy.com/" target="_blank" rel="noopener noreferrer">
+              <Button className="bg-purple-500 hover:bg-purple-600">
+                Pickleball Legacy Foundation
+              </Button>
+            </a>
+            <a href="https://usapickleball.org/juniors/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
+                USA Pickleball Juniors
+              </Button>
+            </a>
+          </div>
         </div>
       </section>
     </div>

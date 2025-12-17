@@ -226,6 +226,29 @@ export function AmateurCompetitions() {
             )) || []}
           </div>
         )}
+
+        {/* External Tournament Finders */}
+        <div className="mt-12 bg-white/5 rounded-xl border border-white/10 p-6">
+          <h3 className="text-lg font-semibold text-white mb-2">Find More Amateur Tournaments</h3>
+          <p className="text-gray-400 text-sm mb-4">Discover thousands of tournaments nationwide on these official platforms:</p>
+          <div className="flex flex-wrap gap-3">
+            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
+                PickleballTournaments.com
+              </Button>
+            </a>
+            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
+                PickleballBrackets.com
+              </Button>
+            </a>
+            <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-green-500/30 text-green-400 hover:bg-green-500/10">
+                USA Pickleball Events
+              </Button>
+            </a>
+          </div>
+        </div>
       </section>
     </div>
   )

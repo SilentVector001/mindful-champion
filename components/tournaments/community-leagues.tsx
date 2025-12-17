@@ -99,34 +99,38 @@ export function CommunityLeagues() {
       {/* Quick Actions */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid md:grid-cols-2 gap-4">
-          <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                <UserPlus className="w-6 h-6 text-green-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white">Looking for a Team?</h3>
-                <p className="text-sm text-gray-400">Find players in your area</p>
-              </div>
-              <Button size="sm" className="bg-green-500 hover:bg-green-600">
-                Find Players
-              </Button>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/30">
-            <CardContent className="p-6 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
-                <Shield className="w-6 h-6 text-emerald-400" />
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white">Start a League</h3>
-                <p className="text-sm text-gray-400">Organize in your community</p>
-              </div>
-              <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
-                Learn More
-              </Button>
-            </CardContent>
-          </Card>
+          <a href="https://www.places2play.org/" target="_blank" rel="noopener noreferrer" className="block">
+            <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30 hover:border-green-500/60 transition-all h-full">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                  <UserPlus className="w-6 h-6 text-green-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white">Find Players & Courts</h3>
+                  <p className="text-sm text-gray-400">Places2Play directory</p>
+                </div>
+                <Button size="sm" className="bg-green-500 hover:bg-green-600">
+                  Find Now
+                </Button>
+              </CardContent>
+            </Card>
+          </a>
+          <a href="https://usapickleball.org/play/start-a-program/" target="_blank" rel="noopener noreferrer" className="block">
+            <Card className="bg-gradient-to-br from-emerald-500/20 to-teal-500/20 border-emerald-500/30 hover:border-emerald-500/60 transition-all h-full">
+              <CardContent className="p-6 flex items-center gap-4">
+                <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center">
+                  <Shield className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="font-semibold text-white">Start a League</h3>
+                  <p className="text-sm text-gray-400">USA Pickleball resources</p>
+                </div>
+                <Button size="sm" variant="outline" className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10">
+                  Learn More
+                </Button>
+              </CardContent>
+            </Card>
+          </a>
         </div>
       </section>
 
