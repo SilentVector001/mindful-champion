@@ -86,6 +86,16 @@ export function PickleballForPurpose() {
     return `${month} ${day}, ${year}`
   }
 
+  // Diverse charity event images - each unique
+  const CHARITY_IMAGES = [
+    "https://plus.unsplash.com/premium_photo-1749494938140-b320c5ccacba?w=800&q=80", // Four friends playing together - community spirit
+    "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80", // Outdoor court action shot
+    "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80", // Indoor tournament setting
+    "https://plus.unsplash.com/premium_photo-1749494935912-a1e81a16e583?w=800&q=80", // Group holding pickleballs - unity/charity theme
+    "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80", // Outdoor court with player
+    "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80", // Indoor competition scene
+  ]
+
   const IMPACT_STATS = [
     { label: "Raised This Year", value: stats?.totalPrize ? formatPrizeMoney(stats?.totalPrize) : "$0" },
     { label: "Charity Events", value: tournaments?.length?.toString?.() || "0" },
@@ -173,7 +183,11 @@ export function PickleballForPurpose() {
                 <Card className="bg-white/5 border-white/10 hover:border-pink-500/30 transition-all overflow-hidden">
                   <div className="flex flex-col md:flex-row">
                     <div className="relative w-full md:w-40 h-32 md:h-auto flex-shrink-0">
-                      <img src="https://images.unsplash.com/photo-1559839734-2b71ea197ec2?w=400" alt="Charity Event" className="w-full h-full object-cover" />
+                      <img 
+                        src={CHARITY_IMAGES[index % CHARITY_IMAGES.length] || CHARITY_IMAGES[0]} 
+                        alt={`${event?.name || 'Charity Tournament'} - Pickleball Event`}
+                        className="w-full h-full object-cover" 
+                      />
                       <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50" />
                     </div>
                     <CardContent className="flex-1 p-4">
