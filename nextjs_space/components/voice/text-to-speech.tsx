@@ -397,9 +397,15 @@ export default function TextToSpeech({
       
       // Use a small delay to ensure the component is stable
       const timeoutId = setTimeout(() => {
-        // Final safety check before speaking
-        const stillNew = messageId !== lastSpokenMessageIdRef.current;
+        // Final safety check before speaking - FIXED: Handle undefined messageId
+        const stillNew = messageId 
+          ? (messageId !== lastSpokenMessageIdRef.current)
+          : (cleanedText !== lastSpokenTextRef.current);
         const stillNotSpeaking = !isSpeaking && !isSpeakingLockedRef.current;
+        
+        console.log('🔍 TTS: Final safety check');
+        console.log('   Still new:', stillNew);
+        console.log('   Still not speaking:', stillNotSpeaking);
         
         if (stillNew && stillNotSpeaking) {
           console.log('✅ TTS: Final checks passed - calling speak()');
@@ -419,6 +425,7 @@ export default function TextToSpeech({
           speak(cleanedText, messageId);
         } else {
           console.log('🚫 TTS: Final check failed - state changed');
+          console.log('   Reason: stillNew=' + stillNew + ', stillNotSpeaking=' + stillNotSpeaking);
         }
       }, 150); // Short delay for stability
       
