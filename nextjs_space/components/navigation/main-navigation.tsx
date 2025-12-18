@@ -160,14 +160,14 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             </InfoTooltip>
 
             {/* SPACER - Push menu button to the right on mobile/tablet */}
-            <div className="flex-1 lg:hidden"></div>
+            <div className="flex-1 xl:hidden"></div>
 
-            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE - FIXED */}
+            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE - FIXED FOR iPAD */}
             <SheetTrigger asChild>
               <Button 
                 variant="default" 
                 size="icon" 
-                className="lg:hidden h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-2 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80 flex-shrink-0"
+                className="xl:hidden h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-2 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80 flex-shrink-0"
                 aria-label="Open navigation menu"
                 style={{ 
                   WebkitTapHighlightColor: 'transparent',
@@ -193,8 +193,8 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </Button>
             </SheetTrigger>
 
-            {/* Main Navigation - Desktop Only (1024px+) */}
-            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
+            {/* Main Navigation - Desktop Only (1280px+) */}
+            <div className="hidden xl:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
               style={{ 
                 maxWidth: 'calc(100vw - 600px)',
                 scrollbarWidth: 'none',
@@ -645,7 +645,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
           </div>
 
           {/* Right Side - Profile Menu - HIDDEN ON MOBILE/TABLET */}
-          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 flex-shrink-0 min-w-0"
+          <div className="hidden xl:flex items-center gap-1.5 xl:gap-2 flex-shrink-0 min-w-0"
             style={{
               maxWidth: 'min(350px, 30vw)'
             }}

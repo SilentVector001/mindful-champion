@@ -229,6 +229,12 @@ export default function TextToSpeech({
     try {
       // Stop any current speech
       speechSynthesis.cancel();
+      
+      // MOBILE FIX: Resume speechSynthesis if paused (critical for mobile browsers)
+      if (speechSynthesis.paused) {
+        console.log('📱 Resuming paused speechSynthesis');
+        speechSynthesis.resume();
+      }
 
       // Create and start new utterance
       const utterance = createUtterance(cleanedText);
@@ -238,7 +244,17 @@ export default function TextToSpeech({
         lastSpokenTextRef.current = cleanedText; // Track what we're speaking
         lastSpokenMessageIdRef.current = finalMessageId; // Track message ID
         lastSpeakTimeRef.current = now; // Track when we started
-        speechSynthesis.speak(utterance);
+        
+        // MOBILE FIX: Small delay to ensure speechSynthesis is ready
+        setTimeout(() => {
+          try {
+            speechSynthesis.speak(utterance);
+            console.log('🔊 Speech started successfully');
+          } catch (speakError) {
+            console.error('🚨 speechSynthesis.speak() error:', speakError);
+            isSpeakingLockedRef.current = false;
+          }
+        }, 50);
       } else {
         // Failed to create utterance, release lock
         isSpeakingLockedRef.current = false;

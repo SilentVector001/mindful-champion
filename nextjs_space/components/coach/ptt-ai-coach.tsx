@@ -562,6 +562,10 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     }
 
     console.log('✅ Processing PTT voice input:', text.substring(0, 50));
+    
+    // 🍎 iOS/MOBILE FIX: Unlock TTS on PTT release (user gesture)
+    unlockIOSTTS();
+    
     setProcessingVoiceInput(true);
     
     // Stop any speaking immediately when user starts talking
