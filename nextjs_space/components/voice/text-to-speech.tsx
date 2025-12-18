@@ -34,9 +34,11 @@ export default function TextToSpeech({
   onSpeakingChange,
   className
 }: TextToSpeechProps) {
+  // 🐛 SAFARI FIX: Initialize with undefined first, then check in useEffect
+  // This ensures consistent hook calling order during SSR/hydration
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported, setIsSupported] = useState<boolean | null>(null); // null during SSR
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [currentVoice, setCurrentVoice] = useState<SpeechSynthesisVoice | null>(voice);
   const [settings, setSettings] = useState({
@@ -52,8 +54,17 @@ export default function TextToSpeech({
   const lastSpokenMessageIdRef = useRef<string>(''); // CRITICAL: Track message ID to prevent duplicate plays
   const isSpeakingLockedRef = useRef<boolean>(false); // Lock to prevent concurrent speech attempts
   const lastSpeakTimeRef = useRef<number>(0); // Cooldown to prevent rapid-fire repetition
+  const isMountedRef = useRef<boolean>(false); // Track if component is mounted
 
-  // Initialize TTS
+  // 🐛 SAFARI FIX: Track mount state to prevent hydration issues
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Initialize TTS - Check support status
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setIsSupported(true);
@@ -80,6 +91,9 @@ export default function TextToSpeech({
         speechSynthesis.addEventListener('voiceschanged', loadVoices);
         return () => speechSynthesis.removeEventListener('voiceschanged', loadVoices);
       }
+    } else {
+      // 🐛 SAFARI FIX: Explicitly set unsupported to avoid null state
+      setIsSupported(false);
     }
   }, [currentVoice]);
 
@@ -99,8 +113,11 @@ export default function TextToSpeech({
 
     utterance.onstart = () => {
       console.log('🔊 TTS: Speech started');
-      setIsSpeaking(true);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      }
       hasSpokenRef.current = true;
       onStart?.();
       onSpeakingChange?.(true);
@@ -108,8 +125,11 @@ export default function TextToSpeech({
 
     utterance.onend = () => {
       console.log('🔇 TTS: Speech ended');
-      setIsSpeaking(false);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      }
       
       // CRITICAL: Release the speaking lock after speech completes
       isSpeakingLockedRef.current = false;
@@ -124,8 +144,11 @@ export default function TextToSpeech({
 
     utterance.onerror = (event) => {
       console.error('🚨 TTS: Speech synthesis error:', event.error);
-      setIsSpeaking(false);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      }
       
       // CRITICAL: Release lock on error
       isSpeakingLockedRef.current = false;
@@ -134,11 +157,17 @@ export default function TextToSpeech({
     };
 
     utterance.onpause = () => {
-      setIsPaused(true);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsPaused(true);
+      }
     };
 
     utterance.onresume = () => {
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsPaused(false);
+      }
     };
 
     return utterance;
@@ -276,8 +305,12 @@ export default function TextToSpeech({
     } catch (e) {
       console.log('TTS cancel error (safe to ignore):', e);
     }
-    setIsSpeaking(false);
-    setIsPaused(false);
+    
+    // 🐛 SAFARI FIX: Only update state if component is still mounted
+    if (isMountedRef.current) {
+      setIsSpeaking(false);
+      setIsPaused(false);
+    }
     
     // Reset all tracking - allows message to be replayed if needed
     hasSpokenRef.current = false;
@@ -515,7 +548,14 @@ export default function TextToSpeech({
     </motion.div>
   );
 
-  if (!isSupported) {
+  // 🐛 SAFARI FIX: Handle loading state (null) and unsupported state (false)
+  // ALL HOOKS MUST BE CALLED ABOVE THIS POINT TO PREVENT ERROR #300
+  if (isSupported === null) {
+    // Still checking support - return nothing during SSR/initial hydration
+    return null;
+  }
+
+  if (isSupported === false) {
     return (
       <div className={`text-xs text-gray-500 ${className}`}>
         Text-to-speech not supported
