@@ -141,7 +141,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
         }}
       >
         <nav className="max-w-full w-full px-3 sm:px-4 lg:px-6">
-          <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-h-[64px] max-w-[100vw] overflow-hidden">
+          <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-h-[64px] w-full">
             {/* Logo - Fixed Positioning */}
             <InfoTooltip content="Return to your coaching dashboard">
               <Link href="/dashboard" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
@@ -162,41 +162,36 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             {/* SPACER - Push menu button to the right on mobile/tablet */}
             <div className="flex-1 lg:hidden"></div>
 
-            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE */}
-            <div 
-              className="lg:hidden ml-auto flex-shrink-0 relative z-[70]"
-              style={{
-                isolation: 'isolate',
-                WebkitTransform: 'translateZ(0)',
-                transform: 'translateZ(0)',
-              }}
-            >
-              <SheetTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="icon" 
-                  className="h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-3 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80"
-                  aria-label="Open navigation menu"
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    position: 'relative',
-                    zIndex: 70,
-                    minWidth: '48px',
-                    minHeight: '48px',
-                  }}
-                  onClick={(e) => {
-                    // Ensure the event is processed on iOS
-                    e.stopPropagation();
-                    console.log('Mobile menu button clicked');
-                  }}
-                >
-                  <Menu className="h-6 w-6 sm:h-8 sm:w-8 text-white stroke-[3.5] pointer-events-none" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-            </div>
+            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE - FIXED */}
+            <SheetTrigger asChild>
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="lg:hidden h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-2 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80 flex-shrink-0"
+                aria-label="Open navigation menu"
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  position: 'relative',
+                  zIndex: 9999,
+                  minWidth: '48px',
+                  minHeight: '48px',
+                  display: 'inline-flex',
+                  visibility: 'visible',
+                  opacity: 1,
+                }}
+                onClick={(e) => {
+                  // Ensure the event is processed on iOS
+                  e.stopPropagation();
+                  console.log('Mobile menu button clicked');
+                  setMobileMenuOpen(true);
+                }}
+              >
+                <Menu className="h-6 w-6 sm:h-8 sm:w-8 text-white stroke-[3.5] pointer-events-none" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
 
             {/* Main Navigation - Desktop Only (1024px+) */}
             <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
