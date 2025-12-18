@@ -1,5 +1,18 @@
-import { sendEmail as sendGmailEmail, EmailType } from './gmail-service';
+/**
+ * Email Service - Resend Only
+ * Migrated from Gmail SMTP to Resend API for cost optimization
+ * All email functionality now exclusively uses Resend API
+ */
+import { getResendClient } from '@/lib/email/resend-client';
 import { prisma } from '@/lib/db';
+
+// Initialize Resend client
+const resend = getResendClient();
+
+// Email configuration
+const FROM_EMAIL = 'notifications@mindfulchampion.com';
+const FROM_NAME = 'Mindful Champion';
+const REPLY_TO_EMAIL = 'dean@mindfulchampion.com';
 
 // Define types locally to avoid Prisma client generation issues
 type EmailStatus = 'PENDING' | 'SENDING' | 'SENT' | 'DELIVERED' | 'OPENED' | 'CLICKED' | 'BOUNCED' | 'FAILED' | 'UNSUBSCRIBED';
@@ -21,27 +34,6 @@ interface SendEmailParams {
   type: string;
   videoAnalysisId?: string;
   metadata?: any;
-}
-
-// Map email notification types to Gmail email types
-function mapEmailType(type: string): EmailType {
-  switch (type) {
-    case 'VIDEO_ANALYSIS_COMPLETE':
-    case 'GOAL_REMINDER':
-    case 'TRAINING_UPDATE':
-      return 'COACH_KAI';
-    case 'SUPPORT':
-    case 'HELP':
-      return 'SUPPORT';
-    case 'PARTNER_APPLICATION':
-    case 'PARTNER_UPDATE':
-      return 'PARTNERSHIP';
-    case 'SPONSOR_APPLICATION':
-    case 'SPONSOR_UPDATE':
-      return 'SPONSORSHIP';
-    default:
-      return 'WELCOME';
-  }
 }
 
 /**
@@ -97,25 +89,25 @@ export const emailService = {
       });
 
       // Get reply-to email from settings
-      const replyToEmail = emailSettings?.replyToEmail || 'support@mindfulchampion.ai';
+      const replyToEmail = emailSettings?.replyToEmail || REPLY_TO_EMAIL;
 
-      // Determine email type for Gmail sender
-      const gmailType = mapEmailType(type);
-
-      // Send email via Gmail
-      const result = await sendGmailEmail({
+      // Send email via Resend
+      const result = await resend.emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
         to: recipientEmail,
         subject,
         html: htmlContent,
-        text: textContent,
-        type: gmailType,
+        text: textContent || undefined,
         replyTo: replyToEmail,
       });
 
-      // Check if result has an error
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send email');
+      // Check if Resend returned an error
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to send email via Resend');
       }
+
+      // Resend success - result.data contains the email ID
+      const messageId = result.data?.id || null;
 
       // Update email notification with success status
       await prisma.emailNotification.update({
@@ -123,7 +115,7 @@ export const emailService = {
         data: {
           status: 'SENT',
           sentAt: new Date(),
-          resendEmailId: result.messageId || null,
+          resendEmailId: messageId,
         },
       });
 
@@ -139,8 +131,8 @@ export const emailService = {
         });
       }
 
-      console.log(`✅ Email sent successfully to ${recipientEmail}`);
-      return { success: true, emailId: result.messageId || undefined };
+      console.log(`✅ Email sent successfully to ${recipientEmail} (ID: ${messageId})`);
+      return { success: true, emailId: messageId || undefined };
     } catch (error: any) {
       console.error('❌ Failed to send email:', error);
 
@@ -220,25 +212,25 @@ export const emailService = {
       });
 
       // Get reply-to email from settings
-      const replyToEmail = emailSettings?.replyToEmail || 'support@mindfulchampion.ai';
+      const replyToEmail = emailSettings?.replyToEmail || REPLY_TO_EMAIL;
 
-      // Determine email type for Gmail sender
-      const gmailType = mapEmailType(notification.type);
-
-      // Resend email via Gmail
-      const result = await sendGmailEmail({
+      // Resend email via Resend
+      const result = await resend.emails.send({
+        from: `${FROM_NAME} <${FROM_EMAIL}>`,
         to: notification.recipientEmail,
         subject: notification.subject,
         html: notification.htmlContent,
         text: notification.textContent || undefined,
-        type: gmailType,
         replyTo: replyToEmail,
       });
 
-      // Check if result has an error
-      if (!result.success) {
-        throw new Error(result.error || 'Failed to send email');
+      // Check if Resend returned an error
+      if (result.error) {
+        throw new Error(result.error.message || 'Failed to retry email via Resend');
       }
+
+      // Resend success - result.data contains the email ID
+      const messageId = result.data?.id || null;
 
       // Update with success
       await prisma.emailNotification.update({
@@ -246,7 +238,7 @@ export const emailService = {
         data: {
           status: 'SENT',
           sentAt: new Date(),
-          resendEmailId: result.messageId || null,
+          resendEmailId: messageId,
           error: null,
         },
       });
@@ -264,8 +256,8 @@ export const emailService = {
         });
       }
 
-      console.log(`✅ Email retry successful for ${notification.recipientEmail}`);
-      return { success: true, emailId: result.messageId || undefined };
+      console.log(`✅ Email retry successful for ${notification.recipientEmail} (ID: ${messageId})`);
+      return { success: true, emailId: messageId || undefined };
     } catch (error: any) {
       console.error('❌ Email retry failed:', error);
 
@@ -321,12 +313,12 @@ export const emailService = {
           marketingEmailsEnabled: false,
           maxRetryAttempts: 3,
           retryDelayMinutes: 30,
-          fromEmail: 'notifications@mindfulchampion.ai',
-          fromName: 'Mindful Champion',
-          replyToEmail: 'support@mindfulchampion.ai',
+          fromEmail: FROM_EMAIL,
+          fromName: FROM_NAME,
+          replyToEmail: REPLY_TO_EMAIL,
         },
       });
-      console.log('✅ Email settings initialized');
+      console.log('✅ Email settings initialized with Resend configuration');
     }
   },
 };
