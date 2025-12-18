@@ -1,8 +1,11 @@
+/**
+ * Signup API Route - Uses Resend Only
+ * Gmail SMTP fallback removed to reduce costs
+ */
 
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
 import { prisma } from "@/lib/db"
-import { sendWelcomeEmail } from "@/lib/email"
 import { MediaCenterEmailService } from "@/lib/media-center/email-service"
 import { SubscriptionTier, PromoCodeStatus } from "@prisma/client"
 
@@ -140,7 +143,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Send enhanced welcome email with trial info
+    // Send welcome email via Resend
     try {
       const emailSent = await MediaCenterEmailService.sendWelcomeEmail(user.id)
       
@@ -153,24 +156,10 @@ export async function POST(req: NextRequest) {
             welcomeEmailSentAt: new Date(),
           }
         })
-        console.log(`✅ Enhanced welcome email sent to ${email}`)
+        console.log(`✅ Welcome email sent successfully to ${email}`)
       } else {
-        console.error(`❌ Failed to send enhanced welcome email to ${email}`)
-        
-        // Fallback to regular welcome email
-        try {
-          const fallbackResult = await sendWelcomeEmail({
-            to: email,
-            name: `${firstName} ${lastName}`,
-            firstName,
-          })
-          
-          if (fallbackResult.success) {
-            console.log(`✅ Fallback welcome email sent to ${email}`)
-          }
-        } catch (fallbackError) {
-          console.error('Fallback welcome email also failed:', fallbackError)
-        }
+        console.error(`❌ Failed to send welcome email to ${email}`)
+        // User signup is still successful, just email failed
       }
     } catch (emailError) {
       console.error('Error sending welcome email:', emailError)

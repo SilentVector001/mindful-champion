@@ -1,41 +1,18 @@
+/**
+ * Email Service - Resend Only
+ * All email functionality now exclusively uses Resend API
+ * Gmail SMTP removed to reduce costs (from 7 Google Workspace licenses to 1)
+ */
 
-import nodemailer from 'nodemailer';
+import { getResendClient } from '@/lib/email/resend-client';
 
-// Lazy transporter creation to ensure env vars are loaded
-let transporter: nodemailer.Transporter | null = null;
+// Initialize Resend client
+const resend = getResendClient();
 
-function getTransporter() {
-  if (!transporter) {
-    const gmailUser = process.env.GMAIL_USER;
-    const gmailPassword = process.env.GMAIL_APP_PASSWORD;
-    
-    if (!gmailUser || !gmailPassword) {
-      console.error('❌ Gmail credentials not configured. Please set GMAIL_USER and GMAIL_APP_PASSWORD in .env file.');
-      throw new Error('Gmail credentials not configured');
-    }
-    
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false, // Use TLS
-      auth: {
-        user: gmailUser,
-        pass: gmailPassword,
-      },
-    });
-    
-    // Verify transporter configuration
-    transporter.verify((error, success) => {
-      if (error) {
-        console.error('❌ Email transporter verification failed:', error);
-      } else {
-        console.log('✅ Email server is ready to send messages');
-      }
-    });
-  }
-  
-  return transporter;
-}
+// Email configuration
+const FROM_EMAIL = 'noreply@mindfulchampion.com';
+const FROM_NAME = 'Mindful Champion';
+const REPLY_TO_EMAIL = 'dean@mindfulchampion.com';
 
 interface WelcomeEmailOptions {
   to: string;
@@ -294,20 +271,29 @@ Elevate your pickleball game with AI-powered coaching 🏆
   `;
 
   try {
-    const info = await getTransporter().sendMail({
-      from: `"Mindful Champion 🏆" <${process.env.GMAIL_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: `${FROM_NAME} 🏆 <${FROM_EMAIL}>`,
+      to: [to],
       subject: '🏓 Welcome to Mindful Champion - Your Journey Begins!',
       text: textContent,
       html: htmlContent,
+      replyTo: REPLY_TO_EMAIL,
     });
 
-    console.log('✅ Welcome email sent successfully:', info.messageId);
+    if (error) {
+      console.error('❌ Error sending welcome email:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send email',
+      };
+    }
+
+    console.log('✅ Welcome email sent successfully:', data?.id);
     console.log(`📧 Email sent to: ${to}`);
     
     return {
       success: true,
-      messageId: info.messageId,
+      messageId: data?.id,
     };
   } catch (error) {
     console.error('❌ Error sending welcome email:', error);
@@ -440,20 +426,29 @@ You can also log into Mindful Champion to view and respond to this request.
   `;
 
   try {
-    const info = await getTransporter().sendMail({
-      from: `"Mindful Champion 🤝" <${process.env.GMAIL_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: `${FROM_NAME} 🤝 <${FROM_EMAIL}>`,
+      to: [to],
       subject: `🤝 ${senderName} wants to connect with you!`,
       text: textContent,
       html: htmlContent,
+      replyTo: REPLY_TO_EMAIL,
     });
 
-    console.log('✅ Partner request email sent successfully:', info.messageId);
+    if (error) {
+      console.error('❌ Error sending partner request email:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send email',
+      };
+    }
+
+    console.log('✅ Partner request email sent successfully:', data?.id);
     console.log(`📧 Email sent to: ${to}`);
     
     return {
       success: true,
-      messageId: info.messageId,
+      messageId: data?.id,
     };
   } catch (error) {
     console.error('❌ Error sending partner request email:', error);
@@ -483,20 +478,29 @@ interface GenericEmailOptions {
  */
 export async function sendEmail({ to, subject, text, html }: GenericEmailOptions) {
   try {
-    const info = await getTransporter().sendMail({
-      from: `"Mindful Champion 🏆" <${process.env.GMAIL_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: `${FROM_NAME} 🏆 <${FROM_EMAIL}>`,
+      to: [to],
       subject,
       text,
       html: html || text,
+      replyTo: REPLY_TO_EMAIL,
     });
 
-    console.log('✅ Email sent successfully:', info.messageId);
+    if (error) {
+      console.error('❌ Error sending email:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send email',
+      };
+    }
+
+    console.log('✅ Email sent successfully:', data?.id);
     console.log(`📧 Email sent to: ${to}`);
     
     return {
       success: true,
-      messageId: info.messageId,
+      messageId: data?.id,
     };
   } catch (error) {
     console.error('❌ Error sending email:', error);
@@ -703,20 +707,29 @@ Building a respectful and supportive pickleball community 🏆
   `;
 
   try {
-    const info = await getTransporter().sendMail({
-      from: `"Mindful Champion Security Team 🛡️" <${process.env.GMAIL_USER}>`,
-      to,
+    const { data, error } = await resend.emails.send({
+      from: `${FROM_NAME} Security Team 🛡️ <${FROM_EMAIL}>`,
+      to: [to],
       subject: `${config.emoji} ${config.label} - Mindful Champion`,
       text: textContent,
       html: htmlContent,
+      replyTo: REPLY_TO_EMAIL,
     });
 
-    console.log('✅ Warning email sent successfully:', info.messageId);
+    if (error) {
+      console.error('❌ Error sending warning email:', error);
+      return {
+        success: false,
+        error: error.message || 'Failed to send email',
+      };
+    }
+
+    console.log('✅ Warning email sent successfully:', data?.id);
     console.log(`📧 Warning email sent to: ${to}`);
     
     return {
       success: true,
-      messageId: info.messageId,
+      messageId: data?.id,
     };
   } catch (error) {
     console.error('❌ Error sending warning email:', error);

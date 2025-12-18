@@ -1,6 +1,9 @@
+/**
+ * Media Center Email Service - Resend Only
+ * Gmail SMTP fallback removed to reduce costs
+ */
 
 import { getResendClient } from '@/lib/email/resend-client';
-import { sendWelcomeEmail as sendWelcomeEmailViaNodemailer } from '@/lib/email';
 import { prisma } from '@/lib/db';
 
 // Define type locally to avoid Prisma client generation issues
@@ -241,7 +244,7 @@ export class MediaCenterEmailService {
       
       const template = this.getWelcomeTemplate(userName, trialEndDate);
 
-      // Try Resend first
+      // Send via Resend only
       const { data, error } = await resend.emails.send({
         from: `${this.FROM_NAME} <${this.FROM_EMAIL}>`,
         to: [user.email],
@@ -252,40 +255,21 @@ export class MediaCenterEmailService {
       });
 
       if (error) {
-        console.error('⚠️ Resend failed, falling back to Nodemailer:', error);
+        console.error('❌ Failed to send welcome email via Resend:', error);
         
-        // Fallback to Nodemailer (Gmail)
-        try {
-          const nodemailerResult = await sendWelcomeEmailViaNodemailer({
-            to: user.email,
-            name: userName,
-            firstName: user.firstName || undefined
-          });
-          
-          if (nodemailerResult.success) {
-            console.log('✅ Welcome email sent via Nodemailer fallback');
-            
-            await this.logEmailNotification({
-              userId,
-              type: 'WELCOME',
-              recipientEmail: user.email,
-              subject: template.subject,
-              status: 'SENT',
-              externalId: nodemailerResult.messageId
-            });
-            
-            return true;
-          } else {
-            console.error('❌ Nodemailer fallback also failed:', nodemailerResult.error);
-            return false;
-          }
-        } catch (fallbackError) {
-          console.error('❌ Nodemailer fallback exception:', fallbackError);
-          return false;
-        }
+        // Log the failure
+        await this.logEmailNotification({
+          userId,
+          type: 'WELCOME',
+          recipientEmail: user.email,
+          subject: template.subject,
+          status: 'FAILED',
+        });
+        
+        return false;
       }
 
-      // Resend succeeded
+      // Email sent successfully
       await this.logEmailNotification({
         userId,
         type: 'WELCOME',
@@ -295,7 +279,7 @@ export class MediaCenterEmailService {
         externalId: data?.id
       });
 
-      console.log('✅ Welcome email sent via Resend');
+      console.log('✅ Welcome email sent successfully via Resend');
       return true;
     } catch (error) {
       console.error('❌ Error in sendWelcomeEmail:', error);
