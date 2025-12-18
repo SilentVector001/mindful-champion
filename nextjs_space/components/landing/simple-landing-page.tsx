@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Mic, Video, Trophy, TrendingUp, Target, Zap, Play, Sparkles, Star, Users, BarChart3, Calendar, CheckCircle2, Award, BookOpen, Dumbbell } from 'lucide-react';
+import { ArrowRight, Mic, Video, Trophy, TrendingUp, Target, Zap, Play, Sparkles, Star, Users, BarChart3, Calendar, CheckCircle2, Award, BookOpen, Dumbbell, Activity } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -52,8 +52,8 @@ export default function SimpleLandingPage() {
         {/* Hero Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=1920&q=80"
-            alt="Pickleball action"
+            src="https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=1920&q=80"
+            alt="Professional pickleball player in action"
             fill
             className="object-cover opacity-40"
             priority
@@ -155,12 +155,22 @@ export default function SimpleLandingPage() {
               className="relative hidden lg:block"
             >
               <div className="relative bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm rounded-2xl border border-cyan-500/30 p-4 shadow-2xl shadow-cyan-500/20">
-                <div className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg">
-                  Coach Kai Ready
-                </div>
+                <motion.div 
+                  className="absolute -top-3 -right-3 bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(6, 182, 212, 0.5)',
+                      '0 0 30px rgba(20, 184, 166, 0.7)',
+                      '0 0 20px rgba(6, 182, 212, 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  ✨ Coach Kai Ready
+                </motion.div>
                 <Image
-                  src="https://images.unsplash.com/photo-1551958219-acbc608c6377?w=600&q=80"
-                  alt="Training dashboard preview"
+                  src="https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=600&q=80"
+                  alt="Pickleball training dashboard preview"
                   width={500}
                   height={350}
                   className="rounded-xl w-full"
@@ -187,8 +197,8 @@ export default function SimpleLandingPage() {
                   7 Programs
                 </div>
                 <Image
-                  src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=700&q=80"
-                  alt="Professional pickleball training"
+                  src="https://images.unsplash.com/photo-1693142518277-3568e9ec3176?w=700&q=80"
+                  alt="Professional pickleball training and coaching"
                   width={600}
                   height={400}
                   className="w-full object-cover"
@@ -261,11 +271,11 @@ export default function SimpleLandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { name: 'Serve', image: 'https://images.unsplash.com/photo-1587280501635-68a0e82cd5ff?w=300&q=80', count: '25+' },
-              { name: 'Dink', image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=300&q=80', count: '30+' },
-              { name: 'Volley', image: 'https://images.unsplash.com/photo-1599474924187-334a4ae5bd3c?w=300&q=80', count: '20+' },
-              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=300&q=80', count: '15+' },
-              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=300&q=80', count: '20+' },
+              { name: 'Serve', image: 'https://images.unsplash.com/photo-1710772099352-f8fbb7b30977?w=300&q=80', count: '25+' },
+              { name: 'Dink', image: 'https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=300&q=80', count: '30+' },
+              { name: 'Volley', image: 'https://images.unsplash.com/photo-1669684899238-64c4abe4d3cc?w=300&q=80', count: '20+' },
+              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1737476997205-b3336182f215?w=300&q=80', count: '15+' },
+              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1693142517898-2f986215e412?w=300&q=80', count: '20+' },
             ].map((drill, idx) => (
               <motion.div
                 key={idx}
@@ -308,9 +318,15 @@ export default function SimpleLandingPage() {
         </div>
       </section>
 
-      {/* COACH KAI - AI Coach Visual */}
-      <section className="py-20 bg-gradient-to-b from-slate-900 to-slate-950">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      {/* COACH KAI - AI Coach Visual - ENHANCED WITH DYNAMIC EFFECTS */}
+      <section className="py-20 bg-gradient-to-b from-slate-900 to-slate-950 relative overflow-hidden">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 left-10 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Content */}
             <motion.div
@@ -318,14 +334,14 @@ export default function SimpleLandingPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/40 px-3 py-1.5 rounded-full mb-4">
-                <Mic className="w-4 h-4 text-blue-400" />
+              <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/40 px-3 py-1.5 rounded-full mb-4 shadow-lg shadow-blue-500/20">
+                <Mic className="w-4 h-4 text-blue-400 animate-pulse" />
                 <span className="text-blue-400 text-sm font-semibold">AI VOICE COACH</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
                 Meet Coach Kai
                 <br />
-                <span className="text-blue-400">Your Personal AI Coach</span>
+                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Your Personal AI Coach</span>
               </h2>
               <p className="text-gray-300 text-lg mb-6">
                 Talk to Coach Kai anytime, anywhere. Get instant answers about technique, strategy, rules, and training. It's like having a pro coach in your pocket.
@@ -337,84 +353,339 @@ export default function SimpleLandingPage() {
                   'Personalized training recommendations',
                   'Available 24/7 - on court or off',
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-gray-300">
+                  <motion.li 
+                    key={idx} 
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-3 text-gray-300"
+                  >
                     <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0" />
                     {item}
-                  </li>
+                  </motion.li>
                 ))}
               </ul>
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold">
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all">
                   <Mic className="w-5 h-5 mr-2" />
                   Talk to Coach Kai
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Right: Coach Kai Interface Mockup */}
+            {/* Right: Coach Kai Interface Mockup - ENHANCED */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-blue-500/30 p-6 shadow-2xl shadow-blue-500/10">
-                <div className="absolute -top-3 left-6 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-1.5 rounded-full text-white text-sm font-bold">
-                  🎙️ Coach Kai
-                </div>
+              {/* Glowing border effect */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-500 rounded-2xl blur opacity-30 group-hover:opacity-50 animate-pulse" />
+              
+              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-blue-500/40 p-6 shadow-2xl shadow-blue-500/20">
+                {/* Animated badge */}
+                <motion.div 
+                  className="absolute -top-3 left-6 bg-gradient-to-r from-blue-500 to-cyan-500 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg shadow-blue-500/50"
+                  animate={{ 
+                    boxShadow: [
+                      '0 0 20px rgba(59, 130, 246, 0.5)',
+                      '0 0 40px rgba(6, 182, 212, 0.7)',
+                      '0 0 20px rgba(59, 130, 246, 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  🎙️ Coach Kai - LIVE
+                </motion.div>
+
                 <div className="space-y-4 pt-4">
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold">K</div>
-                    <div className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-2xl rounded-tl-none p-4">
+                  {/* Coach message */}
+                  <motion.div 
+                    className="flex gap-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                  >
+                    <motion.div 
+                      className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+                      animate={{ 
+                        boxShadow: [
+                          '0 0 0px rgba(59, 130, 246, 0.5)',
+                          '0 0 20px rgba(6, 182, 212, 0.8)',
+                          '0 0 0px rgba(59, 130, 246, 0.5)',
+                        ]
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    >
+                      K
+                    </motion.div>
+                    <motion.div 
+                      className="flex-1 bg-blue-500/10 border border-blue-500/30 rounded-2xl rounded-tl-none p-4 shadow-lg"
+                      whileHover={{ scale: 1.02, borderColor: 'rgba(59, 130, 246, 0.5)' }}
+                    >
                       <p className="text-gray-200">Hey! I'm Coach Kai. What would you like to work on today? I can help with technique, strategy, or recommend drills!</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3 justify-end">
-                    <div className="bg-slate-700/50 rounded-2xl rounded-tr-none p-4 max-w-[80%]">
+                    </motion.div>
+                  </motion.div>
+
+                  {/* User message */}
+                  <motion.div 
+                    className="flex gap-3 justify-end"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <motion.div 
+                      className="bg-slate-700/50 rounded-2xl rounded-tr-none p-4 max-w-[80%]"
+                      whileHover={{ scale: 1.02, backgroundColor: 'rgba(51, 65, 85, 0.6)' }}
+                    >
                       <p className="text-gray-300">How do I improve my third shot drop?</p>
-                    </div>
-                  </div>
-                  <div className="flex gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold">K</div>
-                    <div className="flex-1 bg-blue-500/10 border border-blue-500/20 rounded-2xl rounded-tl-none p-4">
+                    </motion.div>
+                  </motion.div>
+
+                  {/* Coach response */}
+                  <motion.div 
+                    className="flex gap-3"
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.4 }}
+                  >
+                    <motion.div 
+                      className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg"
+                      animate={{ 
+                        boxShadow: [
+                          '0 0 0px rgba(59, 130, 246, 0.5)',
+                          '0 0 20px rgba(6, 182, 212, 0.8)',
+                          '0 0 0px rgba(59, 130, 246, 0.5)',
+                        ]
+                      }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                    >
+                      K
+                    </motion.div>
+                    <motion.div 
+                      className="flex-1 bg-blue-500/10 border border-blue-500/30 rounded-2xl rounded-tl-none p-4 shadow-lg"
+                      whileHover={{ scale: 1.02, borderColor: 'rgba(59, 130, 246, 0.5)' }}
+                    >
                       <p className="text-gray-200">Great question! The third shot drop is crucial for transitioning to the kitchen. Focus on a soft, open paddle face and follow through toward your target...</p>
+                    </motion.div>
+                  </motion.div>
+                </div>
+
+                {/* Voice input with animated waves */}
+                <motion.div 
+                  className="mt-6 flex items-center gap-3 bg-slate-700/50 rounded-xl p-3 border border-blue-500/20 hover:border-blue-500/40 transition-all"
+                  whileHover={{ scale: 1.02 }}
+                >
+                  <motion.div 
+                    className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center relative shadow-lg shadow-blue-500/50"
+                    animate={{ 
+                      boxShadow: [
+                        '0 0 20px rgba(59, 130, 246, 0.5)',
+                        '0 0 40px rgba(6, 182, 212, 0.8)',
+                        '0 0 20px rgba(59, 130, 246, 0.5)',
+                      ]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Mic className="w-6 h-6 text-white" />
+                    {/* Animated voice waves */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full border-2 border-blue-400"
+                      animate={{
+                        scale: [1, 1.5, 1],
+                        opacity: [0.8, 0, 0.8],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity }}
+                    />
+                    <motion.div
+                      className="absolute inset-0 rounded-full border-2 border-cyan-400"
+                      animate={{
+                        scale: [1, 1.8, 1],
+                        opacity: [0.6, 0, 0.6],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, delay: 0.4 }}
+                    />
+                  </motion.div>
+                  <div className="flex-1">
+                    <div className="text-white font-medium mb-1">Voice Active</div>
+                    <div className="flex gap-1 items-center">
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <motion.div
+                          key={i}
+                          className="w-1 bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full"
+                          animate={{
+                            height: [8, 20, 8],
+                          }}
+                          transition={{
+                            duration: 0.8,
+                            repeat: Infinity,
+                            delay: i * 0.1,
+                          }}
+                        />
+                      ))}
+                      <span className="text-blue-400 text-sm ml-2">Listening...</span>
                     </div>
                   </div>
-                </div>
-                <div className="mt-6 flex items-center gap-3 bg-slate-700/50 rounded-xl p-3">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center animate-pulse">
-                    <Mic className="w-6 h-6 text-white" />
-                  </div>
-                  <div className="flex-1 text-gray-400">Press to talk...</div>
-                </div>
+                </motion.div>
               </div>
             </motion.div>
           </div>
         </div>
       </section>
 
-      {/* PROGRESS TRACKING - Dashboard Visual */}
+      {/* PROGRESS TRACKING - Dashboard Visual - ENHANCED WITH PERSONALITY */}
       <section className="py-20 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left: Dashboard Preview */}
+            {/* Left: Dashboard Preview with Animated Charts */}
             <motion.div
               initial={{ opacity: 0, x: -30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="relative order-2 lg:order-1"
             >
-              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-cyan-500/20 p-4 shadow-2xl">
-                <div className="absolute -top-3 left-6 bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-1.5 rounded-full text-white text-sm font-bold">
-                  Track Everything
+              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border border-cyan-500/30 p-6 shadow-2xl shadow-cyan-500/10">
+                <motion.div 
+                  className="absolute -top-3 left-6 bg-gradient-to-r from-cyan-500 to-teal-500 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(6, 182, 212, 0.5)',
+                      '0 0 30px rgba(20, 184, 166, 0.7)',
+                      '0 0 20px rgba(6, 182, 212, 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  📊 Live Analytics
+                </motion.div>
+
+                {/* Animated Progress Bars */}
+                <div className="space-y-6 pt-4">
+                  {/* Skill metrics */}
+                  {[
+                    { skill: 'Serve Accuracy', value: 85, color: 'from-orange-500 to-red-500', icon: '🎯' },
+                    { skill: 'Dink Control', value: 72, color: 'from-blue-500 to-cyan-500', icon: '💧' },
+                    { skill: 'Court Coverage', value: 90, color: 'from-green-500 to-emerald-500', icon: '⚡' },
+                    { skill: 'Shot Selection', value: 68, color: 'from-purple-500 to-pink-500', icon: '🧠' },
+                  ].map((metric, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="space-y-2"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl">{metric.icon}</span>
+                          <span className="text-white font-semibold text-sm">{metric.skill}</span>
+                        </div>
+                        <motion.span 
+                          className="text-cyan-400 font-bold text-sm"
+                          initial={{ opacity: 0 }}
+                          whileInView={{ opacity: 1 }}
+                          viewport={{ once: true }}
+                          transition={{ delay: idx * 0.1 + 0.5 }}
+                        >
+                          {metric.value}%
+                        </motion.span>
+                      </div>
+                      <div className="relative h-3 bg-slate-700/50 rounded-full overflow-hidden">
+                        <motion.div
+                          className={`h-full bg-gradient-to-r ${metric.color} rounded-full relative`}
+                          initial={{ width: 0 }}
+                          whileInView={{ width: `${metric.value}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 1, delay: idx * 0.1, ease: 'easeOut' }}
+                        >
+                          <motion.div
+                            className="absolute inset-0 bg-white/20"
+                            animate={{
+                              x: ['-100%', '100%'],
+                            }}
+                            transition={{
+                              duration: 1.5,
+                              repeat: Infinity,
+                              ease: 'linear',
+                            }}
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Stats Cards */}
+                  <div className="grid grid-cols-3 gap-3 mt-6">
+                    {[
+                      { label: 'Training Days', value: '47', trend: '+12%', icon: '📅' },
+                      { label: 'Drills Done', value: '156', trend: '+28%', icon: '🏋️' },
+                      { label: 'Avg. Score', value: '4.2', trend: '+0.8', icon: '⭐' },
+                    ].map((stat, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.5 + idx * 0.1 }}
+                        className="bg-slate-700/30 border border-cyan-500/20 rounded-xl p-3 hover:border-cyan-500/40 hover:scale-105 transition-all"
+                        whileHover={{ y: -5 }}
+                      >
+                        <div className="text-2xl mb-1">{stat.icon}</div>
+                        <div className="text-white font-bold text-lg">{stat.value}</div>
+                        <div className="text-gray-400 text-xs mb-1">{stat.label}</div>
+                        <motion.div 
+                          className="text-green-400 text-xs font-semibold flex items-center gap-1"
+                          animate={{ opacity: [1, 0.6, 1] }}
+                          transition={{ duration: 2, repeat: Infinity }}
+                        >
+                          <TrendingUp className="w-3 h-3" />
+                          {stat.trend}
+                        </motion.div>
+                      </motion.div>
+                    ))}
+                  </div>
+
+                  {/* Chart visualization mockup */}
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.8 }}
+                    className="mt-4 bg-slate-700/20 border border-cyan-500/20 rounded-xl p-4"
+                  >
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="text-white text-sm font-semibold">Weekly Progress</span>
+                      <Activity className="w-4 h-4 text-cyan-400" />
+                    </div>
+                    <div className="flex items-end justify-between h-24 gap-2">
+                      {[40, 65, 52, 78, 85, 72, 90].map((height, idx) => (
+                        <motion.div
+                          key={idx}
+                          className="flex-1 bg-gradient-to-t from-cyan-500 to-teal-400 rounded-t"
+                          initial={{ height: 0 }}
+                          whileInView={{ height: `${height}%` }}
+                          viewport={{ once: true }}
+                          transition={{ duration: 0.8, delay: 0.9 + idx * 0.05 }}
+                          whileHover={{ opacity: 0.8, scale: 1.05 }}
+                        />
+                      ))}
+                    </div>
+                    <div className="flex justify-between mt-2 text-xs text-gray-500">
+                      <span>Mon</span>
+                      <span>Tue</span>
+                      <span>Wed</span>
+                      <span>Thu</span>
+                      <span>Fri</span>
+                      <span>Sat</span>
+                      <span>Sun</span>
+                    </div>
+                  </motion.div>
                 </div>
-                <Image
-                  src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=600&q=80"
-                  alt="Progress dashboard"
-                  width={550}
-                  height={350}
-                  className="rounded-xl w-full"
-                />
               </div>
             </motion.div>
 
@@ -425,33 +696,42 @@ export default function SimpleLandingPage() {
               viewport={{ once: true }}
               className="order-1 lg:order-2"
             >
-              <div className="inline-flex items-center gap-2 bg-cyan-500/20 border border-cyan-500/40 px-3 py-1.5 rounded-full mb-4">
-                <TrendingUp className="w-4 h-4 text-cyan-400" />
+              <div className="inline-flex items-center gap-2 bg-cyan-500/20 border border-cyan-500/40 px-3 py-1.5 rounded-full mb-4 shadow-lg shadow-cyan-500/20">
+                <TrendingUp className="w-4 h-4 text-cyan-400 animate-pulse" />
                 <span className="text-cyan-400 text-sm font-semibold">PROGRESS TRACKING</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
                 See Your Progress
                 <br />
-                <span className="text-cyan-400">In Real-Time</span>
+                <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">In Real-Time</span>
               </h2>
               <p className="text-gray-300 text-lg mb-6">
                 Set personalized goals and track your journey with detailed analytics. Watch your skills improve through data-driven insights and visual progress charts.
               </p>
-              <ul className="space-y-3 mb-8">
+              <div className="space-y-4 mb-8">
                 {[
-                  'Customizable skill improvement goals',
-                  'Detailed performance analytics & charts',
-                  'Achievement system with rewards',
-                  'Historical data comparison',
+                  { text: 'Customizable skill improvement goals', icon: Target },
+                  { text: 'Detailed performance analytics & charts', icon: BarChart3 },
+                  { text: 'Achievement system with rewards', icon: Award },
+                  { text: 'Historical data comparison', icon: Calendar },
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-cyan-500 flex-shrink-0" />
-                    {item}
-                  </li>
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-3 p-3 bg-slate-800/30 border border-cyan-500/10 rounded-lg hover:border-cyan-500/30 hover:bg-slate-800/50 transition-all group"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <item.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-gray-300 group-hover:text-white transition-colors">{item.text}</span>
+                  </motion.div>
                 ))}
-              </ul>
+              </div>
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold">
+                <Button className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all">
                   Track Your Progress
                   <TrendingUp className="w-5 h-5 ml-2" />
                 </Button>
@@ -461,9 +741,15 @@ export default function SimpleLandingPage() {
         </div>
       </section>
 
-      {/* GAMIFICATION - Badges Visual */}
-      <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+      {/* GAMIFICATION - Badges Visual - ENHANCED WITH 3D EFFECTS */}
+      <section className="py-20 bg-gradient-to-b from-slate-950 to-slate-900 relative overflow-hidden">
+        {/* Sparkle particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-10 right-20 w-32 h-32 bg-yellow-500/10 rounded-full blur-2xl animate-pulse" />
+          <div className="absolute bottom-10 left-20 w-48 h-48 bg-orange-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left: Content */}
             <motion.div
@@ -471,71 +757,194 @@ export default function SimpleLandingPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
             >
-              <div className="inline-flex items-center gap-2 bg-yellow-500/20 border border-yellow-500/40 px-3 py-1.5 rounded-full mb-4">
-                <Award className="w-4 h-4 text-yellow-400" />
+              <div className="inline-flex items-center gap-2 bg-yellow-500/20 border border-yellow-500/40 px-3 py-1.5 rounded-full mb-4 shadow-lg shadow-yellow-500/20">
+                <Award className="w-4 h-4 text-yellow-400 animate-pulse" />
                 <span className="text-yellow-400 text-sm font-semibold">GAMIFICATION</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
                 Earn Rewards &
                 <br />
-                <span className="text-yellow-400">Celebrate Wins</span>
+                <span className="bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 bg-clip-text text-transparent">Celebrate Wins</span>
               </h2>
               <p className="text-gray-300 text-lg mb-6">
                 Stay motivated with our comprehensive reward system. Unlock achievements, earn badges, and celebrate every milestone on your journey to becoming a champion.
               </p>
-              <ul className="space-y-3 mb-8">
+              <div className="space-y-4 mb-8">
                 {[
-                  'Achievement badges for skill milestones',
-                  'Tiered reward system (Bronze, Silver, Gold)',
-                  'Streak tracking and bonus rewards',
-                  'Leaderboards and community recognition',
+                  { text: 'Achievement badges for skill milestones', icon: Star },
+                  { text: 'Tiered reward system (Bronze, Silver, Gold)', icon: Award },
+                  { text: 'Streak tracking and bonus rewards', icon: Zap },
+                  { text: 'Leaderboards and community recognition', icon: Users },
                 ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-yellow-500 flex-shrink-0" />
-                    {item}
-                  </li>
+                  <motion.div
+                    key={idx}
+                    initial={{ opacity: 0, x: -20 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: idx * 0.1 }}
+                    className="flex items-center gap-3 p-3 bg-slate-800/30 border border-yellow-500/10 rounded-lg hover:border-yellow-500/30 hover:bg-slate-800/50 transition-all group"
+                  >
+                    <div className="w-10 h-10 bg-gradient-to-br from-yellow-500 to-orange-500 rounded-lg flex items-center justify-center group-hover:scale-110 group-hover:rotate-6 transition-transform">
+                      <item.icon className="w-5 h-5 text-white" />
+                    </div>
+                    <span className="text-gray-300 group-hover:text-white transition-colors">{item.text}</span>
+                  </motion.div>
                 ))}
-              </ul>
+              </div>
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold">
+                <Button className="bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-yellow-500/30 hover:shadow-yellow-500/50 hover:scale-105 transition-all">
                   Start Earning Rewards
                   <Award className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
             </motion.div>
 
-            {/* Right: Badges Display */}
+            {/* Right: Badges Display - ENHANCED WITH 3D EFFECTS */}
             <motion.div
               initial={{ opacity: 0, x: 30 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="absolute -top-3 right-6 bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-1.5 rounded-full text-white text-sm font-bold z-10">
-                100+ Badges
-              </div>
-              <div className="grid grid-cols-3 gap-4">
+              <motion.div 
+                className="absolute -top-3 right-6 bg-gradient-to-r from-yellow-500 to-orange-500 px-4 py-1.5 rounded-full text-white text-sm font-bold z-10 shadow-lg shadow-yellow-500/50"
+                animate={{
+                  boxShadow: [
+                    '0 0 20px rgba(234, 179, 8, 0.5)',
+                    '0 0 30px rgba(249, 115, 22, 0.7)',
+                    '0 0 20px rgba(234, 179, 8, 0.5)',
+                  ]
+                }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ✨ 100+ Badges
+              </motion.div>
+              <div className="grid grid-cols-3 gap-4 pt-6">
                 {[
-                  { emoji: '🏆', name: 'Champion', color: 'from-yellow-500/20 to-orange-500/20' },
-                  { emoji: '🎯', name: 'Sharpshooter', color: 'from-red-500/20 to-pink-500/20' },
-                  { emoji: '⚡', name: 'Speed Demon', color: 'from-blue-500/20 to-cyan-500/20' },
-                  { emoji: '🔥', name: 'On Fire', color: 'from-orange-500/20 to-red-500/20' },
-                  { emoji: '💪', name: 'Consistent', color: 'from-green-500/20 to-emerald-500/20' },
-                  { emoji: '🌟', name: 'Rising Star', color: 'from-purple-500/20 to-pink-500/20' },
+                  { emoji: '🏆', name: 'Champion', color: 'from-yellow-500/30 to-orange-500/30', borderColor: 'yellow-500', shadowColor: 'yellow' },
+                  { emoji: '🎯', name: 'Sharpshooter', color: 'from-red-500/30 to-pink-500/30', borderColor: 'red-500', shadowColor: 'red' },
+                  { emoji: '⚡', name: 'Speed Demon', color: 'from-blue-500/30 to-cyan-500/30', borderColor: 'blue-500', shadowColor: 'blue' },
+                  { emoji: '🔥', name: 'On Fire', color: 'from-orange-500/30 to-red-500/30', borderColor: 'orange-500', shadowColor: 'orange' },
+                  { emoji: '💪', name: 'Consistent', color: 'from-green-500/30 to-emerald-500/30', borderColor: 'green-500', shadowColor: 'green' },
+                  { emoji: '🌟', name: 'Rising Star', color: 'from-purple-500/30 to-pink-500/30', borderColor: 'purple-500', shadowColor: 'purple' },
                 ].map((badge, idx) => (
                   <motion.div
                     key={idx}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
+                    initial={{ opacity: 0, scale: 0.5, rotateY: -180 }}
+                    whileInView={{ opacity: 1, scale: 1, rotateY: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    className={`bg-gradient-to-br ${badge.color} border border-yellow-500/20 rounded-xl p-4 text-center hover:scale-105 transition-transform`}
+                    transition={{ 
+                      delay: idx * 0.15, 
+                      type: 'spring',
+                      stiffness: 200,
+                      damping: 15 
+                    }}
+                    whileHover={{ 
+                      scale: 1.15, 
+                      rotateY: 15,
+                      rotateX: 10,
+                      transition: { duration: 0.3 }
+                    }}
+                    className={`relative bg-gradient-to-br ${badge.color} border-2 border-${badge.borderColor}/40 rounded-xl p-6 text-center cursor-pointer group`}
+                    style={{
+                      transformStyle: 'preserve-3d',
+                      perspective: '1000px'
+                    }}
                   >
-                    <div className="text-4xl mb-2">{badge.emoji}</div>
-                    <div className="text-white text-sm font-medium">{badge.name}</div>
+                    {/* Glow effect on hover */}
+                    <motion.div
+                      className={`absolute inset-0 rounded-xl bg-gradient-to-br ${badge.color} blur opacity-0 group-hover:opacity-60 transition-opacity -z-10`}
+                      animate={{
+                        scale: [1, 1.1, 1],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: idx * 0.2
+                      }}
+                    />
+                    
+                    {/* Badge content */}
+                    <motion.div
+                      className="relative"
+                      animate={{
+                        y: [0, -5, 0],
+                      }}
+                      transition={{
+                        duration: 2,
+                        repeat: Infinity,
+                        delay: idx * 0.3
+                      }}
+                    >
+                      <div className="text-5xl mb-2 filter drop-shadow-lg">{badge.emoji}</div>
+                      <div className="text-white text-sm font-bold">{badge.name}</div>
+                    </motion.div>
+
+                    {/* Sparkle effect */}
+                    <motion.div
+                      className="absolute -top-2 -right-2 text-yellow-400"
+                      animate={{
+                        scale: [0, 1.5, 0],
+                        rotate: [0, 180, 360],
+                        opacity: [0, 1, 0]
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        delay: idx * 0.5
+                      }}
+                    >
+                      <Sparkles className="w-4 h-4" />
+                    </motion.div>
+
+                    {/* Shine effect */}
+                    <motion.div
+                      className="absolute inset-0 rounded-xl overflow-hidden"
+                      initial={{ x: '-100%' }}
+                      whileHover={{
+                        x: '100%',
+                        transition: { duration: 0.6, ease: 'easeInOut' }
+                      }}
+                    >
+                      <div className="h-full w-1/2 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12" />
+                    </motion.div>
                   </motion.div>
                 ))}
               </div>
+
+              {/* Tier indicators */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.8 }}
+                className="flex justify-center gap-4 mt-6"
+              >
+                {['Bronze', 'Silver', 'Gold'].map((tier, idx) => (
+                  <motion.div
+                    key={tier}
+                    className="flex items-center gap-2 bg-slate-800/50 border border-yellow-500/20 px-4 py-2 rounded-full"
+                    whileHover={{ scale: 1.1, borderColor: 'rgba(234, 179, 8, 0.4)' }}
+                  >
+                    <motion.div
+                      className={`w-3 h-3 rounded-full ${
+                        tier === 'Bronze' ? 'bg-orange-600' :
+                        tier === 'Silver' ? 'bg-gray-400' :
+                        'bg-yellow-400'
+                      }`}
+                      animate={{
+                        boxShadow: [
+                          '0 0 5px rgba(234, 179, 8, 0.3)',
+                          '0 0 15px rgba(234, 179, 8, 0.6)',
+                          '0 0 5px rgba(234, 179, 8, 0.3)',
+                        ]
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, delay: idx * 0.3 }}
+                    />
+                    <span className="text-white text-sm font-medium">{tier}</span>
+                  </motion.div>
+                ))}
+              </motion.div>
             </motion.div>
           </div>
         </div>
@@ -566,11 +975,11 @@ export default function SimpleLandingPage() {
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="relative rounded-2xl overflow-hidden border border-purple-500/20"
+            className="relative rounded-2xl overflow-hidden border border-purple-500/20 shadow-2xl shadow-purple-500/10"
           >
             <Image
-              src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200&q=80"
-              alt="Tournament action"
+              src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=1200&q=80"
+              alt="Pickleball tournament competition action"
               width={1200}
               height={500}
               className="w-full h-[400px] object-cover"
@@ -583,9 +992,17 @@ export default function SimpleLandingPage() {
               </p>
               <div className="flex flex-wrap gap-3">
                 {['Seniors 50+', 'Juniors U18', 'Recreational', 'Competitive 3.5-5.0', 'Pro Leagues', 'Local Events'].map((cat, idx) => (
-                  <span key={idx} className="bg-purple-500/20 border border-purple-500/40 px-4 py-2 rounded-full text-purple-300 text-sm font-medium">
+                  <motion.span 
+                    key={idx} 
+                    className="bg-purple-500/20 border border-purple-500/40 px-4 py-2 rounded-full text-purple-300 text-sm font-medium hover:bg-purple-500/30 hover:scale-105 transition-all cursor-pointer"
+                    whileHover={{ y: -2 }}
+                    initial={{ opacity: 0, y: 10 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: 0.5 + idx * 0.05 }}
+                  >
                     {cat}
-                  </span>
+                  </motion.span>
                 ))}
               </div>
             </div>
