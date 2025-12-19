@@ -744,6 +744,15 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
 
+                <InfoTooltip content="Get help, FAQs, tutorials, and support resources" side="left">
+                  <DropdownMenuItem asChild>
+                    <Link href="/help" className="flex items-center gap-3 py-2 cursor-pointer">
+                      <HelpCircle className="w-4 h-4 text-champion-blue" />
+                      Help Center
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+
                 <InfoTooltip content="Notifications, privacy, and app preferences" side="left">
                   <DropdownMenuItem asChild>
                     <Link href="/settings" className="flex items-center gap-3 py-2 cursor-pointer">
@@ -1003,6 +1012,13 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Crown className="w-5 h-5 text-champion-gold" />
                     Subscription
+                  </Button>
+                </Link>
+
+                <Link href="/help" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
+                    <HelpCircle className="w-5 h-5 text-champion-blue" />
+                    Help Center
                   </Button>
                 </Link>
 
