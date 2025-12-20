@@ -89,29 +89,51 @@ export async function GET(request: NextRequest) {
       prisma.emailNotification.count({ where }),
     ]);
 
-    // Get statistics
-    const stats = await prisma.emailNotification.groupBy({
-      by: ['status'],
-      _count: true,
-      where: userId ? { userId } : {},
-    });
+    // Get statistics - wrapped in try-catch for better error handling
+    let statsMap: Record<string, number> = {};
+    let typeDistribution: Array<{ type: string; count: number }> = [];
+    
+    try {
+      const stats = await prisma.emailNotification.groupBy({
+        by: ['status'],
+        _count: {
+          status: true,
+        },
+        where: userId ? { userId } : {},
+      });
 
-    const statsMap = stats.reduce((acc: any, stat) => {
-      acc[stat.status] = stat._count;
-      return acc;
-    }, {});
+      statsMap = stats.reduce((acc: Record<string, number>, stat) => {
+        acc[stat.status] = stat._count.status;
+        return acc;
+      }, {});
+    } catch (statsError) {
+      console.error('Error fetching email stats:', statsError);
+      // Continue with empty stats
+    }
 
     // Get type distribution
-    const typeDistribution = await prisma.emailNotification.groupBy({
-      by: ['type'],
-      _count: true,
-      orderBy: {
+    try {
+      const typeDistResult = await prisma.emailNotification.groupBy({
+        by: ['type'],
         _count: {
-          type: 'desc',
+          type: true,
         },
-      },
-      take: 10,
-    });
+        orderBy: {
+          _count: {
+            type: 'desc',
+          },
+        },
+        take: 10,
+      });
+      
+      typeDistribution = typeDistResult.map((td) => ({
+        type: td.type,
+        count: td._count.type,
+      }));
+    } catch (typeError) {
+      console.error('Error fetching type distribution:', typeError);
+      // Continue with empty distribution
+    }
 
     const totalPages = Math.ceil(totalCount / limit);
 
@@ -143,10 +165,7 @@ export async function GET(request: NextRequest) {
         clicked: statsMap.CLICKED || 0,
         bounced: statsMap.BOUNCED || 0,
       },
-      typeDistribution: typeDistribution.map((td) => ({
-        type: td.type,
-        count: td._count,
-      })),
+      typeDistribution,
     });
   } catch (error: any) {
     console.error('Error fetching email history:', error);
