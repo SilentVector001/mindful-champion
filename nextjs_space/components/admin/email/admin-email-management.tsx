@@ -220,6 +220,33 @@ export default function AdminEmailManagement() {
     }
   };
 
+  // Initialize Email System
+  const handleInitializeEmailSystem = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/emails/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Email system initialized! Check your inbox for confirmation.');
+        // Reload email history after a short delay
+        setTimeout(() => {
+          loadEmailHistory();
+        }, 2000);
+      } else {
+        toast.error(data.error || 'Failed to initialize email system');
+      }
+    } catch (error) {
+      toast.error('Failed to initialize email system');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Apply Template
   const applyTemplate = (templateKey: string) => {
     const template = emailTemplates[templateKey as keyof typeof emailTemplates];
@@ -692,8 +719,37 @@ export default function AdminEmailManagement() {
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                   </div>
                 ) : emailHistory.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    No emails found
+                  <div className="text-center py-12">
+                    <div className="max-w-md mx-auto">
+                      <Mail className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        No Emails Found
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-6">
+                        Your email system is ready, but no emails have been sent through the application yet.
+                        Click below to send a test email and populate the dashboard.
+                      </p>
+                      <Button
+                        onClick={handleInitializeEmailSystem}
+                        disabled={loading}
+                        className="bg-gradient-to-r from-teal-600 to-cyan-600"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Initializing...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Initialize Email System
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-gray-400 mt-3">
+                        This will send a test email to your admin account and create your first email record.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
