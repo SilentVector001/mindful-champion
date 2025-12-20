@@ -418,6 +418,270 @@ function VideoCard({
   )
 }
 
+// View Examples Modal
+function ViewExamplesModal({ onClose }: { onClose: () => void }) {
+  const exampleVideos = [
+    {
+      id: 1,
+      title: "Pro Serve Analysis",
+      videoUrl: "/videos/examples/IMG_0421.MOV",
+      score: 85,
+      tags: ["Serve", "Technique"],
+      strengths: ["Strong topspin on serve", "Consistent ball toss placement", "Good leg drive and power generation"],
+      improvements: ["Follow-through could be more complete", "Slight hesitation before contact"],
+      keyMetrics: { power: 82, accuracy: 88, consistency: 85 }
+    },
+    {
+      id: 2,
+      title: "Dink Rally Breakdown",
+      videoUrl: "/videos/examples/IMG_0422.MOV",
+      score: 78,
+      tags: ["Dink", "Footwork"],
+      strengths: ["Excellent soft hands at the kitchen", "Good court positioning", "Patient shot selection"],
+      improvements: ["Footwork could be quicker on lateral moves", "Paddle face angle inconsistent"],
+      keyMetrics: { touch: 80, positioning: 82, patience: 75 }
+    }
+  ]
+
+  const [selectedVideo, setSelectedVideo] = useState(exampleVideos[0])
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-900 border border-kai-primary/50 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-2xl"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
+                <Eye className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Example Analyses</h3>
+                <p className="text-sm text-slate-400">See what Coach Kai's analysis looks like</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-slate-400 hover:text-white">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          {/* Video Selector Tabs */}
+          <div className="flex gap-2 mb-4">
+            {exampleVideos.map((video) => (
+              <Button
+                key={video.id}
+                variant={selectedVideo.id === video.id ? "default" : "outline"}
+                size="sm"
+                onClick={() => setSelectedVideo(video)}
+                className={selectedVideo.id === video.id ? "bg-kai-primary" : "border-slate-600"}
+              >
+                {video.title}
+              </Button>
+            ))}
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Video Preview */}
+            <div>
+              <div className="aspect-video rounded-xl overflow-hidden bg-black mb-4">
+                <video
+                  key={selectedVideo.videoUrl}
+                  src={selectedVideo.videoUrl}
+                  controls
+                  className="w-full h-full object-contain"
+                  playsInline
+                />
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                {selectedVideo.tags.map((tag) => (
+                  <Badge key={tag} variant="outline" className="text-xs border-kai-primary/50 text-kai-primary">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+
+            {/* Analysis Results */}
+            <div className="space-y-4">
+              {/* Score */}
+              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                <div className="flex items-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center">
+                    <span className="text-2xl font-black text-white">{selectedVideo.score}</span>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-400">AI Performance Score</p>
+                    <p className="text-lg font-semibold text-white">{selectedVideo.title}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Strengths */}
+              <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/30">
+                <h4 className="text-sm font-semibold text-green-400 mb-2 flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4" /> Strengths
+                </h4>
+                <ul className="space-y-1 text-sm text-slate-300">
+                  {selectedVideo.strengths.map((s, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-green-400 mt-1">•</span> {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Areas to Improve */}
+              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
+                <h4 className="text-sm font-semibold text-amber-400 mb-2 flex items-center gap-2">
+                  <Target className="w-4 h-4" /> Areas to Improve
+                </h4>
+                <ul className="space-y-1 text-sm text-slate-300">
+                  {selectedVideo.improvements.map((s, i) => (
+                    <li key={i} className="flex items-start gap-2">
+                      <span className="text-amber-400 mt-1">•</span> {s}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Key Metrics */}
+              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
+                <h4 className="text-sm font-semibold text-slate-300 mb-3">Key Metrics</h4>
+                <div className="space-y-2">
+                  {Object.entries(selectedVideo.keyMetrics).map(([key, value]) => (
+                    <div key={key} className="flex items-center gap-3">
+                      <span className="text-xs text-slate-400 w-20 capitalize">{key}</span>
+                      <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-kai-primary to-kai-secondary rounded-full"
+                          style={{ width: `${value}%` }}
+                        />
+                      </div>
+                      <span className="text-xs font-medium text-white w-8">{value}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// Quick Start Guide Modal
+function QuickStartModal({ onClose }: { onClose: () => void }) {
+  const steps = [
+    {
+      step: 1,
+      title: "Upload Your Video",
+      description: "Record your pickleball game with any device - phone, GoPro, or camera. Upload the video file (MP4, MOV, or AVI up to 500MB).",
+      icon: Upload,
+      tip: "Tip: Side-angle recordings work best for technique analysis"
+    },
+    {
+      step: 2,
+      title: "AI Analysis Begins",
+      description: "Coach Kai's neural networks analyze every frame - tracking your movements, shots, positioning, and technique.",
+      icon: Brain,
+      tip: "Analysis typically takes 2-5 minutes depending on video length"
+    },
+    {
+      step: 3,
+      title: "Review Your Results",
+      description: "Get detailed insights including an AI score, strengths, areas to improve, shot breakdowns, and key moments.",
+      icon: BarChart3,
+      tip: "Click on any video in your library to see full analysis"
+    },
+    {
+      step: 4,
+      title: "Track Your Progress",
+      description: "Upload multiple videos over time to track your improvement. Download PDF reports to share with coaches.",
+      icon: TrendingUp,
+      tip: "Compare scores across videos to measure your growth"
+    }
+  ]
+
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <motion.div
+        initial={{ scale: 0.95, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        exit={{ scale: 0.95, opacity: 0 }}
+        onClick={(e) => e.stopPropagation()}
+        className="bg-slate-900 border border-kai-primary/50 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto shadow-2xl"
+      >
+        <div className="p-6">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
+                <Play className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-white">Quick Start Guide</h3>
+                <p className="text-sm text-slate-400">Get started with video analysis in 4 easy steps</p>
+              </div>
+            </div>
+            <Button variant="ghost" size="sm" onClick={onClose} className="text-slate-400 hover:text-white">
+              <X className="w-5 h-5" />
+            </Button>
+          </div>
+
+          <div className="space-y-4">
+            {steps.map((item) => (
+              <div key={item.step} className="flex gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
+                <div className="flex-shrink-0">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center">
+                    <item.icon className="w-6 h-6 text-white" />
+                  </div>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className="bg-kai-primary/20 text-kai-primary border-0 text-xs">Step {item.step}</Badge>
+                    <h4 className="font-semibold text-white">{item.title}</h4>
+                  </div>
+                  <p className="text-sm text-slate-300 mb-2">{item.description}</p>
+                  <p className="text-xs text-kai-primary flex items-center gap-1">
+                    <Lightbulb className="w-3 h-3" />
+                    {item.tip}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 flex gap-3">
+            <Button onClick={onClose} className="flex-1 bg-gradient-to-r from-kai-primary to-kai-secondary">
+              Got it, let's upload!
+            </Button>
+            <Button variant="outline" onClick={onClose} className="border-slate-600 text-slate-300">
+              Close
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
 // Post-Upload Modal
 function PostUploadModal({ 
   videoId, 
@@ -514,6 +778,10 @@ export default function VideoAnalysisHub() {
   
   // How it works section
   const [showHowItWorks, setShowHowItWorks] = useState(false)
+  
+  // Modal states
+  const [showViewExamples, setShowViewExamples] = useState(false)
+  const [showQuickStart, setShowQuickStart] = useState(false)
 
   const userTier = (session?.user as any)?.subscriptionTier || 'FREE'
 
@@ -828,6 +1096,20 @@ export default function VideoAnalysisHub() {
         )}
       </AnimatePresence>
 
+      {/* View Examples Modal */}
+      <AnimatePresence>
+        {showViewExamples && (
+          <ViewExamplesModal onClose={() => setShowViewExamples(false)} />
+        )}
+      </AnimatePresence>
+
+      {/* Quick Start Guide Modal */}
+      <AnimatePresence>
+        {showQuickStart && (
+          <QuickStartModal onClose={() => setShowQuickStart(false)} />
+        )}
+      </AnimatePresence>
+
       {/* Post-Upload Modal */}
       <AnimatePresence>
         {showPostUploadModal && (
@@ -978,11 +1260,19 @@ export default function VideoAnalysisHub() {
             <TabsContent value="upload" className="space-y-6">
               {/* Action Buttons */}
               <div className="flex flex-wrap justify-center gap-3">
-                <Button variant="default" className="bg-gradient-to-r from-kai-primary to-kai-secondary">
+                <Button 
+                  variant="default" 
+                  className="bg-gradient-to-r from-kai-primary to-kai-secondary"
+                  onClick={() => setShowQuickStart(true)}
+                >
                   <Play className="w-4 h-4 mr-2" />
                   Quick Start Guide
                 </Button>
-                <Button variant="outline" className="border-border/50 hover:bg-card/50">
+                <Button 
+                  variant="outline" 
+                  className="border-border/50 hover:bg-card/50"
+                  onClick={() => setShowViewExamples(true)}
+                >
                   <Eye className="w-4 h-4 mr-2" />
                   View Examples
                 </Button>
