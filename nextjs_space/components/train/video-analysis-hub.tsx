@@ -26,7 +26,6 @@ import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
 import type { VideoAnalysisData, VideoLibraryStats } from "@/lib/video-analysis-types"
 import MainNavigation from "@/components/navigation/main-navigation"
-import CompactNotificationCenter from "@/components/notifications/compact-notification-center"
 import { AchievementToast, useAchievementNotifications } from "@/components/rewards/achievement-toast"
 import { parseScore, formatScore, getSafeScore } from "@/lib/video-analysis/score-utils"
 import { upload } from '@vercel/blob/client'
@@ -1143,7 +1142,6 @@ export default function VideoAnalysisHub() {
                 </div>
               </div>
               <div className="flex items-center gap-2">
-                <CompactNotificationCenter position="relative" />
                 <Button
                   variant="ghost"
                   size="sm"
