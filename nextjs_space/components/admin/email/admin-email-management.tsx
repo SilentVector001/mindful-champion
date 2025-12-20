@@ -119,8 +119,13 @@ export default function AdminEmailManagement() {
       const data = await response.json();
       
       if (response.ok) {
-        setEmailHistory(data.emails);
-        setStats(data.stats);
+        setEmailHistory(data.emails || []);
+        setStats({
+          total: data.statistics?.total || 0,
+          sent: data.statistics?.sent || 0,
+          failed: data.statistics?.failed || 0,
+          pending: data.statistics?.pending || 0,
+        });
       } else {
         toast.error(data.error || 'Failed to load email history');
       }
@@ -705,7 +710,7 @@ export default function AdminEmailManagement() {
                               {email.status}
                             </Badge>
                             <span className="text-sm text-gray-600">
-                              {format(new Date(email.sentAt), 'MMM dd, yyyy HH:mm')}
+                              {format(new Date(email.sentAt || email.createdAt), 'MMM dd, yyyy HH:mm')}
                             </span>
                           </div>
                           <p className="font-medium text-gray-900">{email.subject}</p>
