@@ -27,12 +27,12 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
-// REAL PICKLEBALL images from Unsplash
+// TOURNAMENT ACTION/ENVIRONMENT images from Unsplash
 const TOURNAMENT_IMAGES = [
-  "https://images.unsplash.com/photo-1693142519367-e8eb86d2bb08?w=800&q=80", // Pickleball court
-  "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80", // Pickleball player
-  "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80", // Pickleball game
-  "https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=800&q=80", // Pickleball paddles
+  "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80", // Indoor tournament setting with players competing
+  "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80", // Outdoor court action shot
+  "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80", // Indoor competition scene
+  "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80", // Outdoor court with players
 ]
 
 // Featured championship events - real tournaments to display
@@ -46,7 +46,7 @@ const FEATURED_CHAMPIONSHIPS = [
     prizePool: 250000,
     type: "grand-slam",
     registrationUrl: "https://ppatour.com/schedule/",
-    image: "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80" // Indoor tournament setting with players competing
   },
   {
     id: "app-chicago-2025",
@@ -57,7 +57,7 @@ const FEATURED_CHAMPIONSHIPS = [
     prizePool: 175000,
     type: "grand-slam",
     registrationUrl: "https://www.theapp.global/schedule",
-    image: "https://images.unsplash.com/photo-1693142518230-f049c9fc1ad2?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
   },
   {
     id: "usap-nationals-2025",
@@ -68,7 +68,7 @@ const FEATURED_CHAMPIONSHIPS = [
     prizePool: 300000,
     type: "grand-slam",
     registrationUrl: "https://usapickleball.org/events/",
-    image: "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80" // Outdoor court action shot
   }
 ]
 
@@ -81,7 +81,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-01-27",
     prizePool: 75000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1693142519367-e8eb86d2bb08?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80" // Outdoor court with players
   },
   {
     id: "midwest-open",
@@ -91,7 +91,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-02-03",
     prizePool: 65000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80" // Indoor tournament setting
   },
   {
     id: "southwest-championship",
@@ -101,7 +101,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-02-16",
     prizePool: 80000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1693142517898-2f986215e412?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
   },
   {
     id: "northeast-classic",
@@ -111,7 +111,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     endDate: "2025-03-03",
     prizePool: 55000,
     registrationUrl: "https://pickleballtournaments.com/",
-    image: "https://images.unsplash.com/photo-1710772099352-f8fbb7b30977?w=800&q=80"
+    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80" // Outdoor court action shot
   }
 ]
 

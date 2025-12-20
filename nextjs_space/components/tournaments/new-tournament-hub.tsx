@@ -458,9 +458,9 @@ export function TournamentHub() {
                   <div className="relative h-48">
                     <img
                       src={[
-                        "https://images.unsplash.com/photo-1693142517868-aa71e2df4b42?w=800&q=80",
-                        "https://images.unsplash.com/photo-1693142518230-f049c9fc1ad2?w=800&q=80",
-                        "https://images.unsplash.com/photo-1659318006095-4d44845f3a1b?w=800&q=80"
+                        "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80", // Indoor tournament setting with players
+                        "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80", // Outdoor court action shot
+                        "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80"  // Indoor competition scene
                       ][index % 3]}
                       alt={tournament?.name || 'Tournament'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
