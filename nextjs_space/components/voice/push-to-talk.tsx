@@ -1016,19 +1016,6 @@ export default function PushToTalk({
         </AnimatePresence>
       </motion.div>
 
-      {/* Single consolidated instruction */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: pttState === 'idle' ? 1 : 0.5 }}
-        className="text-center px-4"
-      >
-        <p className="text-sm font-bold text-gray-700">
-          Press & Hold to Talk
-        </p>
-        <p className="text-xs text-gray-500 mt-0.5">
-          Release when done • Coach Kai responds instantly
-        </p>
-      </motion.div>
     </div>
   );
 }
