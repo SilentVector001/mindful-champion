@@ -1277,7 +1277,7 @@ export default function VideoAnalysisHub() {
                   View Examples
                 </Button>
                 <Button variant="outline" className="border-border/50 hover:bg-card/50" asChild>
-                  <Link href="/coach">
+                  <Link href="/train/coach">
                     <MessageCircle className="w-4 h-4 mr-2" />
                     Ask Coach Kai
                   </Link>
