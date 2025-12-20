@@ -55,11 +55,11 @@ export default function SimpleLandingPage() {
             src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=1920&q=80"
             alt="Pickleball players competing in an intense match"
             fill
-            className="object-cover opacity-40"
+            className="object-cover opacity-70"
             priority
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-transparent" />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/50" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/60 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-slate-950/30" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 py-16">
@@ -122,7 +122,7 @@ export default function SimpleLandingPage() {
                   </Button>
                 </Link>
                 <Link href="#programs">
-                  <Button size="lg" variant="outline" className="border-white/30 text-white hover:bg-white/10 px-8 py-6 text-lg rounded-xl w-full sm:w-auto">
+                  <Button size="lg" variant="outline" className="border-cyan-400/50 text-cyan-400 hover:bg-cyan-400/10 hover:border-cyan-400 px-8 py-6 text-lg font-semibold rounded-xl w-full sm:w-auto backdrop-blur-sm">
                     See Programs
                     <ArrowRight className="w-5 h-5 ml-2" />
                   </Button>
