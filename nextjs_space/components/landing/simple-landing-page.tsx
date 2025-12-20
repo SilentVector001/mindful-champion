@@ -52,8 +52,8 @@ export default function SimpleLandingPage() {
         {/* Hero Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=1920&q=80"
-            alt="Professional pickleball player in action"
+            src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=1920&q=80"
+            alt="Pickleball players competing in an intense match"
             fill
             className="object-cover opacity-40"
             priority
@@ -169,8 +169,8 @@ export default function SimpleLandingPage() {
                   ✨ Coach Kai Ready
                 </motion.div>
                 <Image
-                  src="https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=600&q=80"
-                  alt="Pickleball training dashboard preview"
+                  src="https://images.unsplash.com/photo-1693142517898-2f986215e412?w=600&q=80"
+                  alt="Professional pickleball players in action on court"
                   width={500}
                   height={350}
                   className="rounded-xl w-full"
@@ -197,8 +197,8 @@ export default function SimpleLandingPage() {
                   7 Programs
                 </div>
                 <Image
-                  src="https://images.unsplash.com/photo-1693142518277-3568e9ec3176?w=700&q=80"
-                  alt="Professional pickleball training and coaching"
+                  src="https://images.unsplash.com/photo-1761644518970-2ed0ab543e1b?w=700&q=80"
+                  alt="Pickleball coaching session with players learning technique"
                   width={600}
                   height={400}
                   className="w-full object-cover"
@@ -271,11 +271,11 @@ export default function SimpleLandingPage() {
 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
             {[
-              { name: 'Serve', image: 'https://images.unsplash.com/photo-1710772099352-f8fbb7b30977?w=300&q=80', count: '25+' },
-              { name: 'Dink', image: 'https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=300&q=80', count: '30+' },
-              { name: 'Volley', image: 'https://images.unsplash.com/photo-1669684899238-64c4abe4d3cc?w=300&q=80', count: '20+' },
-              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1737476997205-b3336182f215?w=300&q=80', count: '15+' },
-              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1693142517898-2f986215e412?w=300&q=80', count: '20+' },
+              { name: 'Serve', image: 'https://images.unsplash.com/photo-1761644789725-98e84ef4b8c8?w=300&q=80', count: '25+' },
+              { name: 'Dink', image: 'https://images.unsplash.com/photo-1761644658016-324918bc373c?w=300&q=80', count: '30+' },
+              { name: 'Volley', image: 'https://images.unsplash.com/photo-1693142517898-2f986215e412?w=300&q=80', count: '20+' },
+              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1761644518970-2ed0ab543e1b?w=300&q=80', count: '15+' },
+              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&q=80', count: '20+' },
             ].map((drill, idx) => (
               <motion.div
                 key={idx}
