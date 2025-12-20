@@ -99,7 +99,12 @@ export default function AdminEmailManagement() {
     },
   };
 
-  // Load Email History
+  // Load Email Stats on mount
+  useEffect(() => {
+    loadEmailHistory();
+  }, []);
+
+  // Reload when filters change and on history tab
   useEffect(() => {
     if (activeTab === 'history') {
       loadEmailHistory();
@@ -110,27 +115,35 @@ export default function AdminEmailManagement() {
     setHistoryLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filters.type) params.append('type', filters.type);
-      if (filters.recipient) params.append('recipient', filters.recipient);
+      if (filters.type && filters.type !== 'all') params.append('type', filters.type);
+      if (filters.recipient) params.append('search', filters.recipient);
       if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters.dateTo) params.append('dateTo', filters.dateTo);
       
-      const response = await fetch(`/api/admin/emails/history?${params}`);
+      const response = await fetch(`/api/admin/emails/history?${params.toString()}`);
+      
+      if (!response.ok) {
+        console.error('Email history API error:', response.status);
+        // Set empty state instead of showing error toast on initial load
+        setEmailHistory([]);
+        setStats({ total: 0, sent: 0, failed: 0, pending: 0 });
+        return;
+      }
+      
       const data = await response.json();
       
-      if (response.ok) {
-        setEmailHistory(data.emails || []);
-        setStats({
-          total: data.statistics?.total || 0,
-          sent: data.statistics?.sent || 0,
-          failed: data.statistics?.failed || 0,
-          pending: data.statistics?.pending || 0,
-        });
-      } else {
-        toast.error(data.error || 'Failed to load email history');
-      }
+      setEmailHistory(data.emails || []);
+      setStats({
+        total: data.statistics?.total ?? 0,
+        sent: data.statistics?.sent ?? 0,
+        failed: data.statistics?.failed ?? 0,
+        pending: data.statistics?.pending ?? 0,
+      });
     } catch (error) {
-      toast.error('Failed to load email history');
+      console.error('Failed to load email history:', error);
+      // Set empty state instead of crashing
+      setEmailHistory([]);
+      setStats({ total: 0, sent: 0, failed: 0, pending: 0 });
     } finally {
       setHistoryLoading(false);
     }
