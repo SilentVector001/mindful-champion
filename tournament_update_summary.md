@@ -1,64 +1,41 @@
 # Tournament Data Update Summary
-**Date:** 2025-12-20 09:44:06
+**Date:** 2025-12-20 21:46:42
 
-## Execution Status: SUCCESS ✅
+## Update Results
 
-The tournament data updater successfully fetched and updated national pickleball tournament information from multiple sources.
+### Successfully Updated: 14 tournaments
 
-## Results
+**MLP (Major League Pickleball)** - 6 tournaments:
+- MLP Orlando
+- MLP Columbus
+- MLP Austin
+- MLP Phoenix
+- MLP Daytona Beach
+- MLP Cup
 
-- **Total Tournaments Fetched:** 14
-- **New Tournaments Created:** 0
-- **Existing Tournaments Updated:** 14
-- **Errors Encountered:** 1 (PPA Tour - 403 Forbidden)
+**APP Tour** - 4 tournaments:
+- 2025 GEICO APP Tour Championships
+- 2026 APP Daytona Beach Open
+- 2026 APP Fort Lauderdale Open
+- 2026 Humana APP Louisville Open
 
-## Data Sources
+**USA Pickleball** - 4 tournaments:
+- USA Pickleball National Championships
+- US Open Pickleball Championships
+- USA Pickleball Golden Ticket - Colorado Springs
+- USA Pickleball Golden Ticket - Seattle
 
-### ✅ MLP (Major League Pickleball)
-- **Status:** Success
-- **Tournaments Fetched:** 6
-- **Events Updated:**
-  - MLP Orlando
-  - MLP Columbus
-  - MLP Austin
-  - MLP Phoenix
-  - MLP Daytona Beach
-  - MLP Cup
+### Errors Encountered: 1
 
-### ✅ APP Tour
-- **Status:** Success
-- **Tournaments Fetched:** 4
-- **Events Updated:**
-  - 2025 GEICO APP Tour Championships
-  - 2026 APP Daytona Beach Open
-  - 2026 APP Fort Lauderdale Open
-  - 2026 Humana APP Louisville Open
+**PPA Tour**: 403 Forbidden error when accessing https://ppatour.com/schedule/
+- The PPA Tour website is blocking automated access
+- This may require alternative scraping methods or API access
 
-### ✅ USA Pickleball
-- **Status:** Success
-- **Tournaments Fetched:** 4
-- **Events Updated:**
-  - USA Pickleball National Championships
-  - US Open Pickleball Championships
-  - USA Pickleball Golden Ticket - Colorado Springs
-  - USA Pickleball Golden Ticket - Seattle
+## Summary Statistics
+- **Total Fetched:** 14 tournaments
+- **Created:** 0 new events
+- **Updated:** 14 existing events
+- **Errors:** 1 (PPA Tour access blocked)
 
-### ❌ PPA Tour
-- **Status:** Failed
-- **Error:** 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
-- **Note:** Website may have access restrictions or anti-scraping measures
-
-## Database Operations
-
-All 14 tournaments were successfully updated in the PostgreSQL PickleballEvent table with current information including:
-- Event names and dates
-- Locations
-- Streaming URLs
-- Organization details
-
-## Next Steps
-
-The updater will run automatically every 6 hours. The PPA Tour access issue should be monitored and may require:
-- User-agent header adjustments
-- Alternative data source or API
-- Manual verification of website access restrictions
+## Status
+✅ **PARTIAL SUCCESS** - 3 out of 4 sources updated successfully. PPA Tour data could not be fetched due to access restrictions.
