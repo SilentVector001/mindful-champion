@@ -996,36 +996,37 @@ export default function PushToTalk({
           {getStatusText()}
         </p>
         
-        {/* Live Transcript Display */}
+        {/* Live Transcript Display - with glow effect when active */}
         <AnimatePresence>
           {(transcript || interimTranscript) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-3 p-4 bg-gray-50 rounded-lg border max-w-md mx-auto"
+              className={`mt-3 p-3 bg-gray-50 rounded-lg border max-w-xs mx-auto transition-all duration-300
+                ${pttState === 'recording' ? 'border-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.4)] bg-teal-50/50' : 'border-gray-200'}
+              `}
             >
-              <p className="text-xs sm:text-sm text-gray-500 mb-2 font-medium">Live Transcript:</p>
               <p className="text-sm sm:text-base leading-relaxed">
                 <span className="text-gray-800 font-medium">{transcript}</span>
-                <span className="text-gray-400 italic">{interimTranscript}</span>
+                <span className={`italic ${pttState === 'recording' ? 'text-teal-600' : 'text-gray-400'}`}>{interimTranscript}</span>
               </p>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
 
-      {/* Instructions for walkie-talkie experience */}
+      {/* Single consolidated instruction */}
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: pttState === 'idle' ? 0.8 : 0 }}
-        className="text-center max-w-sm px-4"
+        animate={{ opacity: pttState === 'idle' ? 1 : 0.5 }}
+        className="text-center px-4"
       >
-        <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">
-          🎙️ <strong>Walkie-Talkie Mode Active</strong>
+        <p className="text-sm font-bold text-gray-700">
+          Press & Hold to Talk
         </p>
-        <p className="text-xs text-gray-500">
-          Press & hold to talk, release to send • Coach Kai will respond with voice
+        <p className="text-xs text-gray-500 mt-0.5">
+          Release when done • Coach Kai responds instantly
         </p>
       </motion.div>
     </div>
