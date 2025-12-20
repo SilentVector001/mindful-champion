@@ -109,21 +109,39 @@ function OnboardingWalkthrough({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100]"
     >
-      {/* Dark overlay with spotlight cutout */}
+      {/* Light overlay - readable on mobile */}
       <div 
-        className="absolute inset-0 pointer-events-auto"
+        className="absolute inset-0 pointer-events-auto backdrop-blur-sm"
         onClick={onComplete}
         style={{
-          background: 'rgba(0,0,0,0.75)',
+          background: 'rgba(0,0,0,0.35)',
         }}
       />
       
-      {/* Spotlight ring around target */}
+      {/* Animated spotlight ring around target */}
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="absolute rounded-xl border-2 border-kai-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.75),0_0_30px_rgba(0,200,255,0.5)] pointer-events-none z-[101]"
-        style={spotlightStyle}
+        animate={{ 
+          opacity: 1, 
+          scale: 1,
+          boxShadow: [
+            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)",
+            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 50px rgba(0,200,255,1), 0 0 100px rgba(0,200,255,0.5)",
+            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)"
+          ]
+        }}
+        transition={{
+          boxShadow: {
+            duration: 2,
+            repeat: Infinity,
+            ease: "easeInOut"
+          }
+        }}
+        className="absolute rounded-xl border-4 border-kai-primary pointer-events-none z-[101]"
+        style={{
+          ...spotlightStyle,
+          background: 'rgba(255,255,255,0.02)',
+        }}
       />
       
       {/* Tooltip with arrow */}
