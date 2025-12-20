@@ -31,7 +31,7 @@ import { AchievementToast, useAchievementNotifications } from "@/components/rewa
 import { parseScore, formatScore, getSafeScore } from "@/lib/video-analysis/score-utils"
 import { upload } from '@vercel/blob/client'
 
-// Onboarding Walkthrough Component
+// Onboarding Walkthrough Component - Spotlight Style
 function OnboardingWalkthrough({ 
   onComplete, 
   step 
@@ -43,82 +43,135 @@ function OnboardingWalkthrough({
     {
       title: "Upload your game footage",
       description: "Drop your video here or click to browse. We support MP4, MOV, and AVI files up to 500MB.",
-      target: "upload-area",
+      target: "upload-dropzone",
       icon: Upload,
-      position: "bottom"
+      position: "below" as const,
+      arrowPosition: "top" as const
     },
     {
       title: "AI analyzes every shot",
       description: "Coach Kai's neural networks analyze technique, movement patterns, shot selection, and strategic positioning.",
       target: "how-it-works",
       icon: Brain,
-      position: "top"
+      position: "above" as const,
+      arrowPosition: "bottom" as const
     },
     {
       title: "Your videos live here",
       description: "View your library with AI scores, insights, and track your improvement over time.",
       target: "library-tab",
       icon: Library,
-      position: "bottom"
+      position: "below" as const,
+      arrowPosition: "top" as const
     }
   ]
 
   const currentStep = steps[step - 1]
   if (!currentStep) return null
 
+  // Get target element position
+  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
+  const [spotlightStyle, setSpotlightStyle] = useState<React.CSSProperties>({})
+
+  useEffect(() => {
+    const targetEl = document.getElementById(currentStep.target)
+    if (targetEl) {
+      const rect = targetEl.getBoundingClientRect()
+      const scrollY = window.scrollY
+      
+      // Spotlight around target element
+      setSpotlightStyle({
+        top: rect.top + scrollY - 8,
+        left: rect.left - 8,
+        width: rect.width + 16,
+        height: rect.height + 16,
+      })
+      
+      // Position tooltip relative to element
+      if (currentStep.position === 'below') {
+        setTooltipStyle({
+          top: rect.bottom + scrollY + 16,
+          left: Math.max(16, Math.min(rect.left + rect.width / 2 - 200, window.innerWidth - 416)),
+        })
+      } else {
+        setTooltipStyle({
+          top: rect.top + scrollY - 220,
+          left: Math.max(16, Math.min(rect.left + rect.width / 2 - 200, window.innerWidth - 416)),
+        })
+      }
+    }
+  }, [step, currentStep.target, currentStep.position])
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100] pointer-events-none"
+      className="fixed inset-0 z-[100]"
     >
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/60 pointer-events-auto" onClick={onComplete} />
+      {/* Dark overlay with spotlight cutout */}
+      <div 
+        className="absolute inset-0 pointer-events-auto"
+        onClick={onComplete}
+        style={{
+          background: 'rgba(0,0,0,0.75)',
+        }}
+      />
       
-      {/* Tooltip */}
+      {/* Spotlight ring around target */}
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="absolute rounded-xl border-2 border-kai-primary shadow-[0_0_0_9999px_rgba(0,0,0,0.75),0_0_30px_rgba(0,200,255,0.5)] pointer-events-none z-[101]"
+        style={spotlightStyle}
+      />
+      
+      {/* Tooltip with arrow */}
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
-        className={cn(
-          "absolute z-[101] pointer-events-auto",
-          step === 1 && "top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-          step === 2 && "bottom-32 left-1/2 -translate-x-1/2",
-          step === 3 && "top-48 left-1/2 -translate-x-1/2"
-        )}
+        className="absolute z-[102] pointer-events-auto"
+        style={tooltipStyle}
       >
-        <Card className="bg-slate-900 border-2 border-kai-primary shadow-2xl shadow-kai-primary/30 max-w-md mx-4">
-          <CardContent className="p-6">
+        {/* Arrow */}
+        <div className={cn(
+          "absolute w-4 h-4 bg-slate-900 border-kai-primary rotate-45 z-[103]",
+          currentStep.arrowPosition === 'top' && "left-1/2 -translate-x-1/2 -top-2 border-l-2 border-t-2",
+          currentStep.arrowPosition === 'bottom' && "left-1/2 -translate-x-1/2 -bottom-2 border-r-2 border-b-2"
+        )} />
+        
+        <Card className="bg-slate-900 border-2 border-kai-primary shadow-2xl shadow-kai-primary/30 w-[400px] relative">
+          <CardContent className="p-5">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center flex-shrink-0">
-                <currentStep.icon className="w-6 h-6 text-white" />
+              <div className="w-11 h-11 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center flex-shrink-0">
+                <currentStep.icon className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-kai-primary/20 text-kai-primary border-kai-primary/30">
+                  <Badge className="bg-kai-primary/20 text-kai-primary border-kai-primary/30 text-xs">
                     Step {step} of 3
                   </Badge>
                 </div>
-                <h3 className="text-lg font-bold text-white mb-2">{currentStep.title}</h3>
-                <p className="text-slate-300 text-sm mb-4">{currentStep.description}</p>
+                <h3 className="text-base font-bold text-white mb-1.5">{currentStep.title}</h3>
+                <p className="text-slate-300 text-sm mb-3 leading-relaxed">{currentStep.description}</p>
                 <div className="flex items-center justify-between">
-                  <Link href="/help" className="text-kai-primary text-sm hover:underline flex items-center gap-1">
+                  <Link href="/help" className="text-kai-primary text-xs hover:underline flex items-center gap-1">
                     <HelpCircle className="w-3 h-3" />
                     Need more help? Visit Help Center
                   </Link>
                   <Button
                     onClick={onComplete}
                     size="sm"
-                    className="bg-gradient-to-r from-kai-primary to-kai-secondary"
+                    className="bg-gradient-to-r from-kai-primary to-kai-secondary text-sm px-4"
                   >
                     {step === 3 ? "Got it!" : "Next"}
-                    <ArrowRight className="w-4 h-4 ml-2" />
+                    <ArrowRight className="w-4 h-4 ml-1.5" />
                   </Button>
                 </div>
               </div>
             </div>
             {/* Progress dots */}
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-2 mt-3">
               {[1, 2, 3].map((s) => (
                 <div
                   key={s}
@@ -186,25 +239,39 @@ function VideoCard({
       <Card className="relative bg-card/40 backdrop-blur border-border/50 hover:border-kai-primary/50 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-2xl z-10">
         {/* Thumbnail with Play Overlay */}
         <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800">
-          {video.videoUrl ? (
-            <video
-              src={video.videoUrl}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              muted
-              preload="metadata"
-            />
-          ) : video.thumbnailUrl ? (
+          {video.thumbnailUrl ? (
             <Image
               src={video.thumbnailUrl}
               alt={video.title}
               fill
               className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center">
-              <VideoIcon className="w-12 h-12 text-slate-600" />
+          ) : video.videoUrl ? (
+            <video
+              src={video.videoUrl}
+              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              muted
+              preload="metadata"
+              poster=""
+            />
+          ) : null}
+          
+          {/* Attractive Placeholder - always show as fallback layer */}
+          <div className="absolute inset-0 bg-gradient-to-br from-kai-primary/20 via-slate-800 to-kai-secondary/20 flex flex-col items-center justify-center -z-10">
+            {/* Pickleball pattern background */}
+            <div className="absolute inset-0 opacity-10">
+              <div className="absolute top-4 left-4 w-8 h-8 rounded-full border-2 border-white/30" />
+              <div className="absolute top-8 right-6 w-6 h-6 rounded-full border-2 border-white/20" />
+              <div className="absolute bottom-6 left-8 w-5 h-5 rounded-full border-2 border-white/20" />
+              <div className="absolute bottom-4 right-4 w-7 h-7 rounded-full border-2 border-white/30" />
             </div>
-          )}
+            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-kai-primary/40 to-kai-secondary/40 flex items-center justify-center mb-3 backdrop-blur-sm border border-white/10">
+              <VideoIcon className="w-7 h-7 text-white/70" />
+            </div>
+            <p className="text-white/60 text-xs font-medium max-w-[80%] text-center truncate px-2">
+              {video.title}
+            </p>
+          </div>
           
           {/* Gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
@@ -913,6 +980,7 @@ export default function VideoAnalysisHub() {
                   {!selectedFile ? (
                     <div
                       {...getRootProps()}
+                      id="upload-dropzone"
                       className={cn(
                         "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300",
                         isDragActive 
