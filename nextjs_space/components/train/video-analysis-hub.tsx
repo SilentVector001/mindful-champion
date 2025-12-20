@@ -109,12 +109,12 @@ function OnboardingWalkthrough({
       exit={{ opacity: 0 }}
       className="fixed inset-0 z-[100]"
     >
-      {/* Light overlay - readable on mobile */}
+      {/* Very light overlay - content clearly visible */}
       <div 
-        className="absolute inset-0 pointer-events-auto backdrop-blur-sm"
+        className="absolute inset-0 pointer-events-auto"
         onClick={onComplete}
         style={{
-          background: 'rgba(0,0,0,0.35)',
+          background: 'rgba(255,255,255,0.15)',
         }}
       />
       
@@ -125,9 +125,9 @@ function OnboardingWalkthrough({
           opacity: 1, 
           scale: 1,
           boxShadow: [
-            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)",
-            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 50px rgba(0,200,255,1), 0 0 100px rgba(0,200,255,0.5)",
-            "0 0 0 9999px rgba(0,0,0,0.35), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)"
+            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)",
+            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 50px rgba(0,200,255,1), 0 0 100px rgba(0,200,255,0.5)",
+            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)"
           ]
         }}
         transition={{
@@ -976,6 +976,107 @@ export default function VideoAnalysisHub() {
 
             {/* Upload Tab */}
             <TabsContent value="upload" className="space-y-6">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap justify-center gap-3">
+                <Button variant="default" className="bg-gradient-to-r from-kai-primary to-kai-secondary">
+                  <Play className="w-4 h-4 mr-2" />
+                  Quick Start Guide
+                </Button>
+                <Button variant="outline" className="border-border/50 hover:bg-card/50">
+                  <Eye className="w-4 h-4 mr-2" />
+                  View Examples
+                </Button>
+                <Button variant="outline" className="border-border/50 hover:bg-card/50" asChild>
+                  <Link href="/coach">
+                    <MessageCircle className="w-4 h-4 mr-2" />
+                    Ask Coach Kai
+                  </Link>
+                </Button>
+              </div>
+
+              {/* 4-Step Visual Journey Cards */}
+              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  {
+                    step: 1,
+                    title: "Record Your Game",
+                    bullets: ["Any device", "All formats", "Up to 500MB"],
+                    image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=300&fit=crop",
+                    link: "#upload-dropzone"
+                  },
+                  {
+                    step: 2,
+                    title: "AI Analyzes Every Shot",
+                    bullets: ["Shot tracking", "Movement analysis", "Technique scoring"],
+                    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+                    link: "#"
+                  },
+                  {
+                    step: 3,
+                    title: "Review Detailed Insights",
+                    bullets: ["Pro-level metrics", "Visual heatmaps", "Key moments"],
+                    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
+                    link: "#"
+                  },
+                  {
+                    step: 4,
+                    title: "Track Your Improvement",
+                    bullets: ["Before/after", "Progress trends", "Printable reports"],
+                    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=300&fit=crop",
+                    link: "#"
+                  }
+                ].map((card) => (
+                  <motion.div
+                    key={card.step}
+                    whileHover={{ y: -4 }}
+                    className="relative group"
+                  >
+                    <Card className="bg-card/40 backdrop-blur border-border/50 overflow-hidden hover:border-kai-primary/50 transition-all">
+                      {/* Step Badge */}
+                      <div className="absolute top-3 left-3 z-10">
+                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center font-bold text-white shadow-lg">
+                          {card.step}
+                        </div>
+                      </div>
+                      {/* AI Icon */}
+                      <div className="absolute top-3 right-3 z-10">
+                        <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
+                          <Brain className="w-3.5 h-3.5 text-kai-primary" />
+                        </div>
+                      </div>
+                      {/* Image */}
+                      <div className="aspect-video relative overflow-hidden">
+                        <Image
+                          src={card.image}
+                          alt={card.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+                      </div>
+                      <CardContent className="p-4">
+                        <h4 className="font-semibold text-foreground mb-2">{card.title}</h4>
+                        <ul className="text-xs text-muted-foreground space-y-1 mb-3">
+                          {card.bullets.map((bullet, idx) => (
+                            <li key={idx} className="flex items-center gap-1.5">
+                              <div className="w-1 h-1 rounded-full bg-kai-primary" />
+                              {bullet}
+                            </li>
+                          ))}
+                        </ul>
+                        <Link 
+                          href={card.link}
+                          className="text-kai-primary text-xs font-medium hover:underline flex items-center gap-1 group/link"
+                        >
+                          Learn More
+                          <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
+                        </Link>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+
               <Card className="bg-card/40 backdrop-blur border-border/50">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
@@ -1092,7 +1193,7 @@ export default function VideoAnalysisHub() {
                 </CardContent>
               </Card>
 
-              {/* Collapsible How It Works Section */}
+              {/* Collapsible How It Works Section - 3 Icon Cards Only */}
               <div id="how-it-works">
                 <Button
                   variant="ghost"
@@ -1114,20 +1215,19 @@ export default function VideoAnalysisHub() {
                       exit={{ opacity: 0, height: 0 }}
                       className="overflow-hidden"
                     >
-                      <div className="grid md:grid-cols-4 gap-4 pt-4">
+                      <div className="grid md:grid-cols-3 gap-4 pt-4">
                         {[
-                          { icon: Target, label: "Shot Detection", desc: "Identifies all shot types", color: "from-cyan-500 to-blue-500" },
-                          { icon: Activity, label: "Movement Tracking", desc: "Analyzes footwork & positioning", color: "from-green-500 to-emerald-500" },
-                          { icon: Gauge, label: "Technique Scoring", desc: "Scores form & execution", color: "from-amber-500 to-yellow-500" },
-                          { icon: TrendingUp, label: "Progress Insights", desc: "Tracks improvement over time", color: "from-purple-500 to-pink-500" }
+                          { icon: Cpu, label: "AI-Powered Analysis", desc: "Advanced neural networks", color: "from-cyan-500 to-blue-500" },
+                          { icon: Zap, label: "Results in Minutes", desc: "Lightning-fast processing", color: "from-green-500 to-emerald-500" },
+                          { icon: LineChart, label: "Pro-Level Insights", desc: "Professional-grade metrics", color: "from-purple-500 to-pink-500" }
                         ].map((feature, idx) => (
                           <Card key={idx} className="bg-card/30 border-border/50">
-                            <CardContent className="p-4 text-center">
-                              <div className={cn("w-12 h-12 mx-auto rounded-lg bg-gradient-to-br flex items-center justify-center mb-3", feature.color)}>
-                                <feature.icon className="w-6 h-6 text-white" />
+                            <CardContent className="p-6 text-center">
+                              <div className={cn("w-14 h-14 mx-auto rounded-full bg-gradient-to-br flex items-center justify-center mb-4", feature.color)}>
+                                <feature.icon className="w-7 h-7 text-white" />
                               </div>
-                              <h4 className="font-semibold text-foreground text-sm mb-1">{feature.label}</h4>
-                              <p className="text-xs text-muted-foreground">{feature.desc}</p>
+                              <h4 className="font-semibold text-foreground mb-1">{feature.label}</h4>
+                              <p className="text-sm text-muted-foreground">{feature.desc}</p>
                             </CardContent>
                           </Card>
                         ))}
@@ -1140,6 +1240,62 @@ export default function VideoAnalysisHub() {
 
             {/* Library Tab */}
             <TabsContent value="library" className="space-y-6">
+              {/* Stats Summary Bar */}
+              {videoLibrary.length > 0 && (
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <Card className="bg-gradient-to-br from-kai-primary/20 to-kai-secondary/20 border-kai-primary/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-kai-primary/30 flex items-center justify-center">
+                        <Film className="w-5 h-5 text-kai-primary" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">{libraryStats.totalVideos}</p>
+                        <p className="text-xs text-muted-foreground">Total Videos</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-green-500/30 flex items-center justify-center">
+                        <CheckCircle2 className="w-5 h-5 text-green-400" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">{libraryStats.totalAnalyzed}</p>
+                        <p className="text-xs text-muted-foreground">Analyzed</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border-amber-500/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-amber-500/30 flex items-center justify-center">
+                        <BarChart3 className="w-5 h-5 text-amber-400" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">
+                          {videoLibrary.filter(v => v.overallScore).length > 0 
+                            ? Math.round(videoLibrary.filter(v => v.overallScore).reduce((sum, v) => sum + (v.overallScore || 0), 0) / videoLibrary.filter(v => v.overallScore).length)
+                            : '--'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Avg Score</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                  <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-purple-500/30 flex items-center justify-center">
+                        <TrendingUp className="w-5 h-5 text-purple-400" />
+                      </div>
+                      <div>
+                        <p className="text-2xl font-bold text-foreground">
+                          {libraryStats.avgImprovement > 0 ? `+${libraryStats.avgImprovement}%` : '--'}
+                        </p>
+                        <p className="text-xs text-muted-foreground">Improvement</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
               {videoLibrary.length === 0 ? (
                 <Card className="bg-card/30 border-border/50">
                   <CardContent className="p-12 text-center">
