@@ -733,7 +733,16 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
 
-
+                {user?.role === 'ADMIN' && (
+                  <InfoTooltip content="Access admin dashboard for user management" side="left">
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="flex items-center gap-3 py-2 cursor-pointer">
+                        <Shield className="w-4 h-4 text-emotion-info" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  </InfoTooltip>
+                )}
 
                 <InfoTooltip content="Manage your plan, billing, and premium features" side="left">
                   <DropdownMenuItem asChild>
@@ -1006,7 +1015,14 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-
+                {user?.role === 'ADMIN' && (
+                  <Link href="/admin" onClick={closeMobileMenu}>
+                    <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
+                      <Shield className="w-5 h-5 text-emotion-info" />
+                      Admin Dashboard
+                    </Button>
+                  </Link>
+                )}
 
                 <Link href="/pricing" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
