@@ -102,8 +102,10 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   const { 
     speak: speakOpenAI, 
     stop: stopOpenAI, 
+    unlockAudio,
     isSpeaking, 
-    isLoading: ttsLoading 
+    isLoading: ttsLoading,
+    isAudioUnlocked 
   } = useOpenAITTS({
     voice: 'nova', // Warm, natural female voice
     speed: voicePreferences.rate || 1.0,
@@ -120,6 +122,14 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
       console.error('🚨 TTS Error:', error);
     },
   });
+  
+  // 🔓 Unlock audio on first user interaction (critical for iOS/Safari)
+  const handleUserInteraction = useCallback(() => {
+    if (!isAudioUnlocked) {
+      console.log('🔓 First user interaction - unlocking audio for iOS');
+      unlockAudio();
+    }
+  }, [isAudioUnlocked, unlockAudio]);
   
   // PTT state management
   const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
@@ -678,6 +688,7 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
       e.preventDefault();
       // 🍎 iOS FIX: Unlock TTS on user gesture before async API call
       unlockIOSTTS();
+      handleUserInteraction(); // Unlock OpenAI TTS audio
       handleSendMessage();
     }
   };
@@ -686,8 +697,9 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   const handleSendClick = useCallback(() => {
     // 🍎 iOS FIX: Unlock TTS on user gesture (button click) before async API call
     unlockIOSTTS();
+    handleUserInteraction(); // Unlock OpenAI TTS audio
     handleSendMessage();
-  }, [handleSendMessage]);
+  }, [handleSendMessage, handleUserInteraction]);
 
   // Calculate session stats
   const sessionStart = useRef(new Date());
@@ -879,7 +891,11 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                   {voiceMode === 'conversation' ? (
                     <ConversationalVoice
                       onTranscript={handlePTTVoiceInput}
-                      onSessionChange={setConversationActive}
+                      onSessionChange={(active) => {
+                        setConversationActive(active);
+                        // 🔓 Unlock audio when starting conversation (iOS requirement)
+                        if (active) handleUserInteraction();
+                      }}
                       onSpeakingChange={(speaking) => setIsListening(speaking)}
                       onListeningChange={(listening) => {
                         if (listening) setAvatarState('listening');
