@@ -80,7 +80,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     startDate: "2025-01-25",
     endDate: "2025-01-27",
     prizePool: 75000,
-    registrationUrl: "https://pickleballtournaments.com/",
+    registrationUrl: "https://pickleballtournaments.com/?state=GA",
     image: "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80" // Outdoor court with players
   },
   {
@@ -90,7 +90,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     startDate: "2025-02-01",
     endDate: "2025-02-03",
     prizePool: 65000,
-    registrationUrl: "https://pickleballtournaments.com/",
+    registrationUrl: "https://pickleballtournaments.com/?state=OH",
     image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80" // Indoor tournament setting
   },
   {
@@ -100,7 +100,7 @@ const REGIONAL_CHAMPIONSHIPS = [
     startDate: "2025-02-14",
     endDate: "2025-02-16",
     prizePool: 80000,
-    registrationUrl: "https://pickleballtournaments.com/",
+    registrationUrl: "https://pickleballtournaments.com/?state=AZ",
     image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
   },
   {
@@ -110,18 +110,18 @@ const REGIONAL_CHAMPIONSHIPS = [
     startDate: "2025-03-01",
     endDate: "2025-03-03",
     prizePool: 55000,
-    registrationUrl: "https://pickleballtournaments.com/",
+    registrationUrl: "https://pickleballtournaments.com/?state=MA",
     image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80" // Outdoor court action shot
   }
 ]
 
 const STATE_FINALS = [
-  { id: "ca-state", name: "California State Finals", location: "San Diego, CA", startDate: "2025-01-18", prizePool: 40000, registrationUrl: "https://pickleballtournaments.com/" },
-  { id: "fl-state", name: "Florida State Championship", location: "Naples, FL", startDate: "2025-01-25", prizePool: 45000, registrationUrl: "https://pickleballtournaments.com/" },
-  { id: "tx-state", name: "Texas State Open", location: "Austin, TX", startDate: "2025-02-08", prizePool: 35000, registrationUrl: "https://pickleballtournaments.com/" },
-  { id: "az-state", name: "Arizona State Finals", location: "Scottsdale, AZ", startDate: "2025-02-15", prizePool: 38000, registrationUrl: "https://pickleballtournaments.com/" },
-  { id: "nc-state", name: "North Carolina State Championship", location: "Charlotte, NC", startDate: "2025-02-22", prizePool: 32000, registrationUrl: "https://pickleballtournaments.com/" },
-  { id: "co-state", name: "Colorado State Open", location: "Denver, CO", startDate: "2025-03-01", prizePool: 30000, registrationUrl: "https://pickleballtournaments.com/" },
+  { id: "ca-state", name: "California State Finals", location: "San Diego, CA", startDate: "2025-01-18", prizePool: 40000, registrationUrl: "https://pickleballtournaments.com/?state=CA" },
+  { id: "fl-state", name: "Florida State Championship", location: "Naples, FL", startDate: "2025-01-25", prizePool: 45000, registrationUrl: "https://pickleballtournaments.com/?state=FL" },
+  { id: "tx-state", name: "Texas State Open", location: "Austin, TX", startDate: "2025-02-08", prizePool: 35000, registrationUrl: "https://pickleballtournaments.com/?state=TX" },
+  { id: "az-state", name: "Arizona State Finals", location: "Scottsdale, AZ", startDate: "2025-02-15", prizePool: 38000, registrationUrl: "https://pickleballtournaments.com/?state=AZ" },
+  { id: "nc-state", name: "North Carolina State Championship", location: "Charlotte, NC", startDate: "2025-02-22", prizePool: 32000, registrationUrl: "https://pickleballtournaments.com/?state=NC" },
+  { id: "co-state", name: "Colorado State Open", location: "Denver, CO", startDate: "2025-03-01", prizePool: 30000, registrationUrl: "https://pickleballtournaments.com/?state=CO" },
 ]
 
 interface Tournament {

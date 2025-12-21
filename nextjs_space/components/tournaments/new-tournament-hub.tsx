@@ -33,6 +33,17 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
+// Helper to extract state from location and build registration URL
+const getRegistrationUrl = (location?: string) => {
+  if (!location) return "https://pickleballtournaments.com/"
+  // Extract state abbreviation from "City, ST" format
+  const match = location.match(/,\s*([A-Z]{2})$/)
+  if (match) {
+    return `https://pickleballtournaments.com/?state=${match[1]}`
+  }
+  return "https://pickleballtournaments.com/"
+}
+
 const US_STATES = [
   { abbr: "AL", name: "Alabama", events: 12 },
   { abbr: "AK", name: "Alaska", events: 3 },
@@ -488,7 +499,7 @@ export function TournamentHub() {
                       <div className="text-champion-gold font-semibold">
                         {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
                       </div>
-                      <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+                      <a href={getRegistrationUrl(tournament?.location)} target="_blank" rel="noopener noreferrer">
                         <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
                           <ExternalLink className="w-3 h-3 mr-1" />
                           Register
@@ -685,7 +696,7 @@ export function TournamentHub() {
                       Registration Closed
                     </Badge>
                   )}
-                  <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+                  <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
                     <Button
                       size="sm"
                       className="bg-champion-green hover:bg-champion-green/90"
