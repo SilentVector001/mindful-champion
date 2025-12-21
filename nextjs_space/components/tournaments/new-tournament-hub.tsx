@@ -758,7 +758,7 @@ export function TournamentHub() {
                 <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
               </Button>
             </a>
-            <a href="https://www.theapp.global/schedule" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
                 <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
               </Button>

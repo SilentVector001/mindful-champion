@@ -56,7 +56,7 @@ const FEATURED_CHAMPIONSHIPS = [
     endDate: "2025-03-09",
     prizePool: 175000,
     type: "grand-slam",
-    registrationUrl: "https://www.theapp.global/schedule",
+    registrationUrl: "https://www.theapp.global/tour",
     image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
   },
   {
@@ -361,7 +361,7 @@ export function ChampionshipEvents() {
                 <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour Schedule
               </Button>
             </a>
-            <a href="https://www.theapp.global/schedule" target="_blank" rel="noopener noreferrer">
+            <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10">
                 <ExternalLink className="w-4 h-4 mr-2" /> APP Tour Schedule
               </Button>
