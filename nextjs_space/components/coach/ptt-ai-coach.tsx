@@ -16,6 +16,7 @@ import TextToSpeech, { unlockIOSTTS } from '@/components/voice/text-to-speech';
 import PushToTalk from '@/components/voice/push-to-talk';
 import ConversationalVoice from '@/components/voice/conversational-voice';
 import { Progress } from '@/components/ui/progress';
+import { useOpenAITTS } from '@/hooks/use-openai-tts';
 
 import MentalTrainingPrompts from './mental-training-prompts';
 import ReactMarkdown from 'react-markdown';
@@ -93,10 +94,32 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   // Voice-related state
   const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(defaultVoicePreferences);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [lastAssistantMessage, setLastAssistantMessage] = useState<string>('');
   const [lastAssistantMessageId, setLastAssistantMessageId] = useState<string>(''); // Track message ID for TTS
+  
+  // 🎙️ NEW: OpenAI TTS Hook with natural neural voice
+  const { 
+    speak: speakOpenAI, 
+    stop: stopOpenAI, 
+    isSpeaking, 
+    isLoading: ttsLoading 
+  } = useOpenAITTS({
+    voice: 'nova', // Warm, natural female voice
+    speed: voicePreferences.rate || 1.0,
+    autoPlay: false, // We'll manually control when to speak
+    onStart: () => {
+      console.log('🔊 Coach Kai (OpenAI) started speaking');
+      setAvatarState('speaking');
+    },
+    onEnd: () => {
+      console.log('🔇 Coach Kai (OpenAI) finished speaking');
+      setAvatarState('idle');
+    },
+    onError: (error) => {
+      console.error('🚨 TTS Error:', error);
+    },
+  });
   
   // PTT state management
   const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
@@ -504,6 +527,14 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
       // Set both the message content AND the unique ID for TTS tracking
       setLastAssistantMessage(content);
       setLastAssistantMessageId(uniqueId); // CRITICAL: Pass unique ID to prevent duplicate TTS
+      
+      // 🎙️ AUTO-SPEAK with OpenAI TTS (natural voice)
+      if (voicePreferences.textToSpeechEnabled && voicePreferences.autoSpeak && content.trim()) {
+        console.log('🔊 Auto-speaking with OpenAI TTS...');
+        speakOpenAI(content, uniqueId).catch((err) => {
+          console.error('Failed to speak:', err);
+        });
+      }
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -620,22 +651,21 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     }
   }, [handleSendMessage, isLoading, processingVoiceInput, isSpeaking, messages.length]); // Proper dependencies
 
-  // Handle speaking state change
-  const handleSpeakingChange = useCallback((speaking: boolean) => {
-    setIsSpeaking(speaking);
-  }, []);
-
   // Interrupt TTS - allow user to stop Coach Kai from speaking
   const interruptSpeech = useCallback(() => {
-    if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      try {
-        window.speechSynthesis.cancel();
-      } catch (e) {
-        console.log('TTS cancel error (safe to ignore):', e);
+    if (isSpeaking) {
+      console.log('🛑 Interrupting OpenAI TTS...');
+      stopOpenAI();
+      // Also stop old browser TTS if it's running
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {
+          console.log('TTS cancel error (safe to ignore):', e);
+        }
       }
-      setIsSpeaking(false);
     }
-  }, [isSpeaking]);
+  }, [isSpeaking, stopOpenAI]);
 
   // Handle voice settings update
   const handleVoiceSettingsChange = useCallback((newPreferences: VoicePreferences) => {
@@ -1282,18 +1312,7 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
         onSettingsChange={handleVoiceSettingsChange}
       />
 
-      {/* TTS Component */}
-      <TextToSpeech
-        text={lastAssistantMessage}
-        messageId={lastAssistantMessageId}
-        rate={voicePreferences.rate}
-        pitch={voicePreferences.pitch}
-        volume={voicePreferences.volume}
-        autoPlay={true}
-        onStart={() => console.log('🔊 Coach Kai started speaking')}
-        onEnd={() => console.log('🔇 Coach Kai finished speaking')}
-        onSpeakingChange={handleSpeakingChange}
-      />
+      {/* TTS is now handled by useOpenAITTS hook with natural neural voice */}
     </div>
   );
 }
