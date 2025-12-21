@@ -29,6 +29,7 @@ import MainNavigation from "@/components/navigation/main-navigation"
 import { AchievementToast, useAchievementNotifications } from "@/components/rewards/achievement-toast"
 import { parseScore, formatScore, getSafeScore } from "@/lib/video-analysis/score-utils"
 import { upload } from '@vercel/blob/client'
+import { celebrateDayComplete, showAchievementToast } from "@/lib/celebrations"
 
 // Onboarding Walkthrough Component - Spotlight Style
 function OnboardingWalkthrough({ 
@@ -1003,6 +1004,15 @@ export default function VideoAnalysisHub() {
         const data = await res.json()
         setCurrentAnalysis(data)
         setAnalyzing(false)
+        
+        // Trigger celebration for successful video analysis
+        celebrateDayComplete()
+        showAchievementToast(
+          'Video Analysis Complete! 🎥',
+          'Your AI-powered insights are ready',
+          '🎥'
+        )
+        
         await fetchVideoLibrary()
         await fetchLibraryStats()
         return true
