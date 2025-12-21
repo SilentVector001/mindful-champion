@@ -1299,28 +1299,28 @@ export default function VideoAnalysisHub() {
                     step: 1,
                     title: "Record Your Game",
                     bullets: ["Any device", "All formats", "Up to 500MB"],
-                    image: "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=300&fit=crop",
+                    image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png",
                     link: "#upload-dropzone"
                   },
                   {
                     step: 2,
                     title: "AI Analyzes Every Shot",
                     bullets: ["Shot tracking", "Movement analysis", "Technique scoring"],
-                    image: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop",
+                    image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png",
                     link: "#"
                   },
                   {
                     step: 3,
                     title: "Review Detailed Insights",
                     bullets: ["Pro-level metrics", "Visual heatmaps", "Key moments"],
-                    image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=400&h=300&fit=crop",
+                    image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png",
                     link: "#"
                   },
                   {
                     step: 4,
                     title: "Track Your Improvement",
                     bullets: ["Before/after", "Progress trends", "Printable reports"],
-                    image: "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400&h=300&fit=crop",
+                    image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png",
                     link: "#"
                   }
                 ].map((card) => (
