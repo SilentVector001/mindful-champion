@@ -284,7 +284,7 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
           'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
         },
         body: JSON.stringify({
-          model: 'gpt-4o-mini', // Faster, more focused responses
+          model: 'gpt-5.2', // ⬆️ UPGRADED: Latest GPT-5.2 for enhanced intelligence and reasoning
           messages: conversationMessages,
           max_tokens: 120, // ENFORCED SHORT: Maximum 120 tokens for very concise responses
           temperature: 1.0, // MAXIMUM creativity for maximum variety
@@ -360,7 +360,7 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
               'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
             },
             body: JSON.stringify({
-              model: 'gpt-4o-mini',
+              model: 'gpt-5.2', // ⬆️ UPGRADED: Latest GPT-5.2 for enhanced intelligence
               messages: regenerateMessages,
               max_tokens: 120,
               temperature: 1.2, // EXTRA HIGH creativity for regeneration
