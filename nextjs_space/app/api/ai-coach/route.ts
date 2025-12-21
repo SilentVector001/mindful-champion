@@ -313,24 +313,30 @@ BAD EXAMPLES (DON'T DO THIS):
       { role: "user", content: message }
     ]
 
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-5.2', // ⬆️ UPGRADED: Latest GPT-5.2 for enhanced intelligence and reasoning
-        messages,
-        stream: true,
-        max_tokens: 1500,
-        temperature: 0.8, // Slightly higher for more personality
-      }),
-    })
+    const { callAbacusAI } = await import('@/lib/ai/abacus-client');
+    
+    const aiResponse = await callAbacusAI({
+      messages,
+      stream: true,
+      max_tokens: 1500,
+      temperature: 0.8, // Slightly higher for more personality
+      timeoutMs: 60000, // 60 second timeout
+    }, {
+      userId: session.user.id,
+      enableFallback: true, // Enable automatic model fallback
+    });
 
-    if (!response.ok) {
-      throw new Error(`AI API error: ${response.status}`)
+    if (!aiResponse.success || !aiResponse.data) {
+      console.error('[Coach Kai Streaming] AI call failed:', {
+        error: aiResponse.error,
+        attemptedModels: aiResponse.attemptedModels,
+        userId: session.user.id
+      });
+      throw new Error(aiResponse.error || 'AI API error')
     }
+    
+    console.log(`[Coach Kai Streaming] ✅ Stream started with model: ${aiResponse.model}`);
+    const response = aiResponse.data as Response;
 
     // Create streaming response
     const stream = new ReadableStream({

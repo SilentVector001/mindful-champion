@@ -272,52 +272,42 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
     ];
 
     // ============================================
-    // CALL AI WITH UPGRADED MODEL & SETTINGS
+    // CALL AI WITH MODEL FALLBACK & TIMEOUT
     // ============================================
     
-    let response;
-    try {
-      response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'gpt-5.2', // ⬆️ UPGRADED: Latest GPT-5.2 for enhanced intelligence and reasoning
-          messages: conversationMessages,
-          max_tokens: 120, // ENFORCED SHORT: Maximum 120 tokens for very concise responses
-          temperature: 1.0, // MAXIMUM creativity for maximum variety
-          presence_penalty: 0.9, // MAXIMUM encouragement for diverse topics
-          frequency_penalty: 1.2, // BEYOND MAXIMUM - aggressively reduce repetitive phrases
-          top_p: 0.95, // High nucleus sampling for maximum variety
-        }),
-      });
-    } catch (fetchError: any) {
-      console.error('[Coach Kai] Network error calling AI API:', fetchError.message);
-      return NextResponse.json(
-        { error: "Unable to connect to AI service. Please try again." },
-        { status: 503 }
-      );
-    }
+    const { callAbacusAI } = await import('@/lib/ai/abacus-client');
+    
+    const aiResponse = await callAbacusAI({
+      messages: conversationMessages,
+      max_tokens: 120, // ENFORCED SHORT: Maximum 120 tokens for very concise responses
+      temperature: 1.0, // MAXIMUM creativity for maximum variety
+      presence_penalty: 0.9, // MAXIMUM encouragement for diverse topics
+      frequency_penalty: 1.2, // BEYOND MAXIMUM - aggressively reduce repetitive phrases
+      top_p: 0.95, // High nucleus sampling for maximum variety
+      stream: false,
+      timeoutMs: 60000, // 60 second timeout
+    }, {
+      userId: session.user.id,
+      enableFallback: true, // Enable automatic model fallback
+    });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Coach Kai] AI API error:', {
-        status: response.status,
-        statusText: response.statusText,
-        error: errorText,
+    // Check if AI call was successful
+    if (!aiResponse.success || !aiResponse.data) {
+      console.error('[Coach Kai] AI call failed:', {
+        error: aiResponse.error,
+        attemptedModels: aiResponse.attemptedModels,
         userId: session.user.id
       });
       
-      // Return a user-friendly error
       return NextResponse.json(
-        { error: "Coach Kai is temporarily unavailable. Please try again in a moment." },
+        { error: aiResponse.error || "Coach Kai is temporarily unavailable. Please try again in a moment." },
         { status: 503 }
       );
     }
 
-    const data = await response.json();
+    console.log(`[Coach Kai] ✅ Response generated with model: ${aiResponse.model}`);
+    
+    const data = aiResponse.data;
     let assistantMessage = data.choices?.[0]?.message?.content || "I'm having trouble connecting right now. Please try again!";
 
     // ============================================
@@ -353,27 +343,24 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
         ];
         
         try {
-          const regenerateResponse = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-            },
-            body: JSON.stringify({
-              model: 'gpt-5.2', // ⬆️ UPGRADED: Latest GPT-5.2 for enhanced intelligence
-              messages: regenerateMessages,
-              max_tokens: 120,
-              temperature: 1.2, // EXTRA HIGH creativity for regeneration
-              presence_penalty: 1.0, // MAXIMUM for regeneration
-              frequency_penalty: 1.5, // ULTRA-HIGH for regeneration - force new words
-              top_p: 0.98, // Very high nucleus sampling for regeneration
-            }),
+          const regenerateAIResponse = await callAbacusAI({
+            messages: regenerateMessages,
+            max_tokens: 120,
+            temperature: 1.2, // EXTRA HIGH creativity for regeneration
+            presence_penalty: 1.0, // MAXIMUM for regeneration
+            frequency_penalty: 1.5, // ULTRA-HIGH for regeneration - force new words
+            top_p: 0.98, // Very high nucleus sampling for regeneration
+            stream: false,
+            timeoutMs: 60000,
+          }, {
+            userId: session.user.id,
+            enableFallback: true,
           });
           
-          if (regenerateResponse.ok) {
-            const regenerateData = await regenerateResponse.json();
+          if (regenerateAIResponse.success && regenerateAIResponse.data) {
+            const regenerateData = regenerateAIResponse.data;
             assistantMessage = regenerateData.choices?.[0]?.message?.content || assistantMessage;
-            console.log('✅ Response regenerated successfully');
+            console.log('✅ Response regenerated successfully with model:', regenerateAIResponse.model);
           } else {
             console.log('⚠️ Regeneration failed, using original response');
           }
