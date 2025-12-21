@@ -122,7 +122,33 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
 
   const markDayComplete = async () => {
     try {
-      toast.success(`Day ${selectedDay} completed! 🎉 Amazing work, Champion!`)
+      toast.loading('Updating your progress...')
+      
+      const response = await fetch('/api/training/mark-day-complete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          programId: program.id,
+          day: selectedDay,
+          userId: userId
+        })
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        console.error('API error:', data)
+        toast.dismiss()
+        toast.error(data.error || 'Unable to update progress. Please try again.')
+        return
+      }
+
+      toast.dismiss()
+      toast.success(`Day ${selectedDay} completed! 🎉 Amazing work, Champion!`, {
+        description: data.streak > 1 ? `🔥 ${data.streak} day streak!` : undefined
+      })
       
       // Move to next day if not at the end
       if (selectedDay < totalDays) {
@@ -132,7 +158,8 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
       router.refresh()
     } catch (error) {
       console.error('Error marking day complete:', error)
-      toast.error('Failed to update progress')
+      toast.dismiss()
+      toast.error('Unable to update progress. Please try again.')
     }
   }
 
