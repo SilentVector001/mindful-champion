@@ -14,6 +14,7 @@ import InteractiveAvatar from '@/components/avatar/interactive-avatar';
 import VoiceSettingsModal, { VoicePreferences } from '@/components/voice/voice-settings-modal';
 import TextToSpeech, { unlockIOSTTS } from '@/components/voice/text-to-speech';
 import PushToTalk from '@/components/voice/push-to-talk';
+import ConversationalVoice from '@/components/voice/conversational-voice';
 import { Progress } from '@/components/ui/progress';
 
 import MentalTrainingPrompts from './mental-training-prompts';
@@ -99,6 +100,10 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   
   // PTT state management
   const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
+  
+  // Voice mode: 'ptt' (push-to-talk) or 'conversation' (like ChatGPT)
+  const [voiceMode, setVoiceMode] = useState<'ptt' | 'conversation'>('conversation');
+  const [conversationActive, setConversationActive] = useState(false);
   
   // Mental Training Panel state - Hidden by default to prevent UI clutter
   const [showMentalPanel, setShowMentalPanel] = useState(false);
@@ -731,11 +736,11 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                     COACH KAI
                   </h1>
                   <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 font-semibold px-3 py-1">
-                    🎙️ VOICE ACTIVE
+                    {voiceMode === 'conversation' ? '💬 CHAT MODE' : '📻 PTT MODE'}
                   </Badge>
                 </div>
                 <p className="text-teal-100 font-medium text-sm">
-                  Your AI Pickleball Coach • Walkie-Talkie Mode
+                  Your AI Pickleball Coach • {voiceMode === 'conversation' ? 'Natural Conversation' : 'Walkie-Talkie Mode'}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
@@ -805,37 +810,78 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
         >
           <Card className="shadow-xl border-2 border-teal-200 overflow-hidden bg-gradient-to-br from-white to-teal-50">
             <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 border-b border-teal-100">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Mic className="h-5 w-5 text-white animate-pulse" />
                 <h2 className="text-lg font-bold text-white">Ask Coach Kai Anything</h2>
-                <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 ml-auto text-xs">
-                  Voice + Text Ready
-                </Badge>
+                <div className="ml-auto flex items-center gap-2">
+                  {/* Voice Mode Toggle */}
+                  <div className="flex bg-white/10 rounded-full p-0.5">
+                    <button
+                      onClick={() => setVoiceMode('conversation')}
+                      className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                        voiceMode === 'conversation' 
+                          ? 'bg-white text-teal-600' 
+                          : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      💬 Chat
+                    </button>
+                    <button
+                      onClick={() => setVoiceMode('ptt')}
+                      className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                        voiceMode === 'ptt' 
+                          ? 'bg-white text-teal-600' 
+                          : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      📻 PTT
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             
             <div className="p-4 sm:p-6 bg-white">
-              {/* COMPACT LAYOUT: PTT Button + Text Input Side by Side on Desktop */}
+              {/* COMPACT LAYOUT: Voice Button + Text Input Side by Side on Desktop */}
               <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
-                {/* PTT Button - Compact */}
+                {/* Voice Button - Changes based on mode */}
                 <div className="flex flex-col items-center gap-2 flex-shrink-0">
-                  <div className="relative">
-                    <PushToTalk
+                  {voiceMode === 'conversation' ? (
+                    <ConversationalVoice
                       onTranscript={handlePTTVoiceInput}
+                      onSessionChange={setConversationActive}
+                      onSpeakingChange={(speaking) => setIsListening(speaking)}
+                      onListeningChange={(listening) => {
+                        if (listening) setAvatarState('listening');
+                        else if (!isSpeaking && !isLoading) setAvatarState('idle');
+                      }}
                       disabled={isLoading || processingVoiceInput}
                       language={voicePreferences.language}
-                      className="relative z-10"
+                      aiIsSpeaking={isSpeaking}
+                      onInterruptAI={interruptSpeech}
+                      pauseThreshold={1500}
                     />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-base font-bold text-slate-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                      Press & Hold to Talk
-                    </p>
-                    <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
-                      <Sparkles className="h-3 w-3 text-teal-500" />
-                      Release when done • Coach Kai responds instantly
-                    </p>
-                  </div>
+                  ) : (
+                    <>
+                      <div className="relative">
+                        <PushToTalk
+                          onTranscript={handlePTTVoiceInput}
+                          disabled={isLoading || processingVoiceInput}
+                          language={voicePreferences.language}
+                          className="relative z-10"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-base font-bold text-slate-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                          Press & Hold to Talk
+                        </p>
+                        <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
+                          <Sparkles className="h-3 w-3 text-teal-500" />
+                          Release when done • Coach Kai responds instantly
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 {/* Divider - Vertical on desktop, horizontal on mobile */}
