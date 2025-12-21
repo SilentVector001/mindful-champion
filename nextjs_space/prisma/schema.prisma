@@ -649,6 +649,8 @@ model UserProgram {
   startDate            DateTime?
   currentDay           Int             @default(1)
   completionPercentage Float           @default(0.0)
+  completedDays        DateTime[]      @default([])
+  lastTrainedAt        DateTime?
   completedAt          DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
