@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { logActivity } from "@/lib/tracking-utils";
 
 /**
  * POST /api/video-analysis/confirm-upload
@@ -64,6 +65,13 @@ export async function POST(request: NextRequest) {
       key,
       userId: user.id
     });
+
+    // Log activity
+    await logActivity(user.id, 'video_interaction', {
+      videoTitle: title,
+      videoId: videoAnalysis.id,
+      interactionType: 'UPLOAD'
+    }).catch(err => console.error('Failed to log video upload activity:', err))
 
     return NextResponse.json({
       success: true,

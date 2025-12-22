@@ -6,6 +6,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 
 import { prisma } from '@/lib/db'
+import { logActivity } from '@/lib/tracking-utils'
 
 
 export async function POST(request: Request) {
@@ -145,6 +146,16 @@ export async function POST(request: Request) {
     })
 
     console.log('Mark day complete: Successfully updated', { userProgramId: updatedProgram.id })
+
+    // Log activity
+    await logActivity(session.user.id, 'drill_completion', {
+      drillName: `${program.name} - Day ${day}`,
+      drillCategory: 'Training Program',
+      skillLevel: 'INTERMEDIATE',
+      status: isCompleted ? 'COMPLETED' : 'IN_PROGRESS',
+      timeSpent: null,
+      performanceScore: completionPercentage
+    }).catch(err => console.error('Failed to log training activity:', err))
 
     return NextResponse.json({ 
       success: true, 

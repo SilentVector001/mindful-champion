@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { logActivity } from '@/lib/tracking-utils'
 
 export async function GET() {
   try {
@@ -84,6 +85,16 @@ export async function POST(request: Request) {
         lastActiveDate: new Date()
       }
     })
+
+    // Log activity
+    await logActivity(session.user.id, 'match_record', {
+      result,
+      userScore: playerScore,
+      opponentScore,
+      opponentName: opponent,
+      matchType: 'singles',
+      location
+    }).catch(err => console.error('Failed to log match activity:', err))
 
     return NextResponse.json({ match })
   } catch (error) {

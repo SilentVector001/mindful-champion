@@ -18,7 +18,13 @@ export async function GET(request: NextRequest) {
     console.log('[Activity Feed] Fetching activities since:', sevenDaysAgo.toISOString())
 
     // Fetch various activities
-    const [recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments] = await Promise.all([
+    const [recentActivityLogs, recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments] = await Promise.all([
+      // Recent activity logs (NEW - captures all logged activities)
+      prisma.activityLog.findMany({
+        where: { timestamp: { gte: sevenDaysAgo } },
+        orderBy: { timestamp: 'desc' },
+        take: 50
+      }),
       // Recent signups
       prisma.user.findMany({
         where: { createdAt: { gte: sevenDaysAgo } },
@@ -129,6 +135,22 @@ export async function GET(request: NextRequest) {
     // Combine and format all activities
     const activities: any[] = []
 
+    // Add activity logs (from the new ActivityLog table)
+    recentActivityLogs.forEach((log: any) => {
+      // Get user info if userId exists
+      activities.push({
+        id: `activity-log-${log.id}`,
+        type: log.type?.toLowerCase() || 'activity',
+        userId: log.userId,
+        userEmail: null, // Will be populated if needed
+        userName: 'User', // Will be populated if needed
+        description: log.description || log.title,
+        details: log.category,
+        createdAt: log.timestamp,
+        timeAgo: getTimeAgo(log.timestamp)
+      })
+    })
+
     // Add signups
     recentSignups.forEach((user: any) => {
       activities.push({
@@ -229,6 +251,7 @@ export async function GET(request: NextRequest) {
     console.log('[Activity Feed] Summary:')
     console.log('  - Current time:', new Date().toISOString())
     console.log('  - Fetching activities since:', sevenDaysAgo.toISOString())
+    console.log('  - Activity Logs:', recentActivityLogs.length, '(NEW)')
     console.log('  - Signups:', recentSignups.length)
     console.log('  - Videos:', recentVideos.length)
     console.log('  - Matches:', recentMatches.length)
@@ -249,6 +272,7 @@ export async function GET(request: NextRequest) {
       activities: topActivities,
       total: activities.length,
       breakdown: {
+        activityLogs: recentActivityLogs.length,
         signups: recentSignups.length,
         videos: recentVideos.length,
         matches: recentMatches.length,

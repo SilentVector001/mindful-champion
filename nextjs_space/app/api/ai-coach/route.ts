@@ -6,6 +6,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { createReminderFromCoachKai, hasReminderIntent } from "@/lib/notifications/coach-kai-reminder-tool"
+import { logActivity } from "@/lib/tracking-utils"
 
 export async function POST(req: NextRequest) {
   try {
@@ -50,6 +51,11 @@ export async function POST(req: NextRequest) {
           messageCount: 0,
         }
       })
+      
+      // Log activity for new conversation
+      await logActivity(session.user.id, 'authentication', {
+        eventType: 'COACH_CHAT_STARTED'
+      }).catch(err => console.error('Failed to log coach chat activity:', err))
     } else {
       conversation = existingConversation
     }
