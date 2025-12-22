@@ -27,8 +27,8 @@ export const serveReturnMasteryProgram = {
         focus: "Developing a consistent deep serve to the baseline",
         description: "Master the deep serve - your primary weapon. Learn to consistently place serves deep in the service box, forcing opponents back.",
         duration_minutes: 30,
-        videoUrl: "https://www.youtube.com/watch?v=nPx9cXnAg9A",
-        videoTitle: "Deep Serve Technique in Pickleball",
+        videoUrl: "https://www.youtube.com/watch?v=_ew47Dqi-3w",
+        videoTitle: "Pickleball Serve Fundamentals - Deep Serve Technique",
         warmup: {
           title: "Serve Prep Warm-up",
           exercises: [
@@ -92,8 +92,8 @@ export const serveReturnMasteryProgram = {
         focus: "Returning serves deep to opponent's baseline",
         description: "Learn to neutralize your opponent's serve by consistently returning deep. A deep return keeps you in the point and gives you time to transition forward.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=IxQPFKkKZxg",
-        videoTitle: "Deep Return Strategy",
+        videoUrl: "https://www.youtube.com/watch?v=P06TNWpWU9k",
+        videoTitle: "Return of Serve Techniques & Deep Return Strategy",
         warmup: {
           title: "Return Prep Warm-up",
           exercises: [
@@ -158,8 +158,8 @@ export const serveReturnMasteryProgram = {
         focus: "Developing the short serve to catch opponents off guard",
         description: "Add the short serve to your arsenal. This serve lands just past the kitchen line, forcing opponents to move forward and creating awkward returns.",
         duration_minutes: 30,
-        videoUrl: "https://www.youtube.com/watch?v=kl5r9sJHnU0",
-        videoTitle: "Short Serve Technique",
+        videoUrl: "https://www.youtube.com/watch?v=mAKQtndtp5s",
+        videoTitle: "Master 3 Types of Spin Serves - Short Serve Variations",
         warmup: {
           title: "Touch & Control Warm-up",
           exercises: [
@@ -223,8 +223,8 @@ export const serveReturnMasteryProgram = {
         focus: "Controlling return direction and targeting weaknesses",
         description: "Take your return game to the next level by learning to place returns to specific targets and exploit opponent weaknesses.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=7L1q_qQ9XlI",
-        videoTitle: "Return Placement Strategy",
+        videoUrl: "https://www.youtube.com/watch?v=aiy9c8uR374",
+        videoTitle: "Return Placement & Direction Control Strategies",
         warmup: {
           title: "Directional Control Warm-up",
           exercises: [
@@ -289,8 +289,8 @@ export const serveReturnMasteryProgram = {
         focus: "Developing topspin and sidespin serves",
         description: "Level up your serve game by adding spin. Topspin drops the ball faster, while sidespin creates difficult bounces.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=a5AYb7xQw-o",
-        videoTitle: "How to Add Spin to Your Serve",
+        videoUrl: "https://www.youtube.com/watch?v=D6e5EW7ze48",
+        videoTitle: "2 Legal Spin Serves - Add Spin to Your Serve",
         warmup: {
           title: "Spin Prep Warm-up",
           exercises: [
@@ -355,8 +355,8 @@ export const serveReturnMasteryProgram = {
         focus: "Reading and countering spin serves effectively",
         description: "Learn to read spin, adjust your return, and neutralize opponents' spin serves with confidence.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=Q8xPHmJ0_nA",
-        videoTitle: "How to Return Spin Serves",
+        videoUrl: "https://www.youtube.com/watch?v=nXzfAQki67E",
+        videoTitle: "Reading & Returning Spin Serves Like a Pro",
         warmup: {
           title: "Spin Reading Warm-up",
           exercises: [
@@ -421,8 +421,8 @@ export const serveReturnMasteryProgram = {
         focus: "Applying all serve and return skills in game situations",
         description: "Final day! Put everything together in game situations. Develop mental routines and pressure management for serves and returns.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=BH2x0v_cVX0",
-        videoTitle: "Serve and Return Mental Game",
+        videoUrl: "https://www.youtube.com/watch?v=1Nhnz8brZRA",
+        videoTitle: "Mental Game Mastery for Tournament Play",
         warmup: {
           title: "Championship Warm-up",
           exercises: [

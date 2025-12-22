@@ -40,11 +40,11 @@ function generateEliteDay(day: number): any {
   const theme = themes[day - 1] || themes[0];
   
   const videos = [
-    "https://www.youtube.com/watch?v=SzKWn0yNJws",
-    "https://www.youtube.com/watch?v=nPx9cXnAg9A",
-    "https://www.youtube.com/watch?v=J9lCWVdLQbE",
-    "https://www.youtube.com/watch?v=gqKQmJlKTzE",
-    "https://www.youtube.com/watch?v=3t_2JYlBqhY"
+    "https://www.youtube.com/watch?v=SuDAwDyy3g4",
+    "https://www.youtube.com/watch?v=l8AzqCNxDTI",
+    "https://www.youtube.com/watch?v=mAKQtndtp5s",
+    "https://www.youtube.com/watch?v=I7Xl4w9vy2U",
+    "https://www.youtube.com/watch?v=1Nhnz8brZRA"
   ];
   
   return {

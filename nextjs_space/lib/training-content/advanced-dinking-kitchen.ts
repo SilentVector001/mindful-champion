@@ -64,7 +64,7 @@ export const advancedDinkingProgram = {
         'Final day - compete at match speed with all dinking skills.'
       ][i],
       duration_minutes: 40 + (i % 3) * 5,
-      videoUrl: `https://www.youtube.com/watch?v=${['eD0gCv5hTVE', 'tKKk9p7n_tw', 'sL4vQ3x_9Qk', '8k9fJ3_K4pM', 'pR5zN2_8vQw', '7hK3_pL9mN0', 'qT6_wN5jK8L', 'ZBqxZHHEqog', 'mK9_jN3pQ7w', 'vL8_tP2_hK4', 'xN3_rQ9_mP7', 'gN5_wK8_tL2'][i]}`,
+      videoUrl: `https://www.youtube.com/watch?v=${['USVMB5zEzIc', 'SuDAwDyy3g4', 'ZIqR6rFX0lw', '40ap9ZC7EdI', 'Vptpa0FfS5U', 'a5gTSrUHqzU', 'AuZ3DaTTYrw', 'bJkWCJkquXw', 'SiifS1MLrjg', 'vdqy8C0oH-Q', 'VKR6XWj2DLs', 'pUR6ToL21aU'][i]}`,
       videoTitle: [
         'Dinking Fundamentals',
         'Cross-Court Dinking Strategy',

@@ -81,7 +81,7 @@ export const tournamentPrepProgram = {
           'Develop the championship mindset that separates winners from competitors.'
         ][i],
         duration_minutes: 60,
-        videoUrl: `https://www.youtube.com/watch?v=${['BH2x0v_cVX0', 'mT9_wK5pL7n', 'qR6_vN8tK4m', 'PFD_oKOZYg4', 'xT7_pL9mK6w', 'wN5_qK8tR7m', 'rP8_tN6mK9q', 'vL7_wQ5nP8t', 'mK9_pR7tL6n', 'qT8_wN6pK7m', 'rN7_vK9tP6w', 'pL8_mT6wK9q', 'tK7_qN8pR6m', 'hU9zQl4KqNA', 'wP9_tL7mK6q', 'mR8_vK6tN9p', 'qN9_pT7wK8m', 'tL8_wR6mP9k', 'vK9_pN7tR8m', 'wT8_qL6pK9n', 'pR9_mK7tN8w'][i]}`,
+        videoUrl: `https://www.youtube.com/watch?v=${['1Nhnz8brZRA', '_ew47Dqi-3w', 'P06TNWpWU9k', 'l8AzqCNxDTI', 'SuDAwDyy3g4', 'I7Xl4w9vy2U', 'bJkWCJkquXw', 'rD1O3R9B0Sw', '2Vk-c8TdC28', 'mAKQtndtp5s', 'D6e5EW7ze48', 'nXzfAQki67E', 'ZIqR6rFX0lw', '40ap9ZC7EdI', 'Vptpa0FfS5U', 'a5gTSrUHqzU', 'AuZ3DaTTYrw', 'VKR6XWj2DLs', 'pUR6ToL21aU', '_swDF_6b9qw', '1Nhnz8brZRA'][i]}`,
         videoTitle: weekTopics[weekIndex][dayInWeek],
         warmup: {
           title: 'Tournament Prep Warm-up',

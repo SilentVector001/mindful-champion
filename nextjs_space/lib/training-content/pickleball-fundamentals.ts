@@ -29,8 +29,8 @@ export const pickleballFundamentalsProgram = {
         focus: "Continental grip and paddle control",
         description: "Start your pickleball journey by mastering the fundamental continental grip and basic paddle control. This foundation will set you up for success in all future shots.",
         duration_minutes: 30,
-        videoUrl: "https://www.youtube.com/watch?v=LbqPi1y_ooc",
-        videoTitle: "Pickleball Basics: The Continental Grip",
+        videoUrl: "https://www.youtube.com/watch?v=8OHu0gRZf2o",
+        videoTitle: "Master the Continental Grip - Pickleball Fundamentals",
         warmup: {
           title: "Dynamic Warm-up",
           exercises: [
@@ -104,8 +104,8 @@ export const pickleballFundamentalsProgram = {
         focus: "Underhand serve technique and consistency",
         description: "Master the basic underhand serve - the shot that starts every rally in pickleball. Focus on technique over power.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=nPx9cXnAg9A",
-        videoTitle: "How to Serve in Pickleball - Basic Technique",
+        videoUrl: "https://www.youtube.com/watch?v=_ew47Dqi-3w",
+        videoTitle: "Pickleball Serve Fundamentals - Technique Guide",
         warmup: {
           title: "Serve Prep Warm-up",
           exercises: [
@@ -179,7 +179,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Returning serves deep and consistently",
         description: "Learn to return serves with confidence. The return is the second most important shot in pickleball after the serve.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=IxQPFKkKZxg",
+        videoUrl: "https://www.youtube.com/watch?v=P06TNWpWU9k",
         videoTitle: "Pickleball Return of Serve Strategy",
         warmup: {
           title: "Return-Ready Warm-up",
@@ -254,7 +254,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Soft touch and kitchen line control",
         description: "Master the dink - the most important shot in pickleball. Develop soft hands and touch at the net.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=eD0gCv5hTVE",
+        videoUrl: "https://www.youtube.com/watch?v=USVMB5zEzIc",
         videoTitle: "How to Dink in Pickleball for Beginners",
         warmup: {
           title: "Touch & Feel Warm-up",
@@ -329,7 +329,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Consistent forehand groundstrokes from baseline",
         description: "Develop a reliable forehand drive for baseline rallies and approach shots.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=mWJA61LBcPc",
+        videoUrl: "https://www.youtube.com/watch?v=rD1O3R9B0Sw",
         videoTitle: "Pickleball Forehand Technique",
         warmup: {
           title: "Groundstroke Warm-up",
@@ -404,7 +404,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Building backhand consistency and confidence",
         description: "Develop a solid two-handed or one-handed backhand for baseline play.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=wvP3FsJrGy4",
+        videoUrl: "https://www.youtube.com/watch?v=2Vk-c8TdC28",
         videoTitle: "Pickleball Backhand Fundamentals",
         warmup: {
           title: "Backhand Prep Warm-up",
@@ -479,7 +479,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Court positioning and efficient movement",
         description: "Master the footwork patterns that will get you to every ball efficiently.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=ZBqxZHHEqog",
+        videoUrl: "https://www.youtube.com/watch?v=I7Xl4w9vy2U",
         videoTitle: "Pickleball Footwork Basics",
         warmup: {
           title: "Movement Warm-up",
@@ -554,7 +554,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Net volleys and quick reflexes",
         description: "Develop quick hands and solid volley technique for net play.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=D_5xDvlxhVo",
+        videoUrl: "https://www.youtube.com/watch?v=Vptpa0FfS5U",
         videoTitle: "Pickleball Volley Technique",
         warmup: {
           title: "Volley Prep Warm-up",
@@ -629,7 +629,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Developing the third shot drop technique",
         description: "Learn the game-changing third shot drop - the shot that gets you to the net safely.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=rlfGP-1oPNo",
+        videoUrl: "https://www.youtube.com/watch?v=l8AzqCNxDTI",
         videoTitle: "How to Hit the Third Shot Drop",
         warmup: {
           title: "Drop Shot Warm-up",
@@ -704,7 +704,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Understanding court zones and strategic positioning",
         description: "Learn where to be on the court and why. Good positioning beats speed every time.",
         duration_minutes: 35,
-        videoUrl: "https://www.youtube.com/watch?v=0aXGFEfW9F4",
+        videoUrl: "https://www.youtube.com/watch?v=j9eXwu-vZ7I",
         videoTitle: "Pickleball Court Positioning Strategy",
         warmup: {
           title: "Strategic Movement Warm-up",
@@ -779,7 +779,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Complete understanding of pickleball rules",
         description: "Master all pickleball rules, scoring, faults, and game situations. Knowledge gives confidence!",
         duration_minutes: 30,
-        videoUrl: "https://www.youtube.com/watch?v=fXkV2DtGaEw",
+        videoUrl: "https://www.youtube.com/watch?v=YMGw7785SsE",
         videoTitle: "Official Pickleball Rules Explained",
         warmup: {
           title: "Skills Review Warm-up",
@@ -842,7 +842,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Combining all skills in actual games",
         description: "Put everything together in full game situations. Focus on executing what you've learned.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=E-l1xHZRnMo",
+        videoUrl: "https://www.youtube.com/watch?v=bJkWCJkquXw",
         videoTitle: "Beginner Pickleball Strategy Guide",
         warmup: {
           title: "Complete Warm-up Routine",
@@ -896,7 +896,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Advanced dinking patterns and developing patience",
         description: "Take your dinking to the next level with advanced patterns and learning to wait for the right opportunity.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=tKKk9p7n_tw",
+        videoUrl: "https://www.youtube.com/watch?v=SuDAwDyy3g4",
         videoTitle: "Advanced Dinking Strategy",
         warmup: {
           title: "Dinking Warm-up",
@@ -971,7 +971,7 @@ export const pickleballFundamentalsProgram = {
         focus: "Demonstrating all learned skills and celebrating progress",
         description: "Final day! Show off everything you've learned and celebrate your amazing progress over 14 days.",
         duration_minutes: 50,
-        videoUrl: "https://www.youtube.com/watch?v=gxRFPfQ3K8U",
+        videoUrl: "https://www.youtube.com/watch?v=1Nhnz8brZRA",
         videoTitle: "Your Pickleball Journey Continues",
         warmup: {
           title: "Championship Warm-up",

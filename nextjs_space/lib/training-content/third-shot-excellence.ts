@@ -26,7 +26,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Understanding and executing basic third shot drop",
         description: "Master the fundamental technique of the third shot drop - the shot that gets you from baseline to net safely.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=rlfGP-1oPNo",
+        videoUrl: "https://www.youtube.com/watch?v=l8AzqCNxDTI",
         videoTitle: "Third Shot Drop Fundamentals",
         warmup: {
           title: "Drop Shot Prep Warm-up",
@@ -90,7 +90,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Increasing third shot drop success rate",
         description: "Build on day 1 foundations. Increase consistency and control through targeted repetition.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=wW5yKJ6p_N4",
+        videoUrl: "https://www.youtube.com/watch?v=Bz2wXIKHXcs",
         videoTitle: "Third Shot Drop Consistency Drills",
         warmup: {
           title: "Consistency Warm-up",
@@ -154,7 +154,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Developing the attacking third shot drive",
         description: "Add the third shot drive to your arsenal. Learn when to drop and when to drive based on opponent position.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=rKXn3tApPb0",
+        videoUrl: "https://www.youtube.com/watch?v=O-VOy2lhtB8",
         videoTitle: "Third Shot Drive Technique",
         warmup: {
           title: "Power Shot Warm-up",
@@ -218,7 +218,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Moving forward efficiently after third shot",
         description: "Master the footwork that follows your third shot. Learn to transition from baseline to net smoothly.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=oW5UVvnPPt4",
+        videoUrl: "https://www.youtube.com/watch?v=I7Xl4w9vy2U",
         videoTitle: "Third Shot Transition Footwork",
         warmup: {
           title: "Movement Prep Warm-up",
@@ -282,7 +282,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Adding spin and variety to third shot drops",
         description: "Level up your drops with backspin, cross-court angles, and different trajectories.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=K4XB9TQp4zg",
+        videoUrl: "https://www.youtube.com/watch?v=vZ_yyo0lY7c",
         videoTitle: "Advanced Third Shot Drop Variations",
         warmup: {
           title: "Advanced Skills Warm-up",
@@ -346,7 +346,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Defending against opponents who attack your third shot",
         description: "Learn to handle opponents who attack your third shot drops and drives. Develop defensive skills.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=9oL0JeVKPqc",
+        videoUrl: "https://www.youtube.com/watch?v=aLBgoxT5cIY",
         videoTitle: "Defending Third Shot Attacks",
         warmup: {
           title: "Defensive Ready Warm-up",
@@ -410,7 +410,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Coordinating third shot strategy with partner",
         description: "Develop communication and coordination with your doubles partner around third shot execution.",
         duration_minutes: 40,
-        videoUrl: "https://www.youtube.com/watch?v=hU9zQl4KqNA",
+        videoUrl: "https://www.youtube.com/watch?v=Cw6Iz0nS0ds",
         videoTitle: "Doubles Third Shot Strategy",
         warmup: {
           title: "Partner Coordination Warm-up",
@@ -474,7 +474,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Executing third shots under match pressure",
         description: "Practice third shots in competitive scenarios with pressure and consequences.",
         duration_minutes: 45,
-        videoUrl: "https://www.youtube.com/watch?v=PFD_oKOZYg4",
+        videoUrl: "https://www.youtube.com/watch?v=qu971XPP2XM",
         videoTitle: "Mental Game for Third Shot",
         warmup: {
           title: "Competition Warm-up",
@@ -538,7 +538,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Full-speed game play emphasizing third shot",
         description: "Play competitive games at full speed, focusing on executing perfect third shot sequences.",
         duration_minutes: 50,
-        videoUrl: "https://www.youtube.com/watch?v=X3wT_p0zaqE",
+        videoUrl: "https://www.youtube.com/watch?v=bJkWCJkquXw",
         videoTitle: "Advanced Third Shot Game Play",
         warmup: {
           title: "Game Speed Warm-up",
@@ -594,7 +594,7 @@ export const thirdShotExcellenceProgram = {
         focus: "Final assessment and celebration of progress",
         description: "Final day! Demonstrate all third shot skills, assess your progress, and set goals for continued improvement.",
         duration_minutes: 50,
-        videoUrl: "https://www.youtube.com/watch?v=nfJv2W_7DQY",
+        videoUrl: "https://www.youtube.com/watch?v=1Nhnz8brZRA",
         videoTitle: "Third Shot Excellence - Your Journey Continues",
         warmup: {
           title: "Championship Warm-up",

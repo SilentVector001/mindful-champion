@@ -70,7 +70,7 @@ export const spinPowerProgram = {
         'Final assessment - demonstrate mastery of all spin techniques in competition.'
       ][i],
       duration_minutes: 50 + (i % 4) * 5,
-      videoUrl: `https://www.youtube.com/watch?v=${['k9M_3tApQc0', 'hR7_vL5jN9w', 'pT3_wK8mQ6x', 'K4XB9TQp4zg', 'qN7_tL9vR5k', 'a5AYb7xQw-o', 'mP8_rK5wT3n', 'xL6_nQ9jP8w', 'vN4_tR7mK9q', 'Q8xPHmJ0_nA', 'wK5_pN8qT7m', 'rP9_mK6wL4n', 'tQ7_vL5nR9k', 'nK8_pR6mT4w'][i]}`,
+      videoUrl: `https://www.youtube.com/watch?v=${['0k8bUlkjHMo', 'mAKQtndtp5s', 'D6e5EW7ze48', 'vdqy8C0oH-Q', 'SiifS1MLrjg', 'rHTyvjtZT84', '3snvZGTsT9E', 'rD1O3R9B0Sw', '2Vk-c8TdC28', 'P06TNWpWU9k', 'OxNnewWzUC4', 'aiy9c8uR374', 'nXzfAQki67E', '1Nhnz8brZRA'][i]}`,
       videoTitle: [
         'Understanding Spin in Pickleball',
         'Topspin Forehand Technique',
