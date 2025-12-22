@@ -198,8 +198,8 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
         </Card>
       )}
 
-      {/* Posts */}
-      <div className="space-y-6">
+      {/* Posts - Grid Layout for compact cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <AnimatePresence>
           {posts.map(post => (
             <div key={post.id}>
@@ -211,6 +211,7 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
                 onComment={(id) => setCommentingPostId(id)}
                 onReport={(id) => setReportingPostId(id)}
                 onDelete={handleDelete}
+                compact={true}
               />
               {commentingPostId === post.id && (
                 <motion.div
@@ -230,13 +231,13 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
         </AnimatePresence>
 
         {loading && (
-          <div className="flex justify-center py-8">
+          <div className="col-span-full flex justify-center py-8">
             <Loader2 className="w-8 h-8 animate-spin text-teal-500" />
           </div>
         )}
 
         {!loading && posts.length === 0 && (
-          <Card className="bg-slate-900/50 border-slate-700/50">
+          <Card className="col-span-full bg-slate-900/50 border-slate-700/50">
             <CardContent className="py-12 text-center">
               <Video className="w-12 h-12 mx-auto mb-4 text-slate-500" />
               <h3 className="text-lg font-medium text-slate-300 mb-2">No videos shared yet</h3>
@@ -246,7 +247,7 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
         )}
 
         {hasMore && !loading && posts.length > 0 && (
-          <div className="flex justify-center">
+          <div className="col-span-full flex justify-center">
             <Button onClick={loadMore} variant="outline" className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10">
               Load more
             </Button>

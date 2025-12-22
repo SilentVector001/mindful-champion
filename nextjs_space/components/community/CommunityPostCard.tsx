@@ -89,6 +89,7 @@ interface CommunityPostCardProps {
   onReport?: (postId: string) => void
   onEdit?: (postId: string) => void
   onDelete?: (postId: string) => void
+  compact?: boolean // New prop for compact mode
 }
 
 export function CommunityPostCard({
@@ -100,7 +101,8 @@ export function CommunityPostCard({
   onShare,
   onReport,
   onEdit,
-  onDelete
+  onDelete,
+  compact = true // Default to compact mode
 }: CommunityPostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false)
   const [isSaved, setIsSaved] = useState(post.isSaved || false)
@@ -292,6 +294,208 @@ export function CommunityPostCard({
 
   const displayedComments = showAllComments ? comments : comments.slice(0, 3)
 
+  const [showComments, setShowComments] = useState(false)
+
+  // Compact card layout (social media style)
+  if (compact) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Card className="bg-slate-900/50 border-slate-700/50 overflow-hidden hover:border-teal-500/30 transition-all">
+          {/* Compact Header */}
+          <div className="flex items-center justify-between px-3 py-2">
+            <Link href={`/profile/${post.user.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 min-w-0">
+              <Avatar className="h-8 w-8 border border-teal-500/50">
+                <AvatarImage src={post.user.image || undefined} />
+                <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white text-xs font-bold">
+                  {post.user.name?.[0]?.toUpperCase() || "U"}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5">
+                  <p className="font-semibold text-white text-sm truncate">{post.user.name || "Anonymous"}</p>
+                  {getSubscriptionBadge(post.user.subscriptionTier)}
+                </div>
+                <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                  {post.user.playerRating && <span>{post.user.playerRating}</span>}
+                  <span>• {formatDate(post.createdAt)}</span>
+                </div>
+              </div>
+            </Link>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-slate-400 hover:text-white">
+                  <MoreVertical className="w-4 h-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
+                {isOwner ? (
+                  <>
+                    <DropdownMenuItem onClick={() => onEdit?.(post.id)} className="text-slate-300 text-sm">
+                      <Pencil className="w-3 h-3 mr-2" /> Edit
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => onDelete?.(post.id)} className="text-red-400 text-sm">
+                      <Trash2 className="w-3 h-3 mr-2" /> Delete
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <DropdownMenuItem onClick={() => onReport?.(post.id)} className="text-slate-300 text-sm">
+                    <Flag className="w-3 h-3 mr-2" /> Report
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Compact Video - smaller aspect ratio */}
+          {video && (
+            <div className="relative w-full bg-slate-950" style={{ aspectRatio: '16/9', maxHeight: '180px' }}>
+              {isPlaying ? (
+                <video src={video.videoUrl} controls autoPlay className="w-full h-full object-cover" />
+              ) : (
+                <>
+                  {video.thumbnailUrl ? (
+                    <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" sizes="300px" />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                      <Play className="w-10 h-10 text-slate-600" />
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setIsPlaying(true)}
+                    className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
+                  >
+                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center shadow-lg">
+                      <Play className="w-5 h-5 text-white ml-0.5" fill="currentColor" />
+                    </div>
+                  </button>
+                  <div className="absolute bottom-2 right-2 px-1.5 py-0.5 rounded bg-black/70 text-white text-xs flex items-center gap-1">
+                    <Clock className="w-3 h-3" />
+                    {formatDuration(video.duration)}
+                  </div>
+                  {video.overallScore && (
+                    <div className="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-bold flex items-center gap-1">
+                      <Trophy className="w-3 h-3" />
+                      {video.overallScore}
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Compact Content */}
+          <div className="px-3 py-2 space-y-1.5">
+            {/* Caption - truncated */}
+            {post.caption && (
+              <p className="text-slate-200 text-sm line-clamp-2">
+                <span className="font-semibold text-white mr-1">{post.user.name}</span>
+                {post.caption}
+              </p>
+            )}
+
+            {/* Tags - compact */}
+            {post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {post.tags.slice(0, 4).map(tag => (
+                  <Badge key={tag} className="bg-teal-500/20 text-teal-400 border-0 text-xs px-1.5 py-0">
+                    #{tag}
+                  </Badge>
+                ))}
+                {post.tags.length > 4 && (
+                  <Badge className="bg-slate-700/50 text-slate-400 border-0 text-xs px-1.5 py-0">
+                    +{post.tags.length - 4}
+                  </Badge>
+                )}
+              </div>
+            )}
+
+            {/* Compact Stats & Actions Row */}
+            <div className="flex items-center justify-between pt-1 border-t border-slate-700/30">
+              <div className="flex items-center gap-3 text-xs text-slate-400">
+                <span className="flex items-center gap-1">
+                  <Eye className="w-3 h-3" /> {formatViews(post.views)}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Heart className="w-3 h-3" /> {likeCount}
+                </span>
+                <span className="flex items-center gap-1">
+                  <MessageCircle className="w-3 h-3" /> {comments.length}
+                </span>
+              </div>
+              <div className="flex items-center gap-0.5">
+                <Button variant="ghost" size="icon" onClick={handleLike} className={cn("h-7 w-7", isLiked ? "text-red-500" : "text-slate-400 hover:text-red-400")}>
+                  <Heart className={cn("w-4 h-4", isLiked && "fill-current")} />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={() => setShowComments(!showComments)} className="h-7 w-7 text-slate-400 hover:text-blue-400">
+                  <MessageCircle className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleShare} className="h-7 w-7 text-slate-400 hover:text-cyan-400">
+                  <Share2 className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={handleSave} className={cn("h-7 w-7", isSaved ? "text-amber-500" : "text-slate-400 hover:text-amber-400")}>
+                  <Bookmark className={cn("w-4 h-4", isSaved && "fill-current")} />
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          {/* Expandable Comments Section */}
+          <AnimatePresence>
+            {showComments && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="border-t border-slate-700/30 overflow-hidden"
+              >
+                <div className="p-2 bg-slate-800/30">
+                  <div className="flex gap-2">
+                    <Textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="bg-slate-900/70 border-slate-600/50 text-white placeholder:text-slate-500 min-h-[36px] max-h-[80px] resize-none text-sm"
+                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() }}}
+                    />
+                    <Button onClick={submitComment} disabled={!newComment.trim() || submittingComment} size="icon" className="bg-teal-500 hover:bg-teal-600 h-9 w-9">
+                      {submittingComment ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                    </Button>
+                  </div>
+                </div>
+                {comments.length > 0 && (
+                  <div className="px-2 pb-2 space-y-2 max-h-[150px] overflow-y-auto">
+                    {comments.slice(0, 3).map((comment) => (
+                      <div key={comment.id} className="flex gap-2">
+                        <Avatar className="h-6 w-6">
+                          <AvatarImage src={comment.user.image || undefined} />
+                          <AvatarFallback className="bg-teal-600 text-white text-xs">{comment.user.name?.[0] || "U"}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 bg-slate-800/50 rounded-lg px-2 py-1">
+                          <span className="font-semibold text-white text-xs mr-1">{comment.user.name}</span>
+                          <span className="text-slate-300 text-xs">{comment.content}</span>
+                        </div>
+                      </div>
+                    ))}
+                    {comments.length > 3 && (
+                      <button className="text-xs text-teal-400 hover:text-teal-300 w-full text-center">
+                        View all {comments.length} comments
+                      </button>
+                    )}
+                  </div>
+                )}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </Card>
+      </motion.div>
+    )
+  }
+
+  // Original full-size layout (kept for detail pages)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -351,7 +555,7 @@ export function CommunityPostCard({
         </div>
 
         <CardContent className="p-0 space-y-0">
-          {/* Compact Video Section - 40% of card */}
+          {/* Video Section */}
           {video && (
             <div className="relative w-full bg-slate-950" style={{ aspectRatio: '16/9', maxHeight: '400px' }}>
               {isPlaying ? (
