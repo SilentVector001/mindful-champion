@@ -18,155 +18,76 @@ export async function GET(request: NextRequest) {
     
     console.log('[Activity Feed] Fetching activities since:', sevenDaysAgo.toISOString())
 
-    // Fetch various activities - extended to 30 days for signups to capture more
+    // Helper function for safe queries
+    const safeQuery = async <T>(name: string, query: () => Promise<T>): Promise<T | []> => {
+      try {
+        return await query()
+      } catch (e: any) {
+        console.error(`[Activity Feed] Query "${name}" failed:`, e?.message || e)
+        return [] as any
+      }
+    }
+
+    // Fetch various activities - each query wrapped safely
     const [recentActivityLogs, recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments, recentTrainingProgress] = await Promise.all([
-      // Recent activity logs (NEW - captures all logged activities)
-      prisma.activityLog.findMany({
+      safeQuery('activityLog', () => prisma.activityLog.findMany({
         where: { timestamp: { gte: thirtyDaysAgo } },
         orderBy: { timestamp: 'desc' },
         take: 50,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
-      // Recent signups - extended to 30 days
-      prisma.user.findMany({
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
+      
+      safeQuery('users', () => prisma.user.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 30,
-        select: {
-          id: true,
-          name: true,
-          firstName: true,
-          lastName: true,
-          email: true,
-          createdAt: true,
-          subscriptionTier: true
-        }
-      }),
+        select: { id: true, name: true, firstName: true, lastName: true, email: true, createdAt: true, subscriptionTier: true }
+      })),
 
-      // Recent video uploads
-      prisma.videoAnalysis.findMany({
+      safeQuery('videoAnalysis', () => prisma.videoAnalysis.findMany({
         where: { uploadedAt: { gte: sevenDaysAgo } },
         orderBy: { uploadedAt: 'desc' },
         take: 20,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
 
-      // Recent matches
-      prisma.match.findMany({
+      safeQuery('match', () => prisma.match.findMany({
         where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
 
-      // Recent goals
-      prisma.goal.findMany({
+      safeQuery('goal', () => prisma.goal.findMany({
         where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
 
-      // Recent coach conversations
-      prisma.aIConversation.findMany({
+      safeQuery('aIConversation', () => prisma.aIConversation.findMany({
         where: { createdAt: { gte: sevenDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
 
-      // Recent payments/subscriptions
-      prisma.payment.findMany({
+      safeQuery('payment', () => prisma.payment.findMany({
         where: { createdAt: { gte: thirtyDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
-        include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          }
-        }
-      }),
+        include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
+      })),
       
-      // Recent training program progress
-      prisma.userProgramDay.findMany({
+      safeQuery('userProgramDay', () => prisma.userProgramDay.findMany({
         where: { completedAt: { not: null, gte: thirtyDaysAgo } },
         orderBy: { completedAt: 'desc' },
         take: 30,
         include: {
-          user: {
-            select: {
-              id: true,
-              name: true,
-              firstName: true,
-              lastName: true,
-              email: true
-            }
-          },
-          programDay: {
-            include: {
-              program: {
-                select: { name: true }
-              }
-            }
-          }
+          user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } },
+          programDay: { include: { program: { select: { name: true } } } }
         }
-      })
+      }))
     ])
 
     // Combine and format all activities
@@ -347,10 +268,25 @@ export async function GET(request: NextRequest) {
         } : null
       }
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Activity Feed] Error fetching activity feed:', error)
+    console.error('[Activity Feed] Error stack:', error?.stack)
+    console.error('[Activity Feed] Error name:', error?.name)
+    console.error('[Activity Feed] Error code:', error?.code)
+    
+    // Check for specific Prisma errors
+    const isPrismaError = error?.name?.includes('Prisma') || error?.code?.startsWith('P')
+    const errorMessage = isPrismaError 
+      ? `Database error: ${error?.code || 'Unknown'} - ${error?.meta?.cause || error?.message || 'Query failed'}`
+      : (error instanceof Error ? error.message : 'Unknown error')
+    
     return NextResponse.json(
-      { error: 'Failed to fetch activity feed', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Failed to fetch activity feed', 
+        details: errorMessage,
+        errorType: error?.name || 'Unknown',
+        timestamp: new Date().toISOString()
+      },
       { status: 500 }
     )
   }
