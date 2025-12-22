@@ -1299,7 +1299,7 @@ export default function VideoAnalysisHub() {
                     step: 1,
                     title: "Record Your Game",
                     bullets: ["Any device", "All formats", "Up to 500MB"],
-                    image: "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&h=400&fit=crop",
+                    image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png",
                     link: "#upload-dropzone"
                   },
                   {

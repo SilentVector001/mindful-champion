@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth"
 import { redirect } from "next/navigation"
 import { authOptions } from "@/lib/auth"
-import prisma from "@/lib/db"
+import { prisma } from "@/lib/db"
 import MainNavigation from "@/components/navigation/main-navigation"
 import { CommunityFeed } from "@/components/community"
 import Link from "next/link"

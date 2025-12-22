@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
-import prisma from "@/lib/db"
+import { prisma } from "@/lib/db"
 
 // GET: Fetch comments for a post
 export async function GET(
