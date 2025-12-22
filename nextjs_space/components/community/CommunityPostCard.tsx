@@ -98,10 +98,51 @@ export function CommunityPostCard({
     toast.success(isSaved ? "Removed from saved" : "Saved to collection")
   }
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(`${window.location.origin}/community/${post.id}`)
-    toast.success("Link copied to clipboard!")
-    onShare?.(post.id)
+  const handleShare = async () => {
+    // Create branded share message
+    const postUrl = `${window.location.origin}/connect/community/${post.id}`
+    const userName = post.user.name || "A player"
+    const caption = post.caption || "Check out this training video"
+    const videoTitle = video?.title || "pickleball training"
+    
+    // Format the message with branding
+    const shareTitle = "🏓 Mindful Champion Community"
+    const shareText = `🎾 ${userName} shared: "${caption.slice(0, 100)}${caption.length > 100 ? '...' : ''}"\n\n✨ Watch and join the discussion!\n\n🚀 Improve your game with AI-powered coaching at mindfulchampion.com`
+    
+    // Check if Web Share API is available
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: postUrl
+        })
+        toast.success("Shared successfully! 🎉")
+        onShare?.(post.id)
+      } catch (err: any) {
+        // User cancelled or error occurred
+        if (err.name !== 'AbortError') {
+          // Fallback to clipboard
+          await copyToClipboard(shareText, postUrl)
+        }
+      }
+    } else {
+      // Fallback to clipboard copy
+      await copyToClipboard(shareText, postUrl)
+    }
+  }
+
+  const copyToClipboard = async (shareText: string, postUrl: string) => {
+    try {
+      // Copy formatted text with link
+      const fullText = `${shareText}\n\n${postUrl}`
+      await navigator.clipboard.writeText(fullText)
+      toast.success("📋 Link copied to clipboard!")
+      onShare?.(post.id)
+    } catch (err) {
+      // If clipboard API fails, show the URL for manual copy
+      toast.error("Unable to copy. Please manually copy: " + postUrl)
+    }
   }
 
   const formatDuration = (seconds: number) => {
