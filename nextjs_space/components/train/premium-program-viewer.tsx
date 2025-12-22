@@ -56,6 +56,12 @@ import premiumDesign, {
   calculateProgress 
 } from "@/lib/premium-design-system"
 import AIInsightsPanel from "@/components/ai/ai-insights-panel"
+import { 
+  DrillTimer, 
+  RepCounter, 
+  DrillChecklist, 
+  ActivitySummary 
+} from "@/components/train/interactive-drill-components"
 
 interface DayStructure {
   day: number
@@ -161,6 +167,12 @@ export default function PremiumProgramViewer({
   const [notes, setNotes] = useState(userProgram?.notes || "")
   const [aiCoaching, setAICoaching] = useState<any>(null)
   const [loadingAI, setLoadingAI] = useState(false)
+  
+  // Activity tracking state
+  const [warmupCompleted, setWarmupCompleted] = useState(false)
+  const [drillsCompleted, setDrillsCompleted] = useState(0)
+  const [videoWatched, setVideoWatched] = useState(false)
+  const [cooldownCompleted, setCooldownCompleted] = useState(false)
 
   // Ensure dailyStructure is always an array
   // Handle multiple possible formats
@@ -714,14 +726,23 @@ export default function PremiumProgramViewer({
                         </div>
                       )}
 
-                      {/* Warm-Up Section */}
+                      {/* Warm-Up Section - INTERACTIVE */}
                       {selectedDayData.warmup && (
-                        <div>
+                        <div className="space-y-4">
                           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                             <Flame className="w-5 h-5 text-orange-500" />
-                            {selectedDayData.warmup.title || 'Warm-Up'} ({selectedDayData.warmup.duration_minutes || 5} min)
+                            {selectedDayData.warmup.title || 'Warm-Up'}
                           </h3>
+                          
+                          {/* Warm-up Timer */}
+                          <DrillTimer 
+                            duration_minutes={selectedDayData.warmup.duration_minutes || 10}
+                            onComplete={() => setWarmupCompleted(true)}
+                          />
+                          
+                          {/* Warm-up Exercises Checklist */}
                           <div className="bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-2xl border border-orange-200">
+                            <h4 className="font-semibold text-gray-900 mb-3">Warm-up Routine:</h4>
                             <div className="space-y-2">
                               {(selectedDayData.warmup.exercises || []).map((exercise: string, index: number) => (
                                 <motion.div
@@ -742,62 +763,20 @@ export default function PremiumProgramViewer({
                         </div>
                       )}
 
-                      {/* Main Drills Section */}
+                      {/* Main Drills Section - INTERACTIVE */}
                       {selectedDayData.main_drills && selectedDayData.main_drills.length > 0 && (
-                        <div>
+                        <div className="space-y-4">
                           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                             <Dumbbell className="w-5 h-5 text-purple-500" />
                             Today's Training Drills
                           </h3>
-                          <div className="space-y-4">
-                            {selectedDayData.main_drills.map((drill: any, index: number) => (
-                              <motion.div
-                                key={index}
-                                className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-2xl border border-purple-200 overflow-hidden"
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                              >
-                                <div className="p-6">
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div className="flex items-center gap-3">
-                                      <div className="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center font-bold">
-                                        {index + 1}
-                                      </div>
-                                      <div>
-                                        <h4 className="text-lg font-bold text-gray-900">{drill.name}</h4>
-                                        {drill.duration_minutes && (
-                                          <span className="text-sm text-purple-600 font-medium">{drill.duration_minutes} minutes</span>
-                                        )}
-                                      </div>
-                                    </div>
-                                    {drill.reps_or_sets && (
-                                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
-                                        {drill.reps_or_sets}
-                                      </Badge>
-                                    )}
-                                  </div>
-                                  <p className="text-gray-700 mb-4">{drill.description}</p>
-                                  {drill.tips && drill.tips.length > 0 && (
-                                    <div className="bg-white/50 rounded-xl p-4">
-                                      <h5 className="text-sm font-semibold text-purple-900 mb-2 flex items-center gap-2">
-                                        <Sparkles className="w-4 h-4" />
-                                        Pro Tips
-                                      </h5>
-                                      <ul className="space-y-1">
-                                        {drill.tips.map((tip: string, tipIndex: number) => (
-                                          <li key={tipIndex} className="flex items-start gap-2 text-sm text-gray-600">
-                                            <ChevronRight className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
-                                            {tip}
-                                          </li>
-                                        ))}
-                                      </ul>
-                                    </div>
-                                  )}
-                                </div>
-                              </motion.div>
-                            ))}
-                          </div>
+                          
+                          <DrillChecklist
+                            drills={selectedDayData.main_drills}
+                            onAllComplete={() => {
+                              setDrillsCompleted(selectedDayData.main_drills.length)
+                            }}
+                          />
                           
                           <div className="mt-4 p-4 bg-purple-100 rounded-xl">
                             <div className="flex items-center justify-between text-sm">
@@ -850,83 +829,143 @@ export default function PremiumProgramViewer({
                         </div>
                       )}
 
-                      {/* Training Videos */}
-                      <div>
-                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                          <Video className="w-5 h-5 text-emerald-500" />
-                          Training Videos
-                        </h3>
-                        <div className="space-y-3">
-                          {selectedDayData.videos?.map((videoId: string, index: number) => {
-                            const videoInfo = videoMap[videoId]
-                            if (!videoInfo) return null
-
-                            return (
-                              <motion.div
-                                key={videoId}
-                                className="group cursor-pointer"
-                                onClick={() => onVideoClick(videoId)}
-                                whileHover={{ scale: 1.02 }}
-                                whileTap={{ scale: 0.98 }}
-                              >
-                                <Card className="overflow-hidden border-2 border-transparent group-hover:border-emerald-200 group-hover:shadow-lg transition-all duration-300">
-                                  <CardContent className="p-4">
-                                    <div className="flex items-center gap-4">
-                                      <div className="w-20 h-14 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center relative overflow-hidden">
-                                        {videoInfo.thumbnailUrl ? (
-                                          <Image
-                                            src={videoInfo.thumbnailUrl}
-                                            alt={videoInfo.title}
-                                            fill
-                                            className="object-cover"
-                                          />
-                                        ) : (
-                                          <Play className="w-6 h-6 text-gray-400" />
+                      {/* Training Videos - ENHANCED */}
+                      {(selectedDayData.videoUrl || selectedDayData.videos?.length > 0) && (
+                        <div>
+                          <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                            <Video className="w-5 h-5 text-emerald-500" />
+                            Instructional Video
+                          </h3>
+                          
+                          {/* Direct video embed from daily structure */}
+                          {selectedDayData.videoUrl && (
+                            <motion.div
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="mb-6"
+                            >
+                              <Card className="overflow-hidden border-2 border-emerald-200 shadow-lg">
+                                <CardContent className="p-0">
+                                  <div className="aspect-video w-full bg-black">
+                                    <iframe
+                                      width="100%"
+                                      height="100%"
+                                      src={`https://www.youtube.com/embed/${selectedDayData.videoUrl.split('v=')[1]?.split('&')[0] || selectedDayData.videoUrl.split('/').pop()}`}
+                                      title={selectedDayData.videoTitle || `Day ${selectedDayData.day} Training Video`}
+                                      frameBorder="0"
+                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                      allowFullScreen
+                                      className="w-full h-full"
+                                    />
+                                  </div>
+                                  <div className="p-4 bg-gradient-to-br from-emerald-50 to-teal-50">
+                                    <h4 className="font-semibold text-gray-900 mb-2">
+                                      {selectedDayData.videoTitle || `Day ${selectedDayData.day} Training`}
+                                    </h4>
+                                    <p className="text-sm text-gray-600">
+                                      Watch this instructional video before starting today's drills
+                                    </p>
+                                    <div className="flex items-center gap-4 mt-3">
+                                      <Badge className="bg-emerald-100 text-emerald-800">
+                                        <Play className="w-3 h-3 mr-1" />
+                                        Required
+                                      </Badge>
+                                      <Button
+                                        size="sm"
+                                        variant="outline"
+                                        onClick={() => window.open(selectedDayData.videoUrl, '_blank')}
+                                        className="text-xs"
+                                      >
+                                        Open in YouTube
+                                      </Button>
+                                      <Button
+                                        size="sm"
+                                        variant={videoWatched ? "default" : "outline"}
+                                        onClick={() => {
+                                          setVideoWatched(true)
+                                          toast.success('✅ Video marked as watched!')
+                                        }}
+                                        className={cn(
+                                          "text-xs",
+                                          videoWatched && "bg-emerald-500 hover:bg-emerald-600"
                                         )}
-                                        <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
-                                        <Play className="absolute w-6 h-6 text-white opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
-                                      </div>
-                                      <div className="flex-1">
-                                        <h4 className="font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-2">
-                                          {videoInfo.title}
-                                        </h4>
-                                        <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
-                                          <div className="flex items-center gap-1">
-                                            <Clock className="w-3 h-3" />
-                                            <span>{videoInfo.duration}</span>
-                                          </div>
-                                          {videoInfo.watched && (
-                                            <Badge className="bg-emerald-100 text-emerald-800 text-xs">
-                                              <CheckCircle className="w-3 h-3 mr-1" />
-                                              Watched
-                                            </Badge>
-                                          )}
-                                          {videoInfo.difficulty && (
-                                            <div className="flex">
-                                              {Array.from({ length: 3 }).map((_, i) => (
-                                                <Star 
-                                                  key={i}
-                                                  className={cn(
-                                                    "w-3 h-3",
-                                                    i < (videoInfo.difficulty || 0)
-                                                      ? "text-yellow-400 fill-current" 
-                                                      : "text-gray-300"
-                                                  )}
-                                                />
-                                              ))}
-                                            </div>
-                                          )}
-                                        </div>
-                                      </div>
-                                      <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all duration-300" />
+                                      >
+                                        {videoWatched ? (
+                                          <>
+                                            <CheckCircle className="w-3 h-3 mr-1" />
+                                            Watched
+                                          </>
+                                        ) : (
+                                          'Mark as Watched'
+                                        )}
+                                      </Button>
                                     </div>
-                                  </CardContent>
-                                </Card>
-                              </motion.div>
-                            )
-                          })}
+                                  </div>
+                                </CardContent>
+                              </Card>
+                            </motion.div>
+                          )}
+
+                          {/* Legacy video system (if videos array exists) */}
+                          {selectedDayData.videos?.length > 0 && (
+                            <div className="space-y-3">
+                              {selectedDayData.videos.map((videoId: string, index: number) => {
+                                const videoInfo = videoMap[videoId]
+                                if (!videoInfo) return null
+
+                                return (
+                                  <motion.div
+                                    key={videoId}
+                                    className="group cursor-pointer"
+                                    onClick={() => onVideoClick(videoId)}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                  >
+                                    <Card className="overflow-hidden border-2 border-transparent group-hover:border-emerald-200 group-hover:shadow-lg transition-all duration-300">
+                                      <CardContent className="p-4">
+                                        <div className="flex items-center gap-4">
+                                          <div className="w-20 h-14 bg-gray-200 rounded-lg flex-shrink-0 flex items-center justify-center relative overflow-hidden">
+                                            {videoInfo.thumbnailUrl ? (
+                                              <Image
+                                                src={videoInfo.thumbnailUrl}
+                                                alt={videoInfo.title}
+                                                fill
+                                                className="object-cover"
+                                              />
+                                            ) : (
+                                              <Play className="w-6 h-6 text-gray-400" />
+                                            )}
+                                            <div className="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-all duration-300" />
+                                            <Play className="absolute w-6 h-6 text-white opacity-70 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300" />
+                                          </div>
+                                          <div className="flex-1">
+                                            <h4 className="font-semibold text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-2">
+                                              {videoInfo.title}
+                                            </h4>
+                                            <div className="flex items-center gap-3 mt-2 text-sm text-gray-500">
+                                              <div className="flex items-center gap-1">
+                                                <Clock className="w-3 h-3" />
+                                                <span>{videoInfo.duration}</span>
+                                              </div>
+                                              {videoInfo.watched && (
+                                                <Badge className="bg-emerald-100 text-emerald-800 text-xs">
+                                                  <CheckCircle className="w-3 h-3 mr-1" />
+                                                  Watched
+                                                </Badge>
+                                              )}
+                                            </div>
+                                          </div>
+                                          <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-emerald-500 group-hover:translate-x-1 transition-all duration-300" />
+                                        </div>
+                                      </CardContent>
+                                    </Card>
+                                  </motion.div>
+                                )
+                              })}
+                            </div>
+                          )}
                         </div>
-                      </div>
+                      )}
 
                       {/* Practice Goals */}
                       <div>
@@ -1053,22 +1092,43 @@ export default function PremiumProgramViewer({
                       )}
 
                       {/* Cooldown Section */}
+                      {/* Cool Down Section - INTERACTIVE */}
                       {selectedDayData.cooldown && selectedDayData.cooldown.length > 0 && (
                         <div>
                           <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
                             <RotateCcw className="w-5 h-5 text-blue-500" />
-                            Cool Down
+                            Cool Down & Recovery
                           </h3>
-                          <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-2xl border border-blue-200">
-                            <div className="flex flex-wrap gap-3">
-                              {selectedDayData.cooldown.map((item: string, index: number) => (
-                                <div key={index} className="flex items-center gap-2 bg-white px-4 py-2 rounded-full border border-blue-200">
-                                  <CheckCircle className="w-4 h-4 text-blue-500" />
-                                  <span className="text-gray-700 text-sm">{item}</span>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
+                          <Card className="border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+                            <CardContent className="p-6">
+                              <p className="text-sm text-gray-700 mb-4">
+                                Complete these cool-down exercises to prevent injury and aid recovery:
+                              </p>
+                              <div className="space-y-2">
+                                {selectedDayData.cooldown.map((item: string, index: number) => (
+                                  <div key={index} className="flex items-center gap-3 p-3 bg-white rounded-lg">
+                                    <Checkbox 
+                                      id={`cooldown-${index}`}
+                                      onCheckedChange={(checked) => {
+                                        // Check if all cooldown items are completed
+                                        const allChecked = selectedDayData.cooldown.every((_: any, i: number) => {
+                                          const checkbox = document.getElementById(`cooldown-${i}`) as HTMLInputElement
+                                          return checkbox?.checked || i === index && checked
+                                        })
+                                        if (allChecked) {
+                                          setCooldownCompleted(true)
+                                          toast.success('✅ Cool-down complete! Great recovery work!')
+                                        }
+                                      }}
+                                    />
+                                    <label htmlFor={`cooldown-${index}`} className="text-gray-700 text-sm cursor-pointer">
+                                      {item}
+                                    </label>
+                                  </div>
+                                ))}
+                              </div>
+                            </CardContent>
+                          </Card>
                         </div>
                       )}
 
@@ -1186,8 +1246,22 @@ export default function PremiumProgramViewer({
                           </Button>
                         </div>
 
-                        {/* Action Buttons */}
+                        {/* Activity Summary - SHOWS PROGRESS */}
                         {userProgram && isDayAvailable(selectedDayData.day) && !isDayCompleted(selectedDayData.day) && (
+                          <div className="mb-6">
+                            <ActivitySummary
+                              warmupCompleted={warmupCompleted}
+                              drillsCompleted={drillsCompleted}
+                              totalDrills={selectedDayData.main_drills?.length || 0}
+                              videoWatched={videoWatched}
+                              cooldownCompleted={cooldownCompleted}
+                              onMarkDayComplete={() => onMarkDayComplete(selectedDayData.day)}
+                            />
+                          </div>
+                        )}
+
+                        {/* Legacy Complete Button (fallback) */}
+                        {userProgram && isDayAvailable(selectedDayData.day) && !isDayCompleted(selectedDayData.day) && !selectedDayData.main_drills && (
                           <div className="flex flex-col sm:flex-row justify-center gap-4">
                             <Button
                               onClick={() => onMarkDayComplete(selectedDayData.day)}

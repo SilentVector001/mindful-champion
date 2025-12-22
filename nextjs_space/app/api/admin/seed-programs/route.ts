@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
 import { SkillLevel } from '@prisma/client'
+import { pickleballFundamentalsProgram } from '@/lib/training-content/pickleball-fundamentals'
 
 export async function POST() {
   try {
@@ -13,32 +14,24 @@ export async function POST() {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // }
 
-    console.log('🚀 Seeding comprehensive training programs...')
+    console.log('🚀 Seeding comprehensive training programs with REAL content...')
 
     // Delete existing programs to avoid duplicates
     await prisma.trainingProgram.deleteMany({})
     console.log('✅ Cleared existing programs')
 
     const programs = [
-      // BEGINNER PROGRAM 1
+      // BEGINNER PROGRAM 1 - NOW WITH FULL CONTENT!
       {
-        programId: 'beginner-fundamentals',
-        name: 'Pickleball Fundamentals',
-        tagline: 'Master the basics and build a solid foundation',
-        description: 'Perfect for complete beginners! This 14-day comprehensive program covers everything you need to start playing pickleball with confidence.',
+        programId: pickleballFundamentalsProgram.programId,
+        name: pickleballFundamentalsProgram.name,
+        tagline: pickleballFundamentalsProgram.tagline,
+        description: pickleballFundamentalsProgram.description,
         skillLevel: SkillLevel.BEGINNER,
-        durationDays: 14,
-        estimatedTimePerDay: '30-40 minutes',
-        keyOutcomes: [
-          'Master proper continental grip and ready position',
-          'Execute consistent serves with 80%+ success rate',
-          'Return serves deep into the court consistently',
-          'Develop foundational dinking skills at the kitchen line',
-          'Understand basic court positioning and strategy',
-          'Learn complete rules and scoring system',
-          'Build confidence for recreational play'
-        ],
-        dailyStructure: { days: [] },
+        durationDays: pickleballFundamentalsProgram.durationDays,
+        estimatedTimePerDay: pickleballFundamentalsProgram.estimatedTimePerDay,
+        keyOutcomes: pickleballFundamentalsProgram.keyOutcomes,
+        dailyStructure: pickleballFundamentalsProgram.dailyStructure,
         isActive: true
       },
       // BEGINNER PROGRAM 2
