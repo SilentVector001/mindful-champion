@@ -21,12 +21,22 @@ export async function GET(
       },
       include: {
         user: {
-          select: { id: true, name: true, image: true }
+          select: { 
+            id: true, 
+            name: true, 
+            image: true,
+            subscriptionTier: true
+          }
         },
         replies: {
           include: {
             user: {
-              select: { id: true, name: true, image: true }
+              select: { 
+                id: true, 
+                name: true, 
+                image: true,
+                subscriptionTier: true
+              }
             }
           },
           orderBy: { createdAt: "asc" }
@@ -76,7 +86,12 @@ export async function POST(
       },
       include: {
         user: {
-          select: { id: true, name: true, image: true }
+          select: { 
+            id: true, 
+            name: true, 
+            image: true,
+            subscriptionTier: true
+          }
         }
       }
     })

@@ -43,7 +43,14 @@ export async function GET(request: NextRequest) {
         where,
         include: {
           user: {
-            select: { id: true, name: true, image: true, skillLevel: true }
+            select: { 
+              id: true, 
+              name: true, 
+              image: true, 
+              skillLevel: true,
+              subscriptionTier: true,
+              playerRating: true
+            }
           },
           videoAnalysis: {
             select: {
@@ -156,7 +163,14 @@ export async function POST(request: NextRequest) {
       },
       include: {
         user: {
-          select: { id: true, name: true, image: true, skillLevel: true }
+          select: { 
+            id: true, 
+            name: true, 
+            image: true, 
+            skillLevel: true,
+            subscriptionTier: true,
+            playerRating: true
+          }
         },
         videoAnalysis: {
           select: {
