@@ -23,7 +23,18 @@ export async function GET(request: NextRequest) {
       prisma.activityLog.findMany({
         where: { timestamp: { gte: sevenDaysAgo } },
         orderBy: { timestamp: 'desc' },
-        take: 50
+        take: 50,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          }
+        }
       }),
       // Recent signups
       prisma.user.findMany({
@@ -137,13 +148,16 @@ export async function GET(request: NextRequest) {
 
     // Add activity logs (from the new ActivityLog table)
     recentActivityLogs.forEach((log: any) => {
-      // Get user info if userId exists
+      const userName = log.user?.name || 
+        `${log.user?.firstName || ''} ${log.user?.lastName || ''}`.trim() || 
+        log.user?.email || 'User'
+      
       activities.push({
         id: `activity-log-${log.id}`,
         type: log.type?.toLowerCase() || 'activity',
         userId: log.userId,
-        userEmail: null, // Will be populated if needed
-        userName: 'User', // Will be populated if needed
+        userEmail: log.user?.email || null,
+        userName: userName,
         description: log.description || log.title,
         details: log.category,
         createdAt: log.timestamp,

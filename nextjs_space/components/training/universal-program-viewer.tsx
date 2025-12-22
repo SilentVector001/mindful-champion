@@ -40,6 +40,7 @@ interface UniversalProgramViewerProps {
 
 export default function UniversalProgramViewer({ program, userProgram, userId }: UniversalProgramViewerProps) {
   const router = useRouter()
+  const [currentDay, setCurrentDay] = useState(userProgram?.currentDay || 1)
   const [selectedDay, setSelectedDay] = useState(userProgram?.currentDay || 1)
   const [expandedVideo, setExpandedVideo] = useState<number | null>(0)
   const [completedChecklist, setCompletedChecklist] = useState<Record<number, boolean>>({})
@@ -54,7 +55,7 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
   })
 
   const totalDays = program.durationDays
-  const completedDays = (userProgram?.currentDay || 1) - 1
+  const completedDays = currentDay - 1
   const progressPercentage = (completedDays / totalDays) * 100
   const currentDayVideos = videosByDay[selectedDay] || []
 
@@ -150,9 +151,13 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
         description: data.streak > 1 ? `🔥 ${data.streak} day streak!` : undefined
       })
       
+      // Update local state to unlock next day
+      const nextDay = selectedDay + 1
+      setCurrentDay(nextDay)
+      
       // Move to next day if not at the end
       if (selectedDay < totalDays) {
-        setTimeout(() => setSelectedDay(selectedDay + 1), 1000)
+        setTimeout(() => setSelectedDay(nextDay), 1000)
       }
       
       router.refresh()
@@ -274,9 +279,10 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
         <CardContent>
           <div className="grid grid-cols-7 gap-3">
             {Array.from({ length: totalDays }, (_, i) => i + 1).map((day) => {
-              const isCompleted = day < selectedDay
-              const isCurrent = day === selectedDay
-              const isLocked = day > selectedDay
+              const isCompleted = day < currentDay
+              const isCurrent = day === currentDay
+              const isLocked = day > currentDay
+              const isSelected = day === selectedDay
 
               return (
                 <motion.button
@@ -287,14 +293,15 @@ export default function UniversalProgramViewer({ program, userProgram, userId }:
                   disabled={isLocked}
                   className={`
                     aspect-square rounded-xl p-2 flex flex-col items-center justify-center gap-1 text-sm font-semibold transition-all
-                    ${isCurrent ? 'bg-emerald-600 text-white shadow-lg ring-4 ring-emerald-200' : ''}
+                    ${isSelected ? 'ring-4 ring-emerald-400 shadow-lg' : ''}
+                    ${isCurrent && !isCompleted ? 'bg-emerald-600 text-white' : ''}
                     ${isCompleted ? 'bg-green-100 text-green-800 border-2 border-green-300' : ''}
                     ${isLocked ? 'bg-gray-100 text-gray-400 cursor-not-allowed opacity-50' : ''}
                     ${!isCurrent && !isCompleted && !isLocked ? 'bg-white border-2 border-gray-200 hover:border-emerald-300' : ''}
                   `}
                 >
                   {isCompleted && <CheckCircle2 className="w-4 h-4" />}
-                  {isCurrent && <Zap className="w-4 h-4" />}
+                  {isCurrent && !isCompleted && <Zap className="w-4 h-4" />}
                   <span>Day {day}</span>
                 </motion.button>
               )
