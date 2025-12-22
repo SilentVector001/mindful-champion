@@ -32,7 +32,7 @@ import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import SpeechToText from "../voice/speech-to-text"
 import VoiceSettingsModal, { VoicePreferences } from "../voice/voice-settings-modal"
-import { useOpenAITTS } from "@/hooks/use-openai-tts"
+import { useElevenLabsTTS } from "@/hooks/use-elevenlabs-tts"
 
 // Avatar emotional states
 export type AvatarEmotion = 
@@ -182,12 +182,11 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
     isAudioUnlocked,
     hasAudioReady,
     error: ttsError
-  } = useOpenAITTS({
-    voice: 'nova', // Friendly, warm female voice for Coach Kai
-    speed: 1.0,
-    onStart: () => console.log('🔊 Coach Kai speaking...'),
+  } = useElevenLabsTTS({
+    voice: 'rachel', // Warm, friendly female voice for Coach Kai
+    onStart: () => console.log('🔊 Coach Kai speaking (ElevenLabs)...'),
     onEnd: () => console.log('🔇 Coach Kai finished speaking'),
-    onError: (err) => console.error('TTS Error:', err)
+    onError: (err) => console.error('ElevenLabs TTS Error:', err)
   })
   
   // Check if audio unlock is needed (iOS/Safari)
