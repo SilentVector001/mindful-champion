@@ -474,19 +474,20 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
                 
-                {/* TEMPORARILY HIDDEN - Can be restored later
-                <InfoTooltip content="Connect with other players, share tips, and ask questions" side="right">
+                <InfoTooltip content="Share training videos and learn from the community" side="right">
                   <DropdownMenuItem asChild>
-                    <Link href="/connect/community" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <MessageCircle className="w-4 h-4 text-emotion-success" />
+                    <Link href="/community" className="flex items-center gap-3 py-3 cursor-pointer bg-gradient-to-r from-teal-50/50 to-cyan-50/50 dark:from-teal-900/20 dark:to-cyan-900/20">
+                      <Video className="w-4 h-4 text-teal-500" />
                       <div>
-                        <p className="font-medium">Community Board</p>
-                        <p className="text-xs text-gray-500">Discussions & tips</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">Community Center</p>
+                          <Badge className="bg-teal-500/20 text-teal-600 dark:text-teal-400 text-xs">New</Badge>
+                        </div>
+                        <p className="text-xs text-gray-500">Share & discover videos</p>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
-                */}
                 
                 <InfoTooltip content="Book expert coaching sessions with certified instructors" side="right">
                   <DropdownMenuItem asChild>

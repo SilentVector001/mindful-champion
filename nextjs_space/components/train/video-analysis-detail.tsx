@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 import {
   Video, Download, Share2, ArrowLeft, CheckCircle2, TrendingUp, Target,
   Activity, BarChart3, Lightbulb, Trophy, Clock, Eye, FileText, Play,
-  ChevronRight, ChevronLeft, Star, Award, Gauge, Zap, Brain, AlertCircle, ThumbsUp, Library, Loader2
+  ChevronRight, ChevronLeft, Star, Award, Gauge, Zap, Brain, AlertCircle, ThumbsUp, Library, Loader2, Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
@@ -26,6 +26,7 @@ import ProgressTracking from "@/components/video-analysis/progress-tracking"
 import ShotByBreakdown from "@/components/video-analysis/shot-by-shot-breakdown"
 import ShotDetectionProgress from "@/components/video-analysis/shot-detection-progress"
 import ShotClipsViewer from "@/components/video-analysis/shot-clips-viewer"
+import { PublishToCommunityModal } from "@/components/community"
 
 interface VideoAnalysisDetailProps {
   videoId: string
@@ -39,6 +40,7 @@ export default function VideoAnalysisDetail({ videoId }: VideoAnalysisDetailProp
   const [prevVideoId, setPrevVideoId] = useState<string | null>(null)
   const [nextVideoId, setNextVideoId] = useState<string | null>(null)
   const [fileWarning, setFileWarning] = useState<string | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
 
   useEffect(() => {
     fetchVideoAnalysis()
@@ -271,14 +273,24 @@ export default function VideoAnalysisDetail({ videoId }: VideoAnalysisDetailProp
               </Button>
               <Button 
                 variant="outline" 
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:border-cyan-500/50 shadow-lg hover:shadow-cyan-500/20 transition-all duration-300"
+                onClick={() => setShowShareModal(true)}
+                className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
               >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
+                <Users className="w-4 h-4 mr-2" />
+                Share to Community
               </Button>
             </div>
           </div>
         </motion.div>
+
+        {/* Share to Community Modal */}
+        {showShareModal && video && (
+          <PublishToCommunityModal
+            videoAnalysisId={videoId}
+            videoTitle={video.title}
+            onClose={() => setShowShareModal(false)}
+          />
+        )}
 
         {/* File Warning Banner */}
         {fileWarning && (

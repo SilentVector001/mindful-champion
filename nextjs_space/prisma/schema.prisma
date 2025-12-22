@@ -415,6 +415,7 @@ model VideoAnalysis {
   emailNotifications      EmailNotification[]
   uploadedByAdmin         User?                  @relation("AdminUploads", fields: [uploadedByAdminId], references: [id])
   user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityPost           CommunityPost?
 
   @@index([userId])
   @@index([analysisStatus])
@@ -987,28 +988,37 @@ model NavigationPath {
 }
 
 model CommunityPost {
-  id           String         @id @default(cuid())
-  title        String
-  content      String
-  category     PostCategory   @default(GENERAL)
-  userId       String
-  isPinned     Boolean        @default(false)
-  isLocked     Boolean        @default(false)
-  views        Int            @default(0)
-  likeCount    Int            @default(0)
-  commentCount Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookmarks    PostBookmark[]
-  comments     PostComment[]
-  likes        PostLike[]
-  reports      PostReport[]
+  id              String         @id @default(cuid())
+  title           String
+  content         String
+  category        PostCategory   @default(GENERAL)
+  userId          String
+  isPinned        Boolean        @default(false)
+  isLocked        Boolean        @default(false)
+  views           Int            @default(0)
+  likeCount       Int            @default(0)
+  commentCount    Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  // Video sharing fields
+  videoAnalysisId String?        @unique
+  caption         String?
+  tags            String[]       @default([])
+  isVideoPost     Boolean        @default(false)
+  isPublished     Boolean        @default(true)
+  videoAnalysis   VideoAnalysis? @relation(fields: [videoAnalysisId], references: [id], onDelete: SetNull)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmarks       PostBookmark[]
+  comments        PostComment[]
+  likes           PostLike[]
+  reports         PostReport[]
 
   @@index([userId])
   @@index([category])
   @@index([createdAt])
   @@index([isPinned])
+  @@index([isVideoPost])
+  @@index([videoAnalysisId])
 }
 
 model PostComment {
