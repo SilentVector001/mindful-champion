@@ -962,6 +962,14 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
+                <Link href="/community" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-teal-50/50 to-cyan-50/50 hover:from-teal-100/50 hover:to-cyan-100/50">
+                    <Video className="w-5 h-5 text-teal-500" />
+                    <span className="font-semibold">Community Center</span>
+                    <Badge className="ml-auto bg-teal-500/20 text-teal-600 text-xs">New</Badge>
+                  </Button>
+                </Link>
+
                 {/* TEMPORARILY HIDDEN - Can be restored later
                 <Link href="/connect/community" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
