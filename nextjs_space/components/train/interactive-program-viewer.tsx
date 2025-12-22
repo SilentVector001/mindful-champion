@@ -14,6 +14,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import PremiumProgramViewer from './premium-program-viewer'
+import DayCompletionModal from './day-completion-modal'
 import { 
   celebrateDayComplete, 
   celebrateMilestone, 
@@ -38,6 +39,8 @@ export default function InteractiveProgramViewer({
   const router = useRouter()
   const [userProgram, setUserProgram] = useState(initialUserProgram)
   const [isLoading, setIsLoading] = useState(false)
+  const [showCompletionModal, setShowCompletionModal] = useState(false)
+  const [completionData, setCompletionData] = useState<any>(null)
 
   const handleStartProgram = async () => {
     setIsLoading(true)
@@ -114,7 +117,6 @@ export default function InteractiveProgramViewer({
             'Congratulations on completing your training program!',
             '🏆'
           )
-          toast.success('🎉 Program completed! Amazing work!')
         } else {
           // Day completed
           celebrateDayComplete()
@@ -138,14 +140,33 @@ export default function InteractiveProgramViewer({
               celebrateStreak(data.streak)
             }, 2000)
           }
-          
-          toast.success(`✅ Day ${day} completed! Keep up the great work!`)
         }
         
         // Update local state
         setUserProgram(data.userProgram)
         
-        // Refresh the page
+        // Get next day info for modal
+        const dailyStructure = program.dailyStructure || []
+        const dailySchedule = Array.isArray(dailyStructure) 
+          ? dailyStructure 
+          : (dailyStructure.days || [])
+        
+        const nextDayData = dailySchedule.find((d: any) => d.day === data.userProgram.currentDay)
+        
+        // Show completion modal with all the data
+        setCompletionData({
+          completedDay: day,
+          nextDay: data.userProgram.currentDay,
+          totalDays: program.durationDays,
+          completionPercentage: data.userProgram.completionPercentage,
+          streak: data.streak || 0,
+          programName: program.name,
+          nextDayTitle: nextDayData?.title || `Day ${data.userProgram.currentDay}`,
+          isProgramComplete: data.isCompleted
+        })
+        setShowCompletionModal(true)
+        
+        // Refresh the page in background
         router.refresh()
       } else {
         throw new Error('Failed to mark day complete')
@@ -235,18 +256,54 @@ export default function InteractiveProgramViewer({
     }
   }
 
+  // Handler for starting the next day from the modal
+  const handleStartNextDayFromModal = () => {
+    setShowCompletionModal(false)
+    // Scroll to top and refresh to show the new current day
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setTimeout(() => {
+      router.refresh()
+    }, 300)
+  }
+
+  // Handler for viewing progress from the modal
+  const handleViewProgressFromModal = () => {
+    setShowCompletionModal(false)
+    router.push('/train/progress')
+  }
+
   return (
-    <PremiumProgramViewer
-      program={program}
-      userProgram={userProgram}
-      videos={videos}
-      user={user}
-      onStartProgram={handleStartProgram}
-      onVideoClick={handleVideoClick}
-      onMarkDayComplete={handleMarkDayComplete}
-      onPauseProgram={handlePauseProgram}
-      onResumeProgram={handleResumeProgram}
-      onUpdateNotes={handleUpdateNotes}
-    />
+    <>
+      <PremiumProgramViewer
+        program={program}
+        userProgram={userProgram}
+        videos={videos}
+        user={user}
+        onStartProgram={handleStartProgram}
+        onVideoClick={handleVideoClick}
+        onMarkDayComplete={handleMarkDayComplete}
+        onPauseProgram={handlePauseProgram}
+        onResumeProgram={handleResumeProgram}
+        onUpdateNotes={handleUpdateNotes}
+      />
+
+      {/* Day Completion Modal */}
+      {completionData && (
+        <DayCompletionModal
+          isOpen={showCompletionModal}
+          onClose={() => setShowCompletionModal(false)}
+          completedDay={completionData.completedDay}
+          nextDay={completionData.nextDay}
+          totalDays={completionData.totalDays}
+          completionPercentage={completionData.completionPercentage}
+          streak={completionData.streak}
+          programName={completionData.programName}
+          nextDayTitle={completionData.nextDayTitle}
+          onStartNextDay={handleStartNextDayFromModal}
+          onViewProgress={handleViewProgressFromModal}
+          isProgramComplete={completionData.isProgramComplete}
+        />
+      )}
+    </>
   )
 }
