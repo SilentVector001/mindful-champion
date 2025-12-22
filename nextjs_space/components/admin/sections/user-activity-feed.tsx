@@ -84,6 +84,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
         return { icon: MessageSquare, color: 'text-pink-500', bg: 'bg-pink-500/10' }
       case 'subscription':
         return { icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' }
+      case 'training_complete':
+        return { icon: Target, color: 'text-teal-500', bg: 'bg-teal-500/10' }
       default:
         return { icon: Activity, color: 'text-slate-500', bg: 'bg-slate-500/10' }
     }
@@ -98,6 +100,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
       case 'goal_created': return 'Goal Created'
       case 'chat': return 'Coach Chat'
       case 'subscription': return 'Subscription'
+      case 'training_complete': return 'Training Progress'
       default: return 'Activity'
     }
   }
@@ -111,7 +114,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
     { value: 'signup', label: 'Signups' },
     { value: 'video_upload', label: 'Videos' },
     { value: 'match', label: 'Matches' },
-    { value: 'subscription', label: 'Subscriptions' }
+    { value: 'subscription', label: 'Subscriptions' },
+    { value: 'training_complete', label: 'Training' }
   ]
 
   if (loading) {
@@ -150,7 +154,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 Platform Activity Feed
               </CardTitle>
               <CardDescription className="mt-1 text-sm">
-                Real-time user activities • Last 7 days
+                Real-time user activities • Last 30 days
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -264,8 +268,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 </p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
                   {filter === 'all' 
-                    ? 'No user activities recorded in the last 7 days. The activity feed will automatically update as users interact with the platform.'
-                    : 'No activities of this type in the last 7 days. Try a different filter or check back later.'}
+                    ? 'No user activities recorded in the last 30 days. The activity feed will automatically update as users interact with the platform.'
+                    : 'No activities of this type in the last 30 days. Try a different filter or check back later.'}
                 </p>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-4">
                   <p className="text-xs text-blue-700 font-medium mb-2">💡 Activity Feed Tips:</p>
@@ -275,6 +279,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                     <li>• Match recordings and goal creation logged</li>
                     <li>• Coach Kai conversations monitored</li>
                     <li>• Subscription changes captured</li>
+                    <li>• Training program progress tracked</li>
                   </ul>
                 </div>
                 <Button

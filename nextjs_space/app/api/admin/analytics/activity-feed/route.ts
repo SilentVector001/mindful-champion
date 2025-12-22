@@ -12,16 +12,17 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Get activity data from the last 7 days (extended from 24 hours for better visibility)
+    // Extended to 30 days for better coverage of all activity
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
     const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
     
     console.log('[Activity Feed] Fetching activities since:', sevenDaysAgo.toISOString())
 
-    // Fetch various activities
-    const [recentActivityLogs, recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments] = await Promise.all([
+    // Fetch various activities - extended to 30 days for signups to capture more
+    const [recentActivityLogs, recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments, recentTrainingProgress] = await Promise.all([
       // Recent activity logs (NEW - captures all logged activities)
       prisma.activityLog.findMany({
-        where: { timestamp: { gte: sevenDaysAgo } },
+        where: { timestamp: { gte: thirtyDaysAgo } },
         orderBy: { timestamp: 'desc' },
         take: 50,
         include: {
@@ -36,11 +37,11 @@ export async function GET(request: NextRequest) {
           }
         }
       }),
-      // Recent signups
+      // Recent signups - extended to 30 days
       prisma.user.findMany({
-        where: { createdAt: { gte: sevenDaysAgo } },
+        where: { createdAt: { gte: thirtyDaysAgo } },
         orderBy: { createdAt: 'desc' },
-        take: 20,
+        take: 30,
         select: {
           id: true,
           name: true,
@@ -126,7 +127,7 @@ export async function GET(request: NextRequest) {
 
       // Recent payments/subscriptions
       prisma.payment.findMany({
-        where: { createdAt: { gte: sevenDaysAgo } },
+        where: { createdAt: { gte: thirtyDaysAgo } },
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
@@ -137,6 +138,31 @@ export async function GET(request: NextRequest) {
               firstName: true,
               lastName: true,
               email: true
+            }
+          }
+        }
+      }),
+      
+      // Recent training program progress
+      prisma.userProgramDay.findMany({
+        where: { completedAt: { not: null, gte: thirtyDaysAgo } },
+        orderBy: { completedAt: 'desc' },
+        take: 30,
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              firstName: true,
+              lastName: true,
+              email: true
+            }
+          },
+          programDay: {
+            include: {
+              program: {
+                select: { name: true }
+              }
             }
           }
         }
@@ -256,6 +282,21 @@ export async function GET(request: NextRequest) {
       })
     })
 
+    // Add training program completions
+    recentTrainingProgress.forEach((progress: any) => {
+      activities.push({
+        id: `training-${progress.id}`,
+        type: 'training_complete',
+        userId: progress.user?.id,
+        userEmail: progress.user?.email,
+        userName: progress.user?.name || `${progress.user?.firstName || ''} ${progress.user?.lastName || ''}`.trim() || progress.user?.email || 'User',
+        description: `Completed Day ${progress.programDay?.dayNumber || '?'} of ${progress.programDay?.program?.name || 'Training Program'}`,
+        details: `Training Progress`,
+        createdAt: progress.completedAt,
+        timeAgo: getTimeAgo(progress.completedAt)
+      })
+    })
+
     // Sort by most recent
     activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
@@ -264,14 +305,15 @@ export async function GET(request: NextRequest) {
 
     console.log('[Activity Feed] Summary:')
     console.log('  - Current time:', new Date().toISOString())
-    console.log('  - Fetching activities since:', sevenDaysAgo.toISOString())
-    console.log('  - Activity Logs:', recentActivityLogs.length, '(NEW)')
+    console.log('  - Fetching since (30 days):', thirtyDaysAgo.toISOString())
+    console.log('  - Activity Logs:', recentActivityLogs.length)
     console.log('  - Signups:', recentSignups.length)
     console.log('  - Videos:', recentVideos.length)
     console.log('  - Matches:', recentMatches.length)
     console.log('  - Goals:', recentGoals.length)
     console.log('  - Chats:', recentChats.length)
     console.log('  - Payments:', recentPayments.length)
+    console.log('  - Training Progress:', recentTrainingProgress.length)
     console.log('  - Total activities:', activities.length)
     console.log('  - Returning:', topActivities.length, 'activities')
     
@@ -292,11 +334,12 @@ export async function GET(request: NextRequest) {
         matches: recentMatches.length,
         goals: recentGoals.length,
         chats: recentChats.length,
-        payments: recentPayments.length
+        payments: recentPayments.length,
+        trainingProgress: recentTrainingProgress.length
       },
       meta: {
         fetchedAt: new Date().toISOString(),
-        oldestActivityDate: sevenDaysAgo.toISOString(),
+        oldestActivityDate: thirtyDaysAgo.toISOString(),
         mostRecentActivity: topActivities.length > 0 ? {
           type: topActivities[0].type,
           createdAt: topActivities[0].createdAt,
