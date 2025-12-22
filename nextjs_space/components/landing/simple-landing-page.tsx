@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowRight, Mic, Video, Trophy, TrendingUp, Target, Zap, Play, Sparkles, Star, Users, BarChart3, Calendar, CheckCircle2, Award, BookOpen, Dumbbell, Activity } from 'lucide-react';
+import { ArrowRight, Mic, Video, Trophy, TrendingUp, Target, Zap, Play, Sparkles, Star, Users, BarChart3, Calendar, CheckCircle2, Award, BookOpen, Dumbbell, Activity, Brain } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -240,6 +240,254 @@ export default function SimpleLandingPage() {
               <Link href="/auth/signup">
                 <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold">
                   Start Training Today
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </Link>
+            </motion.div>
+          </div>
+        </div>
+      </section>
+
+      {/* AI VIDEO ANALYSIS - New Section */}
+      <section className="py-20 bg-gradient-to-b from-slate-900 to-slate-950 relative overflow-hidden">
+        {/* Animated background particles */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 right-10 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-20 left-10 w-96 h-96 bg-indigo-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: Visual Content */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="relative order-2 lg:order-1"
+            >
+              {/* Main video analysis mockup */}
+              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl border-2 border-purple-500/40 p-6 shadow-2xl shadow-purple-500/20">
+                <motion.div 
+                  className="absolute -top-3 left-6 bg-gradient-to-r from-purple-500 to-indigo-500 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg shadow-purple-500/50"
+                  animate={{
+                    boxShadow: [
+                      '0 0 20px rgba(168, 85, 247, 0.5)',
+                      '0 0 40px rgba(99, 102, 241, 0.7)',
+                      '0 0 20px rgba(168, 85, 247, 0.5)',
+                    ]
+                  }}
+                  transition={{ duration: 2, repeat: Infinity }}
+                >
+                  🎥 AI Analysis - LIVE
+                </motion.div>
+
+                {/* Video frame mockup */}
+                <div className="relative rounded-xl overflow-hidden mb-4">
+                  <Image
+                    src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=600&q=80"
+                    alt="AI Video Analysis Interface"
+                    width={600}
+                    height={400}
+                    className="w-full rounded-xl"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent" />
+                  
+                  {/* AI overlay indicators */}
+                  <motion.div 
+                    className="absolute top-4 left-4 bg-purple-500/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white text-xs font-bold"
+                    animate={{ opacity: [1, 0.7, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <Brain className="w-3 h-3 inline mr-1" />
+                    Analyzing Form...
+                  </motion.div>
+
+                  {/* Shot detection indicator */}
+                  <motion.div 
+                    className="absolute top-4 right-4 bg-emerald-500/90 backdrop-blur-sm px-3 py-1.5 rounded-lg text-white text-xs font-bold"
+                    animate={{ scale: [1, 1.1, 1] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    Shot Detected: Serve
+                  </motion.div>
+
+                  {/* Body tracking points */}
+                  <motion.div 
+                    className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
+                    animate={{
+                      boxShadow: [
+                        '0 0 10px rgba(34, 211, 238, 0.5)',
+                        '0 0 20px rgba(34, 211, 238, 0.8)',
+                        '0 0 10px rgba(34, 211, 238, 0.5)',
+                      ]
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  />
+                  <motion.div 
+                    className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
+                    animate={{
+                      boxShadow: [
+                        '0 0 10px rgba(34, 211, 238, 0.5)',
+                        '0 0 20px rgba(34, 211, 238, 0.8)',
+                        '0 0 10px rgba(34, 211, 238, 0.5)',
+                      ]
+                    }}
+                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                  />
+                </div>
+
+                {/* Analysis results cards */}
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Form Score', value: '8.5/10', color: 'from-green-500 to-emerald-500', icon: '✓' },
+                    { label: 'Power Rating', value: '92%', color: 'from-orange-500 to-red-500', icon: '⚡' },
+                    { label: 'Accuracy', value: '87%', color: 'from-blue-500 to-cyan-500', icon: '🎯' },
+                    { label: 'Technique', value: 'Good', color: 'from-purple-500 to-pink-500', icon: '⭐' },
+                  ].map((metric, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="bg-slate-700/30 border border-purple-500/20 rounded-lg p-3 hover:border-purple-500/40 transition-all"
+                    >
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-gray-400 text-xs">{metric.label}</span>
+                        <span className="text-lg">{metric.icon}</span>
+                      </div>
+                      <div className={`text-white font-bold text-lg bg-gradient-to-r ${metric.color} bg-clip-text text-transparent`}>
+                        {metric.value}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+
+                {/* Progress indicator */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  whileInView={{ opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: 0.5 }}
+                  className="mt-4 flex items-center gap-2 text-xs text-gray-400"
+                >
+                  <div className="flex-1 h-1.5 bg-slate-700/50 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-purple-500 to-indigo-500"
+                      initial={{ width: 0 }}
+                      whileInView={{ width: '75%' }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 1.5 }}
+                    />
+                  </div>
+                  <span>Processing: 75%</span>
+                </motion.div>
+              </div>
+
+              {/* Feature badges */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.6 }}
+                className="flex flex-wrap gap-3 mt-4"
+              >
+                {['Pose Detection', 'Shot Tracking', 'Form Analysis'].map((badge, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-slate-800/50 border border-purple-500/30 px-4 py-2 rounded-full text-purple-300 text-sm font-medium"
+                  >
+                    {badge}
+                  </div>
+                ))}
+              </motion.div>
+            </motion.div>
+
+            {/* Right: Content */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              className="order-1 lg:order-2"
+            >
+              <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-500/40 px-3 py-1.5 rounded-full mb-4 shadow-lg shadow-purple-500/20">
+                <Video className="w-4 h-4 text-purple-400 animate-pulse" />
+                <span className="text-purple-400 text-sm font-semibold">AI VIDEO ANALYSIS</span>
+              </div>
+              <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+                Master Your Technique
+                <br />
+                <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 bg-clip-text text-transparent">With AI-Powered Video Analysis</span>
+              </h2>
+              <p className="text-gray-300 text-lg mb-6">
+                Upload your pickleball game footage and get instant, AI-powered insights. Our advanced analysis technology breaks down your technique frame-by-frame, identifies areas for improvement, and provides personalized recommendations to elevate your game.
+              </p>
+
+              {/* Key Features */}
+              <div className="mb-6">
+                <h3 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-purple-400" />
+                  Key Features
+                </h3>
+                <ul className="space-y-2.5">
+                  {[
+                    'Upload and analyze pickleball game footage',
+                    'AI-powered technique analysis with pose detection',
+                    'Performance insights and personalized recommendations',
+                    'Shot tracking and comprehensive statistics',
+                    'Form and movement analysis with visual overlays',
+                    'Comparison with professional players',
+                  ].map((item, idx) => (
+                    <motion.li
+                      key={idx}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-start gap-3 text-gray-300"
+                    >
+                      <CheckCircle2 className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </motion.li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Benefits */}
+              <div className="mb-8">
+                <h3 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-indigo-400" />
+                  Benefits
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { text: 'Improve technique faster', icon: Zap },
+                    { text: 'Identify weaknesses', icon: Target },
+                    { text: 'Track progress over time', icon: TrendingUp },
+                    { text: 'Get personalized feedback', icon: Sparkles },
+                    { text: 'Learn from your mistakes', icon: BookOpen },
+                  ].map((benefit, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, scale: 0.9 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: idx * 0.1 }}
+                      className="flex items-center gap-2 p-2.5 bg-slate-800/30 border border-purple-500/10 rounded-lg hover:border-purple-500/30 transition-all group"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-indigo-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
+                        <benefit.icon className="w-4 h-4 text-white" />
+                      </div>
+                      <span className="text-sm text-gray-300 group-hover:text-white transition-colors">{benefit.text}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+
+              <Link href="/train/video">
+                <Button className="bg-gradient-to-r from-purple-500 to-indigo-500 hover:from-purple-600 hover:to-indigo-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-purple-500/30 hover:shadow-purple-500/50 hover:scale-105 transition-all">
+                  <Video className="w-5 h-5 mr-2" />
+                  Start Video Analysis
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
