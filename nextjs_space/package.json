@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true npx next build",
-    "postinstall": "prisma generate && prisma db push --accept-data-loss",
+    "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
     "test:cron": "tsx scripts/test-cron.ts all",
