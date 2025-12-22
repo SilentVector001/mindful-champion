@@ -11,6 +11,7 @@ import {
   Eye, Play, Upload, ArrowRight, Filter, AlertCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import UserDetailPanel from "@/components/admin/user-detail-panel"
 
 interface UserActivityFeedProps {
   activities?: any[]
@@ -21,6 +22,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
   const [activityData, setActivityData] = useState<any[]>([])
   const [filter, setFilter] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [showUserDetail, setShowUserDetail] = useState(false)
 
   useEffect(() => {
     fetchActivities()
@@ -35,6 +38,13 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
         const data = await response.json()
         setActivityData(data.activities || [])
         console.log('Activity feed loaded:', data.activities?.length || 0, 'activities')
+        console.log('Activity breakdown:', data.breakdown)
+        console.log('Activity meta:', data.meta)
+        
+        // Alert if data appears stale (most recent activity is more than 1 hour old)
+        if (data.meta?.mostRecentActivity?.ageInHours > 1) {
+          console.warn('⚠️ Activity feed may be stale. Most recent activity is', data.meta.mostRecentActivity.ageInHours, 'hours old')
+        }
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Failed to fetch activities' }))
         console.error('Activity feed error:', errorData)
@@ -45,6 +55,16 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
       setError('Network error while loading activities. Please check your connection and try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleActivityClick = (activity: any) => {
+    if (activity.userId) {
+      console.log('Opening user detail for:', activity.userName, activity.userId)
+      setSelectedUserId(activity.userId)
+      setShowUserDetail(true)
+    } else {
+      console.warn('No userId found for activity:', activity)
     }
   }
 
@@ -200,6 +220,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ scale: 1.01, x: 5 }}
+                    onClick={() => handleActivityClick(activity)}
                     className="flex items-center justify-between p-4 bg-white rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all cursor-pointer shadow-sm hover:shadow-lg group border border-slate-100"
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -270,6 +291,17 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
           </div>
         </CardContent>
       </Card>
+
+      {/* User Detail Panel */}
+      {showUserDetail && selectedUserId && (
+        <UserDetailPanel
+          userId={selectedUserId}
+          onClose={() => {
+            setShowUserDetail(false)
+            setSelectedUserId(null)
+          }}
+        />
+      )}
     </motion.div>
   )
 }

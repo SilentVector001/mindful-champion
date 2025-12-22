@@ -134,6 +134,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `signup-${user.id}`,
         type: 'signup',
+        userId: user.id,
+        userEmail: user.email,
         userName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
         description: `Joined the platform${user.subscriptionTier ? ` as ${user.subscriptionTier}` : ''}`,
         details: user.email,
@@ -147,6 +149,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `video-${video.id}`,
         type: 'video_upload',
+        userId: video.user?.id,
+        userEmail: video.user?.email,
         userName: video.user?.name || `${video.user?.firstName || ''} ${video.user?.lastName || ''}`.trim() || video.user?.email || 'User',
         description: `Uploaded video: ${video.title}`,
         details: `${Math.round(video.duration / 60)} min • ${video.analysisStatus}`,
@@ -161,6 +165,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `match-${match.id}`,
         type: 'match',
+        userId: match.user?.id,
+        userEmail: match.user?.email,
         userName: match.user?.name || `${match.user?.firstName || ''} ${match.user?.lastName || ''}`.trim() || match.user?.email || 'User',
         description: `Recorded a match • ${result}`,
         details: `${match.playerScore}-${match.opponentScore} • ${match.matchType || 'Singles'}`,
@@ -174,6 +180,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `goal-${goal.id}`,
         type: 'goal_created',
+        userId: goal.user?.id,
+        userEmail: goal.user?.email,
         userName: goal.user?.name || `${goal.user?.firstName || ''} ${goal.user?.lastName || ''}`.trim() || goal.user?.email || 'User',
         description: `Set a new goal: ${goal.title}`,
         details: `Target: ${new Date(goal.targetDate).toLocaleDateString()}`,
@@ -187,6 +195,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `chat-${chat.id}`,
         type: 'chat',
+        userId: chat.user?.id,
+        userEmail: chat.user?.email,
         userName: chat.user?.name || `${chat.user?.firstName || ''} ${chat.user?.lastName || ''}`.trim() || chat.user?.email || 'User',
         description: `Started a conversation with Coach Kai`,
         details: `${(chat.messages as any[])?.length || 0} messages`,
@@ -200,6 +210,8 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `payment-${payment.id}`,
         type: 'subscription',
+        userId: payment.user?.id,
+        userEmail: payment.user?.email,
         userName: payment.user?.name || `${payment.user?.firstName || ''} ${payment.user?.lastName || ''}`.trim() || payment.user?.email || 'User',
         description: `Subscribed to ${payment.subscriptionTier}`,
         details: `$${((payment.amount || 0) / 100).toFixed(2)} • ${payment.billingCycle || 'One-time'}`,
@@ -215,6 +227,8 @@ export async function GET(request: NextRequest) {
     const topActivities = activities.slice(0, 50)
 
     console.log('[Activity Feed] Summary:')
+    console.log('  - Current time:', new Date().toISOString())
+    console.log('  - Fetching activities since:', sevenDaysAgo.toISOString())
     console.log('  - Signups:', recentSignups.length)
     console.log('  - Videos:', recentVideos.length)
     console.log('  - Matches:', recentMatches.length)
@@ -223,6 +237,12 @@ export async function GET(request: NextRequest) {
     console.log('  - Payments:', recentPayments.length)
     console.log('  - Total activities:', activities.length)
     console.log('  - Returning:', topActivities.length, 'activities')
+    
+    // Log most recent activity timestamp for debugging
+    if (topActivities.length > 0) {
+      console.log('  - Most recent activity:', topActivities[0].type, 'at', new Date(topActivities[0].createdAt).toISOString())
+      console.log('  - Most recent activity age (hours):', Math.floor((Date.now() - new Date(topActivities[0].createdAt).getTime()) / (1000 * 60 * 60)))
+    }
 
     return NextResponse.json({
       success: true,
@@ -235,6 +255,15 @@ export async function GET(request: NextRequest) {
         goals: recentGoals.length,
         chats: recentChats.length,
         payments: recentPayments.length
+      },
+      meta: {
+        fetchedAt: new Date().toISOString(),
+        oldestActivityDate: sevenDaysAgo.toISOString(),
+        mostRecentActivity: topActivities.length > 0 ? {
+          type: topActivities[0].type,
+          createdAt: topActivities[0].createdAt,
+          ageInHours: Math.floor((Date.now() - new Date(topActivities[0].createdAt).getTime()) / (1000 * 60 * 60))
+        } : null
       }
     })
   } catch (error) {
