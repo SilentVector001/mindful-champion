@@ -174,11 +174,13 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
   // OpenAI TTS Hook - High-quality neural voice for iOS/mobile compatibility
   const {
     speak: speakWithOpenAI,
+    replay: replayAudio,
     stop: stopOpenAISpeech,
     unlockAudio,
     isSpeaking,
     isLoading: ttsLoading,
     isAudioUnlocked,
+    hasAudioReady,
     error: ttsError
   } = useOpenAITTS({
     voice: 'nova', // Friendly, warm female voice for Coach Kai
@@ -637,6 +639,36 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
                       >
                         <VolumeX className="h-3 w-3 text-teal-600" />
                       </Button>
+                    </div>
+                  </motion.div>
+                )}
+                
+                {/* Play Response Button - shown when autoplay was blocked */}
+                {hasAudioReady && !isSpeaking && speechEnabled && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-start"
+                  >
+                    <Button
+                      onClick={replayAudio}
+                      className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg px-4 py-2 flex items-center gap-2 shadow-md"
+                    >
+                      <Play className="h-4 w-4" />
+                      <span className="text-sm font-medium">Play Coach Kai&apos;s Response</span>
+                    </Button>
+                  </motion.div>
+                )}
+                
+                {/* TTS Error indicator */}
+                {ttsError && !isSpeaking && !hasAudioReady && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex justify-start"
+                  >
+                    <div className="bg-amber-50 rounded-lg rounded-bl-none p-2 flex items-center gap-2 border border-amber-200 text-amber-700 text-xs">
+                      <span>⚠️ {ttsError}</span>
                     </div>
                   </motion.div>
                 )}

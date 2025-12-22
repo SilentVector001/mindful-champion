@@ -13,6 +13,7 @@ interface UseOpenAITTSProps {
 
 interface UseOpenAITTSReturn {
   speak: (text: string, messageId?: string) => Promise<void>;
+  replay: () => Promise<void>;
   stop: () => void;
   pause: () => void;
   resume: () => void;
@@ -21,6 +22,7 @@ interface UseOpenAITTSReturn {
   isPaused: boolean;
   isLoading: boolean;
   isAudioUnlocked: boolean;
+  hasAudioReady: boolean;
   error: string | null;
 }
 
@@ -48,6 +50,7 @@ export function useOpenAITTS({
   const [isPaused, setIsPaused] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isAudioUnlocked, setIsAudioUnlocked] = useState(false);
+  const [hasAudioReady, setHasAudioReady] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -55,10 +58,12 @@ export function useOpenAITTS({
   const lastSpokenTextRef = useRef<string>('');
   const lastSpokenMessageIdRef = useRef<string>('');
   const audioUrlRef = useRef<string | null>(null);
+  const audioBlobRef = useRef<Blob | null>(null);
   const isMountedRef = useRef(true);
   const silentAudioRef = useRef<HTMLAudioElement | null>(null);
+  const playAttemptRef = useRef(0);
 
-  // Create AudioContext for iOS
+  // Create AudioContext for better playback
   const getAudioContext = useCallback(() => {
     if (!audioContextRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
@@ -69,11 +74,11 @@ export function useOpenAITTS({
     return audioContextRef.current;
   }, []);
 
-  // Unlock audio for iOS - must be called on user gesture
+  // Unlock audio - must be called on user gesture
   const unlockAudio = useCallback(async () => {
     if (isAudioUnlocked) return;
 
-    console.log('🔓 TTS: Unlocking audio for iOS/Safari...');
+    console.log('🔓 TTS: Unlocking audio...');
 
     try {
       // Resume AudioContext
@@ -86,7 +91,6 @@ export function useOpenAITTS({
       // Play silent audio to unlock
       if (!silentAudioRef.current) {
         silentAudioRef.current = new Audio();
-        // Tiny silent WAV base64
         silentAudioRef.current.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA';
         silentAudioRef.current.volume = 0.01;
         silentAudioRef.current.setAttribute('playsinline', 'true');
@@ -106,7 +110,13 @@ export function useOpenAITTS({
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
-      stop();
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+      if (audioUrlRef.current) {
+        URL.revokeObjectURL(audioUrlRef.current);
+      }
       if (audioContextRef.current) {
         audioContextRef.current.close();
       }
@@ -121,18 +131,17 @@ export function useOpenAITTS({
   }, []);
 
   const stop = useCallback(() => {
+    console.log('🛑 TTS: Stopping playback');
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.currentTime = 0;
-      audioRef.current = null;
     }
-    cleanupAudioUrl();
     if (isMountedRef.current) {
       setIsSpeaking(false);
       setIsPaused(false);
       setIsLoading(false);
     }
-  }, [cleanupAudioUrl]);
+  }, []);
 
   const pause = useCallback(() => {
     if (audioRef.current && isSpeaking && !isPaused) {
@@ -151,6 +160,164 @@ export function useOpenAITTS({
       setIsPaused(false);
     }
   }, [isSpeaking, isPaused, onError]);
+
+  // Create and play audio from blob
+  const playAudioFromBlob = useCallback(async (blob: Blob): Promise<void> => {
+    return new Promise(async (resolve, reject) => {
+      try {
+        // Cleanup previous URL
+        cleanupAudioUrl();
+        
+        // Create new URL
+        const audioUrl = URL.createObjectURL(blob);
+        audioUrlRef.current = audioUrl;
+        
+        console.log('🔊 TTS: Creating audio element, blob size:', blob.size, 'type:', blob.type);
+
+        // Create new audio element
+        const audio = new Audio();
+        audio.preload = 'auto';
+        audio.setAttribute('playsinline', 'true');
+        audio.setAttribute('webkit-playsinline', 'true');
+        audio.volume = 1.0;
+        
+        // Store reference
+        audioRef.current = audio;
+        
+        // Setup event handlers BEFORE setting src
+        audio.onloadeddata = () => {
+          console.log('🔊 TTS: Audio data loaded, duration:', audio.duration);
+        };
+        
+        audio.oncanplaythrough = () => {
+          console.log('🔊 TTS: Audio can play through');
+        };
+
+        audio.onplay = () => {
+          console.log('🔊 TTS: Playback STARTED');
+          if (isMountedRef.current) {
+            setIsSpeaking(true);
+            setIsLoading(false);
+            setIsPaused(false);
+            setError(null);
+          }
+          onStart?.();
+        };
+
+        audio.onended = () => {
+          console.log('🔇 TTS: Playback ENDED');
+          if (isMountedRef.current) {
+            setIsSpeaking(false);
+            setIsPaused(false);
+          }
+          onEnd?.();
+          resolve();
+        };
+
+        audio.onerror = (e) => {
+          const errorMsg = `Audio error: ${audio.error?.message || 'Unknown error'} (code: ${audio.error?.code})`;
+          console.error('🚨 TTS: Audio error:', errorMsg, e);
+          if (isMountedRef.current) {
+            setError(errorMsg);
+            setIsSpeaking(false);
+            setIsLoading(false);
+          }
+          onError?.(new Error(errorMsg));
+          reject(new Error(errorMsg));
+        };
+
+        audio.onabort = () => {
+          console.log('⚠️ TTS: Audio aborted');
+        };
+
+        audio.onstalled = () => {
+          console.log('⚠️ TTS: Audio stalled');
+        };
+
+        audio.onwaiting = () => {
+          console.log('⏳ TTS: Audio waiting for data');
+        };
+
+        // Set source
+        audio.src = audioUrl;
+        
+        // Load the audio
+        audio.load();
+
+        // Wait for canplaythrough event before playing
+        await new Promise<void>((waitResolve) => {
+          const timeout = setTimeout(() => {
+            console.log('⏰ TTS: Timeout waiting for canplaythrough, attempting play anyway');
+            waitResolve();
+          }, 5000);
+
+          audio.addEventListener('canplaythrough', () => {
+            clearTimeout(timeout);
+            waitResolve();
+          }, { once: true });
+        });
+
+        // Attempt to play
+        console.log('🎵 TTS: Attempting playback...');
+        playAttemptRef.current++;
+        
+        try {
+          await audio.play();
+          console.log('✅ TTS: Play() succeeded');
+        } catch (playError: any) {
+          console.error('🚨 TTS: Play() failed:', playError.name, playError.message);
+          
+          // Handle NotAllowedError (autoplay blocked)
+          if (playError.name === 'NotAllowedError') {
+            setError('Click "Play Response" to hear Coach Kai');
+            setHasAudioReady(true);
+            setIsLoading(false);
+            // Don't reject - audio is ready for manual play
+            return;
+          }
+          
+          throw playError;
+        }
+        
+      } catch (err: any) {
+        console.error('🚨 TTS: playAudioFromBlob error:', err);
+        reject(err);
+      }
+    });
+  }, [cleanupAudioUrl, onStart, onEnd, onError]);
+
+  // Replay the last audio
+  const replay = useCallback(async () => {
+    console.log('🔄 TTS: Replay requested');
+    
+    // If we have a ready audio element, try to play it
+    if (audioRef.current && audioUrlRef.current) {
+      try {
+        audioRef.current.currentTime = 0;
+        await audioRef.current.play();
+        setHasAudioReady(false);
+        setError(null);
+        console.log('✅ TTS: Replay succeeded');
+      } catch (err: any) {
+        console.error('🚨 TTS: Replay failed:', err);
+        setError('Playback failed: ' + err.message);
+        onError?.(err);
+      }
+    } else if (audioBlobRef.current) {
+      // Re-create audio from stored blob
+      try {
+        await playAudioFromBlob(audioBlobRef.current);
+        setHasAudioReady(false);
+      } catch (err: any) {
+        console.error('🚨 TTS: Replay from blob failed:', err);
+        setError('Playback failed: ' + err.message);
+        onError?.(err);
+      }
+    } else {
+      console.warn('⚠️ TTS: No audio to replay');
+      setError('No audio available to replay');
+    }
+  }, [playAudioFromBlob, onError]);
 
   const speak = useCallback(async (text: string, messageId?: string) => {
     // Prevent duplicate speech
@@ -173,18 +340,25 @@ export function useOpenAITTS({
     try {
       setIsLoading(true);
       setError(null);
+      setHasAudioReady(false);
 
       // Stop any current playback
       stop();
 
-      // On iOS/Safari, ensure audio is unlocked
-      const needsUnlock = (isIOS() || isSafari()) && !isAudioUnlocked;
-      if (needsUnlock) {
-        console.log('⚠️ TTS: Audio not unlocked on iOS. Attempting unlock...');
+      // Unlock audio if needed
+      if (!isAudioUnlocked) {
+        console.log('⚠️ TTS: Attempting to unlock audio...');
         await unlockAudio();
       }
 
-      console.log(`🔊 TTS: Requesting speech for text: "${cleanedText.substring(0, 50)}..."`);
+      // Resume AudioContext if suspended (important for Chrome)
+      const ctx = getAudioContext();
+      if (ctx && ctx.state === 'suspended') {
+        console.log('🔄 TTS: Resuming AudioContext...');
+        await ctx.resume();
+      }
+
+      console.log(`🔊 TTS: Fetching audio for: "${cleanedText.substring(0, 50)}..."`);
 
       // Call our OpenAI TTS API
       const response = await fetch('/api/tts/openai', {
@@ -207,105 +381,27 @@ export function useOpenAITTS({
       // Get audio blob
       const audioBlob = await response.blob();
       
+      console.log('📦 TTS: Received blob:', audioBlob.size, 'bytes, type:', audioBlob.type);
+      
       // Verify we got valid audio
       if (audioBlob.size < 100) {
-        throw new Error('Received invalid audio data');
+        throw new Error('Received invalid audio data (too small)');
       }
 
-      const audioUrl = URL.createObjectURL(audioBlob);
-      audioUrlRef.current = audioUrl;
-
-      // Create audio element with iOS-specific attributes
-      const audio = new Audio();
-      audio.src = audioUrl;
-      audio.setAttribute('playsinline', 'true');
-      audio.setAttribute('webkit-playsinline', 'true');
-      audio.preload = 'auto';
+      // Store the blob for replay
+      audioBlobRef.current = audioBlob;
       
-      // For iOS, connect to AudioContext if available
-      if ((isIOS() || isSafari()) && audioContextRef.current) {
-        try {
-          const source = audioContextRef.current.createMediaElementSource(audio);
-          source.connect(audioContextRef.current.destination);
-        } catch (e) {
-          // May fail if already connected, that's ok
-          console.log('AudioContext connection:', e);
-        }
+      // Store text tracking
+      lastSpokenTextRef.current = cleanedText;
+      if (messageId) {
+        lastSpokenMessageIdRef.current = messageId;
       }
 
-      audioRef.current = audio;
-
-      // Set up event listeners
-      audio.oncanplaythrough = () => {
-        console.log('🔊 TTS: Audio ready to play');
-      };
-
-      audio.onplay = () => {
-        console.log('🔊 TTS: Playback started');
-        if (isMountedRef.current) {
-          setIsSpeaking(true);
-          setIsLoading(false);
-          setIsPaused(false);
-        }
-        lastSpokenTextRef.current = cleanedText;
-        if (messageId) {
-          lastSpokenMessageIdRef.current = messageId;
-        }
-        onStart?.();
-      };
-
-      audio.onended = () => {
-        console.log('🔇 TTS: Playback ended');
-        cleanupAudioUrl();
-        if (isMountedRef.current) {
-          setIsSpeaking(false);
-          setIsPaused(false);
-        }
-        onEnd?.();
-      };
-
-      audio.onerror = (err) => {
-        console.error('🚨 TTS: Audio playback error:', err, audio.error);
-        const error = new Error(`Audio playback failed: ${audio.error?.message || 'Unknown error'}`);
-        cleanupAudioUrl();
-        if (isMountedRef.current) {
-          setError(error.message);
-          setIsSpeaking(false);
-          setIsLoading(false);
-        }
-        onError?.(error);
-      };
-
-      // Wait for audio to be ready before playing (important for iOS)
-      await new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          resolve(); // Proceed anyway after timeout
-        }, 3000);
-
-        audio.oncanplaythrough = () => {
-          clearTimeout(timeout);
-          resolve();
-        };
-
-        audio.onerror = () => {
-          clearTimeout(timeout);
-          reject(new Error('Audio loading failed'));
-        };
-
-        audio.load();
-      });
-
-      // Start playback
-      console.log('🔊 TTS: Starting playback...');
-      const playPromise = audio.play();
-      
-      if (playPromise !== undefined) {
-        await playPromise;
-      }
+      // Play the audio
+      await playAudioFromBlob(audioBlob);
 
     } catch (err: any) {
       console.error('🚨 TTS: Speech generation error:', err);
-      cleanupAudioUrl();
       if (isMountedRef.current) {
         setError(err.message || 'Failed to generate speech');
         setIsSpeaking(false);
@@ -313,10 +409,11 @@ export function useOpenAITTS({
       }
       onError?.(err);
     }
-  }, [voice, speed, stop, cleanupAudioUrl, onStart, onEnd, onError, isAudioUnlocked, unlockAudio]);
+  }, [voice, speed, stop, unlockAudio, isAudioUnlocked, getAudioContext, playAudioFromBlob, onError]);
 
   return {
     speak,
+    replay,
     stop,
     pause,
     resume,
@@ -325,6 +422,7 @@ export function useOpenAITTS({
     isPaused,
     isLoading,
     isAudioUnlocked,
+    hasAudioReady,
     error,
   };
 }

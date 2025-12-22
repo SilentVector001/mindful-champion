@@ -101,11 +101,14 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   // 🎙️ NEW: OpenAI TTS Hook with natural neural voice
   const { 
     speak: speakOpenAI, 
+    replay: replayAudio,
     stop: stopOpenAI, 
     unlockAudio,
     isSpeaking, 
     isLoading: ttsLoading,
-    isAudioUnlocked 
+    isAudioUnlocked,
+    hasAudioReady,
+    error: ttsError
   } = useOpenAITTS({
     voice: 'nova', // Warm, natural female voice
     speed: voicePreferences.rate || 1.0,
@@ -835,6 +838,17 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                 >
                   <VolumeX className="h-4 w-4 mr-2" />
                   Stop
+                </Button>
+              )}
+              {hasAudioReady && !isSpeaking && voicePreferences.textToSpeechEnabled && (
+                <Button
+                  onClick={replayAudio}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-green-400/20 border border-green-400/50 animate-pulse"
+                >
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  Play Response
                 </Button>
               )}
             </div>
