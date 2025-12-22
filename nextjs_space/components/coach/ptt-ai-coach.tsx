@@ -622,7 +622,7 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
       } catch (e) {
         console.log('TTS cancel error (safe to ignore):', e);
       }
-      setIsSpeaking(false);
+      stopOpenAI(); // Use the hook's stop function instead of setIsSpeaking
     }
     
     // CRITICAL FIX: Force reset blocking flags if they're stuck (but check timing first)
