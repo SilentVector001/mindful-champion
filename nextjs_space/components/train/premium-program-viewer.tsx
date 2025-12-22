@@ -495,8 +495,10 @@ export default function PremiumProgramViewer({
                       <>
                         <Button 
                           onClick={() => {
-                            if (selectedDayData?.videos?.[0]) {
-                              onVideoClick(selectedDayData.videos[0])
+                            // Scroll to the day content section
+                            const dayContentSection = document.getElementById('day-content-section')
+                            if (dayContentSection) {
+                              dayContentSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
                             }
                           }}
                           className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 text-white hover:shadow-xl"
@@ -525,8 +527,8 @@ export default function PremiumProgramViewer({
       </motion.div>
 
       {/* Main Content */}
-      <div className={premiumDesign.spacing.container}>
-        <div className="-mt-8 relative z-10">
+      <div id="day-content-section" className={premiumDesign.spacing.container}>
+        <div className="-mt-8 relative z-10 scroll-mt-24">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
             
             {/* Day Navigation Sidebar */}

@@ -222,7 +222,7 @@ export default async function TrainingProgramPage({ params }: TrainingProgramPag
     <div className="min-h-screen">
       <MainNavigation user={user} />
       
-      <main>
+      <main className="pt-16">
         <InteractiveProgramViewer
           program={program}
           userProgram={userProgram}
