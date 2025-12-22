@@ -1,50 +1,60 @@
 # Tournament Data Update Summary
-**Date:** December 22, 2025 at 15:54:06 UTC
+**Date:** December 22, 2025  
+**Time:** 21:56:49 UTC
 
 ## Execution Status: ✅ SUCCESS
 
-## Summary
-The National Pickleball Tournament Data Updater successfully fetched and updated tournament information from multiple pickleball organizations. The database has been updated with the latest tournament schedules and event details.
-
-## Results
+## Summary Statistics
 - **Total Tournaments Fetched:** 14
-- **New Tournaments Created:** 0
-- **Existing Tournaments Updated:** 14
-- **Errors Encountered:** 1 (PPA Tour access blocked)
+- **New Events Created:** 0
+- **Existing Events Updated:** 14
+- **Errors Encountered:** 1
 
-## Data Sources
-1. **PPA Tour** (ppatour.com) - ⚠️ Access blocked (403 Forbidden)
-2. **MLP** (majorleaguepickleball.net) - ✅ 6 tournaments fetched
-3. **APP Tour** (theapp.global) - ✅ 4 tournaments fetched
-4. **USA Pickleball** (usapickleball.org) - ✅ 4 tournaments fetched
+## Data Sources Status
 
-## Updated Tournaments
+### ✅ MLP (Major League Pickleball)
+- **Status:** Success
+- **Tournaments Fetched:** 6
+- **Events Updated:**
+  - MLP Orlando
+  - MLP Columbus
+  - MLP Austin
+  - MLP Phoenix
+  - MLP Daytona Beach
+  - MLP Cup
 
-### MLP Tournaments (6)
-- MLP Orlando
-- MLP Columbus
-- MLP Austin
-- MLP Phoenix
-- MLP Daytona Beach
-- MLP Cup
+### ✅ APP Tour
+- **Status:** Success
+- **Tournaments Fetched:** 4
+- **Events Updated:**
+  - 2025 GEICO APP Tour Championships
+  - 2026 APP Daytona Beach Open
+  - 2026 APP Fort Lauderdale Open
+  - 2026 Humana APP Louisville Open
 
-### APP Tour Tournaments (4)
-- 2025 GEICO APP Tour Championships
-- 2026 APP Daytona Beach Open
-- 2026 APP Fort Lauderdale Open
-- 2026 Humana APP Louisville Open
+### ✅ USA Pickleball
+- **Status:** Success
+- **Tournaments Fetched:** 4
+- **Events Updated:**
+  - USA Pickleball National Championships
+  - US Open Pickleball Championships
+  - USA Pickleball Golden Ticket - Colorado Springs
+  - USA Pickleball Golden Ticket - Seattle
 
-### USA Pickleball Tournaments (4)
-- USA Pickleball National Championships
-- US Open Pickleball Championships
-- USA Pickleball Golden Ticket - Colorado Springs
-- USA Pickleball Golden Ticket - Seattle
+### ❌ PPA Tour
+- **Status:** Failed
+- **Error:** 403 Forbidden (Access denied to ppatour.com/schedule/)
+- **Note:** Website may have implemented bot protection or changed access requirements
 
-## Issues & Notes
-- **PPA Tour Access Issue:** The PPA Tour website returned a 403 Forbidden error, preventing data retrieval. This may be due to bot detection or access restrictions. The system will retry on the next scheduled run.
+## Database Operations
+- All 14 fetched tournaments were successfully updated in the PostgreSQL PickleballEvent table
+- Database connection established and closed properly
+- No new events created (all tournaments already existed in database)
 
-## Next Scheduled Update
-The updater runs automatically every 6 hours. Next update expected around 21:54:06 UTC.
+## Next Steps
+- Monitor PPA Tour access issue - may need to implement alternative scraping method or API access
+- Continue scheduled updates every 6 hours
+- Review PPA Tour website for any changes to their data access policies
 
----
-*Automated update completed successfully*
+## Log File Location
+Full detailed logs available at: `/home/ubuntu/mindful_champion/logs/tournament_updater.log`

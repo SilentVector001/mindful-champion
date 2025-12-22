@@ -33,7 +33,9 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/admin/analytics/activity-feed')
+      const response = await fetch('/api/admin/analytics/activity-feed', {
+          credentials: 'include'
+        })
       if (response.ok) {
         const data = await response.json()
         setActivityData(data.activities || [])
