@@ -357,8 +357,12 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
       }
 
       // Auto-speak response if speech is enabled
+      console.log('🎤 TTS Check:', { speechEnabled, hasContent: !!assistantContent, ttsEnabled: voicePreferences.textToSpeechEnabled })
       if (speechEnabled && assistantContent && voicePreferences.textToSpeechEnabled) {
+        console.log('🔊 Calling speakText with:', assistantContent.substring(0, 50) + '...')
         speakText(assistantContent)
+      } else {
+        console.log('⚠️ TTS NOT triggered - condition not met')
       }
 
     } catch (error) {
@@ -391,7 +395,11 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
 
   // Use OpenAI TTS for high-quality, mobile-compatible voice
   const speakText = useCallback(async (text: string) => {
-    if (!speechEnabled) return
+    console.log('🎯 speakText called, speechEnabled:', speechEnabled)
+    if (!speechEnabled) {
+      console.log('⚠️ speechEnabled is false, skipping TTS')
+      return
+    }
     
     // Clean text for better TTS
     const cleanedText = text
@@ -400,12 +408,17 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
       .replace(/\*/g, '') // Remove markdown italic
       .trim()
     
-    if (!cleanedText) return
+    if (!cleanedText) {
+      console.log('⚠️ cleanedText is empty, skipping TTS')
+      return
+    }
     
+    console.log('🚀 Calling ElevenLabs TTS with text length:', cleanedText.length)
     try {
       await speakWithOpenAI(cleanedText)
+      console.log('✅ speakWithOpenAI completed')
     } catch (err) {
-      console.error('TTS speak error:', err)
+      console.error('🚨 TTS speak error:', err)
     }
   }, [speechEnabled, speakWithOpenAI])
 
