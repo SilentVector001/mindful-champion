@@ -99,7 +99,12 @@ export default function AdminEmailManagement() {
     },
   };
 
-  // Load Email History
+  // Load Email Stats on mount
+  useEffect(() => {
+    loadEmailHistory();
+  }, []);
+
+  // Reload when filters change and on history tab
   useEffect(() => {
     if (activeTab === 'history') {
       loadEmailHistory();
@@ -110,22 +115,35 @@ export default function AdminEmailManagement() {
     setHistoryLoading(true);
     try {
       const params = new URLSearchParams();
-      if (filters.type) params.append('type', filters.type);
-      if (filters.recipient) params.append('recipient', filters.recipient);
+      if (filters.type && filters.type !== 'all') params.append('type', filters.type);
+      if (filters.recipient) params.append('search', filters.recipient);
       if (filters.dateFrom) params.append('dateFrom', filters.dateFrom);
       if (filters.dateTo) params.append('dateTo', filters.dateTo);
       
-      const response = await fetch(`/api/admin/emails/history?${params}`);
+      const response = await fetch(`/api/admin/emails/history?${params.toString()}`);
+      
+      if (!response.ok) {
+        console.error('Email history API error:', response.status);
+        // Set empty state instead of showing error toast on initial load
+        setEmailHistory([]);
+        setStats({ total: 0, sent: 0, failed: 0, pending: 0 });
+        return;
+      }
+      
       const data = await response.json();
       
-      if (response.ok) {
-        setEmailHistory(data.emails);
-        setStats(data.stats);
-      } else {
-        toast.error(data.error || 'Failed to load email history');
-      }
+      setEmailHistory(data.emails || []);
+      setStats({
+        total: data.statistics?.total ?? 0,
+        sent: data.statistics?.sent ?? 0,
+        failed: data.statistics?.failed ?? 0,
+        pending: data.statistics?.pending ?? 0,
+      });
     } catch (error) {
-      toast.error('Failed to load email history');
+      console.error('Failed to load email history:', error);
+      // Set empty state instead of crashing
+      setEmailHistory([]);
+      setStats({ total: 0, sent: 0, failed: 0, pending: 0 });
     } finally {
       setHistoryLoading(false);
     }
@@ -210,6 +228,33 @@ export default function AdminEmailManagement() {
       }
     } catch (error) {
       toast.error('Failed to send test email');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Initialize Email System
+  const handleInitializeEmailSystem = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch('/api/admin/emails/initialize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok) {
+        toast.success('Email system initialized! Check your inbox for confirmation.');
+        // Reload email history after a short delay
+        setTimeout(() => {
+          loadEmailHistory();
+        }, 2000);
+      } else {
+        toast.error(data.error || 'Failed to initialize email system');
+      }
+    } catch (error) {
+      toast.error('Failed to initialize email system');
     } finally {
       setLoading(false);
     }
@@ -687,8 +732,37 @@ export default function AdminEmailManagement() {
                     <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
                   </div>
                 ) : emailHistory.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    No emails found
+                  <div className="text-center py-12">
+                    <div className="max-w-md mx-auto">
+                      <Mail className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                        No Emails Found
+                      </h3>
+                      <p className="text-sm text-gray-500 mb-6">
+                        Your email system is ready, but no emails have been sent through the application yet.
+                        Click below to send a test email and populate the dashboard.
+                      </p>
+                      <Button
+                        onClick={handleInitializeEmailSystem}
+                        disabled={loading}
+                        className="bg-gradient-to-r from-teal-600 to-cyan-600"
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                            Initializing...
+                          </>
+                        ) : (
+                          <>
+                            <Send className="h-4 w-4 mr-2" />
+                            Initialize Email System
+                          </>
+                        )}
+                      </Button>
+                      <p className="text-xs text-gray-400 mt-3">
+                        This will send a test email to your admin account and create your first email record.
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -705,7 +779,7 @@ export default function AdminEmailManagement() {
                               {email.status}
                             </Badge>
                             <span className="text-sm text-gray-600">
-                              {format(new Date(email.sentAt), 'MMM dd, yyyy HH:mm')}
+                              {format(new Date(email.sentAt || email.createdAt), 'MMM dd, yyyy HH:mm')}
                             </span>
                           </div>
                           <p className="font-medium text-gray-900">{email.subject}</p>

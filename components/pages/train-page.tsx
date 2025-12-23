@@ -79,7 +79,7 @@ export default function TrainPage({ user }: TrainPageProps) {
     <div className="min-h-screen">
       <MainNavigation user={user} />
       
-      <main>
+      <main className="pt-16">
         <PremiumTrainingPrograms 
           user={user}
           programs={programs}

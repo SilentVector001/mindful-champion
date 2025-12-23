@@ -20,6 +20,15 @@ import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
+    // Check for API key first
+    if (!process.env.ABACUSAI_API_KEY) {
+      console.error('[Coach Kai] CRITICAL: ABACUSAI_API_KEY is not configured');
+      return NextResponse.json(
+        { error: "AI service not configured. Please contact support." },
+        { status: 503 }
+      );
+    }
+
     const session = await getServerSession(authOptions);
     if (!session?.user?.id) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -34,47 +43,60 @@ export async function POST(req: NextRequest) {
     const lastUserMessage = messages[messages.length - 1];
     
     // Get or create conversation for this user
-    let userConversation = await prisma.aIConversation.findFirst({
-      where: { userId: session.user.id }
-    });
+    let userConversation;
+    try {
+      userConversation = await prisma.aIConversation.findFirst({
+        where: { userId: session.user.id }
+      });
 
-    if (!userConversation) {
-      userConversation = await prisma.aIConversation.create({
+      if (!userConversation) {
+        userConversation = await prisma.aIConversation.create({
+          data: {
+            userId: session.user.id,
+            title: 'Coach Kai Conversation',
+            messageCount: 0
+          }
+        });
+      }
+
+      // Save user message to database
+      await prisma.aIMessage.create({
         data: {
+          conversationId: userConversation.id,
           userId: session.user.id,
-          title: 'Coach Kai Conversation',
-          messageCount: 0
+          role: 'user',
+          content: lastUserMessage.content,
         }
       });
+    } catch (dbError: any) {
+      console.error('[Coach Kai] Database error saving user message:', dbError.message);
+      // Continue anyway - we can still respond even if saving failed
     }
-
-    // Save user message to database
-    await prisma.aIMessage.create({
-      data: {
-        conversationId: userConversation.id,
-        userId: session.user.id,
-        role: 'user',
-        content: lastUserMessage.content,
-      }
-    });
 
     // ============================================
     // LOAD FULL USER CONTEXT
     // ============================================
     
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        matches: {
-          orderBy: { date: 'desc' },
-          take: 10
-        },
-        mentalSessions: {
-          orderBy: { createdAt: 'desc' },
-          take: 5
+    let user;
+    try {
+      user = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        include: {
+          matches: {
+            orderBy: { date: 'desc' },
+            take: 10
+          },
+          mentalSessions: {
+            orderBy: { createdAt: 'desc' },
+            take: 5
+          }
         }
-      }
-    });
+      });
+    } catch (dbError: any) {
+      console.error('[Coach Kai] Database error fetching user:', dbError.message);
+      // Continue with null user - we'll use defaults
+      user = null;
+    }
 
     // ============================================
     // NOTE: Frontend already sends conversation history
@@ -115,24 +137,29 @@ export async function POST(req: NextRequest) {
     const needsEquipment = /buy.*paddle|best.*paddle|recommend.*paddle|gear|equipment/i.test(messageText);
     
     if (needsExpertHelp || needsPlayPartner || needsEquipment) {
-      const partners = await prisma.partner.findMany({
-        where: {
-          status: 'ACTIVE',
-          isAvailable: true,
-        },
-        orderBy: [
-          { featured: 'desc' },
-          { rating: 'desc' }
-        ],
-        take: 3,
-      });
+      try {
+        const partners = await prisma.partner.findMany({
+          where: {
+            status: 'ACTIVE',
+            isAvailable: true,
+          },
+          orderBy: [
+            { featured: 'desc' },
+            { rating: 'desc' }
+          ],
+          take: 3,
+        });
 
-      if (partners.length > 0) {
-        partnersContext = `\n\n🎯 AVAILABLE RESOURCES:
+        if (partners.length > 0) {
+          partnersContext = `\n\n🎯 AVAILABLE RESOURCES:
 ${partners.map(p => `• ${p.name} - ${p.partnerType?.replace(/_/g, ' ').toLowerCase()} (⭐ ${p.rating}/5.0)
   Specializes in: ${Array.isArray(p.expertise) ? p.expertise.slice(0, 3).join(', ') : 'various areas'}`).join('\n\n')}
 
 💡 When appropriate, mention 1-2 specific resources by name and let them know they can explore all options at /partners.`;
+        }
+      } catch (dbError: any) {
+        console.error('[Coach Kai] Database error fetching partners:', dbError.message);
+        // Continue without partner recommendations
       }
     }
 
@@ -245,33 +272,42 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
     ];
 
     // ============================================
-    // CALL AI WITH UPGRADED MODEL & SETTINGS
+    // CALL AI WITH MODEL FALLBACK & TIMEOUT
     // ============================================
     
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini', // Faster, more focused responses
-        messages: conversationMessages,
-        max_tokens: 120, // ENFORCED SHORT: Maximum 120 tokens for very concise responses
-        temperature: 1.0, // MAXIMUM creativity for maximum variety
-        presence_penalty: 0.9, // MAXIMUM encouragement for diverse topics
-        frequency_penalty: 1.2, // BEYOND MAXIMUM - aggressively reduce repetitive phrases
-        top_p: 0.95, // High nucleus sampling for maximum variety
-      }),
+    const { callAbacusAI } = await import('@/lib/ai/abacus-client');
+    
+    const aiResponse = await callAbacusAI({
+      messages: conversationMessages,
+      max_tokens: 120, // ENFORCED SHORT: Maximum 120 tokens for very concise responses
+      temperature: 1.0, // MAXIMUM creativity for maximum variety
+      presence_penalty: 0.9, // MAXIMUM encouragement for diverse topics
+      frequency_penalty: 1.2, // BEYOND MAXIMUM - aggressively reduce repetitive phrases
+      top_p: 0.95, // High nucleus sampling for maximum variety
+      stream: false,
+      timeoutMs: 60000, // 60 second timeout
+    }, {
+      userId: session.user.id,
+      enableFallback: true, // Enable automatic model fallback
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('AI API error:', response.status, errorText);
-      throw new Error(`AI API error: ${response.status}`);
+    // Check if AI call was successful
+    if (!aiResponse.success || !aiResponse.data) {
+      console.error('[Coach Kai] AI call failed:', {
+        error: aiResponse.error,
+        attemptedModels: aiResponse.attemptedModels,
+        userId: session.user.id
+      });
+      
+      return NextResponse.json(
+        { error: aiResponse.error || "Coach Kai is temporarily unavailable. Please try again in a moment." },
+        { status: 503 }
+      );
     }
 
-    const data = await response.json();
+    console.log(`[Coach Kai] ✅ Response generated with model: ${aiResponse.model}`);
+    
+    const data = aiResponse.data;
     let assistantMessage = data.choices?.[0]?.message?.content || "I'm having trouble connecting right now. Please try again!";
 
     // ============================================
@@ -306,27 +342,30 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
           }
         ];
         
-        const regenerateResponse = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-          },
-          body: JSON.stringify({
-            model: 'gpt-4o-mini',
+        try {
+          const regenerateAIResponse = await callAbacusAI({
             messages: regenerateMessages,
             max_tokens: 120,
             temperature: 1.2, // EXTRA HIGH creativity for regeneration
             presence_penalty: 1.0, // MAXIMUM for regeneration
             frequency_penalty: 1.5, // ULTRA-HIGH for regeneration - force new words
             top_p: 0.98, // Very high nucleus sampling for regeneration
-          }),
-        });
-        
-        if (regenerateResponse.ok) {
-          const regenerateData = await regenerateResponse.json();
-          assistantMessage = regenerateData.choices?.[0]?.message?.content || assistantMessage;
-          console.log('✅ Response regenerated successfully');
+            stream: false,
+            timeoutMs: 60000,
+          }, {
+            userId: session.user.id,
+            enableFallback: true,
+          });
+          
+          if (regenerateAIResponse.success && regenerateAIResponse.data) {
+            const regenerateData = regenerateAIResponse.data;
+            assistantMessage = regenerateData.choices?.[0]?.message?.content || assistantMessage;
+            console.log('✅ Response regenerated successfully with model:', regenerateAIResponse.model);
+          } else {
+            console.log('⚠️ Regeneration failed, using original response');
+          }
+        } catch (regenerateError) {
+          console.log('⚠️ Regeneration error, using original response:', regenerateError);
         }
       }
     }
@@ -335,22 +374,29 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
     // SAVE RESPONSE & UPDATE CONVERSATION
     // ============================================
     
-    await prisma.aIMessage.create({
-      data: {
-        conversationId: userConversation.id,
-        userId: session.user.id,
-        role: 'assistant',
-        content: assistantMessage,
-      }
-    });
+    try {
+      if (userConversation?.id) {
+        await prisma.aIMessage.create({
+          data: {
+            conversationId: userConversation.id,
+            userId: session.user.id,
+            role: 'assistant',
+            content: assistantMessage,
+          }
+        });
 
-    await prisma.aIConversation.update({
-      where: { id: userConversation.id },
-      data: {
-        messageCount: { increment: 2 },
-        updatedAt: new Date()
+        await prisma.aIConversation.update({
+          where: { id: userConversation.id },
+          data: {
+            messageCount: { increment: 2 },
+            updatedAt: new Date()
+          }
+        });
       }
-    });
+    } catch (dbError: any) {
+      console.error('[Coach Kai] Database error saving assistant message:', dbError.message);
+      // Continue anyway - we can still return the response even if saving failed
+    }
 
     // ============================================
     // DETECT & LOG INTERESTS FOR FUTURE PERSONALIZATION
@@ -380,10 +426,14 @@ Respond to their message with care, keep it brief, and make it FRESH! 🏓`;
       }
     });
     
-  } catch (error) {
-    console.error("Coach Kai error:", error);
+  } catch (error: any) {
+    console.error("[Coach Kai] Unexpected error:", {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     return NextResponse.json(
-      { error: "Failed to get response" },
+      { error: "An unexpected error occurred. Please try again." },
       { status: 500 }
     );
   }

@@ -34,9 +34,11 @@ export default function TextToSpeech({
   onSpeakingChange,
   className
 }: TextToSpeechProps) {
+  // 🐛 SAFARI FIX: Initialize with undefined first, then check in useEffect
+  // This ensures consistent hook calling order during SSR/hydration
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [isSupported, setIsSupported] = useState(false);
+  const [isSupported, setIsSupported] = useState<boolean | null>(null); // null during SSR
   const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
   const [currentVoice, setCurrentVoice] = useState<SpeechSynthesisVoice | null>(voice);
   const [settings, setSettings] = useState({
@@ -52,8 +54,17 @@ export default function TextToSpeech({
   const lastSpokenMessageIdRef = useRef<string>(''); // CRITICAL: Track message ID to prevent duplicate plays
   const isSpeakingLockedRef = useRef<boolean>(false); // Lock to prevent concurrent speech attempts
   const lastSpeakTimeRef = useRef<number>(0); // Cooldown to prevent rapid-fire repetition
+  const isMountedRef = useRef<boolean>(false); // Track if component is mounted
 
-  // Initialize TTS
+  // 🐛 SAFARI FIX: Track mount state to prevent hydration issues
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
+  // Initialize TTS - Check support status
   useEffect(() => {
     if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
       setIsSupported(true);
@@ -80,6 +91,9 @@ export default function TextToSpeech({
         speechSynthesis.addEventListener('voiceschanged', loadVoices);
         return () => speechSynthesis.removeEventListener('voiceschanged', loadVoices);
       }
+    } else {
+      // 🐛 SAFARI FIX: Explicitly set unsupported to avoid null state
+      setIsSupported(false);
     }
   }, [currentVoice]);
 
@@ -99,8 +113,11 @@ export default function TextToSpeech({
 
     utterance.onstart = () => {
       console.log('🔊 TTS: Speech started');
-      setIsSpeaking(true);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(true);
+        setIsPaused(false);
+      }
       hasSpokenRef.current = true;
       onStart?.();
       onSpeakingChange?.(true);
@@ -108,8 +125,11 @@ export default function TextToSpeech({
 
     utterance.onend = () => {
       console.log('🔇 TTS: Speech ended');
-      setIsSpeaking(false);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      }
       
       // CRITICAL: Release the speaking lock after speech completes
       isSpeakingLockedRef.current = false;
@@ -124,8 +144,11 @@ export default function TextToSpeech({
 
     utterance.onerror = (event) => {
       console.error('🚨 TTS: Speech synthesis error:', event.error);
-      setIsSpeaking(false);
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsSpeaking(false);
+        setIsPaused(false);
+      }
       
       // CRITICAL: Release lock on error
       isSpeakingLockedRef.current = false;
@@ -134,11 +157,17 @@ export default function TextToSpeech({
     };
 
     utterance.onpause = () => {
-      setIsPaused(true);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsPaused(true);
+      }
     };
 
     utterance.onresume = () => {
-      setIsPaused(false);
+      // 🐛 SAFARI FIX: Only update state if component is still mounted
+      if (isMountedRef.current) {
+        setIsPaused(false);
+      }
     };
 
     return utterance;
@@ -211,10 +240,10 @@ export default function TextToSpeech({
       return;
     }
 
-    // PROTECTION 4: Cooldown check (prevent rapid-fire repetition within 2 seconds)
+    // PROTECTION 4: Cooldown check (prevent rapid-fire repetition within 1 second)
     const now = Date.now();
     const timeSinceLastSpeak = now - lastSpeakTimeRef.current;
-    if (timeSinceLastSpeak < 2000 && lastSpokenTextRef.current === cleanedText) {
+    if (timeSinceLastSpeak < 1000 && lastSpokenTextRef.current === cleanedText) {
       console.log('🚫 TTS: Cooldown active - only', timeSinceLastSpeak, 'ms since last speak');
       return;
     }
@@ -226,20 +255,41 @@ export default function TextToSpeech({
     // Lock to prevent concurrent attempts
     isSpeakingLockedRef.current = true;
 
-    // Stop any current speech
-    speechSynthesis.cancel();
+    try {
+      // Stop any current speech
+      speechSynthesis.cancel();
+      
+      // MOBILE FIX: Resume speechSynthesis if paused (critical for mobile browsers)
+      if (speechSynthesis.paused) {
+        console.log('📱 Resuming paused speechSynthesis');
+        speechSynthesis.resume();
+      }
 
-    // Create and start new utterance
-    const utterance = createUtterance(cleanedText);
-    if (utterance) {
-      utteranceRef.current = utterance;
-      textRef.current = cleanedText;
-      lastSpokenTextRef.current = cleanedText; // Track what we're speaking
-      lastSpokenMessageIdRef.current = finalMessageId; // Track message ID
-      lastSpeakTimeRef.current = now; // Track when we started
-      speechSynthesis.speak(utterance);
-    } else {
-      // Failed to create utterance, release lock
+      // Create and start new utterance
+      const utterance = createUtterance(cleanedText);
+      if (utterance) {
+        utteranceRef.current = utterance;
+        textRef.current = cleanedText;
+        lastSpokenTextRef.current = cleanedText; // Track what we're speaking
+        lastSpokenMessageIdRef.current = finalMessageId; // Track message ID
+        lastSpeakTimeRef.current = now; // Track when we started
+        
+        // MOBILE FIX: Small delay to ensure speechSynthesis is ready
+        setTimeout(() => {
+          try {
+            speechSynthesis.speak(utterance);
+            console.log('🔊 Speech started successfully');
+          } catch (speakError) {
+            console.error('🚨 speechSynthesis.speak() error:', speakError);
+            isSpeakingLockedRef.current = false;
+          }
+        }, 50);
+      } else {
+        // Failed to create utterance, release lock
+        isSpeakingLockedRef.current = false;
+      }
+    } catch (e) {
+      console.error('🚨 TTS speak error:', e);
       isSpeakingLockedRef.current = false;
     }
   }, [isSupported, text, messageId, createUtterance]);
@@ -250,9 +300,17 @@ export default function TextToSpeech({
     
     console.log('🛑 TTS: Manual stop triggered');
     
-    speechSynthesis.cancel();
-    setIsSpeaking(false);
-    setIsPaused(false);
+    try {
+      speechSynthesis.cancel();
+    } catch (e) {
+      console.log('TTS cancel error (safe to ignore):', e);
+    }
+    
+    // 🐛 SAFARI FIX: Only update state if component is still mounted
+    if (isMountedRef.current) {
+      setIsSpeaking(false);
+      setIsPaused(false);
+    }
     
     // Reset all tracking - allows message to be replayed if needed
     hasSpokenRef.current = false;
@@ -266,15 +324,89 @@ export default function TextToSpeech({
   // Pause/Resume functions
   const pause = useCallback(() => {
     if (!isSupported || !isSpeaking) return;
-    speechSynthesis.pause();
+    try {
+      speechSynthesis.pause();
+    } catch (e) {
+      console.log('TTS pause error (safe to ignore):', e);
+    }
   }, [isSupported, isSpeaking]);
 
   const resume = useCallback(() => {
     if (!isSupported || !isPaused) return;
-    speechSynthesis.resume();
+    try {
+      speechSynthesis.resume();
+    } catch (e) {
+      console.log('TTS resume error (safe to ignore):', e);
+    }
   }, [isSupported, isPaused]);
 
-  // Auto-play effect with BULLETPROOF repetition prevention
+  // iOS DETECTION
+  const isIOSRef = useRef<boolean>(false);
+  const iosAudioUnlockedRef = useRef<boolean>(false);
+  
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      isIOSRef.current = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      console.log('🍎 iOS detected:', isIOSRef.current);
+    }
+  }, []);
+
+  // iOS AUDIO UNLOCK - Must be called synchronously during user gesture
+  const unlockIOSAudio = useCallback(() => {
+    if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+    
+    if (iosAudioUnlockedRef.current) {
+      console.log('🍎 iOS audio already unlocked');
+      return;
+    }
+    
+    console.log('🍎 Unlocking iOS audio with silent utterance...');
+    
+    // Cancel any existing speech
+    speechSynthesis.cancel();
+    
+    // Create a silent utterance - iOS requires this in the same call stack as user gesture
+    const silentUtterance = new SpeechSynthesisUtterance(' ');
+    silentUtterance.volume = 0.01; // Nearly silent
+    silentUtterance.rate = 2; // Fast
+    
+    silentUtterance.onend = () => {
+      console.log('🍎 iOS audio unlocked successfully');
+      iosAudioUnlockedRef.current = true;
+    };
+    
+    silentUtterance.onerror = (e) => {
+      console.log('🍎 iOS unlock error (may still work):', e.error);
+      // Mark as unlocked anyway - the unlock attempt itself sometimes works
+      iosAudioUnlockedRef.current = true;
+    };
+    
+    // Speak immediately - must be synchronous with user gesture
+    speechSynthesis.speak(silentUtterance);
+  }, []);
+
+  // MOBILE FIX: Resume AudioContext on user interaction (critical for iOS/Safari)
+  const resumeAudioContext = useCallback(() => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      // Cancel any pending speech to reset state
+      speechSynthesis.cancel();
+      
+      // iOS-specific unlock
+      if (isIOSRef.current) {
+        unlockIOSAudio();
+      } else {
+        // Non-iOS warm-up
+        const warmUp = new SpeechSynthesisUtterance('');
+        warmUp.volume = 0;
+        speechSynthesis.speak(warmUp);
+      }
+      
+      console.log('🔊 TTS: Audio context warmed up for mobile');
+    }
+  }, [unlockIOSAudio]);
+
+  // Auto-play effect with BULLETPROOF repetition prevention + MOBILE FIX
   useEffect(() => {
     if (!autoPlay || !text) {
       return;
@@ -291,44 +423,74 @@ export default function TextToSpeech({
       return;
     }
 
-    // COMPREHENSIVE CHECKS before attempting to speak
-    const isNewMessageId = messageId && messageId !== lastSpokenMessageIdRef.current;
+    // PRIMARY CHECK: Use messageId if available, fallback to text comparison
+    // FIXED: Make messageId optional - use text comparison as fallback
+    const isNewMessageId = messageId ? (messageId !== lastSpokenMessageIdRef.current) : null;
     const isNewText = cleanedText !== lastSpokenTextRef.current;
+    const isNewMessage = isNewMessageId !== null ? isNewMessageId : isNewText; // Use messageId if available, else text
     const isNotCurrentlySpeaking = !isSpeaking;
     const isNotLocked = !isSpeakingLockedRef.current;
     
     console.log('🔍 TTS: Auto-play effect triggered');
-    console.log('   New Message ID:', isNewMessageId, `(${messageId} vs ${lastSpokenMessageIdRef.current})`);
-    console.log('   New Text:', isNewText);
+    console.log('   Message ID:', messageId);
+    console.log('   Last spoken ID:', lastSpokenMessageIdRef.current);
+    console.log('   Is new message ID:', isNewMessageId);
+    console.log('   Is new text:', isNewText);
+    console.log('   Is new message (final):', isNewMessage);
     console.log('   Not Speaking:', isNotCurrentlySpeaking);
     console.log('   Not Locked:', isNotLocked);
     
-    // Only play if it's genuinely a new message
-    if ((isNewMessageId || isNewText) && isNotCurrentlySpeaking && isNotLocked) {
-      console.log('✅ TTS: Conditions met - will auto-play');
+    // Only play if it's genuinely a new message (use messageId OR text comparison)
+    if (isNewMessage && isNotCurrentlySpeaking && isNotLocked) {
+      console.log('✅ TTS: NEW MESSAGE DETECTED - will auto-play');
       
-      // Use a small delay to ensure the component is stable and to debounce rapid changes
+      // Use a small delay to ensure the component is stable
       const timeoutId = setTimeout(() => {
-        // Final safety check before speaking
-        const stillNew = messageId ? messageId !== lastSpokenMessageIdRef.current : cleanedText !== lastSpokenTextRef.current;
+        // Final safety check before speaking - FIXED: Handle undefined messageId
+        const stillNew = messageId 
+          ? (messageId !== lastSpokenMessageIdRef.current)
+          : (cleanedText !== lastSpokenTextRef.current);
         const stillNotSpeaking = !isSpeaking && !isSpeakingLockedRef.current;
+        
+        console.log('🔍 TTS: Final safety check');
+        console.log('   Still new:', stillNew);
+        console.log('   Still not speaking:', stillNotSpeaking);
         
         if (stillNew && stillNotSpeaking) {
           console.log('✅ TTS: Final checks passed - calling speak()');
-          speak();
+          
+          // MOBILE FIX: Force resume/restart speech synthesis
+          if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+            // Cancel any stuck speech first
+            speechSynthesis.cancel();
+            
+            // Check if speech synthesis is paused/suspended (common on mobile)
+            if (speechSynthesis.paused) {
+              console.log('🔊 TTS: Resuming paused speech synthesis');
+              speechSynthesis.resume();
+            }
+          }
+          
+          speak(cleanedText, messageId);
         } else {
-          console.log('🚫 TTS: Final check failed - another process took over');
+          console.log('🚫 TTS: Final check failed - state changed');
+          console.log('   Reason: stillNew=' + stillNew + ', stillNotSpeaking=' + stillNotSpeaking);
         }
-      }, 150); // Slightly longer delay for better stability
+      }, 150); // Short delay for stability
       
       return () => {
-        console.log('🧹 TTS: Cleaning up auto-play timeout');
         clearTimeout(timeoutId);
       };
     } else {
       console.log('🚫 TTS: Skipping auto-play');
-      if (!isNewMessageId && !isNewText) {
-        console.log('   Reason: Already spoke this message');
+      if (!isNewMessage) {
+        console.log('   Reason: Not a new message (already spoke this)');
+        if (isNewMessageId === false) {
+          console.log('   - Same message ID detected');
+        }
+        if (!isNewText) {
+          console.log('   - Same text content detected');
+        }
       }
       if (!isNotCurrentlySpeaking) {
         console.log('   Reason: Currently speaking');
@@ -338,6 +500,26 @@ export default function TextToSpeech({
       }
     }
   }, [text, messageId, autoPlay, isSpeaking, speak]); // Include all relevant dependencies
+  
+  // MOBILE FIX: Warm up audio on first user interaction
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
+    const warmUpOnInteraction = () => {
+      resumeAudioContext();
+      // Remove listeners after first interaction
+      document.removeEventListener('touchstart', warmUpOnInteraction);
+      document.removeEventListener('click', warmUpOnInteraction);
+    };
+    
+    document.addEventListener('touchstart', warmUpOnInteraction, { once: true, passive: true });
+    document.addEventListener('click', warmUpOnInteraction, { once: true, passive: true });
+    
+    return () => {
+      document.removeEventListener('touchstart', warmUpOnInteraction);
+      document.removeEventListener('click', warmUpOnInteraction);
+    };
+  }, [resumeAudioContext]);
 
   // Voice wave animation component
   const VoiceWave = () => (
@@ -366,7 +548,14 @@ export default function TextToSpeech({
     </motion.div>
   );
 
-  if (!isSupported) {
+  // 🐛 SAFARI FIX: Handle loading state (null) and unsupported state (false)
+  // ALL HOOKS MUST BE CALLED ABOVE THIS POINT TO PREVENT ERROR #300
+  if (isSupported === null) {
+    // Still checking support - return nothing during SSR/initial hydration
+    return null;
+  }
+
+  if (isSupported === false) {
     return (
       <div className={`text-xs text-gray-500 ${className}`}>
         Text-to-speech not supported
@@ -461,6 +650,36 @@ interface VoiceSettingsProps {
   onRateChange: (rate: number) => void;
   onPitchChange: (pitch: number) => void;
   onVolumeChange: (volume: number) => void;
+}
+
+// iOS TTS UNLOCK UTILITY - Call this synchronously on user gesture (button press)
+export function unlockIOSTTS(): void {
+  if (typeof window === 'undefined' || !('speechSynthesis' in window)) return;
+  
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  
+  if (!isIOS) {
+    console.log('🔊 Not iOS, skipping iOS-specific unlock');
+    return;
+  }
+  
+  console.log('🍎 [GLOBAL] Unlocking iOS TTS audio...');
+  
+  try {
+    // Cancel any existing speech
+    speechSynthesis.cancel();
+    
+    // Create and speak a silent utterance immediately (must be in same call stack as gesture)
+    const silentUtterance = new SpeechSynthesisUtterance(' ');
+    silentUtterance.volume = 0.01;
+    silentUtterance.rate = 2;
+    speechSynthesis.speak(silentUtterance);
+    
+    console.log('🍎 [GLOBAL] iOS TTS unlock attempted');
+  } catch (e) {
+    console.log('🍎 iOS TTS unlock error (safe to ignore):', e);
+  }
 }
 
 export function VoiceSettings({

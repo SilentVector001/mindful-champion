@@ -4,6 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { prisma } from "@/lib/db"
 import { sendGoalConfirmation, setupDailyGoalReminders } from "@/lib/notifications/goal-notifications"
+import { logActivity } from "@/lib/tracking-utils"
 
 // GET all goals for user
 export async function GET(req: NextRequest) {
@@ -94,6 +95,14 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(`Goal created and notifications sent for user ${session.user.id}`)
+
+    // Log activity
+    await logActivity(session.user.id, 'goal_milestone', {
+      goalName: goal.title,
+      currentValue: 0,
+      targetValue: 100,
+      percentage: 0
+    }).catch(err => console.error('Failed to log goal activity:', err))
 
     return NextResponse.json(goal)
   } catch (error) {

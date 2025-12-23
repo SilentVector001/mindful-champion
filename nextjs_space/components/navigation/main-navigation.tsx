@@ -462,18 +462,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 </InfoTooltip>
                 */}
                 
-                <InfoTooltip content="Browse and register for local pickleball tournaments" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/connect/tournaments" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Trophy className="w-4 h-4 text-champion-blue" />
-                      <div>
-                        <p className="font-medium">Tournament Hub</p>
-                        <p className="text-xs text-gray-500">Find & register</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-                
                 <InfoTooltip content="Share training videos and learn from the community" side="right">
                   <DropdownMenuItem asChild>
                     <Link href="/community" className="flex items-center gap-3 py-3 cursor-pointer bg-gradient-to-r from-teal-50/50 to-cyan-50/50 dark:from-teal-900/20 dark:to-cyan-900/20">

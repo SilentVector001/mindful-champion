@@ -12,9 +12,11 @@ import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 import InteractiveAvatar from '@/components/avatar/interactive-avatar';
 import VoiceSettingsModal, { VoicePreferences } from '@/components/voice/voice-settings-modal';
-import TextToSpeech from '@/components/voice/text-to-speech';
+import TextToSpeech, { unlockIOSTTS } from '@/components/voice/text-to-speech';
 import PushToTalk from '@/components/voice/push-to-talk';
+import ConversationalVoice from '@/components/voice/conversational-voice';
 import { Progress } from '@/components/ui/progress';
+import { useOpenAITTS } from '@/hooks/use-openai-tts';
 
 import MentalTrainingPrompts from './mental-training-prompts';
 import ReactMarkdown from 'react-markdown';
@@ -92,13 +94,52 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   // Voice-related state
   const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(defaultVoicePreferences);
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
   const [showVoiceSettings, setShowVoiceSettings] = useState(false);
   const [lastAssistantMessage, setLastAssistantMessage] = useState<string>('');
   const [lastAssistantMessageId, setLastAssistantMessageId] = useState<string>(''); // Track message ID for TTS
   
+  // 🎙️ NEW: OpenAI TTS Hook with natural neural voice
+  const { 
+    speak: speakOpenAI, 
+    replay: replayAudio,
+    stop: stopOpenAI, 
+    unlockAudio,
+    isSpeaking, 
+    isLoading: ttsLoading,
+    isAudioUnlocked,
+    hasAudioReady,
+    error: ttsError
+  } = useOpenAITTS({
+    voice: 'nova', // Warm, natural female voice
+    speed: voicePreferences.rate || 1.0,
+    autoPlay: false, // We'll manually control when to speak
+    onStart: () => {
+      console.log('🔊 Coach Kai (OpenAI) started speaking');
+      setAvatarState('speaking');
+    },
+    onEnd: () => {
+      console.log('🔇 Coach Kai (OpenAI) finished speaking');
+      setAvatarState('idle');
+    },
+    onError: (error) => {
+      console.error('🚨 TTS Error:', error);
+    },
+  });
+  
+  // 🔓 Unlock audio on first user interaction (critical for iOS/Safari)
+  const handleUserInteraction = useCallback(() => {
+    if (!isAudioUnlocked) {
+      console.log('🔓 First user interaction - unlocking audio for iOS');
+      unlockAudio();
+    }
+  }, [isAudioUnlocked, unlockAudio]);
+  
   // PTT state management
   const [processingVoiceInput, setProcessingVoiceInput] = useState(false);
+  
+  // Voice mode: 'ptt' (push-to-talk) or 'conversation' (like ChatGPT)
+  const [voiceMode, setVoiceMode] = useState<'ptt' | 'conversation'>('conversation');
+  const [conversationActive, setConversationActive] = useState(false);
   
   // Mental Training Panel state - Hidden by default to prevent UI clutter
   const [showMentalPanel, setShowMentalPanel] = useState(false);
@@ -499,6 +540,14 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
       // Set both the message content AND the unique ID for TTS tracking
       setLastAssistantMessage(content);
       setLastAssistantMessageId(uniqueId); // CRITICAL: Pass unique ID to prevent duplicate TTS
+      
+      // 🎙️ AUTO-SPEAK with OpenAI TTS (natural voice)
+      if (voicePreferences.textToSpeechEnabled && voicePreferences.autoSpeak && content.trim()) {
+        console.log('🔊 Auto-speaking with OpenAI TTS...');
+        speakOpenAI(content, uniqueId).catch((err) => {
+          console.error('Failed to speak:', err);
+        });
+      }
 
     } catch (error: any) {
       if (error.name === 'AbortError') {
@@ -562,13 +611,21 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     }
 
     console.log('✅ Processing PTT voice input:', text.substring(0, 50));
+    
+    // 🍎 iOS/MOBILE FIX: Unlock TTS on PTT release (user gesture)
+    unlockIOSTTS();
+    
     setProcessingVoiceInput(true);
     
     // Stop any speaking immediately when user starts talking
     if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
       console.log('🔇 Interrupting TTS for new voice input');
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+      try {
+        window.speechSynthesis.cancel();
+      } catch (e) {
+        console.log('TTS cancel error (safe to ignore):', e);
+      }
+      stopOpenAI(); // Use the hook's stop function instead of setIsSpeaking
     }
     
     // CRITICAL FIX: Force reset blocking flags if they're stuck (but check timing first)
@@ -607,18 +664,21 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     }
   }, [handleSendMessage, isLoading, processingVoiceInput, isSpeaking, messages.length]); // Proper dependencies
 
-  // Handle speaking state change
-  const handleSpeakingChange = useCallback((speaking: boolean) => {
-    setIsSpeaking(speaking);
-  }, []);
-
   // Interrupt TTS - allow user to stop Coach Kai from speaking
   const interruptSpeech = useCallback(() => {
-    if (isSpeaking && typeof window !== 'undefined' && 'speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      setIsSpeaking(false);
+    if (isSpeaking) {
+      console.log('🛑 Interrupting OpenAI TTS...');
+      stopOpenAI();
+      // Also stop old browser TTS if it's running
+      if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+        try {
+          window.speechSynthesis.cancel();
+        } catch (e) {
+          console.log('TTS cancel error (safe to ignore):', e);
+        }
+      }
     }
-  }, [isSpeaking]);
+  }, [isSpeaking, stopOpenAI]);
 
   // Handle voice settings update
   const handleVoiceSettingsChange = useCallback((newPreferences: VoicePreferences) => {
@@ -629,9 +689,20 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      // 🍎 iOS FIX: Unlock TTS on user gesture before async API call
+      unlockIOSTTS();
+      handleUserInteraction(); // Unlock OpenAI TTS audio
       handleSendMessage();
     }
   };
+
+  // Wrapper for send button click that includes iOS TTS unlock
+  const handleSendClick = useCallback(() => {
+    // 🍎 iOS FIX: Unlock TTS on user gesture (button click) before async API call
+    unlockIOSTTS();
+    handleUserInteraction(); // Unlock OpenAI TTS audio
+    handleSendMessage();
+  }, [handleSendMessage, handleUserInteraction]);
 
   // Calculate session stats
   const sessionStart = useRef(new Date());
@@ -664,8 +735,8 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
     });
   }, [messages]);
 
-  // Always show only last 3 messages - no expansion
-  const displayMessages = messages.slice(-3);
+  // Always show only last 5 messages - no expansion
+  const displayMessages = messages.slice(-5);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-teal-50 via-white to-cyan-50 relative overflow-hidden">
@@ -710,11 +781,11 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                     COACH KAI
                   </h1>
                   <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 font-semibold px-3 py-1">
-                    🎙️ VOICE ACTIVE
+                    {voiceMode === 'conversation' ? '💬 CHAT MODE' : '📻 PTT MODE'}
                   </Badge>
                 </div>
                 <p className="text-teal-100 font-medium text-sm">
-                  Your AI Pickleball Coach • Walkie-Talkie Mode
+                  Your AI Pickleball Coach • {voiceMode === 'conversation' ? 'Natural Conversation' : 'Walkie-Talkie Mode'}
                 </p>
                 <div className="flex items-center gap-2 mt-2">
                   <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${
@@ -769,6 +840,17 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
                   Stop
                 </Button>
               )}
+              {hasAudioReady && !isSpeaking && voicePreferences.textToSpeechEnabled && (
+                <Button
+                  onClick={replayAudio}
+                  variant="ghost"
+                  size="sm"
+                  className="text-white hover:bg-green-400/20 border border-green-400/50 animate-pulse"
+                >
+                  <Volume2 className="h-4 w-4 mr-2" />
+                  Play Response
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -776,100 +858,147 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
 
       {/* MAIN CONTENT AREA */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* PTT & INPUT SECTION - MOVED TO TOP FOR IMMEDIATE ACCESS */}
+        {/* PTT & INPUT SECTION - COMPACT DESIGN */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
         >
-          <Card className="shadow-2xl border-3 border-teal-200 overflow-hidden bg-gradient-to-br from-white to-teal-50">
-            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-6 py-4 border-b border-teal-100">
-              <div className="flex items-center gap-2">
-                <Mic className="h-6 w-6 text-white animate-pulse" />
-                <h2 className="text-xl font-bold text-white">Ask Coach Kai Anything</h2>
-                <Badge className="bg-white/20 backdrop-blur-sm text-white border border-white/30 ml-auto">
-                  Voice + Text Ready
-                </Badge>
+          <Card className="shadow-xl border-2 border-teal-200 overflow-hidden bg-gradient-to-br from-white to-teal-50">
+            <div className="bg-gradient-to-r from-teal-600 to-cyan-600 px-4 py-2 border-b border-teal-100">
+              <div className="flex items-center gap-2 flex-wrap">
+                <Mic className="h-5 w-5 text-white animate-pulse" />
+                <h2 className="text-lg font-bold text-white">Ask Coach Kai Anything</h2>
+                <div className="ml-auto flex items-center gap-2">
+                  {/* Voice Mode Toggle */}
+                  <div className="flex bg-white/10 rounded-full p-0.5">
+                    <button
+                      onClick={() => setVoiceMode('conversation')}
+                      className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                        voiceMode === 'conversation' 
+                          ? 'bg-white text-teal-600' 
+                          : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      💬 Chat
+                    </button>
+                    <button
+                      onClick={() => setVoiceMode('ptt')}
+                      className={`px-2 sm:px-3 py-1 text-xs font-medium rounded-full transition-all ${
+                        voiceMode === 'ptt' 
+                          ? 'bg-white text-teal-600' 
+                          : 'text-white/70 hover:text-white'
+                      }`}
+                    >
+                      📻 PTT
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
             
-            <div className="p-8 bg-white">
-              {/* PTT Button - Large and Prominent */}
-              <div className="flex flex-col items-center gap-4 mb-8">
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className="relative"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-teal-400 to-cyan-400 rounded-full blur-xl opacity-50 animate-pulse" />
-                  <PushToTalk
-                    onTranscript={handlePTTVoiceInput}
-                    disabled={isLoading || processingVoiceInput}
-                    language={voicePreferences.language}
-                    className="scale-125 relative z-10"
-                  />
-                </motion.div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold text-slate-900 mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                    Press & Hold to Talk
-                  </p>
-                  <p className="text-sm text-slate-600 flex items-center justify-center gap-1">
-                    <Sparkles className="h-4 w-4 text-teal-500" />
-                    Release when done • Coach Kai responds instantly
-                  </p>
-                </div>
-              </div>
-
-              {/* Divider */}
-              <div className="relative my-8">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t-2 border-gradient-to-r from-transparent via-slate-300 to-transparent" />
-                </div>
-                <div className="relative flex justify-center">
-                  <span className="px-6 py-2 bg-white text-slate-500 font-bold text-sm rounded-full border-2 border-slate-200">
-                    Or type your question below
-                  </span>
-                </div>
-              </div>
-
-              {/* Text Input - Large and Inviting */}
-              <div className="flex gap-4">
-                <Textarea
-                  ref={inputRef}
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your question for Coach Kai... (e.g., 'How can I improve my serve?')"
-                  disabled={isLoading}
-                  className="flex-1 min-h-[100px] text-lg resize-none border-3 border-slate-200 focus:border-teal-400 focus:ring-4 focus:ring-teal-400/20 rounded-2xl p-4 shadow-inner"
-                />
-                <Button
-                  onClick={() => handleSendMessage()}
-                  disabled={!input.trim() || isLoading}
-                  className="h-[100px] w-[100px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-2xl shadow-2xl hover:shadow-3xl hover:scale-105 transition-all"
-                >
-                  {isLoading ? (
-                    <Loader2 className="h-10 w-10 animate-spin" />
+            <div className="p-4 sm:p-6 bg-white">
+              {/* COMPACT LAYOUT: Voice Button + Text Input Side by Side on Desktop */}
+              <div className="flex flex-col lg:flex-row items-center gap-4 lg:gap-6">
+                {/* Voice Button - Changes based on mode */}
+                <div className="flex flex-col items-center gap-2 flex-shrink-0">
+                  {voiceMode === 'conversation' ? (
+                    <ConversationalVoice
+                      onTranscript={handlePTTVoiceInput}
+                      onSessionChange={(active) => {
+                        setConversationActive(active);
+                        // 🔓 Unlock audio when starting conversation (iOS requirement)
+                        if (active) handleUserInteraction();
+                      }}
+                      onSpeakingChange={(speaking) => setIsListening(speaking)}
+                      onListeningChange={(listening) => {
+                        if (listening) setAvatarState('listening');
+                        else if (!isSpeaking && !isLoading) setAvatarState('idle');
+                      }}
+                      disabled={isLoading || processingVoiceInput}
+                      language={voicePreferences.language}
+                      aiIsSpeaking={isSpeaking}
+                      onInterruptAI={interruptSpeech}
+                      pauseThreshold={1500}
+                    />
                   ) : (
-                    <Send className="h-10 w-10" />
+                    <>
+                      <div className="relative">
+                        <PushToTalk
+                          onTranscript={handlePTTVoiceInput}
+                          disabled={isLoading || processingVoiceInput}
+                          language={voicePreferences.language}
+                          className="relative z-10"
+                        />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-base font-bold text-slate-900 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                          Press & Hold to Talk
+                        </p>
+                        <p className="text-xs text-slate-500 flex items-center justify-center gap-1">
+                          <Sparkles className="h-3 w-3 text-teal-500" />
+                          Release when done • Coach Kai responds instantly
+                        </p>
+                      </div>
+                    </>
                   )}
-                </Button>
+                </div>
+
+                {/* Divider - Vertical on desktop, horizontal on mobile */}
+                <div className="hidden lg:flex flex-col items-center h-32">
+                  <div className="h-full w-px bg-slate-200" />
+                  <span className="px-2 py-1 bg-white text-slate-400 font-medium text-xs whitespace-nowrap -mt-1">
+                    or type
+                  </span>
+                  <div className="h-full w-px bg-slate-200" />
+                </div>
+                <div className="lg:hidden w-full flex items-center gap-2 my-2">
+                  <div className="flex-1 h-px bg-slate-200" />
+                  <span className="px-2 py-1 bg-white text-slate-400 font-medium text-xs">
+                    Or type your question
+                  </span>
+                  <div className="flex-1 h-px bg-slate-200" />
+                </div>
+
+                {/* Text Input - Flexible */}
+                <div className="flex gap-3 w-full lg:flex-1">
+                  <Textarea
+                    ref={inputRef}
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyDown={handleKeyPress}
+                    placeholder="Type your question for Coach Kai... (e.g., 'How can I improve my serve?')"
+                    disabled={isLoading}
+                    className="flex-1 min-h-[70px] text-sm resize-none border-2 border-slate-200 focus:border-teal-400 focus:ring-2 focus:ring-teal-400/20 rounded-xl p-3"
+                  />
+                  <Button
+                    onClick={handleSendClick}
+                    disabled={!input.trim() || isLoading}
+                    className="h-[70px] w-[70px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all flex-shrink-0"
+                  >
+                    {isLoading ? (
+                      <Loader2 className="h-7 w-7 animate-spin" />
+                    ) : (
+                      <Send className="h-7 w-7" />
+                    )}
+                  </Button>
+                </div>
               </div>
             </div>
           </Card>
         </motion.div>
 
-        {/* LAST 3 CONVERSATIONS - STATIC DISPLAY */}
+        {/* LAST 5 CONVERSATIONS - STATIC DISPLAY */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
           <Card className="shadow-xl border-2 border-slate-100 overflow-hidden">
-            <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-6 py-3 border-b border-slate-200 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-2 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-teal-600" />
-                <h2 className="text-lg font-bold text-slate-900">Last 3 Conversations</h2>
+                <MessageSquare className="h-4 w-4 text-teal-600" />
+                <h2 className="text-base font-bold text-slate-900">Last 5 Conversations</h2>
                 <Badge variant="secondary" className="text-xs">
                   Latest
                 </Badge>
@@ -1213,18 +1342,7 @@ export default function PTTAICoach({ userContext }: PTTAICoachProps) {
         onSettingsChange={handleVoiceSettingsChange}
       />
 
-      {/* TTS Component */}
-      <TextToSpeech
-        text={lastAssistantMessage}
-        messageId={lastAssistantMessageId}
-        rate={voicePreferences.rate}
-        pitch={voicePreferences.pitch}
-        volume={voicePreferences.volume}
-        autoPlay={true}
-        onStart={() => console.log('🔊 Coach Kai started speaking')}
-        onEnd={() => console.log('🔇 Coach Kai finished speaking')}
-        onSpeakingChange={handleSpeakingChange}
-      />
+      {/* TTS is now handled by useOpenAITTS hook with natural neural voice */}
     </div>
   );
 }

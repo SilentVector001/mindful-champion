@@ -1,49 +1,36 @@
 import { PrismaClient } from '@prisma/client';
-import { config } from 'dotenv';
-import { resolve } from 'path';
+import * as dotenv from 'dotenv';
+import * as path from 'path';
+import * as fs from 'fs';
 
-config({ path: resolve(__dirname, '../.env') });
+const envPath = path.join(process.cwd(), '..', '.env.local');
+if (fs.existsSync(envPath)) {
+  dotenv.config({ path: envPath });
+}
 
 const prisma = new PrismaClient();
 
-async function verify() {
+async function main() {
+  console.log('\n📊 Verifying Media Sync Data...\n');
+  
   const liveStreams = await prisma.liveStream.count();
+  console.log(`✅ Live Streams: ${liveStreams}`);
+  
   const podcasts = await prisma.podcastShow.count();
+  console.log(`✅ Podcast Shows: ${podcasts}`);
+  
+  const episodes = await prisma.podcastEpisode.count();
+  console.log(`✅ Podcast Episodes: ${episodes}`);
+  
   const events = await prisma.externalEvent.count();
+  console.log(`✅ External Events: ${events}`);
   
-  console.log('Database Verification:');
-  console.log('═'.repeat(40));
-  console.log(`Live Streams: ${liveStreams} records`);
-  console.log(`Podcast Shows: ${podcasts} records`);
-  console.log(`External Events: ${events} records`);
-  console.log('═'.repeat(40));
+  const cache = await prisma.apiCache.count();
+  console.log(`✅ API Cache Entries: ${cache}`);
   
-  // Show sample data
-  const sampleStream = await prisma.liveStream.findFirst();
-  const samplePodcast = await prisma.podcastShow.findFirst();
-  const sampleEvent = await prisma.externalEvent.findFirst();
-  
-  if (sampleStream) {
-    console.log('\nSample Live Stream:');
-    console.log(`  Title: ${sampleStream.title}`);
-    console.log(`  Platform: ${sampleStream.platform}`);
-    console.log(`  Status: ${sampleStream.status}`);
-  }
-  
-  if (samplePodcast) {
-    console.log('\nSample Podcast:');
-    console.log(`  Title: ${samplePodcast.title}`);
-    console.log(`  Author: ${samplePodcast.author}`);
-  }
-  
-  if (sampleEvent) {
-    console.log('\nSample Event:');
-    console.log(`  Title: ${sampleEvent.title}`);
-    console.log(`  Location: ${sampleEvent.location}`);
-    console.log(`  Start Date: ${sampleEvent.startDate.toLocaleDateString()}`);
-  }
+  console.log('\n✨ Verification complete!\n');
   
   await prisma.$disconnect();
 }
 
-verify().catch(console.error);
+main();

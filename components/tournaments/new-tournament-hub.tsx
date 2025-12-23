@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Trophy,
   Calendar,
@@ -33,56 +34,68 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
+// Helper to extract state from location and build registration URL
+const getRegistrationUrl = (location?: string) => {
+  if (!location) return "https://pickleballtournaments.com/"
+  // Extract state abbreviation from "City, ST" format
+  const match = location.match(/,\s*([A-Z]{2})$/)
+  if (match) {
+    return `https://pickleballtournaments.com/?state=${match[1]}`
+  }
+  return "https://pickleballtournaments.com/"
+}
+
+// States sorted by tournament count (descending) for heat map effect
 const US_STATES = [
-  { abbr: "AL", name: "Alabama", events: 12 },
-  { abbr: "AK", name: "Alaska", events: 3 },
-  { abbr: "AZ", name: "Arizona", events: 45 },
-  { abbr: "AR", name: "Arkansas", events: 8 },
-  { abbr: "CA", name: "California", events: 128 },
-  { abbr: "CO", name: "Colorado", events: 34 },
-  { abbr: "CT", name: "Connecticut", events: 15 },
-  { abbr: "DE", name: "Delaware", events: 5 },
   { abbr: "FL", name: "Florida", events: 156 },
-  { abbr: "GA", name: "Georgia", events: 28 },
-  { abbr: "HI", name: "Hawaii", events: 8 },
-  { abbr: "ID", name: "Idaho", events: 11 },
-  { abbr: "IL", name: "Illinois", events: 22 },
-  { abbr: "IN", name: "Indiana", events: 14 },
-  { abbr: "IA", name: "Iowa", events: 9 },
-  { abbr: "KS", name: "Kansas", events: 7 },
-  { abbr: "KY", name: "Kentucky", events: 10 },
-  { abbr: "LA", name: "Louisiana", events: 11 },
-  { abbr: "ME", name: "Maine", events: 6 },
-  { abbr: "MD", name: "Maryland", events: 18 },
-  { abbr: "MA", name: "Massachusetts", events: 21 },
-  { abbr: "MI", name: "Michigan", events: 19 },
-  { abbr: "MN", name: "Minnesota", events: 16 },
-  { abbr: "MS", name: "Mississippi", events: 6 },
-  { abbr: "MO", name: "Missouri", events: 12 },
-  { abbr: "MT", name: "Montana", events: 5 },
-  { abbr: "NE", name: "Nebraska", events: 7 },
-  { abbr: "NV", name: "Nevada", events: 22 },
-  { abbr: "NH", name: "New Hampshire", events: 8 },
-  { abbr: "NJ", name: "New Jersey", events: 24 },
-  { abbr: "NM", name: "New Mexico", events: 9 },
-  { abbr: "NY", name: "New York", events: 35 },
-  { abbr: "NC", name: "North Carolina", events: 26 },
-  { abbr: "ND", name: "North Dakota", events: 4 },
-  { abbr: "OH", name: "Ohio", events: 23 },
-  { abbr: "OK", name: "Oklahoma", events: 10 },
-  { abbr: "OR", name: "Oregon", events: 18 },
-  { abbr: "PA", name: "Pennsylvania", events: 27 },
-  { abbr: "RI", name: "Rhode Island", events: 5 },
-  { abbr: "SC", name: "South Carolina", events: 19 },
-  { abbr: "SD", name: "South Dakota", events: 4 },
-  { abbr: "TN", name: "Tennessee", events: 17 },
+  { abbr: "CA", name: "California", events: 128 },
   { abbr: "TX", name: "Texas", events: 89 },
-  { abbr: "UT", name: "Utah", events: 21 },
-  { abbr: "VT", name: "Vermont", events: 5 },
-  { abbr: "VA", name: "Virginia", events: 22 },
+  { abbr: "AZ", name: "Arizona", events: 45 },
+  { abbr: "NY", name: "New York", events: 35 },
+  { abbr: "CO", name: "Colorado", events: 34 },
+  { abbr: "GA", name: "Georgia", events: 28 },
   { abbr: "WA", name: "Washington", events: 28 },
-  { abbr: "WV", name: "West Virginia", events: 5 },
+  { abbr: "PA", name: "Pennsylvania", events: 27 },
+  { abbr: "NC", name: "North Carolina", events: 26 },
+  { abbr: "NJ", name: "New Jersey", events: 24 },
+  { abbr: "OH", name: "Ohio", events: 23 },
+  { abbr: "IL", name: "Illinois", events: 22 },
+  { abbr: "NV", name: "Nevada", events: 22 },
+  { abbr: "VA", name: "Virginia", events: 22 },
+  { abbr: "MA", name: "Massachusetts", events: 21 },
+  { abbr: "UT", name: "Utah", events: 21 },
+  { abbr: "MI", name: "Michigan", events: 19 },
+  { abbr: "SC", name: "South Carolina", events: 19 },
+  { abbr: "MD", name: "Maryland", events: 18 },
+  { abbr: "OR", name: "Oregon", events: 18 },
+  { abbr: "TN", name: "Tennessee", events: 17 },
+  { abbr: "MN", name: "Minnesota", events: 16 },
+  { abbr: "CT", name: "Connecticut", events: 15 },
+  { abbr: "IN", name: "Indiana", events: 14 },
   { abbr: "WI", name: "Wisconsin", events: 14 },
+  { abbr: "AL", name: "Alabama", events: 12 },
+  { abbr: "MO", name: "Missouri", events: 12 },
+  { abbr: "ID", name: "Idaho", events: 11 },
+  { abbr: "LA", name: "Louisiana", events: 11 },
+  { abbr: "KY", name: "Kentucky", events: 10 },
+  { abbr: "OK", name: "Oklahoma", events: 10 },
+  { abbr: "IA", name: "Iowa", events: 9 },
+  { abbr: "NM", name: "New Mexico", events: 9 },
+  { abbr: "AR", name: "Arkansas", events: 8 },
+  { abbr: "HI", name: "Hawaii", events: 8 },
+  { abbr: "NH", name: "New Hampshire", events: 8 },
+  { abbr: "KS", name: "Kansas", events: 7 },
+  { abbr: "NE", name: "Nebraska", events: 7 },
+  { abbr: "ME", name: "Maine", events: 6 },
+  { abbr: "MS", name: "Mississippi", events: 6 },
+  { abbr: "DE", name: "Delaware", events: 5 },
+  { abbr: "MT", name: "Montana", events: 5 },
+  { abbr: "RI", name: "Rhode Island", events: 5 },
+  { abbr: "VT", name: "Vermont", events: 5 },
+  { abbr: "WV", name: "West Virginia", events: 5 },
+  { abbr: "ND", name: "North Dakota", events: 4 },
+  { abbr: "SD", name: "South Dakota", events: 4 },
+  { abbr: "AK", name: "Alaska", events: 3 },
   { abbr: "WY", name: "Wyoming", events: 3 },
 ]
 
@@ -163,6 +176,7 @@ interface TournamentStats {
 }
 
 export function TournamentHub() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState("all")
@@ -410,10 +424,12 @@ export function TournamentHub() {
                 <SelectItem value="charity">Charity</SelectItem>
               </SelectContent>
             </Select>
-            <Button className="bg-champion-green hover:bg-champion-green/90 h-12">
-              <Filter className="w-4 h-4 mr-2" />
-              Find Events
-            </Button>
+            <Link href={`/tournaments/calendar${searchQuery ? `?q=${encodeURIComponent(searchQuery)}` : ''}`}>
+              <Button className="bg-champion-green hover:bg-champion-green/90 h-12">
+                <Filter className="w-4 h-4 mr-2" />
+                Find Events
+              </Button>
+            </Link>
           </motion.div>
         </div>
       </section>
@@ -455,7 +471,11 @@ export function TournamentHub() {
                 <Card className="bg-white/5 border-white/10 overflow-hidden group hover:border-champion-green/50 transition-all">
                   <div className="relative h-48">
                     <img
-                      src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800"
+                      src={[
+                        "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80", // Indoor tournament setting with players
+                        "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80", // Outdoor court action shot
+                        "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80"  // Indoor competition scene
+                      ][index % 3]}
                       alt={tournament?.name || 'Tournament'}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
@@ -482,10 +502,12 @@ export function TournamentHub() {
                       <div className="text-champion-gold font-semibold">
                         {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
                       </div>
-                      <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
-                        Register
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Button>
+                      <a href={getRegistrationUrl(tournament?.location)} target="_blank" rel="noopener noreferrer">
+                        <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
+                          <ExternalLink className="w-3 h-3 mr-1" />
+                          Register
+                        </Button>
+                      </a>
                     </div>
                   </CardContent>
                 </Card>
@@ -551,13 +573,38 @@ export function TournamentHub() {
             </div>
           </div>
 
+          {/* Selected State Filter Badge */}
+          {selectedState && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="mb-4 flex items-center justify-center gap-2"
+            >
+              <Badge className="bg-champion-green/20 text-champion-green border-champion-green/30 px-4 py-2 text-base">
+                Showing tournaments in {US_STATES.find(s => s.abbr === selectedState)?.name || selectedState}
+              </Badge>
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => setSelectedState(null)}
+                className="text-gray-400 hover:text-white hover:bg-white/10"
+              >
+                Clear Filter ✕
+              </Button>
+            </motion.div>
+          )}
+
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {filteredStates?.slice?.(0, 24)?.map?.((state) => {
+            {filteredStates?.map?.((state) => {
               const gradient = getStateGradient(state?.events || 0)
               return (
                 <motion.button
                   key={state?.abbr}
-                  onClick={() => setSelectedState(state?.abbr || null)}
+                  onClick={() => {
+                    // Navigate to calendar page with state filter pre-applied
+                    router.push(`/tournaments/calendar?state=${state?.abbr}`)
+                  }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   className={`p-3 rounded-lg border transition-all text-center relative overflow-hidden group ${
@@ -622,10 +669,23 @@ export function TournamentHub() {
       </section>
 
       {/* Upcoming Events List */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+      <section id="upcoming-events" className="max-w-7xl mx-auto px-4 sm:px-6 py-12 scroll-mt-20">
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white">Upcoming Events</h2>
+            <h2 className="text-2xl font-bold text-white">
+              Upcoming Events
+              {selectedState && (() => {
+                const filteredCount = upcomingEvents?.filter?.(e => 
+                  e?.location?.includes?.(selectedState) || 
+                  e?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
+                )?.length || 0
+                return (
+                  <span className="ml-3 text-lg text-champion-green">
+                    ({filteredCount} in {US_STATES.find(s => s.abbr === selectedState)?.name})
+                  </span>
+                )
+              })()}
+            </h2>
             <p className="text-gray-400">Registration open now</p>
           </div>
           <Link href="/tournaments/calendar">
@@ -639,56 +699,84 @@ export function TournamentHub() {
           <div className="text-center py-12">
             <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
           </div>
-        ) : (
-          <div className="space-y-4">
-            {upcomingEvents?.map?.((event, index) => (
-              <motion.div
-                key={event?.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
-                    <Trophy className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {event?.location || 'TBA'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(event?.startDate, event?.endDate)}
-                      </span>
+        ) : (() => {
+          // Filter events by selected state
+          const displayEvents = selectedState 
+            ? upcomingEvents?.filter?.(event => 
+                event?.location?.includes?.(selectedState) || 
+                event?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
+              )
+            : upcomingEvents
+
+          return displayEvents?.length > 0 ? (
+            <div className="space-y-4">
+              {displayEvents?.map?.((event, index) => (
+                <motion.div
+                  key={event?.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
+                      <Trophy className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {event?.location || 'TBA'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(event?.startDate, event?.endDate)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {event?.registrationOpen ? (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      Open for Registration
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
-                      Registration Closed
-                    </Badge>
-                  )}
-                  <Button
-                    size="sm"
-                    disabled={!event?.registrationOpen}
-                    className={event?.registrationOpen ? "bg-champion-green hover:bg-champion-green/90" : ""}
-                  >
-                    {event?.registrationOpen ? "Register" : "View Details"}
-                  </Button>
-                </div>
-              </motion.div>
-            )) || []}
-          </div>
-        )}
+                  <div className="flex items-center gap-4">
+                    {event?.registrationOpen ? (
+                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        Open for Registration
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                        Registration Closed
+                      </Badge>
+                    )}
+                    <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        size="sm"
+                        className="bg-champion-green hover:bg-champion-green/90"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        {event?.registrationOpen ? "Register" : "View Details"}
+                      </Button>
+                    </a>
+                  </div>
+                </motion.div>
+              )) || []}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+              <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                No tournaments found in {US_STATES.find(s => s.abbr === selectedState)?.name}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Try selecting a different state or view all tournaments
+              </p>
+              <Button
+                onClick={() => setSelectedState(null)}
+                className="bg-champion-green hover:bg-champion-green/90"
+              >
+                View All Tournaments
+              </Button>
+            </div>
+          )
+        })()}
       </section>
 
       {/* CTA Section */}
@@ -713,6 +801,40 @@ export function TournamentHub() {
                 Find My Level
               </Button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Quick Links to Tournament Finders */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
+        <div className="bg-white/5 rounded-xl border border-white/10 p-6">
+          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Sites</h3>
+          <div className="flex flex-wrap gap-3 justify-center">
+            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-champion-green/50 text-champion-green hover:bg-champion-green/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PickleballTournaments.com
+              </Button>
+            </a>
+            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PickleballBrackets.com
+              </Button>
+            </a>
+            <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
+              </Button>
+            </a>
+            <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
+              </Button>
+            </a>
+            <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-purple-500/50 text-purple-400 hover:bg-purple-500/10">
+                <ExternalLink className="w-4 h-4 mr-2" /> USA Pickleball
+              </Button>
+            </a>
           </div>
         </div>
       </section>

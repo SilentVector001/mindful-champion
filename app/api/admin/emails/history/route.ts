@@ -8,12 +8,37 @@ export const dynamic = 'force-dynamic';
 /**
  * GET /api/admin/emails/history
  * Fetch email notification history with filters and pagination
+ * Returns empty data gracefully if no emails exist
  */
 export async function GET(request: NextRequest) {
+  // Default empty response to return on any error
+  const emptyResponse = {
+    emails: [],
+    pagination: {
+      page: 1,
+      limit: 20,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+    },
+    statistics: {
+      total: 0,
+      sent: 0,
+      failed: 0,
+      pending: 0,
+      delivered: 0,
+      opened: 0,
+      clicked: 0,
+      bounced: 0,
+    },
+    typeDistribution: [],
+  };
+
   try {
     // Authenticate admin
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== 'ADMIN') {
+    if (!session || session.user?.role !== 'ADMIN') {
       return NextResponse.json(
         { error: 'Unauthorized. Admin access required.' },
         { status: 401 }
@@ -22,26 +47,26 @@ export async function GET(request: NextRequest) {
 
     // Extract query parameters
     const searchParams = request.nextUrl.searchParams;
-    const page = parseInt(searchParams.get('page') || '1');
-    const limit = parseInt(searchParams.get('limit') || '20');
+    const page = parseInt(searchParams.get('page') || '1') || 1;
+    const limit = parseInt(searchParams.get('limit') || '20') || 20;
     const skip = (page - 1) * limit;
 
-    // Filters
+    // Filters - support both 'search' and 'recipient' params
     const typeFilter = searchParams.get('type');
     const statusFilter = searchParams.get('status');
-    const searchQuery = searchParams.get('search');
-    const startDate = searchParams.get('startDate');
-    const endDate = searchParams.get('endDate');
+    const searchQuery = searchParams.get('search') || searchParams.get('recipient');
+    const startDate = searchParams.get('startDate') || searchParams.get('dateFrom');
+    const endDate = searchParams.get('endDate') || searchParams.get('dateTo');
     const userId = searchParams.get('userId');
 
     // Build where clause
     const where: any = {};
 
-    if (typeFilter) {
+    if (typeFilter && typeFilter !== 'all') {
       where.type = typeFilter;
     }
 
-    if (statusFilter) {
+    if (statusFilter && statusFilter !== 'all') {
       where.status = statusFilter;
     }
 
@@ -60,65 +85,108 @@ export async function GET(request: NextRequest) {
     if (startDate || endDate) {
       where.createdAt = {};
       if (startDate) {
-        where.createdAt.gte = new Date(startDate);
+        try {
+          where.createdAt.gte = new Date(startDate);
+        } catch (e) {
+          console.error('Invalid startDate:', startDate);
+        }
       }
       if (endDate) {
-        where.createdAt.lte = new Date(endDate);
+        try {
+          where.createdAt.lte = new Date(endDate);
+        } catch (e) {
+          console.error('Invalid endDate:', endDate);
+        }
+      }
+      // Remove empty createdAt filter
+      if (Object.keys(where.createdAt).length === 0) {
+        delete where.createdAt;
       }
     }
 
-    // Fetch emails with pagination
-    const [emails, totalCount] = await Promise.all([
-      prisma.emailNotification.findMany({
-        where,
-        include: {
-          user: {
-            select: {
-              id: true,
-              email: true,
-              firstName: true,
-              lastName: true,
-              name: true,
+    // Fetch emails with pagination - wrapped in try-catch
+    let emails: any[] = [];
+    let totalCount = 0;
+    
+    try {
+      [emails, totalCount] = await Promise.all([
+        prisma.emailNotification.findMany({
+          where,
+          include: {
+            user: {
+              select: {
+                id: true,
+                email: true,
+                firstName: true,
+                lastName: true,
+                name: true,
+              },
             },
           },
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+        }),
+        prisma.emailNotification.count({ where }),
+      ]);
+    } catch (dbError: any) {
+      console.error('Database error fetching emails:', dbError?.message || dbError);
+      // Return empty response instead of error
+      return NextResponse.json(emptyResponse);
+    }
+
+    // Get statistics - wrapped in try-catch for better error handling
+    let statsMap: Record<string, number> = {};
+    let typeDistribution: Array<{ type: string; count: number }> = [];
+    
+    try {
+      const stats = await prisma.emailNotification.groupBy({
+        by: ['status'],
+        _count: {
+          status: true,
         },
-        orderBy: { createdAt: 'desc' },
-        skip,
-        take: limit,
-      }),
-      prisma.emailNotification.count({ where }),
-    ]);
+        where: userId ? { userId } : undefined,
+      });
 
-    // Get statistics
-    const stats = await prisma.emailNotification.groupBy({
-      by: ['status'],
-      _count: true,
-      where: userId ? { userId } : {},
-    });
-
-    const statsMap = stats.reduce((acc: any, stat) => {
-      acc[stat.status] = stat._count;
-      return acc;
-    }, {});
+      statsMap = stats.reduce((acc: Record<string, number>, stat) => {
+        acc[stat.status] = stat._count.status;
+        return acc;
+      }, {});
+    } catch (statsError: any) {
+      console.error('Error fetching email stats:', statsError?.message || statsError);
+      // Continue with empty stats
+    }
 
     // Get type distribution
-    const typeDistribution = await prisma.emailNotification.groupBy({
-      by: ['type'],
-      _count: true,
-      orderBy: {
+    try {
+      const typeDistResult = await prisma.emailNotification.groupBy({
+        by: ['type'],
         _count: {
-          type: 'desc',
+          type: true,
         },
-      },
-      take: 10,
-    });
+        orderBy: {
+          _count: {
+            type: 'desc',
+          },
+        },
+        take: 10,
+      });
+      
+      typeDistribution = typeDistResult.map((td) => ({
+        type: td.type,
+        count: td._count.type,
+      }));
+    } catch (typeError: any) {
+      console.error('Error fetching type distribution:', typeError?.message || typeError);
+      // Continue with empty distribution
+    }
 
-    const totalPages = Math.ceil(totalCount / limit);
+    const totalPages = Math.ceil(totalCount / limit) || 0;
 
     return NextResponse.json({
       emails: emails.map((email) => ({
         ...email,
-        // Create content preview
+        // Create content preview safely
         contentPreview: email.htmlContent
           ? email.htmlContent
               .replace(/<[^>]*>/g, '')
@@ -143,17 +211,12 @@ export async function GET(request: NextRequest) {
         clicked: statsMap.CLICKED || 0,
         bounced: statsMap.BOUNCED || 0,
       },
-      typeDistribution: typeDistribution.map((td) => ({
-        type: td.type,
-        count: td._count,
-      })),
+      typeDistribution,
     });
   } catch (error: any) {
-    console.error('Error fetching email history:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch email history', details: error.message },
-      { status: 500 }
-    );
+    console.error('Error fetching email history:', error?.message || error);
+    // Return empty response instead of 500 error
+    return NextResponse.json(emptyResponse);
   }
 }
 

@@ -11,6 +11,7 @@ import {
   Eye, Play, Upload, ArrowRight, Filter, AlertCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
+import UserDetailPanel from "@/components/admin/user-detail-panel"
 
 interface UserActivityFeedProps {
   activities?: any[]
@@ -21,6 +22,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
   const [activityData, setActivityData] = useState<any[]>([])
   const [filter, setFilter] = useState<string>('all')
   const [error, setError] = useState<string | null>(null)
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null)
+  const [showUserDetail, setShowUserDetail] = useState(false)
 
   useEffect(() => {
     fetchActivities()
@@ -30,11 +33,20 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
     try {
       setLoading(true)
       setError(null)
-      const response = await fetch('/api/admin/analytics/activity-feed')
+      const response = await fetch('/api/admin/analytics/activity-feed', {
+          credentials: 'include'
+        })
       if (response.ok) {
         const data = await response.json()
         setActivityData(data.activities || [])
         console.log('Activity feed loaded:', data.activities?.length || 0, 'activities')
+        console.log('Activity breakdown:', data.breakdown)
+        console.log('Activity meta:', data.meta)
+        
+        // Alert if data appears stale (most recent activity is more than 1 hour old)
+        if (data.meta?.mostRecentActivity?.ageInHours > 1) {
+          console.warn('⚠️ Activity feed may be stale. Most recent activity is', data.meta.mostRecentActivity.ageInHours, 'hours old')
+        }
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Failed to fetch activities' }))
         console.error('Activity feed error:', errorData)
@@ -45,6 +57,16 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
       setError('Network error while loading activities. Please check your connection and try again.')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleActivityClick = (activity: any) => {
+    if (activity.userId) {
+      console.log('Opening user detail for:', activity.userName, activity.userId)
+      setSelectedUserId(activity.userId)
+      setShowUserDetail(true)
+    } else {
+      console.warn('No userId found for activity:', activity)
     }
   }
 
@@ -64,6 +86,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
         return { icon: MessageSquare, color: 'text-pink-500', bg: 'bg-pink-500/10' }
       case 'subscription':
         return { icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' }
+      case 'training_complete':
+        return { icon: Target, color: 'text-teal-500', bg: 'bg-teal-500/10' }
       default:
         return { icon: Activity, color: 'text-slate-500', bg: 'bg-slate-500/10' }
     }
@@ -78,6 +102,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
       case 'goal_created': return 'Goal Created'
       case 'chat': return 'Coach Chat'
       case 'subscription': return 'Subscription'
+      case 'training_complete': return 'Training Progress'
       default: return 'Activity'
     }
   }
@@ -91,7 +116,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
     { value: 'signup', label: 'Signups' },
     { value: 'video_upload', label: 'Videos' },
     { value: 'match', label: 'Matches' },
-    { value: 'subscription', label: 'Subscriptions' }
+    { value: 'subscription', label: 'Subscriptions' },
+    { value: 'training_complete', label: 'Training' }
   ]
 
   if (loading) {
@@ -130,7 +156,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 Platform Activity Feed
               </CardTitle>
               <CardDescription className="mt-1 text-sm">
-                Real-time user activities • Last 7 days
+                Real-time user activities • Last 30 days
               </CardDescription>
             </div>
             <div className="flex items-center gap-2">
@@ -200,6 +226,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: index * 0.05 }}
                     whileHover={{ scale: 1.01, x: 5 }}
+                    onClick={() => handleActivityClick(activity)}
                     className="flex items-center justify-between p-4 bg-white rounded-xl hover:bg-gradient-to-r hover:from-purple-50 hover:to-pink-50 transition-all cursor-pointer shadow-sm hover:shadow-lg group border border-slate-100"
                   >
                     <div className="flex items-center gap-4 flex-1">
@@ -243,8 +270,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                 </p>
                 <p className="text-xs text-slate-500 max-w-sm mx-auto mb-4">
                   {filter === 'all' 
-                    ? 'No user activities recorded in the last 7 days. The activity feed will automatically update as users interact with the platform.'
-                    : 'No activities of this type in the last 7 days. Try a different filter or check back later.'}
+                    ? 'No user activities recorded in the last 30 days. The activity feed will automatically update as users interact with the platform.'
+                    : 'No activities of this type in the last 30 days. Try a different filter or check back later.'}
                 </p>
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto mb-4">
                   <p className="text-xs text-blue-700 font-medium mb-2">💡 Activity Feed Tips:</p>
@@ -254,6 +281,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
                     <li>• Match recordings and goal creation logged</li>
                     <li>• Coach Kai conversations monitored</li>
                     <li>• Subscription changes captured</li>
+                    <li>• Training program progress tracked</li>
                   </ul>
                 </div>
                 <Button
@@ -270,6 +298,17 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
           </div>
         </CardContent>
       </Card>
+
+      {/* User Detail Panel */}
+      {showUserDetail && selectedUserId && (
+        <UserDetailPanel
+          userId={selectedUserId}
+          onClose={() => {
+            setShowUserDetail(false)
+            setSelectedUserId(null)
+          }}
+        />
+      )}
     </motion.div>
   )
 }

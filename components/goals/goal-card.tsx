@@ -19,6 +19,7 @@ import {
   Edit
 } from "lucide-react"
 import { format } from "date-fns"
+import { celebrateMilestone, showAchievementToast } from "@/lib/celebrations"
 
 interface Milestone {
   id: string
@@ -84,6 +85,16 @@ export default function GoalCard({ goal, onUpdate, onDelete }: GoalCardProps) {
       })
 
       if (response.ok) {
+        // Trigger celebration when milestone is completed
+        if (newStatus === 'COMPLETED') {
+          celebrateMilestone()
+          showAchievementToast(
+            'Milestone Achieved! ⭐',
+            `You completed: ${milestone.title}`,
+            '⭐'
+          )
+        }
+        
         // Refresh the goal data
         onUpdate(goal.id, {})
       }

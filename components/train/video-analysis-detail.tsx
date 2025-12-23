@@ -14,7 +14,7 @@ import { motion } from "framer-motion"
 import {
   Video, Download, Share2, ArrowLeft, CheckCircle2, TrendingUp, Target,
   Activity, BarChart3, Lightbulb, Trophy, Clock, Eye, FileText, Play,
-  ChevronRight, ChevronLeft, Star, Award, Gauge, Zap, Brain, AlertCircle, ThumbsUp, Library, Loader2
+  ChevronRight, ChevronLeft, Star, Award, Gauge, Zap, Brain, AlertCircle, ThumbsUp, Library, Loader2, Users
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
@@ -26,6 +26,7 @@ import ProgressTracking from "@/components/video-analysis/progress-tracking"
 import ShotByBreakdown from "@/components/video-analysis/shot-by-shot-breakdown"
 import ShotDetectionProgress from "@/components/video-analysis/shot-detection-progress"
 import ShotClipsViewer from "@/components/video-analysis/shot-clips-viewer"
+import { PublishToCommunityModal } from "@/components/community"
 
 interface VideoAnalysisDetailProps {
   videoId: string
@@ -39,6 +40,7 @@ export default function VideoAnalysisDetail({ videoId }: VideoAnalysisDetailProp
   const [prevVideoId, setPrevVideoId] = useState<string | null>(null)
   const [nextVideoId, setNextVideoId] = useState<string | null>(null)
   const [fileWarning, setFileWarning] = useState<string | null>(null)
+  const [showShareModal, setShowShareModal] = useState(false)
 
   useEffect(() => {
     fetchVideoAnalysis()
@@ -271,14 +273,24 @@ export default function VideoAnalysisDetail({ videoId }: VideoAnalysisDetailProp
               </Button>
               <Button 
                 variant="outline" 
-                className="border-slate-600 text-slate-300 hover:bg-slate-800 hover:border-cyan-500/50 shadow-lg hover:shadow-cyan-500/20 transition-all duration-300"
+                onClick={() => setShowShareModal(true)}
+                className="border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-500 shadow-lg hover:shadow-teal-500/20 transition-all duration-300"
               >
-                <Share2 className="w-4 h-4 mr-2" />
-                Share
+                <Users className="w-4 h-4 mr-2" />
+                Share to Community
               </Button>
             </div>
           </div>
         </motion.div>
+
+        {/* Share to Community Modal */}
+        {showShareModal && video && (
+          <PublishToCommunityModal
+            videoAnalysisId={videoId}
+            videoTitle={video.title}
+            onClose={() => setShowShareModal(false)}
+          />
+        )}
 
         {/* File Warning Banner */}
         {fileWarning && (
@@ -354,6 +366,78 @@ export default function VideoAnalysisDetail({ videoId }: VideoAnalysisDetailProp
               <p className="text-xs text-slate-400 mt-2">
                 Check back in a few minutes for your comprehensive analysis results.
               </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* COMMUNITY SHARE CTA - PROMINENT BANNER */}
+        {!isProcessing && !isPending && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-8"
+          >
+            <div className="relative group cursor-pointer" onClick={() => setShowShareModal(true)}>
+              {/* Animated gradient background */}
+              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/20 via-cyan-500/20 to-blue-500/20 rounded-2xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-75 group-hover:opacity-100" />
+              
+              {/* Main banner card */}
+              <div className="relative bg-gradient-to-br from-teal-500/10 via-cyan-500/10 to-blue-500/10 backdrop-blur-sm rounded-2xl p-8 border-2 border-teal-500/30 group-hover:border-teal-400/50 shadow-2xl shadow-teal-500/20 transition-all duration-300 group-hover:scale-[1.02]">
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  {/* Icon section */}
+                  <div className="flex-shrink-0">
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-3xl blur-lg opacity-75 group-hover:opacity-100 transition-opacity" />
+                      <div className="relative p-6 bg-gradient-to-br from-teal-500 to-cyan-600 rounded-3xl shadow-lg">
+                        <Users className="w-12 h-12 text-white" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Content section */}
+                  <div className="flex-1 text-center md:text-left space-y-3">
+                    <div className="flex flex-col md:flex-row md:items-center gap-3">
+                      <h3 className="text-3xl font-bold bg-gradient-to-r from-teal-300 via-cyan-300 to-blue-300 bg-clip-text text-transparent">
+                        Share Your Progress with the Community!
+                      </h3>
+                      <Badge className="bg-teal-500/20 text-teal-300 border-teal-400/50 text-sm font-semibold px-3 py-1 w-fit mx-auto md:mx-0">
+                        ✨ New Feature
+                      </Badge>
+                    </div>
+                    <p className="text-lg text-slate-300 leading-relaxed max-w-3xl">
+                      Get feedback from fellow players, inspire others with your improvement journey, and learn from the community's collective wisdom. 
+                      Your analysis could help hundreds of players improve their game!
+                    </p>
+                    <div className="flex flex-wrap gap-4 pt-2 justify-center md:justify-start">
+                      <div className="flex items-center gap-2 text-teal-400">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-medium">Expert Feedback</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-cyan-400">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-medium">Inspire Others</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-blue-400">
+                        <CheckCircle2 className="w-5 h-5" />
+                        <span className="text-sm font-medium">Earn Recognition</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* CTA Button */}
+                  <div className="flex-shrink-0">
+                    <Button
+                      size="lg"
+                      className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-400 hover:to-cyan-500 text-white font-bold px-8 py-6 text-lg rounded-xl shadow-xl shadow-teal-500/30 hover:shadow-2xl hover:shadow-teal-400/40 transition-all duration-300 group-hover:scale-105 border-2 border-teal-400/30"
+                    >
+                      <Users className="w-6 h-6 mr-3" />
+                      Share Now
+                      <ChevronRight className="w-5 h-5 ml-2" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
         )}

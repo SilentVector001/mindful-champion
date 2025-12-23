@@ -29,6 +29,7 @@ import { cn } from "@/lib/utils"
 import { motion, AnimatePresence } from "framer-motion"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
+import { celebrateDayComplete, showAchievementToast } from "@/lib/celebrations"
 
 interface AnalysisData {
   analysisId: string;
@@ -286,6 +287,14 @@ export default function ComprehensiveVideoAnalysis() {
       }
 
       const analysisResult = await analysisResponse.json()
+      
+      // Trigger celebration for successful video analysis
+      celebrateDayComplete()
+      showAchievementToast(
+        'Video Analysis Complete! 🎥',
+        'Your AI-powered insights are ready to view',
+        '🎥'
+      )
       
       // Show success toast
       toast.success('✅ Analysis complete! Your video is ready.', { 

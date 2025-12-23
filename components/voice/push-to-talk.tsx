@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Mic, MicOff, Loader2, Radio, Volume2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { unlockIOSTTS } from '@/components/voice/text-to-speech';
 
 interface PushToTalkProps {
   onTranscript: (text: string) => void;
@@ -423,6 +424,10 @@ export default function PushToTalk({
     event.preventDefault();
     event.stopPropagation();
     
+    // 🍎 iOS FIX: Unlock TTS audio immediately on button press (MUST be synchronous with gesture)
+    // This allows speechSynthesis to work later after the async API call
+    unlockIOSTTS();
+    
     if (disabled || pttState === 'processing' || !recognitionRef.current) {
       console.log('🚫 PTT Start blocked:', { disabled, pttState, hasRecognition: !!recognitionRef.current });
       return;
@@ -564,7 +569,7 @@ export default function PushToTalk({
     
     // IMPROVED: Validate touch event matches the original touch
     // This prevents interference from other touches on the screen
-    if (event?.type.startsWith('touch') && event.changedTouches && event.changedTouches.length > 0) {
+    if (event?.type?.startsWith('touch') && event.changedTouches && event.changedTouches.length > 0) {
       const touchId = event.changedTouches[0].identifier;
       if (touchIdentifierRef.current !== null && touchId !== touchIdentifierRef.current) {
         console.log('🚫 Touch ID mismatch, ignoring touchend (different touch point)');
@@ -626,6 +631,20 @@ export default function PushToTalk({
       }
     }
     
+    // MOBILE FIX: Force stop ALL audio tracks from the microphone stream
+    // This ensures the orange microphone indicator turns off on iOS
+    if (microphoneStream) {
+      console.log('🎤 Force stopping all microphone tracks...');
+      microphoneStream.getTracks().forEach(track => {
+        track.stop();
+        console.log('   Stopped track:', track.kind, track.label);
+      });
+      setMicrophoneStream(null);
+      // Reset permission status so next PTT press re-requests microphone
+      // This is necessary because we just stopped all tracks
+      permissionRequestedRef.current = false;
+    }
+    
     // IMPROVED: Wait a moment for any final transcript, then send
     // Increased delay slightly for mobile to ensure all transcription is captured
     setTimeout(() => {
@@ -639,7 +658,7 @@ export default function PushToTalk({
         setError(null);
       }
     }, 250); // Slightly longer delay for mobile (was 200ms)
-  }, [sendTranscript, triggerHapticFeedback]);
+  }, [sendTranscript, triggerHapticFeedback, microphoneStream]);
 
   // Handle touch move - detect when finger slides SIGNIFICANTLY outside button
   const handleTouchMove = useCallback((event: TouchEvent) => {
@@ -977,38 +996,26 @@ export default function PushToTalk({
           {getStatusText()}
         </p>
         
-        {/* Live Transcript Display */}
+        {/* Live Transcript Display - with glow effect when active */}
         <AnimatePresence>
           {(transcript || interimTranscript) && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="mt-3 p-4 bg-gray-50 rounded-lg border max-w-md mx-auto"
+              className={`mt-3 p-3 bg-gray-50 rounded-lg border max-w-xs mx-auto transition-all duration-300
+                ${pttState === 'recording' ? 'border-teal-400 shadow-[0_0_15px_rgba(20,184,166,0.4)] bg-teal-50/50' : 'border-gray-200'}
+              `}
             >
-              <p className="text-xs sm:text-sm text-gray-500 mb-2 font-medium">Live Transcript:</p>
               <p className="text-sm sm:text-base leading-relaxed">
                 <span className="text-gray-800 font-medium">{transcript}</span>
-                <span className="text-gray-400 italic">{interimTranscript}</span>
+                <span className={`italic ${pttState === 'recording' ? 'text-teal-600' : 'text-gray-400'}`}>{interimTranscript}</span>
               </p>
             </motion.div>
           )}
         </AnimatePresence>
       </motion.div>
 
-      {/* Instructions for walkie-talkie experience */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: pttState === 'idle' ? 0.8 : 0 }}
-        className="text-center max-w-sm px-4"
-      >
-        <p className="text-xs sm:text-sm text-gray-600 font-medium mb-1">
-          🎙️ <strong>Walkie-Talkie Mode Active</strong>
-        </p>
-        <p className="text-xs text-gray-500">
-          Press & hold to talk, release to send • Coach Kai will respond with voice
-        </p>
-      </motion.div>
     </div>
   );
 }

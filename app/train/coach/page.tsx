@@ -3,9 +3,8 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import PTTAICoach from "@/components/coach/ptt-ai-coach"
+import SimpleCoachKai from "@/components/coach/simple-coach-kai"
 import MainNavigation from "@/components/navigation/main-navigation"
-import { CoachErrorBoundary } from "@/components/coach/coach-error-boundary"
 
 export default async function AICoachPage() {
   const session = await getServerSession(authOptions)
@@ -59,10 +58,8 @@ export default async function AICoachPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50">
       <MainNavigation user={userData} />
-      <div className="pt-16"> {/* Add padding-top to prevent navigation overlap */}
-        <CoachErrorBoundary fallbackMode="text-only">
-          <PTTAICoach userContext={userContext} />
-        </CoachErrorBoundary>
+      <div className="pt-16">
+        <SimpleCoachKai userContext={userContext} />
       </div>
     </div>
   )

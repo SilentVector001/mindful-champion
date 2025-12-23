@@ -1,124 +1,193 @@
+import { NextRequest, NextResponse } from "next/server"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/db"
 
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/db'
-
+// GET: Fetch community video posts with pagination
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category')
+    const page = parseInt(searchParams.get("page") || "1")
+    const limit = parseInt(searchParams.get("limit") || "10")
+    const tag = searchParams.get("tag")
+    const userId = searchParams.get("userId")
+    const skip = (page - 1) * limit
 
-    const where = category && category !== 'ALL' 
-      ? { category: category as any }
-      : {}
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    })
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
 
-    const posts = await prisma.communityPost.findMany({
-      where,
-      include: {
-        user: {
-          select: {
-            id: true,
-            name: true,
-            nickname: true,
-            image: true,
-            skillLevel: true,
-            playerRating: true,
-            ageRange: true
+    const where: any = {
+      isVideoPost: true,
+      isPublished: true
+    }
+
+    if (tag) {
+      where.tags = { has: tag }
+    }
+
+    if (userId) {
+      where.userId = userId
+    }
+
+    const [posts, total] = await Promise.all([
+      prisma.communityPost.findMany({
+        where,
+        include: {
+          user: {
+            select: { 
+              id: true, 
+              name: true, 
+              image: true, 
+              skillLevel: true,
+              subscriptionTier: true,
+              playerRating: true
+            }
+          },
+          videoAnalysis: {
+            select: {
+              id: true,
+              videoUrl: true,
+              thumbnailUrl: true,
+              title: true,
+              duration: true,
+              overallScore: true,
+              analysisStatus: true
+            }
+          },
+          likes: {
+            where: { userId: user.id },
+            select: { id: true }
+          },
+          bookmarks: {
+            where: { userId: user.id },
+            select: { id: true }
+          },
+          _count: {
+            select: { comments: true, likes: true }
           }
         },
-        _count: {
-          select: {
-            comments: true,
-            likes: true
-          }
-        }
-      },
-      orderBy: [
-        { isPinned: 'desc' },
-        { createdAt: 'desc' }
-      ],
-      take: 100
-    })
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit
+      }),
+      prisma.communityPost.count({ where })
+    ])
 
-    const postsWithCounts = posts.map(post => ({
+    // Transform to add isLiked and isSaved flags
+    const transformedPosts = posts.map(post => ({
       ...post,
+      isLiked: post.likes.length > 0,
+      isSaved: post.bookmarks.length > 0,
       likeCount: post._count.likes,
-      commentCount: post._count.comments
+      commentCount: post._count.comments,
+      likes: undefined,
+      bookmarks: undefined,
+      _count: undefined
     }))
 
-    return NextResponse.json({ posts: postsWithCounts })
+    return NextResponse.json({
+      posts: transformedPosts,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    })
   } catch (error) {
-    console.error('Error fetching posts:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch posts' },
-      { status: 500 }
-    )
+    console.error("Error fetching community posts:", error)
+    return NextResponse.json({ error: "Failed to fetch posts" }, { status: 500 })
   }
 }
 
+// POST: Create a new community video post
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const { title, content, category } = await request.json()
+    const user = await prisma.user.findUnique({
+      where: { email: session.user.email }
+    })
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 })
+    }
 
-    if (!title?.trim() || !content?.trim()) {
-      return NextResponse.json(
-        { error: 'Title and content are required' },
-        { status: 400 }
-      )
+    const body = await request.json()
+    const { videoAnalysisId, caption, tags } = body
+
+    if (!videoAnalysisId) {
+      return NextResponse.json({ error: "Video analysis ID required" }, { status: 400 })
+    }
+
+    // Verify user owns the video analysis
+    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+      where: { id: videoAnalysisId }
+    })
+
+    if (!videoAnalysis || videoAnalysis.userId !== user.id) {
+      return NextResponse.json({ error: "Video not found or access denied" }, { status: 404 })
+    }
+
+    // Check if already shared
+    const existing = await prisma.communityPost.findUnique({
+      where: { videoAnalysisId }
+    })
+
+    if (existing) {
+      return NextResponse.json({ error: "Video already shared" }, { status: 400 })
     }
 
     const post = await prisma.communityPost.create({
       data: {
-        title: title.trim(),
-        content: content.trim(),
-        category: category || 'GENERAL',
-        userId: session.user.id!
+        title: videoAnalysis.title || "Training Video",
+        content: caption || "",
+        caption,
+        tags: tags || [],
+        isVideoPost: true,
+        isPublished: true,
+        videoAnalysisId,
+        userId: user.id,
+        category: "TRAINING_TIPS"
       },
       include: {
         user: {
+          select: { 
+            id: true, 
+            name: true, 
+            image: true, 
+            skillLevel: true,
+            subscriptionTier: true,
+            playerRating: true
+          }
+        },
+        videoAnalysis: {
           select: {
             id: true,
-            name: true,
-            image: true
+            videoUrl: true,
+            thumbnailUrl: true,
+            title: true,
+            duration: true,
+            overallScore: true
           }
         }
       }
     })
 
-    // Initialize or update community stats
-    await prisma.communityStats.upsert({
-      where: { userId: session.user.id! },
-      create: {
-        userId: session.user.id!,
-        postsCount: 1,
-        commentsCount: 0,
-        likesReceived: 0,
-        helpfulVotes: 0,
-        lastActiveAt: new Date()
-      },
-      update: {
-        postsCount: { increment: 1 },
-        lastActiveAt: new Date()
-      }
-    })
-
-    return NextResponse.json({ post })
+    return NextResponse.json({ post }, { status: 201 })
   } catch (error) {
-    console.error('Error creating post:', error)
-    return NextResponse.json(
-      { error: 'Failed to create post' },
-      { status: 500 }
-    )
+    console.error("Error creating community post:", error)
+    return NextResponse.json({ error: "Failed to create post" }, { status: 500 })
   }
 }

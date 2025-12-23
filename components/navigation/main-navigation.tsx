@@ -141,7 +141,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
         }}
       >
         <nav className="max-w-full w-full px-3 sm:px-4 lg:px-6">
-          <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-h-[64px] max-w-[100vw] overflow-hidden">
+          <div className="flex items-center justify-between h-16 gap-2 sm:gap-3 min-h-[64px] w-full">
             {/* Logo - Fixed Positioning */}
             <InfoTooltip content="Return to your coaching dashboard">
               <Link href="/dashboard" className="flex items-center gap-2 group flex-shrink-0 min-w-0">
@@ -160,46 +160,41 @@ export default function MainNavigation({ user }: MainNavigationProps) {
             </InfoTooltip>
 
             {/* SPACER - Push menu button to the right on mobile/tablet */}
-            <div className="flex-1 lg:hidden"></div>
+            <div className="flex-1 xl:hidden"></div>
 
-            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE */}
-            <div 
-              className="lg:hidden ml-auto flex-shrink-0 relative z-[70]"
-              style={{
-                isolation: 'isolate',
-                WebkitTransform: 'translateZ(0)',
-                transform: 'translateZ(0)',
-              }}
-            >
-              <SheetTrigger asChild>
-                <Button 
-                  variant="default" 
-                  size="icon" 
-                  className="h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-3 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80"
-                  aria-label="Open navigation menu"
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    WebkitTouchCallout: 'none',
-                    WebkitUserSelect: 'none',
-                    position: 'relative',
-                    zIndex: 70,
-                    minWidth: '48px',
-                    minHeight: '48px',
-                  }}
-                  onClick={(e) => {
-                    // Ensure the event is processed on iOS
-                    e.stopPropagation();
-                    console.log('Mobile menu button clicked');
-                  }}
-                >
-                  <Menu className="h-6 w-6 sm:h-8 sm:w-8 text-white stroke-[3.5] pointer-events-none" />
-                  <span className="sr-only">Open menu</span>
-                </Button>
-              </SheetTrigger>
-            </div>
+            {/* Mobile/Tablet Menu Button - HIGHLY VISIBLE - FIXED FOR iPAD */}
+            <SheetTrigger asChild>
+              <Button 
+                variant="default" 
+                size="icon" 
+                className="xl:hidden h-12 w-12 sm:h-14 sm:w-14 bg-champion-green hover:bg-champion-green/90 text-white shadow-2xl rounded-lg border-2 border-white/30 backdrop-blur-sm transition-all hover:scale-105 touch-manipulation cursor-pointer active:scale-95 active:bg-champion-green/80 flex-shrink-0"
+                aria-label="Open navigation menu"
+                style={{ 
+                  WebkitTapHighlightColor: 'transparent',
+                  WebkitTouchCallout: 'none',
+                  WebkitUserSelect: 'none',
+                  position: 'relative',
+                  zIndex: 9999,
+                  minWidth: '48px',
+                  minHeight: '48px',
+                  display: 'inline-flex',
+                  visibility: 'visible',
+                  opacity: 1,
+                }}
+                onClick={(e) => {
+                  // Ensure the event is processed on iOS
+                  e.stopPropagation();
+                  console.log('Mobile menu button clicked');
+                  setMobileMenuOpen(true);
+                }}
+              >
+                <Menu className="h-6 w-6 sm:h-8 sm:w-8 text-white stroke-[3.5] pointer-events-none" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </SheetTrigger>
 
-            {/* Main Navigation - Desktop Only (1024px+) */}
-            <div className="hidden lg:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
+            {/* Main Navigation - Desktop Only (1280px+) */}
+            <div className="hidden xl:flex items-center gap-0.5 xl:gap-1 flex-1 min-w-0 justify-center overflow-x-auto scrollbar-hide"
               style={{ 
                 maxWidth: 'calc(100vw - 600px)',
                 scrollbarWidth: 'none',
@@ -467,31 +462,20 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 </InfoTooltip>
                 */}
                 
-                <InfoTooltip content="Browse and register for local pickleball tournaments" side="right">
+                <InfoTooltip content="Share training videos and learn from the community" side="right">
                   <DropdownMenuItem asChild>
-                    <Link href="/connect/tournaments" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Trophy className="w-4 h-4 text-champion-blue" />
+                    <Link href="/community" className="flex items-center gap-3 py-3 cursor-pointer bg-gradient-to-r from-teal-50/50 to-cyan-50/50 dark:from-teal-900/20 dark:to-cyan-900/20">
+                      <Video className="w-4 h-4 text-teal-500" />
                       <div>
-                        <p className="font-medium">Tournament Hub</p>
-                        <p className="text-xs text-gray-500">Find & register</p>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">Community Center</p>
+                          <Badge className="bg-teal-500/20 text-teal-600 dark:text-teal-400 text-xs">New</Badge>
+                        </div>
+                        <p className="text-xs text-gray-500">Share & discover videos</p>
                       </div>
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
-                
-                {/* TEMPORARILY HIDDEN - Can be restored later
-                <InfoTooltip content="Connect with other players, share tips, and ask questions" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/connect/community" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <MessageCircle className="w-4 h-4 text-emotion-success" />
-                      <div>
-                        <p className="font-medium">Community Board</p>
-                        <p className="text-xs text-gray-500">Discussions & tips</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
-                */}
                 
                 <InfoTooltip content="Book expert coaching sessions with certified instructors" side="right">
                   <DropdownMenuItem asChild>
@@ -650,7 +634,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
           </div>
 
           {/* Right Side - Profile Menu - HIDDEN ON MOBILE/TABLET */}
-          <div className="hidden lg:flex items-center gap-1.5 xl:gap-2 flex-shrink-0 min-w-0"
+          <div className="hidden xl:flex items-center gap-1.5 xl:gap-2 flex-shrink-0 min-w-0"
             style={{
               maxWidth: 'min(350px, 30vw)'
             }}
@@ -738,13 +722,31 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </DropdownMenuItem>
                 </InfoTooltip>
 
-
+                {user?.role === 'ADMIN' && (
+                  <InfoTooltip content="Access admin dashboard for user management" side="left">
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin" className="flex items-center gap-3 py-2 cursor-pointer">
+                        <Shield className="w-4 h-4 text-emotion-info" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  </InfoTooltip>
+                )}
 
                 <InfoTooltip content="Manage your plan, billing, and premium features" side="left">
                   <DropdownMenuItem asChild>
                     <Link href="/pricing" className="flex items-center gap-3 py-2 cursor-pointer">
                       <Crown className="w-4 h-4 text-champion-gold" />
                       Subscription
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+
+                <InfoTooltip content="Get help, FAQs, tutorials, and support resources" side="left">
+                  <DropdownMenuItem asChild>
+                    <Link href="/help" className="flex items-center gap-3 py-2 cursor-pointer">
+                      <HelpCircle className="w-4 h-4 text-champion-blue" />
+                      Help Center
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
@@ -948,6 +950,14 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
+                <Link href="/community" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-teal-50/50 to-cyan-50/50 hover:from-teal-100/50 hover:to-cyan-100/50">
+                    <Video className="w-5 h-5 text-teal-500" />
+                    <span className="font-semibold">Community Center</span>
+                    <Badge className="ml-auto bg-teal-500/20 text-teal-600 text-xs">New</Badge>
+                  </Button>
+                </Link>
+
                 {/* TEMPORARILY HIDDEN - Can be restored later
                 <Link href="/connect/community" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
@@ -1002,12 +1012,26 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-
+                {user?.role === 'ADMIN' && (
+                  <Link href="/admin" onClick={closeMobileMenu}>
+                    <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
+                      <Shield className="w-5 h-5 text-emotion-info" />
+                      Admin Dashboard
+                    </Button>
+                  </Link>
+                )}
 
                 <Link href="/pricing" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Crown className="w-5 h-5 text-champion-gold" />
                     Subscription
+                  </Button>
+                </Link>
+
+                <Link href="/help" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
+                    <HelpCircle className="w-5 h-5 text-champion-blue" />
+                    Help Center
                   </Button>
                 </Link>
 

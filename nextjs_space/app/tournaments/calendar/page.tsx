@@ -10,7 +10,11 @@ export const metadata = {
   description: 'Interactive tournament calendar with map view - find events near you or across the nation',
 }
 
-export default async function CalendarPage() {
+interface CalendarPageProps {
+  searchParams: { state?: string; type?: string; q?: string }
+}
+
+export default async function CalendarPage({ searchParams }: CalendarPageProps) {
   const session = await getServerSession(authOptions)
   
   if (!session?.user) {
@@ -37,10 +41,19 @@ export default async function CalendarPage() {
     redirect("/auth/signin?callbackUrl=/tournaments/calendar")
   }
 
+  // Extract filter params from URL
+  const initialState = searchParams?.state || null
+  const initialType = searchParams?.type || null
+  const initialQuery = searchParams?.q || null
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={user} />
-      <TournamentCalendar />
+      <TournamentCalendar 
+        initialState={initialState}
+        initialType={initialType}
+        initialQuery={initialQuery}
+      />
     </div>
   )
 }

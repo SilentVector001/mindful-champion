@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import {
   Trophy,
   Calendar,
@@ -175,6 +176,7 @@ interface TournamentStats {
 }
 
 export function TournamentHub() {
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [selectedState, setSelectedState] = useState<string | null>(null)
   const [selectedType, setSelectedType] = useState("all")
@@ -600,14 +602,8 @@ export function TournamentHub() {
                 <motion.button
                   key={state?.abbr}
                   onClick={() => {
-                    setSelectedState(state?.abbr || null)
-                    // Smooth scroll to upcoming events section
-                    setTimeout(() => {
-                      const upcomingSection = document.getElementById('upcoming-events')
-                      if (upcomingSection) {
-                        upcomingSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
-                      }
-                    }, 100)
+                    // Navigate to calendar page with state filter pre-applied
+                    router.push(`/tournaments/calendar?state=${state?.abbr}`)
                   }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}

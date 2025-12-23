@@ -146,24 +146,30 @@ BAD EXAMPLES (DON'T DO THIS):
       ...messages
     ]
 
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o',
-        messages: fullMessages,
-        stream: true,
-        max_tokens: 1500,
-        temperature: 0.8
-      })
-    })
+    const { callAbacusAI } = await import('@/lib/ai/abacus-client');
+    
+    const aiResponse = await callAbacusAI({
+      messages: fullMessages,
+      stream: true,
+      max_tokens: 1500,
+      temperature: 0.8,
+      timeoutMs: 60000, // 60 second timeout
+    }, {
+      userId: session.user.id,
+      enableFallback: true, // Enable automatic model fallback
+    });
 
-    if (!response.ok) {
-      throw new Error(`LLM API error: ${response.statusText}`)
+    if (!aiResponse.success || !aiResponse.data) {
+      console.error('[Coach Chat Streaming] AI call failed:', {
+        error: aiResponse.error,
+        attemptedModels: aiResponse.attemptedModels,
+        userId: session.user.id
+      });
+      throw new Error(aiResponse.error || 'LLM API error')
     }
+    
+    console.log(`[Coach Chat Streaming] ✅ Stream started with model: ${aiResponse.model}`);
+    const response = aiResponse.data as Response;
 
     const stream = new ReadableStream({
       async start(controller) {

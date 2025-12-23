@@ -174,6 +174,7 @@ model User {
   videoPlaylists               VideoPlaylist[]
   videoSuggestions             VideoSuggestion[]
   wearableDevices              WearableDevice[]
+  activityLogs                 ActivityLog[]
 }
 
 model VerificationToken {
@@ -415,6 +416,7 @@ model VideoAnalysis {
   emailNotifications      EmailNotification[]
   uploadedByAdmin         User?                  @relation("AdminUploads", fields: [uploadedByAdminId], references: [id])
   user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityPost           CommunityPost?
 
   @@index([userId])
   @@index([analysisStatus])
@@ -649,6 +651,8 @@ model UserProgram {
   startDate            DateTime?
   currentDay           Int             @default(1)
   completionPercentage Float           @default(0.0)
+  completedDays        DateTime[]      @default([])
+  lastTrainedAt        DateTime?
   completedAt          DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
@@ -985,28 +989,37 @@ model NavigationPath {
 }
 
 model CommunityPost {
-  id           String         @id @default(cuid())
-  title        String
-  content      String
-  category     PostCategory   @default(GENERAL)
-  userId       String
-  isPinned     Boolean        @default(false)
-  isLocked     Boolean        @default(false)
-  views        Int            @default(0)
-  likeCount    Int            @default(0)
-  commentCount Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookmarks    PostBookmark[]
-  comments     PostComment[]
-  likes        PostLike[]
-  reports      PostReport[]
+  id              String         @id @default(cuid())
+  title           String
+  content         String
+  category        PostCategory   @default(GENERAL)
+  userId          String
+  isPinned        Boolean        @default(false)
+  isLocked        Boolean        @default(false)
+  views           Int            @default(0)
+  likeCount       Int            @default(0)
+  commentCount    Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  // Video sharing fields
+  videoAnalysisId String?        @unique
+  caption         String?
+  tags            String[]       @default([])
+  isVideoPost     Boolean        @default(false)
+  isPublished     Boolean        @default(true)
+  videoAnalysis   VideoAnalysis? @relation(fields: [videoAnalysisId], references: [id], onDelete: SetNull)
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmarks       PostBookmark[]
+  comments        PostComment[]
+  likes           PostLike[]
+  reports         PostReport[]
 
   @@index([userId])
   @@index([category])
   @@index([createdAt])
   @@index([isPinned])
+  @@index([isVideoPost])
+  @@index([videoAnalysisId])
 }
 
 model PostComment {
@@ -1621,6 +1634,7 @@ model PhoneResetToken {
 model ActivityLog {
   id          String   @id @default(cuid())
   userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   sessionId   String?
   type        String
   title       String
@@ -3297,125 +3311,4 @@ model MediaPhoto {
   @@index([category])
   @@index([featured])
   @@index([tournamentId])
-}
-
-// ===== PRACTICE DRILL LIBRARY MODELS =====
-
-model Drill {
-  id                String             @id @default(cuid())
-  legacyId          Int?               @unique // For migration from JSON data
-  title             String
-  tagline           String
-  description       String             @db.Text
-  category          DrillCategory
-  difficulty        DrillDifficulty
-  ageGroups         Json               // Array of age groups: ["Kids 8-12", "Teens 13-17", "Adults 18-55", "Seniors 55+", "All Ages"]
-  gender            String             @default("All") // "Male", "Female", "All"
-  skillLevelRange   String             // e.g., "1.0-2.5", "3.0-3.5", "4.0-4.5", "5.0+"
-  duration          Int                // minutes
-  playersRequired   String             // "1", "2", "2-4", "4+"
-  equipment         Json               // Array of equipment needed
-  focusAreas        Json               // Array of specific skills improved
-  instructions      Json               // Array of step-by-step instructions
-  proTips           Json               // Array of pro tips
-  commonMistakes    Json               // Array of common mistakes to avoid
-  successMetrics    String             @db.Text
-  videos            Json               // Array of video objects with url, title, description
-  benefits          Json?              // Optional array of benefits
-  relatedDrillIds   Json?              // Optional array of related drill IDs
-  popularityScore   Int                @default(0)
-  effectivenessRating Float            @default(5.0)
-  featured          Boolean            @default(false)
-  active            Boolean            @default(true)
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  
-  // Relations
-  favorites         FavoriteDrill[]
-  progress          UserDrillProgress[]
-  planDrills        CustomDrillPlanDrill[]
-  
-  @@index([category])
-  @@index([difficulty])
-  @@index([featured])
-  @@index([active])
-  @@index([popularityScore])
-}
-
-model FavoriteDrill {
-  id        String   @id @default(cuid())
-  userId    String
-  drillId   String
-  drill     Drill    @relation(fields: [drillId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  
-  @@unique([userId, drillId])
-  @@index([userId])
-  @@index([drillId])
-}
-
-model CustomDrillPlan {
-  id          String                 @id @default(cuid())
-  userId      String
-  name        String
-  description String?                @db.Text
-  totalDuration Int                  @default(0) // Total minutes
-  drills      CustomDrillPlanDrill[]
-  createdAt   DateTime               @default(now())
-  updatedAt   DateTime               @updatedAt
-  
-  @@index([userId])
-}
-
-model CustomDrillPlanDrill {
-  id        String           @id @default(cuid())
-  planId    String
-  drillId   String
-  order     Int              // Order in the plan
-  plan      CustomDrillPlan  @relation(fields: [planId], references: [id], onDelete: Cascade)
-  drill     Drill            @relation(fields: [drillId], references: [id], onDelete: Cascade)
-  
-  @@unique([planId, drillId])
-  @@index([planId])
-  @@index([drillId])
-}
-
-model UserDrillProgress {
-  id               String         @id @default(cuid())
-  userId           String
-  drillId          String
-  drill            Drill          @relation(fields: [drillId], references: [id], onDelete: Cascade)
-  completedCount   Int            @default(0)
-  lastCompletedAt  DateTime?
-  totalTimeSpent   Int            @default(0) // Total minutes
-  averageRating    Float?         // User's average rating of the drill
-  notes            String?        @db.Text
-  createdAt        DateTime       @default(now())
-  updatedAt        DateTime       @updatedAt
-  
-  @@unique([userId, drillId])
-  @@index([userId])
-  @@index([drillId])
-  @@index([lastCompletedAt])
-}
-
-enum DrillCategory {
-  WARMUP_CONDITIONING
-  FOOTWORK_MOVEMENT
-  DINKING
-  SERVING_RETURN
-  VOLLEY
-  THIRD_SHOT_DROP
-  OVERHEAD_LOB
-  STRATEGY_POSITIONING
-  PARTNER_TEAM
-  SOLO_PRACTICE
-  COOLDOWN_RECOVERY
-}
-
-enum DrillDifficulty {
-  BEGINNER
-  INTERMEDIATE
-  ADVANCED
-  PRO
 }
