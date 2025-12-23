@@ -42,59 +42,12 @@ const getRegistrationUrl = (tournament?: any) => {
   return "https://ppatour.com/schedule/"
 }
 
-// States sorted by tournament count (descending) for heat map effect
-const US_STATES = [
-  { abbr: "FL", name: "Florida", events: 156 },
-  { abbr: "CA", name: "California", events: 128 },
-  { abbr: "TX", name: "Texas", events: 89 },
-  { abbr: "AZ", name: "Arizona", events: 45 },
-  { abbr: "NY", name: "New York", events: 35 },
-  { abbr: "CO", name: "Colorado", events: 34 },
-  { abbr: "GA", name: "Georgia", events: 28 },
-  { abbr: "WA", name: "Washington", events: 28 },
-  { abbr: "PA", name: "Pennsylvania", events: 27 },
-  { abbr: "NC", name: "North Carolina", events: 26 },
-  { abbr: "NJ", name: "New Jersey", events: 24 },
-  { abbr: "OH", name: "Ohio", events: 23 },
-  { abbr: "IL", name: "Illinois", events: 22 },
-  { abbr: "NV", name: "Nevada", events: 22 },
-  { abbr: "VA", name: "Virginia", events: 22 },
-  { abbr: "MA", name: "Massachusetts", events: 21 },
-  { abbr: "UT", name: "Utah", events: 21 },
-  { abbr: "MI", name: "Michigan", events: 19 },
-  { abbr: "SC", name: "South Carolina", events: 19 },
-  { abbr: "MD", name: "Maryland", events: 18 },
-  { abbr: "OR", name: "Oregon", events: 18 },
-  { abbr: "TN", name: "Tennessee", events: 17 },
-  { abbr: "MN", name: "Minnesota", events: 16 },
-  { abbr: "CT", name: "Connecticut", events: 15 },
-  { abbr: "IN", name: "Indiana", events: 14 },
-  { abbr: "WI", name: "Wisconsin", events: 14 },
-  { abbr: "AL", name: "Alabama", events: 12 },
-  { abbr: "MO", name: "Missouri", events: 12 },
-  { abbr: "ID", name: "Idaho", events: 11 },
-  { abbr: "LA", name: "Louisiana", events: 11 },
-  { abbr: "KY", name: "Kentucky", events: 10 },
-  { abbr: "OK", name: "Oklahoma", events: 10 },
-  { abbr: "IA", name: "Iowa", events: 9 },
-  { abbr: "NM", name: "New Mexico", events: 9 },
-  { abbr: "AR", name: "Arkansas", events: 8 },
-  { abbr: "HI", name: "Hawaii", events: 8 },
-  { abbr: "NH", name: "New Hampshire", events: 8 },
-  { abbr: "KS", name: "Kansas", events: 7 },
-  { abbr: "NE", name: "Nebraska", events: 7 },
-  { abbr: "ME", name: "Maine", events: 6 },
-  { abbr: "MS", name: "Mississippi", events: 6 },
-  { abbr: "DE", name: "Delaware", events: 5 },
-  { abbr: "MT", name: "Montana", events: 5 },
-  { abbr: "RI", name: "Rhode Island", events: 5 },
-  { abbr: "VT", name: "Vermont", events: 5 },
-  { abbr: "WV", name: "West Virginia", events: 5 },
-  { abbr: "ND", name: "North Dakota", events: 4 },
-  { abbr: "SD", name: "South Dakota", events: 4 },
-  { abbr: "AK", name: "Alaska", events: 3 },
-  { abbr: "WY", name: "Wyoming", events: 3 },
-]
+// State type for real database data
+interface StateData {
+  abbr: string
+  name: string
+  events: number
+}
 
 const CATEGORIES = [
   {
@@ -181,12 +134,14 @@ export function TournamentHub() {
   const [featuredTournaments, setFeaturedTournaments] = useState<Tournament[]>([])
   const [upcomingEvents, setUpcomingEvents] = useState<Tournament[]>([])
   const [stats, setStats] = useState<TournamentStats | null>(null)
+  const [stateData, setStateData] = useState<StateData[]>([])
   const [loading, setLoading] = useState(true)
+  const [statesLoading, setStatesLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Calculate min and max event counts for gradient scaling
-  const minEvents = Math.min(...US_STATES.map(s => s.events))
-  const maxEvents = Math.max(...US_STATES.map(s => s.events))
+  // Calculate min and max event counts for gradient scaling from real data
+  const minEvents = stateData?.length > 0 ? Math.min(...stateData.filter(s => s.events > 0).map(s => s.events), 1) : 1
+  const maxEvents = stateData?.length > 0 ? Math.max(...stateData.map(s => s.events), 1) : 1
 
   // Generate gradient color based on event count
   const getStateGradient = (eventCount: number) => {
@@ -279,6 +234,7 @@ export function TournamentHub() {
   useEffect(() => {
     setIsClient(true)
     fetchTournamentData()
+    fetchStateData()
   }, [])
 
   const fetchTournamentData = async () => {
@@ -311,7 +267,23 @@ export function TournamentHub() {
     }
   }
 
-  const filteredStates = US_STATES?.filter?.(state =>
+  const fetchStateData = async () => {
+    try {
+      setStatesLoading(true)
+      const res = await fetch('/api/tournaments/by-state')
+      if (!res?.ok) throw new Error('Failed to fetch state data')
+      const data = await res?.json()
+      setStateData(data?.states || [])
+    } catch (err) {
+      console.error('Error fetching state data:', err)
+      // Set empty array on error
+      setStateData([])
+    } finally {
+      setStatesLoading(false)
+    }
+  }
+
+  const filteredStates = stateData?.filter?.(state =>
     state?.name?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '') ||
     state?.abbr?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '')
   ) || []
@@ -579,7 +551,7 @@ export function TournamentHub() {
               className="mb-4 flex items-center justify-center gap-2"
             >
               <Badge className="bg-champion-green/20 text-champion-green border-champion-green/30 px-4 py-2 text-base">
-                Showing tournaments in {US_STATES.find(s => s.abbr === selectedState)?.name || selectedState}
+                Showing tournaments in {stateData?.find?.(s => s?.abbr === selectedState)?.name || selectedState}
               </Badge>
               <Button
                 size="sm"
@@ -592,37 +564,49 @@ export function TournamentHub() {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {filteredStates?.map?.((state) => {
-              const gradient = getStateGradient(state?.events || 0)
-              return (
-                <motion.button
-                  key={state?.abbr}
-                  onClick={() => {
-                    // Navigate to calendar page with state filter pre-applied
-                    router.push(`/tournaments/calendar?state=${state?.abbr}`)
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`p-3 rounded-lg border transition-all text-center relative overflow-hidden group ${
-                    selectedState === state?.abbr
-                      ? "bg-champion-green border-champion-green text-white shadow-lg shadow-champion-green/50"
-                      : `bg-gradient-to-br ${gradient.from} ${gradient.to} ${gradient.border} ${gradient.glow} hover:scale-105 shadow-lg backdrop-blur-sm`
-                  }`}
-                >
-                  {/* Shimmer effect on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  
-                  <div className={`text-lg font-bold relative z-10 ${selectedState === state?.abbr ? 'text-white' : gradient.text}`}>
-                    {state?.abbr}
-                  </div>
-                  <div className={`text-xs relative z-10 ${selectedState === state?.abbr ? 'text-white/80' : 'text-white/70'}`}>
-                    {state?.events} events
-                  </div>
-                </motion.button>
-              )
-            }) || []}
-          </div>
+          {statesLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 text-champion-green mx-auto animate-spin" />
+              <p className="text-gray-400 mt-2">Loading state data...</p>
+            </div>
+          ) : filteredStates?.length === 0 ? (
+            <div className="text-center py-12">
+              <Globe className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400">No states found matching your search</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {filteredStates?.map?.((state) => {
+                const gradient = getStateGradient(state?.events || 0)
+                return (
+                  <motion.button
+                    key={state?.abbr}
+                    onClick={() => {
+                      // Navigate to calendar page with state filter pre-applied
+                      router.push(`/tournaments/calendar?state=${state?.abbr}`)
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`p-3 rounded-lg border transition-all text-center relative overflow-hidden group ${
+                      selectedState === state?.abbr
+                        ? "bg-champion-green border-champion-green text-white shadow-lg shadow-champion-green/50"
+                        : `bg-gradient-to-br ${gradient.from} ${gradient.to} ${gradient.border} ${gradient.glow} hover:scale-105 shadow-lg backdrop-blur-sm`
+                    }`}
+                  >
+                    {/* Shimmer effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                    
+                    <div className={`text-lg font-bold relative z-10 ${selectedState === state?.abbr ? 'text-white' : gradient.text}`}>
+                      {state?.abbr}
+                    </div>
+                    <div className={`text-xs relative z-10 ${selectedState === state?.abbr ? 'text-white/80' : 'text-white/70'}`}>
+                      {state?.events} event{state?.events !== 1 ? 's' : ''}
+                    </div>
+                  </motion.button>
+                )
+              }) || []}
+            </div>
+          )}
 
           {/* Color Legend */}
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
@@ -674,11 +658,11 @@ export function TournamentHub() {
               {selectedState && (() => {
                 const filteredCount = upcomingEvents?.filter?.(e => 
                   e?.location?.includes?.(selectedState) || 
-                  e?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
+                  e?.location?.includes?.(stateData?.find?.(s => s?.abbr === selectedState)?.name || '')
                 )?.length || 0
                 return (
                   <span className="ml-3 text-lg text-champion-green">
-                    ({filteredCount} in {US_STATES.find(s => s.abbr === selectedState)?.name})
+                    ({filteredCount} in {stateData?.find?.(s => s?.abbr === selectedState)?.name})
                   </span>
                 )
               })()}
@@ -701,7 +685,7 @@ export function TournamentHub() {
           const displayEvents = selectedState 
             ? upcomingEvents?.filter?.(event => 
                 event?.location?.includes?.(selectedState) || 
-                event?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
+                event?.location?.includes?.(stateData?.find?.(s => s?.abbr === selectedState)?.name || '')
               )
             : upcomingEvents
 
@@ -760,7 +744,7 @@ export function TournamentHub() {
             <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
               <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
               <h3 className="text-xl font-semibold text-gray-400 mb-2">
-                No tournaments found in {US_STATES.find(s => s.abbr === selectedState)?.name}
+                No tournaments found in {stateData?.find?.(s => s?.abbr === selectedState)?.name}
               </h3>
               <p className="text-gray-500 mb-4">
                 Try selecting a different state or view all tournaments
