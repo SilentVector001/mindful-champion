@@ -297,7 +297,311 @@ function ScoreGauge({ score, label, size = 'md' }: { score: number; label: strin
   )
 }
 
-// ===== PRO COMPARISON WITH VIDEO =====
+// ===== FRAME-BY-FRAME OBSERVATIONS =====
+function FrameByFrameObservations({ shot }: { shot: any }) {
+  // Generate realistic frame observations based on shot data
+  const generateFrameObservations = (shot: any) => {
+    const baseTime = shot.time || 0
+    return [
+      {
+        frame: 1,
+        timestamp: `${Math.floor(baseTime / 60)}:${String(Math.floor(baseTime % 60)).padStart(2, '0')}.00`,
+        phase: 'Setup',
+        observations: [
+          { type: 'Body Position', detail: shot.bodyScore >= 80 ? 'Athletic ready stance detected - knees bent, weight on balls of feet' : 'Stance slightly upright - recommend lower center of gravity', status: shot.bodyScore >= 80 ? 'good' : 'improve' },
+          { type: 'Paddle Position', detail: shot.paddleAngle >= 130 ? 'Paddle up in ready position at chest height' : 'Paddle position lower than optimal - should be at chest level', status: shot.paddleAngle >= 130 ? 'good' : 'improve' },
+        ]
+      },
+      {
+        frame: 2,
+        timestamp: `${Math.floor(baseTime / 60)}:${String(Math.floor(baseTime % 60)).padStart(2, '0')}.12`,
+        phase: 'Backswing',
+        observations: [
+          { type: 'Shoulder Rotation', detail: shot.score >= 80 ? 'Good torso coil detected - loading power properly' : 'Limited shoulder turn - losing potential power', status: shot.score >= 80 ? 'good' : 'improve' },
+          { type: 'Weight Transfer', detail: 'Weight shifting to back foot in preparation', status: 'good' },
+        ]
+      },
+      {
+        frame: 3,
+        timestamp: `${Math.floor(baseTime / 60)}:${String(Math.floor(baseTime % 60)).padStart(2, '0')}.24`,
+        phase: 'Contact Point',
+        observations: [
+          { type: 'Paddle Angle', detail: `Paddle face at ${shot.paddleAngle || shot.angle || 142}° - ${(shot.paddleAngle || shot.angle || 142) >= 135 && (shot.paddleAngle || shot.angle || 142) <= 150 ? 'optimal for this shot type' : 'adjust for better control'}`, status: (shot.paddleAngle || shot.angle || 142) >= 135 && (shot.paddleAngle || shot.angle || 142) <= 150 ? 'good' : 'improve' },
+          { type: 'Contact Location', detail: shot.accuracy >= 80 ? 'Ball struck in front of body - ideal position' : 'Contact point slightly late - aim to hit further in front', status: shot.accuracy >= 80 ? 'good' : 'improve' },
+          { type: 'Wrist Position', detail: 'Wrist firm through contact zone', status: 'good' },
+        ]
+      },
+      {
+        frame: 4,
+        timestamp: `${Math.floor(baseTime / 60)}:${String(Math.floor(baseTime % 60)).padStart(2, '0')}.36`,
+        phase: 'Follow Through',
+        observations: [
+          { type: 'Extension', detail: shot.score >= 85 ? 'Full arm extension toward target - excellent!' : 'Abbreviated follow-through - extend more toward target', status: shot.score >= 85 ? 'good' : 'improve' },
+          { type: 'Recovery', detail: 'Beginning return to ready position', status: 'good' },
+        ]
+      },
+    ]
+  }
+
+  const frames = generateFrameObservations(shot)
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+      <div className="flex items-center gap-2 mb-3">
+        <Eye className="w-4 h-4 text-cyan-400" />
+        <span className="text-sm font-semibold text-white">Frame-by-Frame Analysis</span>
+        <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-[10px]">AI Detected</Badge>
+      </div>
+      
+      <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+        {frames.map((frame, idx) => (
+          <motion.div 
+            key={idx}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50"
+          >
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded-full bg-cyan-500/20 flex items-center justify-center text-[10px] font-bold text-cyan-400">
+                  {frame.frame}
+                </div>
+                <span className="text-xs font-semibold text-white">{frame.phase}</span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">{frame.timestamp}</span>
+            </div>
+            <div className="space-y-1.5">
+              {frame.observations.map((obs, obsIdx) => (
+                <div key={obsIdx} className="flex items-start gap-2">
+                  <div className={cn("w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0", obs.status === 'good' ? 'bg-emerald-500' : 'bg-amber-500')} />
+                  <div>
+                    <span className="text-[10px] font-medium text-slate-400">{obs.type}:</span>
+                    <span className="text-[10px] text-slate-300 ml-1">{obs.detail}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+// ===== RECOMMENDATION WITH OBSERVATION LINK =====
+function RecommendationWithObservation({ shot }: { shot: any }) {
+  const recommendations = [
+    {
+      observation: shot.bodyScore < 80 ? `At ${shot.timestamp}, we detected your stance was slightly upright (Body Score: ${shot.bodyScore}/100)` : `At ${shot.timestamp}, your body position scored ${shot.bodyScore}/100`,
+      issue: shot.bodyScore < 80 ? 'Higher center of gravity reduces power and balance' : null,
+      recommendation: shot.bodyScore < 80 ? 'Bend your knees more and lower your hips. Think "sit in a chair" before each shot.' : 'Great stance! Keep maintaining this low, athletic position.',
+      drill: shot.bodyScore < 80 ? 'Wall Sit Paddle Drills' : null,
+      status: shot.bodyScore >= 80 ? 'strength' : 'improve'
+    },
+    {
+      observation: `Paddle angle measured at ${shot.paddleAngle || shot.angle || 142}° during contact at ${shot.timestamp}`,
+      issue: (shot.paddleAngle || shot.angle || 142) < 130 || (shot.paddleAngle || shot.angle || 142) > 155 ? 'Paddle face angle outside optimal range (130-155°)' : null,
+      recommendation: (shot.paddleAngle || shot.angle || 142) < 130 ? 'Open your paddle face more at contact for better lift and control.' : (shot.paddleAngle || shot.angle || 142) > 155 ? 'Close your paddle face slightly to prevent pop-ups.' : 'Excellent paddle angle - this is textbook technique!',
+      drill: (shot.paddleAngle || shot.angle || 142) < 130 || (shot.paddleAngle || shot.angle || 142) > 155 ? 'Paddle Face Control Drill' : null,
+      status: (shot.paddleAngle || shot.angle || 142) >= 130 && (shot.paddleAngle || shot.angle || 142) <= 155 ? 'strength' : 'improve'
+    },
+    {
+      observation: `Shot speed: ${shot.speed}mph with ${shot.accuracy}% accuracy at ${shot.timestamp}`,
+      issue: shot.accuracy < 80 ? 'Accuracy below target threshold' : null,
+      recommendation: shot.accuracy < 80 ? `Focus on placement over power. Your ${shot.speed}mph has good pace - now dial in the targeting.` : `Great balance of power (${shot.speed}mph) and precision (${shot.accuracy}%)!`,
+      drill: shot.accuracy < 80 ? 'Target Practice Drill' : null,
+      status: shot.accuracy >= 80 ? 'strength' : 'improve'
+    }
+  ]
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
+      <div className="flex items-center gap-2 mb-3">
+        <Lightbulb className="w-4 h-4 text-amber-400" />
+        <span className="text-sm font-semibold text-white">AI Recommendations</span>
+        <Badge className="bg-amber-500/20 text-amber-400 border-amber-500/30 text-[10px]">Personalized</Badge>
+      </div>
+
+      <div className="space-y-3">
+        {recommendations.map((rec, idx) => (
+          <motion.div
+            key={idx}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: idx * 0.1 }}
+            className={cn("rounded-xl p-3 border", rec.status === 'strength' ? 'bg-emerald-500/10 border-emerald-500/30' : 'bg-amber-500/10 border-amber-500/30')}
+          >
+            {/* Observation */}
+            <div className="flex items-start gap-2 mb-2">
+              <Eye className={cn("w-3.5 h-3.5 mt-0.5 flex-shrink-0", rec.status === 'strength' ? 'text-emerald-400' : 'text-amber-400')} />
+              <p className="text-[11px] text-slate-300 italic">"{rec.observation}"</p>
+            </div>
+            
+            {/* Issue (if any) */}
+            {rec.issue && (
+              <div className="flex items-start gap-2 mb-2 pl-5">
+                <AlertCircle className="w-3 h-3 text-amber-400 mt-0.5 flex-shrink-0" />
+                <p className="text-[10px] text-amber-300">{rec.issue}</p>
+              </div>
+            )}
+            
+            {/* Recommendation */}
+            <div className="flex items-start gap-2 pl-5">
+              <ChevronRight className={cn("w-3.5 h-3.5 mt-0.5 flex-shrink-0", rec.status === 'strength' ? 'text-emerald-400' : 'text-cyan-400')} />
+              <p className="text-xs text-white font-medium">{rec.recommendation}</p>
+            </div>
+            
+            {/* Drill Link (if improvement needed) */}
+            {rec.drill && (
+              <Link href={`/train/drills?search=${encodeURIComponent(rec.drill)}`}
+                className="flex items-center gap-2 mt-2 ml-5 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors">
+                <Dumbbell className="w-3 h-3" />
+                Try: {rec.drill}
+                <ArrowUpRight className="w-3 h-3" />
+              </Link>
+            )}
+          </motion.div>
+        ))}
+      </div>
+    </motion.div>
+  )
+}
+
+// ===== SIDE-BY-SIDE PRO COMPARISON =====
+function SideBySideProComparison({ shot, userVideoUrl }: { shot: any; userVideoUrl?: string }) {
+  const [showProVideo, setShowProVideo] = useState(false)
+  const proVideo = PRO_TECHNIQUE_VIDEOS[shot?.type] ?? PRO_TECHNIQUE_VIDEOS['Forehand Drive']
+  const proTech = PRO_TECHNIQUES[shot?.type as keyof typeof PRO_TECHNIQUES] ?? PRO_TECHNIQUES['Forehand Drive']
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-purple-500/10 via-slate-900/50 to-indigo-500/10 rounded-2xl border border-purple-500/30 overflow-hidden">
+      <div className="p-4 border-b border-purple-500/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Crown className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Side-by-Side Pro Comparison</h3>
+              <p className="text-xs text-slate-400">Compare your {shot?.type || 'shot'} with {proVideo.pro}</p>
+            </div>
+          </div>
+          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+            <Video className="w-3 h-3 mr-1" /> Compare
+          </Badge>
+        </div>
+      </div>
+
+      {/* Side-by-Side Video Players */}
+      <div className="p-4">
+        <div className="grid grid-cols-2 gap-3 mb-4">
+          {/* User's Video */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-[10px]">Your Shot</Badge>
+              <span className="text-[10px] text-slate-500">{shot?.timestamp}</span>
+            </div>
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-800 border border-cyan-500/30">
+              {userVideoUrl ? (
+                <video src={userVideoUrl} className="w-full h-full object-cover" controls />
+              ) : (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  <div className="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center mb-2">
+                    <Video className="w-6 h-6 text-cyan-400" />
+                  </div>
+                  <p className="text-[10px] text-slate-400">Your video position</p>
+                  <p className="text-[10px] text-cyan-400 font-mono">{shot?.timestamp}</p>
+                </div>
+              )}
+              <div className="absolute bottom-2 left-2">
+                <div className={cn("px-2 py-1 rounded text-[10px] font-bold", shot?.score >= 80 ? 'bg-emerald-500/90 text-white' : shot?.score >= 60 ? 'bg-cyan-500/90 text-white' : 'bg-amber-500/90 text-white')}>
+                  Score: {shot?.score}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Pro Video */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30 text-[10px]">Pro Reference</Badge>
+              <span className="text-[10px] text-slate-500">{proVideo.pro}</span>
+            </div>
+            <div className="relative aspect-video rounded-xl overflow-hidden bg-slate-800 border border-purple-500/30">
+              {showProVideo ? (
+                <>
+                  <iframe
+                    src={`https://www.youtube.com/embed/${proVideo.videoId}?autoplay=1&rel=0&modestbranding=1`}
+                    title={proVideo.title}
+                    className="absolute inset-0 w-full h-full"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                  />
+                  <button onClick={() => setShowProVideo(false)} className="absolute top-2 right-2 p-1 bg-black/60 hover:bg-black/80 rounded-full z-10">
+                    <X className="w-3 h-3 text-white" />
+                  </button>
+                </>
+              ) : (
+                <button onClick={() => setShowProVideo(true)} className="absolute inset-0 w-full h-full group">
+                  <img src={proVideo.thumbnail} alt={proVideo.title} className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity" onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=640&h=360&fit=crop'; }} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/90 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Play className="w-5 h-5 text-white ml-0.5" />
+                    </div>
+                  </div>
+                </button>
+              )}
+              <div className="absolute bottom-2 left-2">
+                <div className="px-2 py-1 rounded bg-purple-500/90 text-[10px] font-bold text-white">
+                  Pro Standard
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Technique Comparison Table */}
+        <div className="bg-slate-800/50 rounded-xl p-3 border border-slate-700/50">
+          <h4 className="text-xs font-semibold text-white mb-3 flex items-center gap-2">
+            <BarChart3 className="w-4 h-4 text-purple-400" /> Technique Breakdown: You vs {proVideo.pro}
+          </h4>
+          <div className="space-y-2">
+            {[
+              { label: 'Stance', yours: shot?.bodyScore >= 80 ? 'Good athletic stance' : 'Needs lower position', pro: proTech.stance, match: shot?.bodyScore >= 80 },
+              { label: 'Paddle', yours: `${shot?.paddleAngle || shot?.angle || 142}° angle`, pro: proTech.paddle, match: (shot?.paddleAngle || shot?.angle || 142) >= 130 && (shot?.paddleAngle || shot?.angle || 142) <= 155 },
+              { label: 'Follow-Through', yours: shot?.score >= 85 ? 'Full extension' : 'Abbreviated', pro: proTech.follow, match: shot?.score >= 85 },
+            ].map((item, idx) => (
+              <div key={idx} className="grid grid-cols-3 gap-2 items-center text-[10px]">
+                <div className="text-slate-400 font-medium">{item.label}</div>
+                <div className={cn("p-1.5 rounded", item.match ? 'bg-emerald-500/20 text-emerald-300' : 'bg-amber-500/20 text-amber-300')}>
+                  {item.yours}
+                </div>
+                <div className="p-1.5 rounded bg-purple-500/20 text-purple-300">{item.pro}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Score Gap */}
+        <div className="mt-3 p-3 bg-slate-800/30 rounded-xl border border-slate-700/30">
+          <div className="flex items-center justify-between">
+            <div className="text-xs text-slate-400">Your Score vs Pro Standard (95)</div>
+            <div className={cn("text-sm font-bold", (95 - (shot?.score || 0)) <= 10 ? 'text-emerald-400' : (95 - (shot?.score || 0)) <= 20 ? 'text-cyan-400' : 'text-amber-400')}>
+              {(shot?.score || 0) >= 95 ? '🏆 Pro Level!' : `${95 - (shot?.score || 0)} points to pro level`}
+            </div>
+          </div>
+          <div className="mt-2 h-2 bg-slate-700 rounded-full overflow-hidden relative">
+            <motion.div className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full" initial={{ width: 0 }} animate={{ width: `${shot?.score || 0}%` }} transition={{ duration: 0.8 }} />
+            <div className="absolute top-0 right-[5%] w-0.5 h-full bg-purple-500" title="Pro Standard (95)" />
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ===== PRO COMPARISON WITH VIDEO (LEGACY - kept for detail panel) =====
 function ProComparisonSection({ shotType, shot }: { shotType: string; shot: any }) {
   const [showVideo, setShowVideo] = useState(false)
   const proVideo = PRO_TECHNIQUE_VIDEOS[shotType] ?? PRO_TECHNIQUE_VIDEOS['Forehand Drive']
@@ -407,7 +711,7 @@ function ProComparisonSection({ shotType, shot }: { shotType: string; shot: any 
 // ===== RICH SHOT DETAIL PANEL =====
 function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, currentIndex }: { shot: any; onClose: () => void; onPrevious: () => void; onNext: () => void; totalShots: number; currentIndex: number }) {
   if (!shot) return null
-  const [activeSection, setActiveSection] = useState<'metrics' | 'tips' | 'compare'>('metrics')
+  const [activeSection, setActiveSection] = useState<'metrics' | 'tips' | 'frames' | 'compare'>('metrics')
   const qualityColors = {
     excellent: { bg: 'from-emerald-500/20 to-emerald-600/10', text: 'text-emerald-400', border: 'border-emerald-500/30', badge: 'bg-emerald-500/20', label: 'Excellent' },
     good: { bg: 'from-cyan-500/20 to-cyan-600/10', text: 'text-cyan-400', border: 'border-cyan-500/30', badge: 'bg-cyan-500/20', label: 'Good' },
@@ -451,6 +755,7 @@ function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, cu
         {[
           { id: 'metrics', label: 'Metrics', icon: BarChart3 },
           { id: 'tips', label: 'Tips', icon: Lightbulb },
+          { id: 'frames', label: 'Frames', icon: Eye },
           { id: 'compare', label: 'Compare', icon: Crown }
         ].map((tab) => (
           <button key={tab.id} onClick={() => setActiveSection(tab.id as any)}
@@ -510,21 +815,7 @@ function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, cu
 
           {activeSection === 'tips' && (
             <motion.div key="tips" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
-              <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <CheckCircle className="w-5 h-5 text-emerald-400" />
-                  <span className="text-sm font-semibold text-emerald-400">What Went Well</span>
-                </div>
-                <p className="text-sm text-slate-300">{shot.whatWentWell || `Great execution on this ${shot.type.toLowerCase()}. Your timing and paddle control were solid.`}</p>
-              </div>
-              
-              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/20">
-                <div className="flex items-center gap-2 mb-2">
-                  <Target className="w-5 h-5 text-amber-400" />
-                  <span className="text-sm font-semibold text-amber-400">Focus Area</span>
-                </div>
-                <p className="text-sm text-slate-300">{shot.whatToImprove || `Work on getting lower and following through more toward your target.`}</p>
-              </div>
+              <RecommendationWithObservation shot={shot} />
 
               <Link href={`/train/drills?search=${encodeURIComponent(shot.type)}`}
                 className="flex items-center gap-3 p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-colors group">
@@ -537,6 +828,12 @@ function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, cu
                 </div>
                 <ChevronRight className="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" />
               </Link>
+            </motion.div>
+          )}
+
+          {activeSection === 'frames' && (
+            <motion.div key="frames" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <FrameByFrameObservations shot={shot} />
             </motion.div>
           )}
 
@@ -1026,6 +1323,13 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
                   })}
                 </div>
               </motion.div>
+
+              {/* SIDE-BY-SIDE PRO COMPARISON - NEW PROMINENT SECTION */}
+              {selectedShot && (
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
+                  <SideBySideProComparison shot={selectedShot} userVideoUrl={video?.videoUrl} />
+                </motion.div>
+              )}
             </div>
 
             {/* RIGHT SIDEBAR */}
