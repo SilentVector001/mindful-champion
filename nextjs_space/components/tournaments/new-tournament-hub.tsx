@@ -34,15 +34,12 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
-// Helper to extract state from location and build registration URL
-const getRegistrationUrl = (location?: string) => {
-  if (!location) return "https://pickleballtournaments.com/"
-  // Extract state abbreviation from "City, ST" format
-  const match = location.match(/,\s*([A-Z]{2})$/)
-  if (match) {
-    return `https://pickleballtournaments.com/?state=${match[1]}`
-  }
-  return "https://pickleballtournaments.com/"
+// Helper to get registration URL - directs to official tour sites
+const getRegistrationUrl = (tournament?: any) => {
+  // If tournament has a specific registration URL, use it
+  if (tournament?.registrationUrl) return tournament.registrationUrl
+  // Default to PPA Tour schedule page
+  return "https://ppatour.com/schedule/"
 }
 
 // States sorted by tournament count (descending) for heat map effect
@@ -502,7 +499,7 @@ export function TournamentHub() {
                       <div className="text-champion-gold font-semibold">
                         {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
                       </div>
-                      <a href={getRegistrationUrl(tournament?.location)} target="_blank" rel="noopener noreferrer">
+                      <a href={getRegistrationUrl(tournament)} target="_blank" rel="noopener noreferrer">
                         <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
                           <ExternalLink className="w-3 h-3 mr-1" />
                           Register
@@ -805,29 +802,19 @@ export function TournamentHub() {
         </div>
       </section>
 
-      {/* Quick Links to Tournament Finders */}
+      {/* Quick Links to Official Tour Sites */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Sites</h3>
+          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Tour Sites</h3>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-champion-green/50 text-champion-green hover:bg-champion-green/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PickleballTournaments.com
-              </Button>
-            </a>
-            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PickleballBrackets.com
-              </Button>
-            </a>
             <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
+                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour Schedule
               </Button>
             </a>
             <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
+                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour Events
               </Button>
             </a>
             <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">

@@ -35,93 +35,99 @@ const TOURNAMENT_IMAGES = [
   "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80", // Outdoor court with players
 ]
 
-// Featured championship events - real tournaments to display
+// Featured championship events - REAL PPA/APP Tour events
 const FEATURED_CHAMPIONSHIPS = [
   {
-    id: "ppa-masters-2025",
-    name: "PPA Masters Championship",
-    location: "Las Vegas, NV",
-    startDate: "2025-02-14",
-    endDate: "2025-02-17",
-    prizePool: 250000,
+    id: "ppa-carvana-masters-2026",
+    name: "The Carvana Masters Powered by Invited",
+    location: "Rancho Mirage, CA",
+    startDate: "2026-01-12",
+    endDate: "2026-01-18",
+    prizePool: 200000,
+    points: 2000,
     type: "grand-slam",
     registrationUrl: "https://ppatour.com/schedule/",
-    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80" // Indoor tournament setting with players competing
+    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80"
   },
   {
-    id: "app-chicago-2025",
-    name: "APP Chicago Open",
-    location: "Chicago, IL",
-    startDate: "2025-03-07",
-    endDate: "2025-03-09",
+    id: "app-nyc-open-2025",
+    name: "Zimmer Biomet APP New York City Open",
+    location: "New York, NY",
+    startDate: "2025-05-20",
+    endDate: "2025-05-25",
     prizePool: 175000,
     type: "grand-slam",
     registrationUrl: "https://www.theapp.global/tour",
-    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
+    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80"
   },
   {
-    id: "usap-nationals-2025",
-    name: "USA Pickleball Nationals",
-    location: "Indian Wells, CA",
-    startDate: "2025-04-04",
-    endDate: "2025-04-11",
-    prizePool: 300000,
+    id: "app-tour-championships-2025",
+    name: "GEICO APP Tour Championships",
+    location: "Fort Lauderdale, FL",
+    startDate: "2025-12-09",
+    endDate: "2025-12-14",
+    prizePool: 250000,
     type: "grand-slam",
-    registrationUrl: "https://usapickleball.org/events/",
-    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80" // Outdoor court action shot
+    registrationUrl: "https://www.theapp.global/tour-schedule/2025-app-tour-championships",
+    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80"
   }
 ]
 
+// Regional Championships - Real PPA Challenger & APP events
 const REGIONAL_CHAMPIONSHIPS = [
   {
-    id: "southeast-regional",
-    name: "Southeast Regional Championship",
-    location: "Atlanta, GA",
-    startDate: "2025-01-25",
-    endDate: "2025-01-27",
+    id: "ppa-atlanta-2026",
+    name: "Atlanta Pickleball Championships",
+    location: "Peachtree Corners, GA",
+    startDate: "2026-04-27",
+    endDate: "2026-05-03",
+    prizePool: 150000,
+    points: 2000,
+    registrationUrl: "https://ppatour.com/schedule/",
+    image: "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80"
+  },
+  {
+    id: "app-great-lakes-2025",
+    name: "APP Great Lakes Open",
+    location: "Midland, MI",
+    startDate: "2025-08-13",
+    endDate: "2025-08-17",
     prizePool: 75000,
-    registrationUrl: "https://pickleballtournaments.com/?state=GA",
-    image: "https://images.unsplash.com/photo-1618551763300-dc7eb8ce3560?w=800&q=80" // Outdoor court with players
+    registrationUrl: "https://www.theapp.global/tour",
+    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80"
   },
   {
-    id: "midwest-open",
-    name: "Midwest Open Championship",
-    location: "Columbus, OH",
-    startDate: "2025-02-01",
-    endDate: "2025-02-03",
-    prizePool: 65000,
-    registrationUrl: "https://pickleballtournaments.com/?state=OH",
-    image: "https://images.unsplash.com/photo-1761644658016-324918bc373c?w=800&q=80" // Indoor tournament setting
+    id: "ppa-mesa-cup-2026",
+    name: "Carvana Mesa Cup",
+    location: "Mesa, AZ",
+    startDate: "2026-02-16",
+    endDate: "2026-02-22",
+    prizePool: 120000,
+    points: 1500,
+    registrationUrl: "https://ppatour.com/schedule/",
+    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80"
   },
   {
-    id: "southwest-championship",
-    name: "Southwest Championship Series",
-    location: "Phoenix, AZ",
-    startDate: "2025-02-14",
-    endDate: "2025-02-16",
-    prizePool: 80000,
-    registrationUrl: "https://pickleballtournaments.com/?state=AZ",
-    image: "https://images.unsplash.com/photo-1686721135036-22ac6cbb8ce8?w=800&q=80" // Indoor competition scene
-  },
-  {
-    id: "northeast-classic",
-    name: "Northeast Classic",
-    location: "Boston, MA",
-    startDate: "2025-03-01",
-    endDate: "2025-03-03",
-    prizePool: 55000,
-    registrationUrl: "https://pickleballtournaments.com/?state=MA",
-    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80" // Outdoor court action shot
+    id: "ppa-newport-beach-2026",
+    name: "Newport Beach Open",
+    location: "Newport Beach, CA",
+    startDate: "2026-03-02",
+    endDate: "2026-03-08",
+    prizePool: 100000,
+    points: 1000,
+    registrationUrl: "https://ppatour.com/schedule/",
+    image: "https://images.unsplash.com/photo-1749578291886-44a514bd12a6?w=800&q=80"
   }
 ]
 
+// PPA Challenger events
 const STATE_FINALS = [
-  { id: "ca-state", name: "California State Finals", location: "San Diego, CA", startDate: "2025-01-18", prizePool: 40000, registrationUrl: "https://pickleballtournaments.com/?state=CA" },
-  { id: "fl-state", name: "Florida State Championship", location: "Naples, FL", startDate: "2025-01-25", prizePool: 45000, registrationUrl: "https://pickleballtournaments.com/?state=FL" },
-  { id: "tx-state", name: "Texas State Open", location: "Austin, TX", startDate: "2025-02-08", prizePool: 35000, registrationUrl: "https://pickleballtournaments.com/?state=TX" },
-  { id: "az-state", name: "Arizona State Finals", location: "Scottsdale, AZ", startDate: "2025-02-15", prizePool: 38000, registrationUrl: "https://pickleballtournaments.com/?state=AZ" },
-  { id: "nc-state", name: "North Carolina State Championship", location: "Charlotte, NC", startDate: "2025-02-22", prizePool: 32000, registrationUrl: "https://pickleballtournaments.com/?state=NC" },
-  { id: "co-state", name: "Colorado State Open", location: "Denver, CO", startDate: "2025-03-01", prizePool: 30000, registrationUrl: "https://pickleballtournaments.com/?state=CO" },
+  { id: "ppa-punta-gorda-2026", name: "Punta Gorda PPA Challenger", location: "Punta Gorda, FL", startDate: "2026-01-09", endDate: "2026-01-11", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
+  { id: "ppa-tucson-2026", name: "Tucson PPA Challenger", location: "Tucson, AZ", startDate: "2026-01-23", endDate: "2026-01-25", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
+  { id: "ppa-houston-2026", name: "Houston PPA Challenger", location: "Atascocita, TX", startDate: "2026-02-20", endDate: "2026-02-22", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
+  { id: "ppa-harbour-island-2026", name: "Harbour Island PPA Challenger", location: "Tampa, FL", startDate: "2026-03-06", endDate: "2026-03-08", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
+  { id: "ppa-wilson-2026", name: "Wilson PPA Challenger", location: "Wilson, NC", startDate: "2026-05-22", endDate: "2026-05-24", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
+  { id: "ppa-boise-2026", name: "Boise PPA Challenger", location: "Meridian, ID", startDate: "2026-06-12", endDate: "2026-06-14", prizePool: 25000, registrationUrl: "https://ppatour.com/schedule/" },
 ]
 
 interface Tournament {
