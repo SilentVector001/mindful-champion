@@ -56,7 +56,10 @@ const US_STATES = [
 interface Tournament {
   id: string
   name: string
-  location: string
+  location?: string
+  city?: string
+  state?: string
+  address?: string
   startDate: string
   endDate?: string
   prizePool?: number
@@ -127,14 +130,19 @@ export function TournamentCalendar({ initialState, initialType, initialQuery }: 
 
   const filteredEvents = tournaments?.filter?.(event => {
     const matchesType = selectedType === "all" || event?.type === selectedType
-    // State filtering - check if location contains state abbreviation or full name
+    // State filtering - match the state field directly (abbreviation) or full name
+    const eventStateAbbr = event?.state?.toUpperCase?.() || ''
+    const eventStateName = US_STATES.find(s => s.abbr === eventStateAbbr)?.name?.toLowerCase?.() || ''
     const matchesState = selectedState === "all" || 
-      event?.location?.includes?.(selectedState) || 
-      event?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
-    // Search query matching
+      eventStateAbbr === selectedState.toUpperCase() ||
+      event?.location?.toLowerCase?.()?.includes?.(selectedState?.toLowerCase?.()) ||
+      event?.location?.toLowerCase?.()?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name?.toLowerCase?.() || '')
+    // Search query matching - check name, city, state, and location
+    const locationStr = event?.location || `${event?.city || ''}, ${event?.state || ''}`
     const matchesSearch = !searchQuery || 
       event?.name?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.()) ||
-      event?.location?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.())
+      locationStr?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.()) ||
+      event?.city?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.())
     return matchesType && matchesState && matchesSearch
   }) || []
 
@@ -339,7 +347,7 @@ export function TournamentCalendar({ initialState, initialType, initialQuery }: 
                         <div className="flex items-center gap-3 text-sm text-gray-400">
                           <span className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
-                            {event?.location || 'TBA'}
+                            {event?.location || (event?.city && event?.state ? `${event.city}, ${event.state}` : 'TBA')}
                           </span>
                           <span className="flex items-center gap-1">
                             <Calendar className="w-3 h-3" />
