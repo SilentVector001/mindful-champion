@@ -169,6 +169,8 @@ model User {
   watchHistory                 UserWatchHistory[]
   adminUploadedVideos          VideoAnalysis[]                 @relation("AdminUploads")
   videoAnalyses                VideoAnalysis[]
+  videoAnalysisProgress        VideoAnalysisProgress[]
+  videoAnalysisAchievements    VideoAnalysisUserAchievement[]
   videoBookmarks               VideoBookmark[]
   clips                        VideoClip[]
   videoPlaylists               VideoPlaylist[]
@@ -417,6 +419,7 @@ model VideoAnalysis {
   uploadedByAdmin         User?                  @relation("AdminUploads", fields: [uploadedByAdminId], references: [id])
   user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   communityPost           CommunityPost?
+  shots                   VideoAnalysisShot[]
 
   @@index([userId])
   @@index([analysisStatus])
@@ -3311,4 +3314,78 @@ model MediaPhoto {
   @@index([category])
   @@index([featured])
   @@index([tournamentId])
+}
+
+// ==========================================
+// VIDEO ANALYSIS PROGRESS TRACKING
+// ==========================================
+
+model VideoAnalysisShot {
+  id              String   @id @default(cuid())
+  analysisId      String
+  timestamp       Float    // seconds into video
+  shotType        String   // "Forehand Drive", "Dink", etc.
+  quality         String   // "excellent", "good", "needs_work"
+  speed           Float?   // mph
+  spinRate        Float?   // rpm
+  accuracy        Float?   // 0-100
+  bodyScore       Float?   // body positioning score 0-100
+  paddleAngle     Float?   // degrees
+  whatWentWell    String?
+  whatToImprove   String?
+  recommendedDrillId String?
+  score           Int      // 0-100
+  analysis        VideoAnalysis @relation(fields: [analysisId], references: [id], onDelete: Cascade)
+  
+  @@index([analysisId])
+  @@index([shotType])
+}
+
+model VideoAnalysisProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  skillType        String   // "serve", "dink", "drive", "volley", etc.
+  averageScore     Float    @default(0)
+  totalShots       Int      @default(0)
+  bestScore        Float    @default(0)
+  sessionsCount    Int      @default(0)
+  lastAnalyzed     DateTime?
+  improvementRate  Float    @default(0) // percentage improvement
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, skillType])
+  @@index([userId])
+}
+
+model VideoAnalysisAchievement {
+  id           String   @id @default(cuid())
+  code         String   @unique // "FIRST_ANALYSIS", "SPEED_30_MPH", etc.
+  name         String
+  description  String
+  icon         String
+  category     String   // "milestone", "speed", "accuracy", "consistency"
+  threshold    Float    // value needed to unlock
+  thresholdType String  // "count", "speed", "score", "percentage"
+  points       Int      @default(10)
+  createdAt    DateTime @default(now())
+  
+  unlockedBy   VideoAnalysisUserAchievement[]
+}
+
+model VideoAnalysisUserAchievement {
+  id            String   @id @default(cuid())
+  userId        String
+  achievementId String
+  unlockedAt    DateTime @default(now())
+  value         Float?   // the value that triggered it
+  videoId       String?  // which video triggered it
+  notified      Boolean  @default(false)
+  
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  achievement   VideoAnalysisAchievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, achievementId])
+  @@index([userId])
 }
