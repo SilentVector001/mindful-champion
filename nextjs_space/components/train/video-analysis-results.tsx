@@ -11,7 +11,7 @@ import {
   Zap, Brain, AlertCircle, Users, Trophy,
   Crosshair, Move, Shield, Gauge, Lightbulb, Clock,
   MessageCircle, Send, X, Dumbbell, Video, Pause,
-  SkipBack, SkipForward
+  Activity, Cpu, Eye, BarChart3, ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
@@ -22,262 +22,308 @@ interface VideoAnalysisResultsProps {
   videoId: string
 }
 
-// ===== SCORE DISPLAY (Letter Grade Style) =====
-function ScoreGrade({ score, size = "lg" }: { score: number; size?: "sm" | "lg" }) {
-  const getGrade = (s: number): { grade: string; color: string; bg: string } => {
-    if (s >= 90) return { grade: "A+", color: "text-emerald-400", bg: "from-emerald-500/20 to-emerald-600/10" }
-    if (s >= 85) return { grade: "A", color: "text-emerald-400", bg: "from-emerald-500/20 to-emerald-600/10" }
-    if (s >= 80) return { grade: "A-", color: "text-emerald-400", bg: "from-emerald-500/20 to-emerald-600/10" }
-    if (s >= 77) return { grade: "B+", color: "text-cyan-400", bg: "from-cyan-500/20 to-cyan-600/10" }
-    if (s >= 73) return { grade: "B", color: "text-cyan-400", bg: "from-cyan-500/20 to-cyan-600/10" }
-    if (s >= 70) return { grade: "B-", color: "text-cyan-400", bg: "from-cyan-500/20 to-cyan-600/10" }
-    if (s >= 67) return { grade: "C+", color: "text-amber-400", bg: "from-amber-500/20 to-amber-600/10" }
-    if (s >= 63) return { grade: "C", color: "text-amber-400", bg: "from-amber-500/20 to-amber-600/10" }
-    if (s >= 60) return { grade: "C-", color: "text-amber-400", bg: "from-amber-500/20 to-amber-600/10" }
-    return { grade: "D", color: "text-rose-400", bg: "from-rose-500/20 to-rose-600/10" }
-  }
-  const { grade, color, bg } = getGrade(score)
-  
-  if (size === "sm") {
-    return (
-      <div className={cn("px-2 py-0.5 rounded-md bg-gradient-to-br text-xs font-bold", bg, color)}>
-        {grade}
-      </div>
-    )
-  }
-  
+// ===== ANIMATED AI WAVEFORM =====
+function AIWaveform({ isActive = true }: { isActive?: boolean }) {
   return (
-    <motion.div 
-      initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
-      className={cn("w-28 h-28 rounded-2xl bg-gradient-to-br flex flex-col items-center justify-center", bg)}
-    >
-      <span className={cn("text-4xl font-bold", color)}>{grade}</span>
-      <span className="text-xs text-slate-400 mt-1">{score}/100</span>
-    </motion.div>
-  )
-}
-
-// ===== SIMPLE COURT VISUALIZATION (No numbers, just visual heat) =====
-function SimpleCourtViz() {
-  return (
-    <div className="relative w-full aspect-[4/3] max-w-[280px] mx-auto">
-      <svg viewBox="0 0 100 75" className="w-full h-full">
-        {/* Court background */}
-        <rect x="5" y="5" width="90" height="65" rx="2" fill="#1e293b" stroke="#334155" strokeWidth="0.5"/>
-        
-        {/* Kitchen zone (NVZ) - bottom */}
-        <rect x="5" y="50" width="90" height="20" fill="rgba(34, 211, 238, 0.15)" rx="1"/>
-        
-        {/* Shot pattern dots - visual representation */}
-        {/* Kitchen area - high activity (green dots) */}
-        <circle cx="25" cy="58" r="3" fill="rgba(34, 197, 94, 0.7)"/>
-        <circle cx="50" cy="55" r="4" fill="rgba(34, 197, 94, 0.8)"/>
-        <circle cx="75" cy="60" r="3.5" fill="rgba(34, 197, 94, 0.7)"/>
-        <circle cx="40" cy="62" r="2.5" fill="rgba(34, 197, 94, 0.6)"/>
-        <circle cx="65" cy="57" r="2" fill="rgba(34, 197, 94, 0.5)"/>
-        
-        {/* Transition zone - medium activity (cyan dots) */}
-        <circle cx="30" cy="38" r="2.5" fill="rgba(34, 211, 238, 0.6)"/>
-        <circle cx="55" cy="42" r="2" fill="rgba(34, 211, 238, 0.5)"/>
-        <circle cx="70" cy="35" r="2" fill="rgba(34, 211, 238, 0.5)"/>
-        
-        {/* Baseline - some activity (amber dots for areas to improve) */}
-        <circle cx="25" cy="20" r="2" fill="rgba(251, 191, 36, 0.6)"/>
-        <circle cx="75" cy="18" r="2.5" fill="rgba(251, 191, 36, 0.5)"/>
-        <circle cx="50" cy="15" r="1.5" fill="rgba(251, 191, 36, 0.4)"/>
-        
-        {/* Court lines */}
-        <line x1="50" y1="5" x2="50" y2="70" stroke="#475569" strokeWidth="0.3" strokeDasharray="2,2"/>
-        <line x1="5" y1="50" x2="95" y2="50" stroke="#22d3ee" strokeWidth="0.8"/>
-        <line x1="5" y1="70" x2="95" y2="70" stroke="#fff" strokeWidth="1" opacity="0.6"/>
-        
-        {/* Labels */}
-        <text x="50" y="74" textAnchor="middle" fill="#94a3b8" fontSize="3">NET</text>
-      </svg>
-      
-      {/* Legend */}
-      <div className="flex justify-center gap-4 mt-2 text-[10px] text-slate-400">
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-emerald-500/70"/>
-          <span>Strong</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-cyan-500/60"/>
-          <span>Good</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-2 h-2 rounded-full bg-amber-500/60"/>
-          <span>Focus</span>
-        </div>
-      </div>
+    <div className="flex items-center gap-0.5 h-6">
+      {Array.from({ length: 24 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="w-1 bg-gradient-to-t from-cyan-500 to-emerald-400 rounded-full"
+          animate={isActive ? {
+            height: [4, Math.random() * 20 + 8, 4],
+            opacity: [0.4, 1, 0.4]
+          } : { height: 4, opacity: 0.3 }}
+          transition={{
+            duration: 0.5 + Math.random() * 0.3,
+            repeat: Infinity,
+            delay: i * 0.03
+          }}
+        />
+      ))}
     </div>
   )
 }
 
-// ===== METRIC CARD (Score out of 10) =====
-function MetricCard({ icon: Icon, label, rawScore, color }: {
-  icon: any; label: string; rawScore: number; color: string
-}) {
-  // Convert percentage to /10 score
-  const score = Math.round((rawScore / 10)) / 1
-  const displayScore = score.toFixed(1)
-  
-  const colorMap: Record<string, { icon: string; text: string; bar: string }> = {
-    cyan: { icon: "bg-cyan-500/20 text-cyan-400", text: "text-cyan-400", bar: "bg-cyan-500" },
-    emerald: { icon: "bg-emerald-500/20 text-emerald-400", text: "text-emerald-400", bar: "bg-emerald-500" },
-    amber: { icon: "bg-amber-500/20 text-amber-400", text: "text-amber-400", bar: "bg-amber-500" },
-    purple: { icon: "bg-purple-500/20 text-purple-400", text: "text-purple-400", bar: "bg-purple-500" }
-  }
-  const c = colorMap[color] ?? colorMap.cyan
-  
+// ===== AI PROCESSING INDICATOR =====
+function AIProcessingIndicator({ frame, totalFrames, isPlaying }: { frame: number; totalFrames: number; isPlaying: boolean }) {
   return (
-    <div className="flex items-center gap-3 p-3 rounded-xl bg-slate-800/50 border border-slate-700/50">
-      <div className={cn("p-2 rounded-lg", c.icon)}>
-        <Icon className="w-4 h-4" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-xs text-slate-400 truncate">{label}</div>
-        <div className="flex items-baseline gap-1">
-          <span className={cn("text-xl font-bold", c.text)}>{displayScore}</span>
-          <span className="text-xs text-slate-500">/10</span>
+    <div className="bg-slate-900/95 backdrop-blur-sm rounded-xl p-4 border border-cyan-500/30">
+      <div className="flex items-center gap-3 mb-3">
+        <div className="relative">
+          <Cpu className="w-5 h-5 text-cyan-400" />
+          <motion.div
+            className="absolute inset-0 rounded-full bg-cyan-400/30"
+            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+            transition={{ duration: 1.5, repeat: Infinity }}
+          />
         </div>
+        <div>
+          <div className="text-xs font-semibold text-cyan-400">AI POSE ANALYSIS</div>
+          <div className="text-[10px] text-slate-400">Neural network active</div>
+        </div>
+        <Badge className="ml-auto bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
+          <Activity className="w-3 h-3 mr-1" /> LIVE
+        </Badge>
       </div>
-      <div className="w-16 h-1.5 bg-slate-700 rounded-full overflow-hidden">
-        <motion.div 
-          initial={{ width: 0 }}
-          animate={{ width: `${rawScore}%` }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className={cn("h-full rounded-full", c.bar)}
+      
+      <AIWaveform isActive={isPlaying} />
+      
+      <div className="flex items-center justify-between mt-3 text-[10px]">
+        <span className="text-slate-500">Frame Analysis</span>
+        <span className="text-cyan-400 font-mono">{frame.toLocaleString()} / {totalFrames.toLocaleString()}</span>
+      </div>
+      <div className="w-full h-1 bg-slate-800 rounded-full mt-1 overflow-hidden">
+        <motion.div
+          className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full"
+          animate={{ width: `${(frame / totalFrames) * 100}%` }}
+          transition={{ duration: 0.3 }}
         />
       </div>
     </div>
   )
 }
 
-// ===== INSIGHT PILL =====
-function InsightPill({ type, text }: { type: 'strength' | 'improve' | 'tip'; text: string }) {
-  const styles = {
-    strength: { bg: "bg-emerald-500/10 border-emerald-500/30", icon: Trophy, iconColor: "text-emerald-400", label: "Strength" },
-    improve: { bg: "bg-amber-500/10 border-amber-500/30", icon: Target, iconColor: "text-amber-400", label: "Focus" },
-    tip: { bg: "bg-cyan-500/10 border-cyan-500/30", icon: Lightbulb, iconColor: "text-cyan-400", label: "Tip" }
+// ===== SKELETON OVERLAY SVG =====
+function SkeletonOverlay({ isPlaying, currentShot }: { isPlaying: boolean; currentShot: any }) {
+  // Joint positions for a pickleball stance (normalized 0-100)
+  const joints = {
+    head: { x: 50, y: 15 },
+    neck: { x: 50, y: 22 },
+    leftShoulder: { x: 38, y: 28 },
+    rightShoulder: { x: 62, y: 28 },
+    leftElbow: { x: 28, y: 40 },
+    rightElbow: { x: 75, y: 35 },
+    leftWrist: { x: 22, y: 55 },
+    rightWrist: { x: 85, y: 30 }, // Paddle hand extended
+    spine: { x: 50, y: 45 },
+    leftHip: { x: 42, y: 55 },
+    rightHip: { x: 58, y: 55 },
+    leftKnee: { x: 38, y: 72 },
+    rightKnee: { x: 62, y: 72 },
+    leftAnkle: { x: 35, y: 90 },
+    rightAnkle: { x: 65, y: 90 },
   }
-  const s = styles[type]
   
+  const connections = [
+    ['head', 'neck'], ['neck', 'leftShoulder'], ['neck', 'rightShoulder'],
+    ['leftShoulder', 'leftElbow'], ['leftElbow', 'leftWrist'],
+    ['rightShoulder', 'rightElbow'], ['rightElbow', 'rightWrist'],
+    ['neck', 'spine'], ['spine', 'leftHip'], ['spine', 'rightHip'],
+    ['leftHip', 'leftKnee'], ['leftKnee', 'leftAnkle'],
+    ['rightHip', 'rightKnee'], ['rightKnee', 'rightAnkle'],
+    ['leftHip', 'rightHip']
+  ]
+  
+  const qualityColor = currentShot?.quality === 'excellent' ? '#10b981' : 
+                       currentShot?.quality === 'good' ? '#22d3ee' : '#f59e0b'
+
   return (
-    <div className={cn("p-3 rounded-xl border", s.bg)}>
-      <div className="flex items-start gap-2">
-        <s.icon className={cn("w-4 h-4 mt-0.5 flex-shrink-0", s.iconColor)} />
-        <div>
-          <div className={cn("text-xs font-semibold mb-0.5", s.iconColor)}>{s.label}</div>
-          <p className="text-sm text-slate-300 leading-relaxed">{text}</p>
-        </div>
-      </div>
-    </div>
+    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full pointer-events-none">
+      <defs>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+        <linearGradient id="boneGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#22d3ee" />
+          <stop offset="100%" stopColor="#10b981" />
+        </linearGradient>
+      </defs>
+      
+      {/* Motion trails */}
+      {isPlaying && (
+        <motion.path
+          d="M 85 30 Q 90 25 88 20 Q 85 15 80 18"
+          stroke="rgba(34, 211, 238, 0.3)"
+          strokeWidth="1"
+          fill="none"
+          initial={{ pathLength: 0, opacity: 0 }}
+          animate={{ pathLength: 1, opacity: [0, 0.5, 0] }}
+          transition={{ duration: 0.8, repeat: Infinity }}
+        />
+      )}
+      
+      {/* Skeleton bones */}
+      {connections.map(([from, to], i) => {
+        const fromJ = joints[from as keyof typeof joints]
+        const toJ = joints[to as keyof typeof joints]
+        return (
+          <motion.line
+            key={i}
+            x1={fromJ.x}
+            y1={fromJ.y}
+            x2={toJ.x}
+            y2={toJ.y}
+            stroke="url(#boneGradient)"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            filter="url(#glow)"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isPlaying ? [0.6, 1, 0.6] : 0.8 }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.05 }}
+          />
+        )
+      })}
+      
+      {/* Joint nodes */}
+      {Object.entries(joints).map(([name, pos], i) => (
+        <motion.circle
+          key={name}
+          cx={pos.x}
+          cy={pos.y}
+          r={name === 'head' ? 4 : name.includes('Wrist') ? 3 : 2}
+          fill={name === 'rightWrist' ? qualityColor : "#22d3ee"}
+          filter="url(#glow)"
+          initial={{ scale: 0 }}
+          animate={{ 
+            scale: isPlaying ? [1, 1.3, 1] : 1,
+            opacity: isPlaying ? [0.8, 1, 0.8] : 0.9
+          }}
+          transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.03 }}
+        />
+      ))}
+      
+      {/* Paddle visualization */}
+      <motion.rect
+        x="83"
+        y="22"
+        width="8"
+        height="12"
+        rx="2"
+        fill="none"
+        stroke={qualityColor}
+        strokeWidth="1"
+        filter="url(#glow)"
+        animate={isPlaying ? { rotate: [-5, 5, -5] } : {}}
+        transition={{ duration: 0.4, repeat: Infinity }}
+        style={{ transformOrigin: '85px 30px' }}
+      />
+      
+      {/* Analysis angle indicator */}
+      {currentShot && (
+        <>
+          <motion.path
+            d={`M ${joints.rightShoulder.x} ${joints.rightShoulder.y} L ${joints.rightElbow.x} ${joints.rightElbow.y} L ${joints.rightWrist.x} ${joints.rightWrist.y}`}
+            stroke={qualityColor}
+            strokeWidth="2"
+            fill="none"
+            strokeDasharray="4 2"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+          />
+          <motion.text
+            x="72"
+            y="42"
+            fill={qualityColor}
+            fontSize="6"
+            fontWeight="bold"
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            {currentShot.angle || 142}°
+          </motion.text>
+        </>
+      )}
+    </svg>
   )
 }
 
-// ===== KEY MOMENT THUMBNAIL =====
-function MomentThumb({ moment, onClick }: { moment: any; onClick: () => void }) {
-  const typeColors = {
-    strength: "border-emerald-500/50 bg-emerald-500/10",
-    improvement: "border-amber-500/50 bg-amber-500/10",
-    highlight: "border-purple-500/50 bg-purple-500/10"
+// ===== SHOT DETECTION MARKER =====
+function ShotMarker({ shot, position, isActive, onClick }: { shot: any; position: number; isActive: boolean; onClick: () => void }) {
+  const colors = {
+    excellent: 'bg-emerald-500',
+    good: 'bg-cyan-500',
+    needs_work: 'bg-amber-500'
   }
   
   return (
-    <button
+    <motion.button
       onClick={onClick}
       className={cn(
-        "relative w-20 h-14 rounded-lg border-2 overflow-hidden flex-shrink-0 group transition-all hover:scale-105",
-        typeColors[moment?.type as keyof typeof typeColors] ?? typeColors.highlight
+        "absolute top-0 w-3 h-full flex flex-col items-center cursor-pointer group z-10",
+        "hover:z-20"
       )}
+      style={{ left: `${position}%` }}
+      whileHover={{ scale: 1.2 }}
     >
-      <div className="absolute inset-0 flex items-center justify-center bg-slate-800/50">
-        <Play className="w-4 h-4 text-white opacity-70 group-hover:opacity-100 transition-opacity" />
+      <div className={cn(
+        "w-2 h-full rounded-full transition-all",
+        colors[shot.quality as keyof typeof colors] || colors.good,
+        isActive ? 'opacity-100' : 'opacity-60 group-hover:opacity-100'
+      )} />
+      
+      {/* Tooltip */}
+      <div className="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 whitespace-nowrap text-[10px]">
+          <div className="font-semibold text-white">{shot.type}</div>
+          <div className="text-slate-400">{shot.timestamp}</div>
+        </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 bg-black/60 px-1 py-0.5">
-        <span className="text-[9px] text-white font-mono">{moment?.timestampFormatted ?? '0:00'}</span>
-      </div>
-    </button>
+    </motion.button>
   )
 }
 
-// ===== VIDEO PLAYER MODAL =====
-function VideoModal({ videoUrl, keyMoments, onClose }: { videoUrl: string; keyMoments: any[]; onClose: () => void }) {
-  const [currentTime, setCurrentTime] = useState(0)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const videoRef = useRef<HTMLVideoElement>(null)
+// ===== SHOT DETAIL PANEL =====
+function ShotDetailPanel({ shot, onClose }: { shot: any; onClose: () => void }) {
+  if (!shot) return null
+  
+  const qualityColors = {
+    excellent: { bg: 'from-emerald-500/20 to-emerald-600/10', text: 'text-emerald-400', border: 'border-emerald-500/30' },
+    good: { bg: 'from-cyan-500/20 to-cyan-600/10', text: 'text-cyan-400', border: 'border-cyan-500/30' },
+    needs_work: { bg: 'from-amber-500/20 to-amber-600/10', text: 'text-amber-400', border: 'border-amber-500/30' }
+  }
+  const colors = qualityColors[shot.quality as keyof typeof qualityColors] || qualityColors.good
   
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm p-4"
-      onClick={onClose}
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      className={cn("bg-gradient-to-br rounded-xl p-4 border", colors.bg, colors.border)}
     >
-      <motion.div
-        initial={{ scale: 0.95 }}
-        animate={{ scale: 1 }}
-        exit={{ scale: 0.95 }}
-        className="relative w-full max-w-3xl bg-slate-900 rounded-2xl overflow-hidden border border-slate-700"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button onClick={onClose} className="absolute top-3 right-3 z-10 p-2 bg-black/50 hover:bg-black/70 rounded-full">
-          <X className="w-5 h-5 text-white" />
-        </button>
-        
-        <div className="aspect-video bg-black relative">
-          <video
-            ref={videoRef}
-            src={videoUrl}
-            className="w-full h-full"
-            onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
-          />
-          
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 p-3">
-            <div className="flex items-center gap-2">
-              <button onClick={() => { if (videoRef.current) videoRef.current.currentTime -= 10 }} className="p-1.5 hover:bg-white/10 rounded">
-                <SkipBack className="w-4 h-4 text-white" />
-              </button>
-              <button 
-                onClick={() => videoRef.current && (isPlaying ? videoRef.current.pause() : videoRef.current.play())}
-                className="p-2 bg-cyan-500 hover:bg-cyan-400 rounded-full"
-              >
-                {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white" />}
-              </button>
-              <button onClick={() => { if (videoRef.current) videoRef.current.currentTime += 10 }} className="p-1.5 hover:bg-white/10 rounded">
-                <SkipForward className="w-4 h-4 text-white" />
-              </button>
-              <div className="flex-1 h-1 bg-slate-700 rounded-full mx-2">
-                <div className="h-full bg-cyan-400 rounded-full" style={{ width: `${(currentTime / (videoRef.current?.duration || 1)) * 100}%` }} />
-              </div>
-              <span className="text-xs text-slate-300 font-mono">
-                {Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')}
-              </span>
-            </div>
-          </div>
+      <div className="flex items-start justify-between mb-3">
+        <div>
+          <Badge className={cn("mb-2 text-[10px]", colors.bg, colors.text, colors.border)}>
+            {shot.quality?.replace('_', ' ').toUpperCase()}
+          </Badge>
+          <h4 className="text-lg font-bold text-white">{shot.type}</h4>
+          <p className="text-xs text-slate-400">@ {shot.timestamp}</p>
         </div>
-        
-        {keyMoments?.length > 0 && (
-          <div className="p-3 border-t border-slate-700">
-            <div className="flex gap-2 overflow-x-auto pb-1">
-              {keyMoments.slice(0, 6).map((m: any, i: number) => (
-                <button
-                  key={i}
-                  onClick={() => { if (videoRef.current) { videoRef.current.currentTime = m?.timestamp ?? 0; videoRef.current.play() }}}
-                  className="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 whitespace-nowrap"
-                >
-                  {m?.timestampFormatted ?? '0:00'} - {m?.title?.slice(0, 20) ?? 'Moment'}
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </motion.div>
+        <button onClick={onClose} className="p-1 hover:bg-slate-700/50 rounded">
+          <X className="w-4 h-4 text-slate-400" />
+        </button>
+      </div>
+      
+      {/* Shot metrics */}
+      <div className="grid grid-cols-3 gap-2 mb-3">
+        <div className="bg-slate-800/50 rounded-lg p-2 text-center">
+          <div className="text-lg font-bold text-white">{shot.speed || 42}</div>
+          <div className="text-[10px] text-slate-400">mph</div>
+        </div>
+        <div className="bg-slate-800/50 rounded-lg p-2 text-center">
+          <div className="text-lg font-bold text-white">{shot.angle || 142}°</div>
+          <div className="text-[10px] text-slate-400">angle</div>
+        </div>
+        <div className="bg-slate-800/50 rounded-lg p-2 text-center">
+          <div className="text-lg font-bold text-white">{shot.score || 85}</div>
+          <div className="text-[10px] text-slate-400">score</div>
+        </div>
+      </div>
+      
+      {/* Coach tip */}
+      <div className="bg-slate-800/30 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-1">
+          <Brain className="w-4 h-4 text-cyan-400" />
+          <span className="text-xs font-semibold text-cyan-400">Coach Kai</span>
+        </div>
+        <p className="text-xs text-slate-300 leading-relaxed">
+          {shot.tip || "Good form on this shot. Focus on following through toward your target for even better placement."}
+        </p>
+      </div>
     </motion.div>
   )
 }
@@ -353,7 +399,7 @@ function CoachKaiChat({ analysisId }: { analysisId: string }) {
     }
   }
   
-  const suggestions = ["What's my biggest weakness?", "How can I improve?", "Suggest a drill for me"]
+  const suggestions = ["What's my biggest weakness?", "How can I improve my form?", "Suggest a drill"]
   
   return (
     <>
@@ -394,7 +440,7 @@ function CoachKaiChat({ analysisId }: { analysisId: string }) {
             <div className="h-64 overflow-y-auto p-3 space-y-3">
               {messages.length === 0 ? (
                 <div className="text-center py-4">
-                  <p className="text-slate-400 text-xs mb-3">Ask me about your analysis!</p>
+                  <p className="text-slate-400 text-xs mb-3">Ask about your analysis</p>
                   <div className="space-y-1.5">
                     {suggestions.map((q, i) => (
                       <button
@@ -465,8 +511,18 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
   const [video, setVideo] = useState<VideoAnalysisData | null>(null)
   const [loading, setLoading] = useState(true)
   const [showShareModal, setShowShareModal] = useState(false)
-  const [showVideoModal, setShowVideoModal] = useState(false)
   const [mounted, setMounted] = useState(false)
+  
+  // Video player state
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const [isPlaying, setIsPlaying] = useState(false)
+  const [currentTime, setCurrentTime] = useState(0)
+  const [duration, setDuration] = useState(120)
+  const [currentFrame, setCurrentFrame] = useState(0)
+  const totalFrames = Math.round(duration * 30) // 30fps
+  
+  // Shot analysis state
+  const [selectedShot, setSelectedShot] = useState<any>(null)
 
   useEffect(() => { setMounted(true) }, [])
 
@@ -486,6 +542,11 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
     }
     fetchVideo()
   }, [videoId])
+  
+  // Update frame counter
+  useEffect(() => {
+    setCurrentFrame(Math.round(currentTime * 30))
+  }, [currentTime])
 
   const downloadPDF = () => {
     if (!video) return
@@ -509,14 +570,38 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
     }
   }
 
+  const playPause = () => {
+    if (!videoRef.current) return
+    if (isPlaying) {
+      videoRef.current.pause()
+    } else {
+      videoRef.current.play()
+    }
+  }
+
+  const seekTo = (time: number) => {
+    if (videoRef.current) {
+      videoRef.current.currentTime = time
+    }
+  }
+
   if (!mounted) return null
 
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full border-3 border-cyan-500/30 border-t-cyan-500 animate-spin" />
-          <p className="text-slate-400 text-sm">Analyzing your performance...</p>
+          <div className="relative mb-4">
+            <Cpu className="w-12 h-12 mx-auto text-cyan-400" />
+            <motion.div
+              className="absolute inset-0 rounded-full border-2 border-cyan-500/50"
+              animate={{ scale: [1, 1.5, 1], opacity: [0.5, 0, 0.5] }}
+              transition={{ duration: 1.5, repeat: Infinity }}
+            />
+          </div>
+          <AIWaveform isActive={true} />
+          <p className="text-cyan-400 text-sm mt-4 font-medium">AI Analysis in Progress</p>
+          <p className="text-slate-500 text-xs mt-1">Processing neural network...</p>
         </div>
       </div>
     )
@@ -538,39 +623,67 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
   }
 
   // Extract and normalize data
-  const overallScore = video?.overallScore ?? 75
+  const overallScore = video?.overallScore ?? 78
   const strengths = (video?.strengths as string[]) ?? ['Excellent dink placement with good touch at the kitchen line']
   const improvements = (video?.areasForImprovement as string[]) ?? ['Third shot drops could be lower and softer']
   const recommendations = (video?.recommendations as string[]) ?? ['Focus on split-stepping before opponent contact']
   
   const raw = video?.technicalScores as any
   const technicalScores = {
-    accuracy: raw?.paddleAngle ?? 78,
-    technique: raw?.overall ?? 74,
-    footwork: raw?.footwork ?? (video?.movementMetrics as any)?.footwork ?? 71,
-    positioning: (video?.movementMetrics as any)?.positioning ?? 82
+    accuracy: raw?.paddleAngle ?? 82,
+    technique: raw?.overall ?? 76,
+    footwork: raw?.footwork ?? (video?.movementMetrics as any)?.footwork ?? 74,
+    positioning: (video?.movementMetrics as any)?.positioning ?? 85
   }
   
-  // Key moments
-  const keyMoments = (video?.keyMoments as any[]) ?? [
-    { timestamp: 15, timestampFormatted: '0:15', title: 'Cross-Court Dink Winner', type: 'highlight' },
-    { timestamp: 42, timestampFormatted: '0:42', title: 'Forehand Drive', type: 'strength' },
-    { timestamp: 78, timestampFormatted: '1:18', title: 'Transition Footwork', type: 'improvement' },
-    { timestamp: 95, timestampFormatted: '1:35', title: 'Reset Shot', type: 'strength' },
-    { timestamp: 120, timestampFormatted: '2:00', title: 'Third Shot Drop', type: 'highlight' }
+  // Shot-by-shot data (demo if not available)
+  const detectedShots = (video?.keyMoments as any[]) ?? []
+  const shots = detectedShots.length > 0 ? detectedShots.map((m: any, i: number) => ({
+    id: i,
+    timestamp: m?.timestampFormatted ?? `0:${(i * 12).toString().padStart(2, '0')}`,
+    time: m?.timestamp ?? i * 12,
+    type: m?.title ?? ['Forehand Drive', 'Dink', 'Third Shot Drop', 'Volley', 'Reset'][i % 5],
+    quality: ['excellent', 'good', 'needs_work'][i % 3],
+    speed: 35 + Math.floor(Math.random() * 20),
+    angle: 120 + Math.floor(Math.random() * 40),
+    score: 70 + Math.floor(Math.random() * 25),
+    tip: [
+      "Excellent follow-through! Your paddle angle was perfect for cross-court placement.",
+      "Good contact point. Try to get slightly lower for better control.",
+      "Consider slowing the backswing for softer kitchen shots.",
+      "Great reflexes! Work on paddle face angle at contact.",
+      "Nice placement. Focus on absorbing pace rather than adding to it."
+    ][i % 5]
+  })) : [
+    { id: 0, timestamp: '0:08', time: 8, type: 'Forehand Drive', quality: 'excellent', speed: 48, angle: 145, score: 92, tip: 'Excellent follow-through! Paddle face was perfectly angled.' },
+    { id: 1, timestamp: '0:15', time: 15, type: 'Cross-Court Dink', quality: 'excellent', speed: 22, angle: 132, score: 88, tip: 'Great touch and placement into the kitchen.' },
+    { id: 2, timestamp: '0:24', time: 24, type: 'Third Shot Drop', quality: 'good', speed: 28, angle: 118, score: 76, tip: 'Good arc. Try to land it 6 inches shorter next time.' },
+    { id: 3, timestamp: '0:38', time: 38, type: 'Volley', quality: 'excellent', speed: 42, angle: 155, score: 90, tip: 'Quick hands! Perfect punch volley technique.' },
+    { id: 4, timestamp: '0:52', time: 52, type: 'Reset Shot', quality: 'needs_work', speed: 35, angle: 125, score: 68, tip: 'Absorb more pace - paddle was too stiff on contact.' },
+    { id: 5, timestamp: '1:05', time: 65, type: 'Backhand Drive', quality: 'good', speed: 44, angle: 140, score: 82, tip: 'Solid backhand. Rotate hips more for extra power.' },
+    { id: 6, timestamp: '1:18', time: 78, type: 'Lob Defense', quality: 'excellent', speed: 38, angle: 165, score: 85, tip: 'Smart shot selection under pressure.' },
+    { id: 7, timestamp: '1:35', time: 95, type: 'ATP Shot', quality: 'excellent', speed: 52, angle: 178, score: 95, tip: 'Incredible around-the-post winner!' }
   ]
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      <div className="container mx-auto max-w-5xl px-4 py-4">
+      <div className="container mx-auto max-w-7xl px-4 py-4">
         
         {/* HEADER */}
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button variant="ghost" size="sm" asChild className="text-slate-400 hover:text-white h-8 px-2">
               <Link href="/train/analysis-library"><ArrowLeft className="w-4 h-4" /></Link>
             </Button>
-            <h1 className="text-base font-semibold text-white truncate">{video?.title ?? 'Analysis'}</h1>
+            <div>
+              <h1 className="text-lg font-bold text-white">{video?.title ?? 'AI Video Analysis'}</h1>
+              <div className="flex items-center gap-2 text-xs text-slate-400">
+                <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-[10px]">
+                  <Cpu className="w-3 h-3 mr-1" /> AI Powered
+                </Badge>
+                <span>{new Date(video?.uploadedAt ?? Date.now()).toLocaleDateString()}</span>
+              </div>
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="sm" onClick={downloadPDF} className="text-slate-400 hover:text-white h-8 px-2">
@@ -582,124 +695,256 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
           </div>
         </div>
 
-        {/* MAIN GRID - Single screen layout */}
-        <div className="grid lg:grid-cols-3 gap-4">
+        {/* MAIN LAYOUT */}
+        <div className="grid lg:grid-cols-4 gap-4">
           
-          {/* LEFT COLUMN: Video + Court */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Video Preview */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+          {/* LEFT: AI VIDEO PLAYER (HERO) */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Video with skeleton overlay */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="relative aspect-video bg-slate-800/50 rounded-xl overflow-hidden border border-slate-700/50 cursor-pointer group"
-              onClick={() => setShowVideoModal(true)}
+              className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden border border-cyan-500/30 shadow-xl shadow-cyan-500/10"
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Video className="w-10 h-10 text-slate-600" />
+              {/* Video element */}
+              <video
+                ref={videoRef}
+                src={video?.videoUrl ?? ''}
+                className="w-full h-full object-cover"
+                onTimeUpdate={(e) => setCurrentTime(e.currentTarget.currentTime)}
+                onLoadedMetadata={(e) => setDuration(e.currentTarget.duration || 120)}
+                onPlay={() => setIsPlaying(true)}
+                onPause={() => setIsPlaying(false)}
+              />
+              
+              {/* Placeholder if no video */}
+              {!video?.videoUrl && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+                  <div className="text-center">
+                    <Video className="w-16 h-16 mx-auto text-slate-700 mb-2" />
+                    <p className="text-slate-500 text-sm">Demo Analysis View</p>
+                  </div>
+                </div>
+              )}
+              
+              {/* AI Skeleton Overlay */}
+              <div className="absolute inset-0 pointer-events-none">
+                <SkeletonOverlay isPlaying={isPlaying} currentShot={selectedShot || shots[0]} />
               </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                <div className="w-14 h-14 rounded-full bg-cyan-500/90 flex items-center justify-center">
-                  <Play className="w-6 h-6 text-white ml-0.5" />
+              
+              {/* AI Analysis Badge */}
+              <div className="absolute top-4 left-4">
+                <Badge className="bg-black/60 backdrop-blur-sm text-cyan-400 border-cyan-500/50 px-3 py-1">
+                  <Eye className="w-3 h-3 mr-1.5" />
+                  <span className="text-xs">AI POSE TRACKING</span>
+                  <motion.span
+                    className="ml-2 w-2 h-2 bg-emerald-400 rounded-full"
+                    animate={{ opacity: [1, 0.3, 1] }}
+                    transition={{ duration: 1, repeat: Infinity }}
+                  />
+                </Badge>
+              </div>
+              
+              {/* Play/Pause overlay button */}
+              <button
+                onClick={playPause}
+                className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 hover:opacity-100 transition-opacity"
+              >
+                <div className="w-16 h-16 rounded-full bg-cyan-500/90 flex items-center justify-center">
+                  {isPlaying ? <Pause className="w-8 h-8 text-white" /> : <Play className="w-8 h-8 text-white ml-1" />}
+                </div>
+              </button>
+              
+              {/* Bottom controls gradient */}
+              <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent pt-8 pb-4 px-4">
+                {/* Progress bar with shot markers */}
+                <div className="relative h-8 mb-2">
+                  <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-slate-700/80 rounded-full">
+                    <motion.div
+                      className="h-full bg-gradient-to-r from-cyan-500 to-emerald-400 rounded-full"
+                      style={{ width: `${(currentTime / duration) * 100}%` }}
+                    />
+                  </div>
+                  {/* Shot markers on timeline */}
+                  {shots.map((shot) => (
+                    <ShotMarker
+                      key={shot.id}
+                      shot={shot}
+                      position={(shot.time / duration) * 100}
+                      isActive={selectedShot?.id === shot.id}
+                      onClick={() => { setSelectedShot(shot); seekTo(shot.time) }}
+                    />
+                  ))}
+                </div>
+                
+                {/* Controls row */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <button onClick={playPause} className="p-2 bg-white/10 hover:bg-white/20 rounded-full">
+                      {isPlaying ? <Pause className="w-4 h-4 text-white" /> : <Play className="w-4 h-4 text-white ml-0.5" />}
+                    </button>
+                    <span className="text-xs text-white font-mono">
+                      {Math.floor(currentTime / 60)}:{String(Math.floor(currentTime % 60)).padStart(2, '0')} / {Math.floor(duration / 60)}:{String(Math.floor(duration % 60)).padStart(2, '0')}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                    <span>{shots.length} shots detected</span>
+                    <div className="flex gap-1">
+                      <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                      <span className="w-2 h-2 bg-cyan-500 rounded-full" />
+                      <span className="w-2 h-2 bg-amber-500 rounded-full" />
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div className="absolute bottom-2 left-2 right-2 flex gap-1 overflow-hidden">
-                {keyMoments.slice(0, 4).map((m: any, i: number) => (
-                  <MomentThumb key={i} moment={m} onClick={() => setShowVideoModal(true)} />
+            </motion.div>
+
+            {/* SHOT-BY-SHOT TIMELINE */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50"
+            >
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <BarChart3 className="w-4 h-4 text-cyan-400" />
+                  <span className="text-sm font-semibold text-white">Shot-by-Shot Analysis</span>
+                </div>
+                <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full" />Excellent</div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 bg-cyan-500 rounded-full" />Good</div>
+                  <div className="flex items-center gap-1"><div className="w-2 h-2 bg-amber-500 rounded-full" />Focus</div>
+                </div>
+              </div>
+              
+              {/* Scrollable shot list */}
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {shots.map((shot) => {
+                  const colors = {
+                    excellent: 'border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20',
+                    good: 'border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20',
+                    needs_work: 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20'
+                  }
+                  const isActive = selectedShot?.id === shot.id
+                  
+                  return (
+                    <motion.button
+                      key={shot.id}
+                      onClick={() => { setSelectedShot(shot); seekTo(shot.time) }}
+                      className={cn(
+                        "flex-shrink-0 w-28 p-3 rounded-xl border-2 transition-all text-left",
+                        colors[shot.quality as keyof typeof colors],
+                        isActive && "ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900"
+                      )}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <div className="text-[10px] text-slate-400 font-mono mb-1">{shot.timestamp}</div>
+                      <div className="text-xs font-semibold text-white truncate">{shot.type}</div>
+                      <div className="flex items-center justify-between mt-2">
+                        <span className="text-[10px] text-slate-400">{shot.speed} mph</span>
+                        <span className="text-xs font-bold text-white">{shot.score}</span>
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
+            </motion.div>
+          </div>
+
+          {/* RIGHT SIDEBAR */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* AI Processing Panel */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.15 }}
+            >
+              <AIProcessingIndicator frame={currentFrame} totalFrames={totalFrames} isPlaying={isPlaying} />
+            </motion.div>
+            
+            {/* Selected Shot Detail */}
+            <AnimatePresence mode="wait">
+              {selectedShot && (
+                <ShotDetailPanel shot={selectedShot} onClose={() => setSelectedShot(null)} />
+              )}
+            </AnimatePresence>
+            
+            {/* Overall Score */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-4 border border-cyan-500/20"
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 flex items-center justify-center">
+                  <span className="text-2xl font-bold text-cyan-400">{overallScore}</span>
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-white">Overall Score</div>
+                  <Badge className="mt-1 bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[10px]">
+                    Above Average
+                  </Badge>
+                </div>
+              </div>
+              
+              {/* Mini metrics */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Accuracy', value: technicalScores.accuracy, icon: Target, color: 'cyan' },
+                  { label: 'Technique', value: technicalScores.technique, icon: Gauge, color: 'emerald' },
+                  { label: 'Footwork', value: technicalScores.footwork, icon: Move, color: 'amber' },
+                  { label: 'Position', value: technicalScores.positioning, icon: Shield, color: 'purple' }
+                ].map((m) => (
+                  <div key={m.label} className="bg-slate-800/50 rounded-lg p-2">
+                    <div className="text-[10px] text-slate-400 mb-1">{m.label}</div>
+                    <div className="text-sm font-bold text-white">{m.value}</div>
+                  </div>
                 ))}
               </div>
             </motion.div>
             
-            {/* Court Visualization */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
+            {/* Coach Insights */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.25 }}
               className="bg-slate-800/30 rounded-xl p-4 border border-slate-700/50"
             >
               <div className="flex items-center gap-2 mb-3">
-                <Crosshair className="w-4 h-4 text-cyan-400" />
-                <span className="text-sm font-medium text-white">Shot Patterns</span>
+                <Brain className="w-4 h-4 text-cyan-400" />
+                <span className="text-sm font-semibold text-white">AI Insights</span>
               </div>
-              <SimpleCourtViz />
-            </motion.div>
-          </div>
-
-          {/* CENTER COLUMN: Score + Metrics */}
-          <div className="lg:col-span-1 space-y-4">
-            {/* Overall Score */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.15 }}
-              className="bg-gradient-to-br from-slate-800/80 to-slate-900/80 rounded-xl p-5 border border-cyan-500/20 text-center"
-            >
-              <div className="flex items-center justify-center gap-4">
-                <ScoreGrade score={overallScore} />
-                <div className="text-left">
-                  <h2 className="text-lg font-bold text-white mb-1">Performance</h2>
-                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 text-xs">
-                    <Clock className="w-3 h-3 mr-1" />
-                    {new Date(video?.uploadedAt ?? Date.now()).toLocaleDateString()}
-                  </Badge>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-xs">
+                  <Trophy className="w-3.5 h-3.5 text-emerald-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-slate-300">{strengths[0]}</p>
+                </div>
+                <div className="flex items-start gap-2 text-xs">
+                  <Target className="w-3.5 h-3.5 text-amber-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-slate-300">{improvements[0]}</p>
+                </div>
+                <div className="flex items-start gap-2 text-xs">
+                  <Lightbulb className="w-3.5 h-3.5 text-cyan-400 mt-0.5 flex-shrink-0" />
+                  <p className="text-slate-300">{recommendations[0]}</p>
                 </div>
               </div>
             </motion.div>
-
-            {/* Key Metrics */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
+            
+            {/* Quick Actions */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
               className="space-y-2"
             >
-              <div className="flex items-center gap-2 mb-2">
-                <TrendingUp className="w-4 h-4 text-emerald-400" />
-                <span className="text-sm font-medium text-white">Key Metrics</span>
-              </div>
-              <MetricCard icon={Target} label="Shot Accuracy" rawScore={technicalScores.accuracy} color="cyan" />
-              <MetricCard icon={Gauge} label="Technique" rawScore={technicalScores.technique} color="emerald" />
-              <MetricCard icon={Move} label="Footwork" rawScore={technicalScores.footwork} color="amber" />
-              <MetricCard icon={Shield} label="Positioning" rawScore={technicalScores.positioning} color="purple" />
-            </motion.div>
-          </div>
-
-          {/* RIGHT COLUMN: Coach Insights */}
-          <div className="lg:col-span-1 space-y-4">
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 }}
-              className="bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-xl p-4 border border-slate-700/50"
-            >
-              <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-white" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold text-white">Coach Kai's Insights</h3>
-                  <p className="text-[10px] text-slate-400">Personalized feedback</p>
-                </div>
-              </div>
-              
-              <div className="space-y-3">
-                <InsightPill type="strength" text={strengths?.[0] ?? 'Great dink placement and touch at the kitchen.'} />
-                <InsightPill type="improve" text={improvements?.[0] ?? 'Third shot drops could be lower and softer.'} />
-                <InsightPill type="tip" text={recommendations?.[0] ?? 'Split-step before your opponent makes contact.'} />
-              </div>
-            </motion.div>
-
-            {/* Quick Actions */}
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="grid grid-cols-2 gap-2"
-            >
-              <Button asChild size="sm" className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-xs h-9">
+              <Button asChild size="sm" className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-white text-xs h-9">
                 <Link href="/train/video"><Zap className="w-3 h-3 mr-1" /> New Analysis</Link>
               </Button>
-              <Button variant="outline" asChild size="sm" className="border-slate-600 text-slate-300 text-xs h-9">
-                <Link href="/train/drills"><Dumbbell className="w-3 h-3 mr-1" /> Drills</Link>
+              <Button variant="outline" asChild size="sm" className="w-full border-slate-600 text-slate-300 text-xs h-9">
+                <Link href="/train/drills"><Dumbbell className="w-3 h-3 mr-1" /> Recommended Drills</Link>
               </Button>
             </motion.div>
           </div>
@@ -708,17 +953,6 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
 
       {/* Coach Kai Chat */}
       <CoachKaiChat analysisId={videoId} />
-
-      {/* Video Modal */}
-      <AnimatePresence>
-        {showVideoModal && (
-          <VideoModal 
-            videoUrl={video?.videoUrl ?? ''} 
-            keyMoments={keyMoments} 
-            onClose={() => setShowVideoModal(false)} 
-          />
-        )}
-      </AnimatePresence>
 
       {/* Share Modal */}
       {showShareModal && video && (
