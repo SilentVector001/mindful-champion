@@ -28,10 +28,14 @@ export default async function SavedPostsPage() {
 
   // Fetch saved posts
   const bookmarks = await prisma.postBookmark.findMany({
-    where: { userId: user.id },
+    where: {
+      userId: user.id,
+      post: {
+        isVideoPost: true
+      }
+    },
     include: {
       post: {
-        where: { isVideoPost: true },
         include: {
           user: {
             select: { id: true, name: true, image: true, skillLevel: true }
@@ -56,14 +60,14 @@ export default async function SavedPostsPage() {
   })
 
   const savedPosts = bookmarks
-    .filter(b => b.post.isVideoPost)
-    .map(b => ({
-      ...b.post,
+    ?.filter(b => b?.post?.isVideoPost ?? false)
+    ?.map(b => ({
+      ...(b?.post ?? {}),
       isLiked: false,
       isSaved: true,
-      likeCount: b.post._count.likes,
-      commentCount: b.post._count.comments
-    }))
+      likeCount: b?.post?._count?.likes ?? 0,
+      commentCount: b?.post?._count?.comments ?? 0
+    })) ?? []
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">

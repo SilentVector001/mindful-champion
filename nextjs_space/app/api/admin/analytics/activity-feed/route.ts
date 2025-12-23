@@ -79,13 +79,13 @@ export async function GET(request: NextRequest) {
         include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } }
       })),
       
-      safeQuery('userProgramDay', () => prisma.userProgramDay.findMany({
+      safeQuery('userProgram', () => prisma.userProgram.findMany({
         where: { completedAt: { not: null, gte: thirtyDaysAgo } },
         orderBy: { completedAt: 'desc' },
         take: 30,
         include: {
           user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } },
-          programDay: { include: { program: { select: { name: true } } } }
+          program: { select: { name: true } }
         }
       }))
     ])
@@ -204,14 +204,14 @@ export async function GET(request: NextRequest) {
     })
 
     // Add training program completions
-    recentTrainingProgress.forEach((progress: any) => {
+    (recentTrainingProgress as any[] ?? []).forEach((progress: any) => {
       activities.push({
         id: `training-${progress.id}`,
         type: 'training_complete',
         userId: progress.user?.id,
         userEmail: progress.user?.email,
         userName: progress.user?.name || `${progress.user?.firstName || ''} ${progress.user?.lastName || ''}`.trim() || progress.user?.email || 'User',
-        description: `Completed Day ${progress.programDay?.dayNumber || '?'} of ${progress.programDay?.program?.name || 'Training Program'}`,
+        description: `Completed training in ${progress.program?.name || 'Training Program'}`,
         details: `Training Progress`,
         createdAt: progress.completedAt,
         timeAgo: getTimeAgo(progress.completedAt)
@@ -234,7 +234,7 @@ export async function GET(request: NextRequest) {
     console.log('  - Goals:', recentGoals.length)
     console.log('  - Chats:', recentChats.length)
     console.log('  - Payments:', recentPayments.length)
-    console.log('  - Training Progress:', recentTrainingProgress.length)
+    console.log('  - Training Progress:', (recentTrainingProgress as any[] ?? []).length)
     console.log('  - Total activities:', activities.length)
     console.log('  - Returning:', topActivities.length, 'activities')
     
