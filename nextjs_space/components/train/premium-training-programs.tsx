@@ -172,139 +172,147 @@ export default function PremiumTrainingPrograms({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50/30">
-      {/* Hero Section with Premium Background */}
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      {/* Compact Premium Hero Section */}
       <motion.div 
         className="relative overflow-hidden"
-        style={{
-          backgroundImage: `linear-gradient(rgba(15, 23, 42, 0.7), rgba(45, 80, 22, 0.8)), url(${premiumBackgrounds.hero})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-        {...premiumAnimations.heroReveal}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.6 }}
       >
-        <div className={premiumDesign.spacing.container}>
-          <div className={premiumDesign.spacing.hero}>
-            <div className="max-w-4xl mx-auto text-center text-white">
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2, duration: 0.8 }}
-              >
-                <Badge className="mb-6 bg-white/20 text-white border-white/30 backdrop-blur-sm">
-                  <Crown className="w-4 h-4 mr-1" />
-                  Premium Training Experience
-                </Badge>
-              </motion.div>
-              
-              <motion.h1
-                className={cn(premiumDesign.typography.heading.hero, "mb-6")}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3, duration: 0.8 }}
-              >
-                Master Your Game with
-                <br />
-                <span className="bg-gradient-to-r from-emerald-400 to-yellow-400 bg-clip-text text-transparent">
-                  AI-Powered Training
-                </span>
-              </motion.h1>
-              
-              <motion.p
-                className={cn(premiumDesign.typography.body.lead, "text-gray-200 mb-8 max-w-3xl mx-auto")}
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4, duration: 0.8 }}
-              >
-                Welcome back, <span className="text-yellow-400 font-semibold">{firstName}</span>! 
-                Experience sophisticated training programs designed by world-class coaches and 
-                powered by advanced AI to accelerate your pickleball mastery.
-              </motion.p>
-
-              {/* Skill Level Filters */}
-              <motion.div
-                className="flex flex-wrap justify-center gap-3 mb-8"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.6 }}
-              >
-                <Button
-                  variant={selectedSkillLevel === null ? "default" : "outline"}
-                  className={cn(
-                    "bg-white/20 border-white/30 text-white backdrop-blur-sm hover:bg-white/30",
-                    selectedSkillLevel === null && "bg-white text-gray-900 hover:bg-gray-100"
-                  )}
-                  onClick={() => setSelectedSkillLevel(null)}
-                >
-                  All Levels
-                </Button>
-                {Object.entries(skillLevelConfigs).map(([level, config]) => (
-                  <Button
-                    key={level}
-                    variant={selectedSkillLevel === level ? "default" : "outline"}
-                    className={cn(
-                      "bg-white/20 border-white/30 text-white backdrop-blur-sm hover:bg-white/30",
-                      selectedSkillLevel === level && "bg-white text-gray-900 hover:bg-gray-100"
-                    )}
-                    onClick={() => setSelectedSkillLevel(level)}
-                  >
-                    <config.icon className="w-4 h-4 mr-2" />
-                    {config.name}
-                  </Button>
-                ))}
-              </motion.div>
-            </div>
-          </div>
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0">
+          <Image
+            src="https://cdn.abacus.ai/images/d48a8f9d-90ef-4c84-989b-f0b286faec63.jpg"
+            alt="Pickleball training"
+            fill
+            className="object-cover opacity-40"
+            priority
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/70" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-slate-950" />
         </div>
 
-        {/* Floating Stats */}
-        <motion.div
-          className="absolute bottom-8 right-8 hidden lg:block"
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.7, duration: 0.6 }}
-        >
-          <Card className="bg-white/10 backdrop-blur-md border-white/20 text-white">
-            <CardContent className="p-4">
-              <div className="flex items-center gap-4">
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-yellow-400">{programs.length}</div>
-                  <div className="text-xs text-gray-300">Programs</div>
+        {/* Accent Glows */}
+        <div className="absolute top-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl" />
+        <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
+
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="py-10 md:py-14 lg:py-16">
+            {/* Header Row with Stats */}
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.2, duration: 0.5 }}
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 backdrop-blur-sm">
+                    <Sparkles className="w-3 h-3 mr-1" />
+                    AI-Powered
+                  </Badge>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 backdrop-blur-sm">
+                    <Crown className="w-3 h-3 mr-1" />
+                    Premium
+                  </Badge>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-400">{userPrograms.length}</div>
-                  <div className="text-xs text-gray-300">Active</div>
+                <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
+                  Master Your Game
+                </h1>
+                <p className="text-gray-400 mt-1 text-sm md:text-base">
+                  Welcome back, <span className="text-cyan-400 font-medium">{firstName}</span> — Let&apos;s train
+                </p>
+              </motion.div>
+
+              {/* Inline Stats */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.5 }}
+                className="flex items-center gap-4 md:gap-6"
+              >
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
+                  <BookOpen className="w-4 h-4 text-cyan-400" />
+                  <span className="text-xl font-bold text-white">{programs.length}</span>
+                  <span className="text-xs text-gray-400">Programs</span>
                 </div>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-400">98%</div>
-                  <div className="text-xs text-gray-300">Success Rate</div>
+                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
+                  <Flame className="w-4 h-4 text-orange-400" />
+                  <span className="text-xl font-bold text-white">{userPrograms.length}</span>
+                  <span className="text-xs text-gray-400">Active</span>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
-        </motion.div>
+                <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <span className="text-xl font-bold text-white">98%</span>
+                  <span className="text-xs text-gray-400">Success</span>
+                </div>
+              </motion.div>
+            </div>
+
+            {/* Compact Skill Level Filters */}
+            <motion.div
+              className="flex flex-wrap items-center gap-2"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.5 }}
+            >
+              <span className="text-sm text-gray-500 mr-2">Filter:</span>
+              <Button
+                size="sm"
+                variant={selectedSkillLevel === null ? "default" : "outline"}
+                className={cn(
+                  "h-8 text-xs",
+                  selectedSkillLevel === null 
+                    ? "bg-cyan-500 hover:bg-cyan-600 text-white border-0" 
+                    : "bg-slate-800/60 border-slate-700/50 text-gray-300 hover:bg-slate-700/60 hover:text-white"
+                )}
+                onClick={() => setSelectedSkillLevel(null)}
+              >
+                All Levels
+              </Button>
+              {Object.entries(skillLevelConfigs).map(([level, config]) => (
+                <Button
+                  key={level}
+                  size="sm"
+                  variant={selectedSkillLevel === level ? "default" : "outline"}
+                  className={cn(
+                    "h-8 text-xs",
+                    selectedSkillLevel === level 
+                      ? "bg-cyan-500 hover:bg-cyan-600 text-white border-0" 
+                      : "bg-slate-800/60 border-slate-700/50 text-gray-300 hover:bg-slate-700/60 hover:text-white"
+                  )}
+                  onClick={() => setSelectedSkillLevel(level)}
+                >
+                  <config.icon className="w-3 h-3 mr-1" />
+                  {config.name}
+                </Button>
+              ))}
+            </motion.div>
+          </div>
+        </div>
       </motion.div>
 
-      <div className={premiumDesign.spacing.container}>
-        <div className="-mt-16 relative z-10 space-y-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="pt-8 space-y-12">
           
           {/* Active Programs - Premium Cards */}
           {activePrograms.length > 0 && (
             <motion.section
-              {...premiumAnimations.cardReveal}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center gap-3 mb-8">
-                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                  <Flame className="w-6 h-6 text-white" />
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
+                  <Flame className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h2 className={premiumDesign.typography.heading.h3}>Your Active Journey</h2>
-                  <p className={premiumDesign.typography.body.small}>Continue building your championship skills</p>
+                  <h2 className="text-xl font-bold text-white">Your Active Journey</h2>
+                  <p className="text-sm text-gray-400">Continue building your championship skills</p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {activePrograms.map((userProgram, index) => {
                   const skillConfig = getSkillConfig(userProgram.program.skillLevel)
                   const metrics = getProgressMetrics(userProgram)
@@ -313,30 +321,31 @@ export default function PremiumTrainingPrograms({
                   return (
                     <motion.div
                       key={userProgram.id}
-                      {...premiumAnimations.staggerItem}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.1 }}
-                      {...premiumAnimations.cardHover}
+                      whileHover={{ scale: 1.02 }}
                     >
-                      <Card className={premiumDesign.components.cards.featured}>
-                        <CardContent className="p-8">
+                      <Card className="bg-slate-800/60 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/80 transition-all">
+                        <CardContent className="p-6">
                           {/* Program Header */}
-                          <div className="flex items-start justify-between mb-6">
-                            <div className="flex items-start gap-4">
+                          <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-start gap-3">
                               <div className={cn(
-                                "w-16 h-16 rounded-2xl bg-gradient-to-br flex items-center justify-center shadow-xl",
+                                "w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg",
                                 skillConfig.gradient
                               )}>
-                                <IconComponent className="w-8 h-8 text-white" />
+                                <IconComponent className="w-6 h-6 text-white" />
                               </div>
                               <div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-1">
+                                <h3 className="text-lg font-bold text-white mb-1">
                                   {userProgram.program.name}
                                 </h3>
                                 <Badge className={skillConfig.badge}>
                                   {skillConfig.name}
                                 </Badge>
                                 {userProgram.program.tagline && (
-                                  <p className="text-sm text-gray-600 mt-2">
+                                  <p className="text-xs text-gray-400 mt-1">
                                     {userProgram.program.tagline}
                                   </p>
                                 )}
@@ -344,7 +353,7 @@ export default function PremiumTrainingPrograms({
                             </div>
                             
                             {metrics.isOnTrack && (
-                              <Badge className="bg-green-100 text-green-800">
+                              <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
                                 <TrendingUp className="w-3 h-3 mr-1" />
                                 On Track
                               </Badge>
@@ -352,33 +361,33 @@ export default function PremiumTrainingPrograms({
                           </div>
 
                           {/* Progress Visualization */}
-                          <div className="mb-6 p-4 bg-gray-50 rounded-xl">
-                            <div className="flex justify-between items-center mb-3">
-                              <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-                              <span className="text-lg font-bold text-gray-900">
+                          <div className="mb-4 p-3 bg-slate-900/50 rounded-lg">
+                            <div className="flex justify-between items-center mb-2">
+                              <span className="text-xs font-medium text-gray-400">Progress</span>
+                              <span className="text-sm font-bold text-white">
                                 {Math.round(metrics.progress)}%
                               </span>
                             </div>
-                            <Progress value={metrics.progress} className="h-3 mb-4" />
+                            <Progress value={metrics.progress} className="h-2 mb-3" />
                             
-                            <div className="grid grid-cols-3 gap-4 text-center">
+                            <div className="grid grid-cols-3 gap-3 text-center">
                               <div>
-                                <div className="text-xl font-bold text-blue-600">
+                                <div className="text-lg font-bold text-cyan-400">
                                   {userProgram.currentDay}
                                 </div>
-                                <div className="text-xs text-gray-500">Current Day</div>
+                                <div className="text-xs text-gray-500">Day</div>
                               </div>
                               <div>
-                                <div className="text-xl font-bold text-orange-500">
+                                <div className="text-lg font-bold text-orange-400">
                                   {metrics.streak}
                                 </div>
-                                <div className="text-xs text-gray-500">Day Streak</div>
+                                <div className="text-xs text-gray-500">Streak</div>
                               </div>
                               <div>
-                                <div className="text-xl font-bold text-green-600">
+                                <div className="text-lg font-bold text-emerald-400">
                                   {userProgram.program.durationDays}
                                 </div>
-                                <div className="text-xs text-gray-500">Total Days</div>
+                                <div className="text-xs text-gray-500">Total</div>
                               </div>
                             </div>
                           </div>
@@ -386,15 +395,15 @@ export default function PremiumTrainingPrograms({
                           {/* Action Button */}
                           <Button
                             className={cn(
-                              "w-full h-12 text-lg font-semibold bg-gradient-to-r",
+                              "w-full h-10 font-semibold bg-gradient-to-r",
                               skillConfig.gradient,
-                              "hover:shadow-xl hover:scale-[1.02] transition-all duration-300"
+                              "hover:shadow-lg transition-all duration-300"
                             )}
                             onClick={() => router.push(`/train/program/${userProgram.program.programId || userProgram.program.id}`)}
                           >
-                            <Play className="w-5 h-5 mr-2" />
+                            <Play className="w-4 h-4 mr-2" />
                             Continue Day {userProgram.currentDay}
-                            <ChevronRight className="w-5 h-5 ml-2" />
+                            <ChevronRight className="w-4 h-4 ml-2" />
                           </Button>
                         </CardContent>
                       </Card>
@@ -407,34 +416,35 @@ export default function PremiumTrainingPrograms({
 
           {/* Explanation Card - What is this page? */}
           <motion.div
-            {...premiumAnimations.cardReveal}
-            transition={{ delay: 0.2 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
           >
-            <Card className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border-2 border-cyan-200/50 shadow-lg">
-              <CardContent className="p-6">
+            <Card className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border border-cyan-500/20 backdrop-blur-sm">
+              <CardContent className="p-5">
                 <div className="flex items-start gap-4">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
-                    <BookOpen className="w-7 h-7 text-white" />
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <BookOpen className="w-6 h-6 text-white" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2">
-                      📚 Welcome to Your Training Hub!
+                    <h3 className="text-lg font-bold text-white mb-1">
+                      Your Training Hub
                     </h3>
-                    <p className="text-gray-700 leading-relaxed mb-4">
-                      Browse <strong>{programs.length} structured training programs</strong> designed by world-class coaches. Each program includes day-by-day lessons, video tutorials, and progress tracking. Simply <strong>click "Start Program"</strong> on any card below to begin your journey!
+                    <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                      Browse <span className="text-cyan-400 font-medium">{programs.length} structured programs</span> designed by world-class coaches. Click &quot;Start Program&quot; to begin!
                     </p>
                     <div className="flex flex-wrap gap-2">
-                      <Badge className="bg-cyan-100 text-cyan-800 border-cyan-200">
+                      <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30">
                         <Target className="w-3 h-3 mr-1" />
-                        {programs.length} Programs Available
+                        {programs.length} Programs
                       </Badge>
-                      <Badge className="bg-blue-100 text-blue-800 border-blue-200">
+                      <Badge className="bg-blue-500/20 text-blue-400 border-blue-500/30">
                         <Calendar className="w-3 h-3 mr-1" />
                         7-30 Days Each
                       </Badge>
-                      <Badge className="bg-purple-100 text-purple-800 border-purple-200">
+                      <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
                         <TrendingUp className="w-3 h-3 mr-1" />
-                        Track Your Progress
+                        Track Progress
                       </Badge>
                     </div>
                   </div>
