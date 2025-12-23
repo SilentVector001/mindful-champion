@@ -72,19 +72,19 @@ export default function RedesignedHomeDashboard({
 
   const firstName = user?.firstName || user?.name?.split(' ')?.[0] || 'Champion'
 
-  // Quick nav items
+  // Quick nav items with enhanced gradients
   const quickNavItems = [
-    { name: 'Train', icon: Dumbbell, path: '/train', color: 'from-blue-500 to-cyan-500', description: 'Drills & Programs' },
-    { name: 'Analyze', icon: Video, path: '/train/video', color: 'from-purple-500 to-pink-500', description: 'Video Analysis' },
-    { name: 'Tournaments', icon: Trophy, path: '/tournaments', color: 'from-amber-500 to-orange-500', description: 'Find Events' },
-    { name: 'Progress', icon: BarChart3, path: '/progress', color: 'from-emerald-500 to-teal-500', description: 'View Stats' },
-    { name: 'Connect', icon: Users, path: '/connect', color: 'from-indigo-500 to-purple-500', description: 'Find Partners' },
-    { name: 'Rewards', icon: Gift, path: '/marketplace', color: 'from-yellow-500 to-amber-500', description: 'Earn Points' },
+    { name: 'Train', icon: Dumbbell, path: '/train', color: 'from-blue-500 to-cyan-400', bgGlow: 'shadow-blue-500/40', description: 'Drills & Programs' },
+    { name: 'Analyze', icon: Video, path: '/train/video', color: 'from-purple-500 to-pink-400', bgGlow: 'shadow-purple-500/40', description: 'Video Analysis' },
+    { name: 'Tournaments', icon: Trophy, path: '/tournaments', color: 'from-amber-500 to-orange-400', bgGlow: 'shadow-amber-500/40', description: 'Find Events' },
+    { name: 'Progress', icon: BarChart3, path: '/progress', color: 'from-emerald-500 to-teal-400', bgGlow: 'shadow-emerald-500/40', description: 'View Stats' },
+    { name: 'Connect', icon: Users, path: '/connect', color: 'from-indigo-500 to-purple-400', bgGlow: 'shadow-indigo-500/40', description: 'Find Partners' },
+    { name: 'Rewards', icon: Gift, path: '/marketplace', color: 'from-yellow-500 to-amber-400', bgGlow: 'shadow-yellow-500/40', description: 'Earn Points' },
   ]
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
         <MainNavigation user={user} />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -94,7 +94,7 @@ export default function RedesignedHomeDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={user} />
       
       {/* Single Screen Dashboard */}
@@ -109,7 +109,7 @@ export default function RedesignedHomeDashboard({
           {/* Greeting */}
           <div className="flex items-center gap-4">
             <motion.div
-              className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-lg shadow-emerald-500/30"
+              className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/40"
               animate={{ scale: [1, 1.05, 1] }}
               transition={{ duration: 3, repeat: Infinity }}
             >
@@ -117,18 +117,18 @@ export default function RedesignedHomeDashboard({
             </motion.div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-white">
-                Welcome back, <span className="bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">{firstName}</span>!
+                Welcome back, <span className="bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent">{firstName}</span>!
               </h1>
-              <p className="text-gray-400 text-sm">Ready to elevate your game today?</p>
+              <p className="text-slate-300 text-sm">Ready to elevate your game today?</p>
             </div>
           </div>
 
-          {/* Compact Stats Row */}
+          {/* Compact Stats Row - Enhanced */}
           <div className="flex gap-3">
             {[
-              { label: 'Streak', value: dashboardStats?.dayStreak?.count || 0, icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/20' },
-              { label: 'Points', value: dashboardStats?.rewardPoints?.count || 0, icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-              { label: 'Level', value: dashboardStats?.skillLevel || '3.0', icon: Award, color: 'text-purple-400', bg: 'bg-purple-500/20' },
+              { label: 'Streak', value: dashboardStats?.dayStreak?.count || 0, icon: Flame, color: 'text-orange-400', bg: 'bg-gradient-to-br from-orange-500/30 to-red-500/20', shadow: 'shadow-lg shadow-orange-500/20' },
+              { label: 'Points', value: dashboardStats?.rewardPoints?.count || 0, icon: Star, color: 'text-yellow-400', bg: 'bg-gradient-to-br from-yellow-500/30 to-amber-500/20', shadow: 'shadow-lg shadow-yellow-500/20' },
+              { label: 'Level', value: dashboardStats?.skillLevel || '3.0', icon: Award, color: 'text-purple-400', bg: 'bg-gradient-to-br from-purple-500/30 to-pink-500/20', shadow: 'shadow-lg shadow-purple-500/20' },
             ].map((stat, i) => {
               const Icon = stat.icon
               return (
@@ -138,8 +138,8 @@ export default function RedesignedHomeDashboard({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10",
-                    stat.bg
+                    "flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20",
+                    stat.bg, stat.shadow
                   )}
                 >
                   <Icon className={cn("w-5 h-5", stat.color)} />
@@ -147,7 +147,7 @@ export default function RedesignedHomeDashboard({
                     <div className={cn("text-lg font-bold", stat.color)}>
                       {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                     </div>
-                    <div className="text-[10px] text-gray-400 uppercase tracking-wide">{stat.label}</div>
+                    <div className="text-[10px] text-slate-300 uppercase tracking-wide">{stat.label}</div>
                   </div>
                 </motion.div>
               )
@@ -168,11 +168,11 @@ export default function RedesignedHomeDashboard({
             {/* Coach Kai Card - Primary CTA */}
             <div
               onClick={() => router.push('/train/coach')}
-              className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 p-6 sm:p-8 cursor-pointer group hover:shadow-2xl hover:shadow-emerald-500/30 transition-all duration-300"
+              className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600 p-6 sm:p-8 cursor-pointer group shadow-2xl shadow-emerald-600/40 hover:shadow-emerald-500/50 transition-all duration-300"
             >
               {/* Background Effects */}
-              <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+              <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-white/15 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
               <motion.div
                 className="absolute bottom-4 right-4 text-white/20"
                 animate={{ rotate: 360, scale: [1, 1.2, 1] }}
@@ -184,7 +184,7 @@ export default function RedesignedHomeDashboard({
               <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center gap-6">
                 {/* Avatar */}
                 <motion.div
-                  className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl flex items-center justify-center shadow-2xl flex-shrink-0"
+                  className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-2xl flex items-center justify-center shadow-2xl shadow-black/30 flex-shrink-0"
                   animate={{ scale: [1, 1.05, 1] }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
@@ -194,20 +194,20 @@ export default function RedesignedHomeDashboard({
                 {/* Content */}
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="px-3 py-1 bg-white/20 rounded-full text-xs font-semibold text-white">AI Coach</span>
+                    <span className="px-3 py-1 bg-white/25 rounded-full text-xs font-semibold text-white shadow-sm">AI Coach</span>
                     <motion.div
-                      className="flex items-center gap-1 px-2 py-1 bg-green-400/30 rounded-full"
+                      className="flex items-center gap-1 px-2 py-1 bg-green-400/40 rounded-full"
                       animate={{ opacity: [1, 0.7, 1] }}
                       transition={{ duration: 1.5, repeat: Infinity }}
                     >
-                      <div className="w-2 h-2 bg-green-400 rounded-full" />
-                      <span className="text-xs text-green-200">Online</span>
+                      <div className="w-2 h-2 bg-green-300 rounded-full shadow-sm shadow-green-400" />
+                      <span className="text-xs text-white font-medium">Online</span>
                     </motion.div>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2 drop-shadow-md">
                     Chat with Coach Kai
                   </h2>
-                  <p className="text-emerald-100 text-sm sm:text-base mb-4">
+                  <p className="text-white/90 text-sm sm:text-base mb-4">
                     Get instant AI-powered coaching, personalized tips, and strategy guidance
                   </p>
                   
@@ -220,7 +220,7 @@ export default function RedesignedHomeDashboard({
                     ].map((feat, i) => {
                       const Icon = feat.icon
                       return (
-                        <div key={i} className="flex items-center gap-1.5 text-white/80 text-sm">
+                        <div key={i} className="flex items-center gap-1.5 text-white text-sm">
                           <Icon className="w-4 h-4" />
                           <span>{feat.text}</span>
                         </div>
@@ -230,7 +230,7 @@ export default function RedesignedHomeDashboard({
 
                   {/* CTA Button */}
                   <motion.button
-                    className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                    className="inline-flex items-center gap-2 bg-white text-emerald-700 font-bold px-6 py-3 rounded-xl shadow-xl shadow-black/20 hover:shadow-2xl hover:scale-105 transition-all"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.98 }}
                   >
@@ -247,22 +247,22 @@ export default function RedesignedHomeDashboard({
               </div>
             </div>
 
-            {/* Active Training - Compact */}
+            {/* Active Training - Compact with enhanced depth */}
             {userPrograms?.find(up => up?.status === 'IN_PROGRESS') && (
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mt-4 p-4 rounded-2xl bg-slate-800/50 border border-emerald-500/20 backdrop-blur-sm"
+                className="mt-4 p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-emerald-500/30 shadow-xl shadow-emerald-500/10"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center">
+                    <div className="w-10 h-10 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30">
                       <Target className="w-5 h-5 text-white" />
                     </div>
                     <div>
                       <p className="text-white font-semibold">{userPrograms.find(up => up?.status === 'IN_PROGRESS')?.program?.name || 'Active Training'}</p>
-                      <p className="text-xs text-gray-400">Continue where you left off</p>
+                      <p className="text-xs text-slate-400">Continue where you left off</p>
                     </div>
                   </div>
                   <button
@@ -271,7 +271,7 @@ export default function RedesignedHomeDashboard({
                       const activeProgram = userPrograms.find(up => up?.status === 'IN_PROGRESS')
                       if (activeProgram?.programId) router.push(`/train/program/${activeProgram.programId}`)
                     }}
-                    className="px-4 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 rounded-lg text-sm font-medium transition-colors flex items-center gap-1"
+                    className="px-4 py-2 bg-emerald-500/30 hover:bg-emerald-500/40 text-emerald-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-1 shadow-md"
                   >
                     Continue <ChevronRight className="w-4 h-4" />
                   </button>
@@ -287,43 +287,43 @@ export default function RedesignedHomeDashboard({
             transition={{ delay: 0.2 }}
             className="space-y-4"
           >
-            {/* Today's Tip */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+            {/* Today's Tip - Enhanced */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-600/20 border border-amber-500/30 shadow-xl shadow-amber-500/10">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0 shadow-lg shadow-amber-500/30">
                   <Sparkles className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-amber-400 text-xs font-semibold uppercase tracking-wide mb-1">Daily Tip</p>
-                  <p className="text-gray-300 text-sm leading-relaxed">
+                  <p className="text-amber-300 text-xs font-semibold uppercase tracking-wide mb-1">Daily Tip</p>
+                  <p className="text-slate-200 text-sm leading-relaxed">
                     Focus on your ready position today - paddle up, knees bent, weight forward!
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Recent Achievement */}
+            {/* Recent Achievement - Enhanced */}
             {achievements?.length > 0 && (
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-600/20 border border-purple-500/30 shadow-xl shadow-purple-500/10">
                 <div className="flex items-center gap-3">
                   <motion.div
-                    className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center"
+                    className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/30"
                     animate={{ rotate: [0, 5, -5, 0] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
                     <Trophy className="w-6 h-6 text-white" />
                   </motion.div>
                   <div>
-                    <p className="text-purple-400 text-xs font-semibold uppercase tracking-wide">Latest Achievement</p>
+                    <p className="text-purple-300 text-xs font-semibold uppercase tracking-wide">Latest Achievement</p>
                     <p className="text-white font-medium">{achievements[0]?.achievement?.name || achievements[0]?.name || 'New Badge!'}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Quick Stats Card */}
-            <div className="p-4 rounded-2xl bg-slate-800/50 border border-white/10">
-              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">This Week</p>
+            {/* Quick Stats Card - Enhanced */}
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/15 shadow-xl">
+              <p className="text-slate-300 text-xs font-semibold uppercase tracking-wide mb-3">This Week</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
                   { label: 'Sessions', value: dashboardStats?.weeklyStats?.sessions || 0, icon: Calendar },
@@ -332,10 +332,10 @@ export default function RedesignedHomeDashboard({
                   const Icon = stat.icon
                   return (
                     <div key={i} className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-gray-500" />
+                      <Icon className="w-4 h-4 text-slate-400" />
                       <div>
                         <p className="text-white font-bold">{stat.value}</p>
-                        <p className="text-gray-500 text-xs">{stat.label}</p>
+                        <p className="text-slate-400 text-xs">{stat.label}</p>
                       </div>
                     </div>
                   )
@@ -345,7 +345,7 @@ export default function RedesignedHomeDashboard({
           </motion.div>
         </div>
 
-        {/* ===== QUICK NAVIGATION GRID ===== */}
+        {/* ===== QUICK NAVIGATION GRID - Enhanced ===== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -368,23 +368,26 @@ export default function RedesignedHomeDashboard({
                   whileHover={{ scale: 1.05, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(item.path)}
-                  className="group relative p-4 rounded-2xl bg-slate-800/50 border border-white/10 hover:border-emerald-500/30 hover:bg-slate-800 transition-all duration-300 text-left"
+                  className={cn(
+                    "group relative p-4 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 border border-white/15 hover:border-white/30 transition-all duration-300 text-left shadow-xl",
+                    `hover:${item.bgGlow}`
+                  )}
                 >
                   {/* Gradient Glow on Hover */}
                   <div className={cn(
-                    "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl",
+                    "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-30 transition-opacity blur-xl",
                     `bg-gradient-to-br ${item.color}`
                   )} />
                   
                   <div className="relative z-10">
                     <div className={cn(
-                      "w-12 h-12 rounded-xl bg-gradient-to-br mb-3 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform",
-                      item.color
+                      "w-12 h-12 rounded-xl bg-gradient-to-br mb-3 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg",
+                      item.color, item.bgGlow
                     )}>
                       <Icon className="w-6 h-6 text-white" />
                     </div>
                     <h3 className="font-semibold text-white mb-0.5">{item.name}</h3>
-                    <p className="text-xs text-gray-500">{item.description}</p>
+                    <p className="text-xs text-slate-400">{item.description}</p>
                   </div>
                 </motion.button>
               )
@@ -392,7 +395,7 @@ export default function RedesignedHomeDashboard({
           </div>
         </motion.div>
 
-        {/* ===== BOTTOM ROW - Secondary Info ===== */}
+        {/* ===== BOTTOM ROW - Secondary Info - Enhanced ===== */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -400,12 +403,12 @@ export default function RedesignedHomeDashboard({
           className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {/* Upcoming - Placeholder */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 text-slate-300 mb-2">
               <Calendar className="w-4 h-4" />
               <span className="text-sm font-medium">Upcoming</span>
             </div>
-            <p className="text-gray-500 text-sm">No scheduled sessions</p>
+            <p className="text-slate-400 text-sm">No scheduled sessions</p>
             <button
               onClick={() => router.push('/tournaments')}
               className="mt-2 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors"
@@ -415,12 +418,12 @@ export default function RedesignedHomeDashboard({
           </div>
 
           {/* Community Activity */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 text-slate-300 mb-2">
               <Users className="w-4 h-4" />
               <span className="text-sm font-medium">Community</span>
             </div>
-            <p className="text-gray-500 text-sm">Connect with local players</p>
+            <p className="text-slate-400 text-sm">Connect with local players</p>
             <button
               onClick={() => router.push('/connect')}
               className="mt-2 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors"
@@ -430,12 +433,12 @@ export default function RedesignedHomeDashboard({
           </div>
 
           {/* Rewards Summary */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 text-slate-300 mb-2">
               <Gift className="w-4 h-4" />
               <span className="text-sm font-medium">Rewards</span>
             </div>
-            <p className="text-gray-500 text-sm">
+            <p className="text-slate-400 text-sm">
               {(dashboardStats?.rewardPoints?.count || 0).toLocaleString()} points available
             </p>
             <button
