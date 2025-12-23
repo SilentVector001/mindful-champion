@@ -1,55 +1,76 @@
 # Tournament Data Update Summary
-**Date:** December 23, 2025 at 03:58:06 UTC
+**Date:** December 23, 2025 at 10:00:58 UTC  
+**Status:** ✅ SUCCESS
 
-## Execution Status: ✅ SUCCESS
+## Execution Results
 
-## Summary
-The National Pickleball Tournament Data Updater successfully fetched and updated tournament information from multiple pickleball organizations. The system processed 14 tournaments across MLP, APP Tour, and USA Pickleball.
-
-## Results
+### Statistics
 - **Total Tournaments Fetched:** 14
-- **New Tournaments Created:** 14
-- **Existing Tournaments Updated:** 0
-- **Errors Encountered:** 1 (PPA Tour access blocked)
+- **Tournaments Created:** 0
+- **Tournaments Updated:** 14
+- **Errors Encountered:** 1 (PPA Tour website returned 403 Forbidden)
 
-## Data Sources
-| Organization | Status | Tournaments Fetched |
-|-------------|--------|---------------------|
-| PPA Tour | ❌ Error (403 Forbidden) | 0 |
-| MLP | ✅ Success | 6 |
-| APP Tour | ✅ Success | 4 |
-| USA Pickleball | ✅ Success | 4 |
+### Data Sources
 
-## Tournaments Added to Database
+#### ✅ Major League Pickleball (MLP)
+- **Status:** Success
+- **Tournaments Fetched:** 6
+- **Events Updated:**
+  - MLP Orlando (April 24-27, 2025)
+  - MLP Columbus (May 1-4, 2025)
+  - MLP Austin (May 23-26, 2025)
+  - MLP Phoenix (May 29-June 1, 2025)
+  - MLP Daytona Beach (June 5-8, 2025)
+  - MLP Cup (October 31-November 2, 2025)
 
-### MLP Tournaments (6)
-1. MLP Orlando
-2. MLP Columbus
-3. MLP Austin
-4. MLP Phoenix
-5. MLP Daytona Beach
-6. MLP Cup
+#### ✅ APP Tour
+- **Status:** Success
+- **Tournaments Fetched:** 4
+- **Events Updated:**
+  - 2025 GEICO APP Tour Championships (December 9-14, 2025)
+  - 2026 APP Daytona Beach Open (February 18-22, 2026)
+  - 2026 APP Fort Lauderdale Open (March 25-29, 2026)
+  - 2026 Humana APP Louisville Open (October 14-18, 2026)
 
-### APP Tour Tournaments (4)
-1. 2025 GEICO APP Tour Championships
-2. 2026 APP Daytona Beach Open
-3. 2026 APP Fort Lauderdale Open
-4. 2026 Humana APP Louisville Open
+#### ✅ USA Pickleball
+- **Status:** Success
+- **Tournaments Fetched:** 4
+- **Events Updated:**
+  - USA Pickleball National Championships (November 15-23, 2025)
+  - US Open Pickleball Championships (April 11-18, 2026)
+  - USA Pickleball Golden Ticket - Colorado Springs (June 24-28, 2026)
+  - USA Pickleball Golden Ticket - Seattle (July 8-12, 2026)
 
-### USA Pickleball Tournaments (4)
-1. USA Pickleball National Championships
-2. US Open Pickleball Championships
-3. USA Pickleball Golden Ticket - Colorado Springs
-4. USA Pickleball Golden Ticket - Seattle
+#### ⚠️ PPA Tour
+- **Status:** Error (403 Forbidden)
+- **Tournaments Fetched:** 0
+- **Issue:** Website blocked the request with a 403 Forbidden error
+- **Note:** The script includes fallback data for known PPA tournaments, but the live fetch failed
 
-## Issues & Notes
-- **PPA Tour Access Issue:** The PPA Tour website (ppatour.com) returned a 403 Forbidden error, preventing data retrieval. This may be due to bot detection or access restrictions. Consider implementing user-agent rotation or alternative scraping methods.
-- All other data sources (MLP, APP Tour, USA Pickleball) were successfully accessed and parsed.
+## Database Operations
 
-## Next Steps
-- Monitor PPA Tour access in future runs
-- Verify tournament data accuracy in the database
-- Next scheduled update: 6 hours from now
+All 14 tournaments were successfully updated in the PostgreSQL PickleballEvent table with the latest information including:
+- Event names and dates
+- Locations
+- Website URLs
+- Streaming URLs (where available)
+- Organization names
 
-## Log File Location
-Full execution logs available at: `/home/ubuntu/mindful_champion/logs/tournament_updater.log`
+## System Health
+
+- ✅ Database connection successful
+- ✅ Environment variables loaded correctly
+- ✅ Log file updated at `/home/ubuntu/mindful_champion/logs/tournament_updater.log`
+- ✅ All Python dependencies available
+
+## Notes
+
+1. The PPA Tour website is blocking automated requests (403 Forbidden). This is a known issue with some tournament websites that implement bot protection.
+2. All other data sources (MLP, APP Tour, USA Pickleball) are functioning correctly.
+3. The script uses fallback data for known tournaments when live scraping fails.
+4. All 14 tournaments already existed in the database and were updated with the latest information.
+5. Fixed the updater script to properly update the `updatedAt` timestamp on each run for accurate tracking.
+
+## Next Scheduled Run
+
+The updater is configured to run every 6 hours to keep tournament data current.

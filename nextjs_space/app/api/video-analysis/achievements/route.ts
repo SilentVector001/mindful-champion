@@ -22,16 +22,33 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    // Get all achievements
-    const allAchievements = await prisma.videoAnalysisAchievement.findMany({
-      orderBy: [{ category: 'asc' }, { threshold: 'asc' }]
-    })
+    // Get all achievements (gracefully handle missing table)
+    let allAchievements = []
+    try {
+      allAchievements = await prisma.videoAnalysisAchievement.findMany({
+        orderBy: [{ category: 'asc' }, { threshold: 'asc' }]
+      })
+    } catch (error) {
+      console.log('VideoAnalysisAchievement table not yet migrated, returning empty achievements')
+      return NextResponse.json({
+        achievements: [],
+        byCategory: {},
+        totalUnlocked: 0,
+        totalAchievements: 0,
+        totalPoints: 0
+      })
+    }
 
     // Get user's unlocked achievements
-    const userAchievements = await prisma.videoAnalysisUserAchievement.findMany({
-      where: { userId: user.id },
-      select: { achievementId: true, unlockedAt: true, value: true }
-    })
+    let userAchievements = []
+    try {
+      userAchievements = await prisma.videoAnalysisUserAchievement.findMany({
+        where: { userId: user.id },
+        select: { achievementId: true, unlockedAt: true, value: true }
+      })
+    } catch (error) {
+      console.log('VideoAnalysisUserAchievement table not yet migrated, returning empty user achievements')
+    }
 
     const unlockedIds = new Set(userAchievements?.map(a => a?.achievementId) ?? [])
 

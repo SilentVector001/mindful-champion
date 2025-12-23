@@ -8,11 +8,14 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Load environment variables
-if [ -f "$PROJECT_DIR/.env.local" ]; then
-    export $(grep -v '^#' "$PROJECT_DIR/.env.local" | xargs)
+ENV_FILE="$PROJECT_DIR/nextjs_space/.env.local"
+if [ -f "$ENV_FILE" ]; then
+    set -a
+    source "$ENV_FILE"
+    set +a
     echo "Loaded environment variables from .env.local"
 else
-    echo "Warning: .env.local file not found"
+    echo "Warning: .env.local file not found at $ENV_FILE"
 fi
 
 # Ensure log directory exists

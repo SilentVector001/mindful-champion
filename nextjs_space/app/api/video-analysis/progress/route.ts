@@ -38,18 +38,28 @@ export async function GET(request: NextRequest) {
       take: 20
     })
 
-    // Get skill progress
-    const skillProgress = await prisma.videoAnalysisProgress.findMany({
-      where: { userId: user.id },
-      orderBy: { averageScore: 'desc' }
-    })
+    // Get skill progress (gracefully handle missing table)
+    let skillProgress = []
+    try {
+      skillProgress = await prisma.videoAnalysisProgress.findMany({
+        where: { userId: user.id },
+        orderBy: { averageScore: 'desc' }
+      })
+    } catch (error) {
+      console.log('VideoAnalysisProgress table not yet migrated, returning empty progress')
+    }
 
-    // Get achievements
-    const achievements = await prisma.videoAnalysisUserAchievement.findMany({
-      where: { userId: user.id },
-      include: { achievement: true },
-      orderBy: { unlockedAt: 'desc' }
-    })
+    // Get achievements (gracefully handle missing table)
+    let achievements = []
+    try {
+      achievements = await prisma.videoAnalysisUserAchievement.findMany({
+        where: { userId: user.id },
+        include: { achievement: true },
+        orderBy: { unlockedAt: 'desc' }
+      })
+    } catch (error) {
+      console.log('VideoAnalysisAchievement tables not yet migrated, returning empty achievements')
+    }
 
     // Calculate overall stats
     const totalAnalyses = analyses?.length ?? 0

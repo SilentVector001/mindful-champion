@@ -338,7 +338,8 @@ class TournamentDataUpdater:
                         SET 
                             location = COALESCE(%s, location),
                             "websiteUrl" = COALESCE(%s, "websiteUrl"),
-                            "streamUrl" = COALESCE(%s, "streamUrl")
+                            "streamUrl" = COALESCE(%s, "streamUrl"),
+                            "updatedAt" = NOW()
                         WHERE id = %s
                     """, (
                         tournament['location'],
