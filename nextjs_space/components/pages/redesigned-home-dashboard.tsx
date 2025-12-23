@@ -84,7 +84,7 @@ export default function RedesignedHomeDashboard({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
         <MainNavigation user={user} />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -94,7 +94,7 @@ export default function RedesignedHomeDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={user} />
       
       {/* Single Screen Dashboard */}
@@ -356,7 +356,7 @@ export default function RedesignedHomeDashboard({
             <h2 className="text-lg font-bold text-white">Quick Access</h2>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
             {quickNavItems.map((item, index) => {
               const Icon = item.icon
               return (
@@ -368,11 +368,17 @@ export default function RedesignedHomeDashboard({
                   whileHover={{ scale: 1.05, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(item.path)}
-                  className="group relative p-4 rounded-2xl bg-slate-800/50 border border-white/10 hover:border-emerald-500/30 hover:bg-slate-800 transition-all duration-300 text-left"
+                  className="group relative p-5 rounded-2xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/10 hover:border-white/20 transition-all duration-300 text-left shadow-xl shadow-black/20 overflow-hidden"
                 >
-                  {/* Gradient Glow on Hover */}
+                  {/* Background gradient overlay */}
                   <div className={cn(
-                    "absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-20 transition-opacity blur-xl",
+                    "absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity",
+                    `bg-gradient-to-br ${item.color}`
+                  )} />
+                  
+                  {/* Colored glow effect */}
+                  <div className={cn(
+                    "absolute -top-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity",
                     `bg-gradient-to-br ${item.color}`
                   )} />
                   
@@ -381,10 +387,10 @@ export default function RedesignedHomeDashboard({
                       "w-12 h-12 rounded-xl bg-gradient-to-br mb-3 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform",
                       item.color
                     )}>
-                      <Icon className="w-6 h-6 text-white" />
+                      <Icon className="w-6 h-6 text-white drop-shadow-lg" />
                     </div>
-                    <h3 className="font-semibold text-white mb-0.5">{item.name}</h3>
-                    <p className="text-xs text-gray-500">{item.description}</p>
+                    <h3 className="font-bold text-white mb-0.5">{item.name}</h3>
+                    <p className="text-xs text-gray-400">{item.description}</p>
                   </div>
                 </motion.button>
               )
@@ -400,50 +406,56 @@ export default function RedesignedHomeDashboard({
           className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {/* Upcoming - Placeholder */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm font-medium">Upcoming</span>
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg">
+            <div className="flex items-center gap-2 text-gray-300 mb-2">
+              <Calendar className="w-4 h-4 text-blue-400" />
+              <span className="text-sm font-semibold">Upcoming</span>
             </div>
-            <p className="text-gray-500 text-sm">No scheduled sessions</p>
+            <p className="text-gray-400 text-sm">No scheduled sessions</p>
             <button
               onClick={() => router.push('/tournaments')}
-              className="mt-2 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors"
+              className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
             >
-              Browse tournaments →
+              Browse tournaments <ChevronRight className="w-4 h-4" />
             </button>
           </div>
 
           {/* Community Activity */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
-              <Users className="w-4 h-4" />
-              <span className="text-sm font-medium">Community</span>
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-gray-300 mb-2">
+                <Users className="w-4 h-4 text-indigo-400" />
+                <span className="text-sm font-semibold">Community</span>
+              </div>
+              <p className="text-gray-400 text-sm">Connect with local players</p>
+              <button
+                onClick={() => router.push('/connect')}
+                className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
+              >
+                Find partners <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-gray-500 text-sm">Connect with local players</p>
-            <button
-              onClick={() => router.push('/connect')}
-              className="mt-2 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors"
-            >
-              Find partners →
-            </button>
           </div>
 
           {/* Rewards Summary */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
-            <div className="flex items-center gap-2 text-gray-400 mb-2">
-              <Gift className="w-4 h-4" />
-              <span className="text-sm font-medium">Rewards</span>
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/20 rounded-full blur-2xl" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-gray-300 mb-2">
+                <Gift className="w-4 h-4 text-amber-400" />
+                <span className="text-sm font-semibold">Rewards</span>
+              </div>
+              <p className="text-gray-400 text-sm">
+                {(dashboardStats?.rewardPoints?.count || 0).toLocaleString()} points available
+              </p>
+              <button
+                onClick={() => router.push('/marketplace')}
+                className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
+              >
+                View rewards <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-gray-500 text-sm">
-              {(dashboardStats?.rewardPoints?.count || 0).toLocaleString()} points available
-            </p>
-            <button
-              onClick={() => router.push('/marketplace')}
-              className="mt-2 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors"
-            >
-              View rewards →
-            </button>
           </div>
         </motion.div>
       </div>
