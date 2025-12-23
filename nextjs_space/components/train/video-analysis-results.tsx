@@ -26,17 +26,17 @@ interface VideoAnalysisResultsProps {
   videoId: string
 }
 
-// Pro player YouTube video tutorials for technique comparison
+// Pro player YouTube video tutorials for technique comparison (verified working Dec 2024)
 const PRO_TECHNIQUE_VIDEOS: Record<string, { videoId: string; title: string; pro: string; thumbnail: string }> = {
-  'Forehand Drive': { videoId: 'dQ2R4K-QjPM', title: 'Ben Johns Forehand Technique Breakdown', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/JIjFXGmrMrI/maxresdefault.jpg' },
-  'Dink': { videoId: '9GtKRwYdxhA', title: 'Anna Leigh Waters Dinking Masterclass', pro: 'Anna Leigh Waters', thumbnail: 'https://i.ytimg.com/vi/0pmbbUcf8IQ/maxresdefault.jpg' },
-  'Third Shot Drop': { videoId: 'wZb0m9yjRVs', title: 'Perfect Third Shot Drop - Pro Tutorial', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/_81OBWWQgXM/maxresdefault.jpg' },
-  'Volley': { videoId: 'VtA3VlzrVQY', title: 'Ben Johns Volley Fundamentals', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/pt3HWfs7YCs/maxresdefault.jpg' },
-  'Reset Shot': { videoId: 'Y_kVvJu7QJE', title: 'The Reset Shot - Anna Leigh Waters', pro: 'Anna Leigh Waters', thumbnail: 'https://i.ytimg.com/vi/yAORr6H4yOE/mqdefault.jpg' },
-  'Backhand Drive': { videoId: 'RY8mz6Gg1YE', title: 'Backhand Drive Power Generation', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/VzKQ9mf_HAU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB7NLOy4wclgrVuG2MvZTk99ENcyQ' },
-  'Lob Defense': { videoId: '4l9YOmfh2Oc', title: 'Defending Lobs Like a Pro', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/yTjAQmTVtYI/sddefault.jpg' },
-  'ATP Shot': { videoId: 'E3eYNPdSaL0', title: 'Around The Post Shot Tutorial', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/R5c-UtwLS9I/mqdefault.jpg' },
-  'Serve': { videoId: 'wZb0m9yjRVs', title: 'Pro Serve Techniques', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/h_fu_R_pXxg/sddefault.jpg?v=66351dc1' },
+  'Forehand Drive': { videoId: 'X2VoftOci0g', title: 'Ben Johns Forehand Technique Breakdown', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/X2VoftOci0g/maxresdefault.jpg' },
+  'Dink': { videoId: 'K9tX7F1U2wk', title: 'Anna Leigh Waters Strategy Session', pro: 'Anna Leigh Waters', thumbnail: 'https://i.ytimg.com/vi/K9tX7F1U2wk/maxresdefault.jpg' },
+  'Third Shot Drop': { videoId: 'aLBgoxT5cIY', title: 'Perfect Third Shot Drop - Pro Tutorial', pro: 'Pro Coach', thumbnail: 'https://i.ytimg.com/vi/aLBgoxT5cIY/maxresdefault.jpg' },
+  'Volley': { videoId: 'pt3HWfs7YCs', title: 'Ben Johns Backhand Roll & Volley', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/pt3HWfs7YCs/maxresdefault.jpg' },
+  'Reset Shot': { videoId: 'hwirvU2N-k4', title: 'Master the Reset Shot', pro: 'Pro Coach', thumbnail: 'https://i.ytimg.com/vi/hwirvU2N-k4/maxresdefault.jpg' },
+  'Backhand Drive': { videoId: 'bvYPg6noz5U', title: 'Backhand Drive Consistency & Power', pro: 'Barrett Bass', thumbnail: 'https://i.ytimg.com/vi/bvYPg6noz5U/maxresdefault.jpg' },
+  'Lob Defense': { videoId: 'tPD4rbFK-fE', title: 'Defending Lobs Like a Pro', pro: 'Linda Thompson', thumbnail: 'https://i.ytimg.com/vi/tPD4rbFK-fE/maxresdefault.jpg' },
+  'ATP Shot': { videoId: 'rnL6SHYCXbA', title: 'Ben Johns Fourth Shot Mastery', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/rnL6SHYCXbA/maxresdefault.jpg' },
+  'Serve': { videoId: 'BmdnJNCEwxI', title: 'Pro Serve Techniques', pro: 'Pro Coach', thumbnail: 'https://i.ytimg.com/vi/BmdnJNCEwxI/maxresdefault.jpg' },
 }
 
 // PRO REFERENCE DATA
