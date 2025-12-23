@@ -28,6 +28,22 @@ type UserContext = {
   biggestChallenges?: string[];
 };
 
+// Format message timestamp
+function formatMessageTime(date: Date): string {
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMs / 3600000);
+  const diffDays = Math.floor(diffMs / 86400000);
+  
+  if (diffMins < 1) return 'Just now';
+  if (diffMins < 60) return `${diffMins} min ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+  
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+}
+
 // Animated Avatar Component
 function AnimatedAvatar({ state, size = 'lg' }: { state: AvatarState; size?: 'sm' | 'md' | 'lg' }) {
   const sizeClasses = {
@@ -311,7 +327,6 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   const [isListening, setIsListening] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   
-  const scrollRef = useRef<HTMLDivElement>(null);
   const isProcessingRef = useRef(false);
   const lastMessageRef = useRef('');
   const historyLoadedRef = useRef(false);
@@ -375,12 +390,7 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
     }
   }, [isListening, isLoading]);
 
-  // Auto-scroll
-  useEffect(() => {
-    if (scrollRef.current && messages.length > 0) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
+
 
   // Send message
   const sendMessage = useCallback(async (text?: string) => {
@@ -554,11 +564,11 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
         <Card className="shadow-xl border-2 border-slate-100 overflow-hidden">
           <div className="bg-gradient-to-r from-slate-50 to-slate-100 px-4 py-2 border-b flex items-center gap-2">
             <MessageCircle className="w-4 h-4 text-teal-600" />
-            <span className="font-bold text-slate-900">Last 5 Conversations</span>
-            <Badge variant="secondary" className="text-xs">Latest</Badge>
+            <span className="font-bold text-slate-900">Recent Conversations</span>
+            <Badge variant="secondary" className="text-xs">Newest First</Badge>
           </div>
           
-          <div ref={scrollRef} className="bg-white p-4 max-h-[400px] overflow-y-auto space-y-3">
+          <div className="bg-white p-4 space-y-3">
             {isLoadingHistory ? (
               <div className="flex items-center justify-center py-12">
                 <Loader2 className="w-8 h-8 animate-spin text-teal-500 mr-2" />
@@ -570,45 +580,50 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                 <p className="font-semibold">Start a conversation!</p>
               </div>
             ) : (
-              displayMessages.map((message, index) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md ${
-                    message.role === 'user'
-                      ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                      : 'bg-slate-100 text-slate-900 border border-slate-200'
-                  }`}>
-                    {message.role === 'assistant' ? (
-                      <div className="prose prose-sm max-w-none">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                          {message.content}
-                        </ReactMarkdown>
+              <>
+                {isLoading && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex justify-start"
+                  >
+                    <div className="bg-slate-100 rounded-2xl px-4 py-3 border border-slate-200">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-teal-500" />
+                        <span className="text-slate-700">Coach Kai is thinking...</span>
                       </div>
-                    ) : (
-                      <p>{message.content}</p>
-                    )}
-                  </div>
-                </motion.div>
-              ))
-            )}
-            {isLoading && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex justify-start"
-              >
-                <div className="bg-slate-100 rounded-2xl px-4 py-3 border border-slate-200">
-                  <div className="flex items-center gap-2">
-                    <Loader2 className="w-4 h-4 animate-spin text-teal-500" />
-                    <span className="text-slate-700">Coach Kai is thinking...</span>
-                  </div>
-                </div>
-              </motion.div>
+                    </div>
+                  </motion.div>
+                )}
+                {[...displayMessages].reverse().map((message, index) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
+                  >
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-md ${
+                      message.role === 'user'
+                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
+                        : 'bg-slate-100 text-slate-900 border border-slate-200'
+                    }`}>
+                      {message.role === 'assistant' ? (
+                        <div className="prose prose-sm max-w-none">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {message.content}
+                          </ReactMarkdown>
+                        </div>
+                      ) : (
+                        <p>{message.content}</p>
+                      )}
+                    </div>
+                    <span className={`text-xs text-slate-400 mt-1 px-1 ${message.role === 'user' ? 'text-right' : 'text-left'}`}>
+                      {formatMessageTime(message.timestamp)}
+                    </span>
+                  </motion.div>
+                ))}
+              </>
             )}
           </div>
         </Card>
