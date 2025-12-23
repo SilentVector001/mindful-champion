@@ -898,3 +898,38 @@ DETAIL:  Failing row contains (cs9upye41ujjhe60imjmx7hhx, USA Pickleball Golden 
 2025-12-22 21:56:49,788 - INFO -   Errors: 1
 2025-12-22 21:56:49,788 - INFO - ============================================================
 2025-12-22 21:56:49,789 - INFO - Database connection closed
+2025-12-23 03:58:06,572 - INFO - ============================================================
+2025-12-23 03:58:06,572 - INFO - Starting Tournament Data Updater
+2025-12-23 03:58:06,572 - INFO - ============================================================
+2025-12-23 03:58:07,083 - INFO - Successfully connected to database
+2025-12-23 03:58:07,083 - INFO - Fetching PPA Tour tournaments...
+2025-12-23 03:58:07,187 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2025-12-23 03:58:07,188 - INFO - Fetching MLP tournaments...
+2025-12-23 03:58:07,188 - INFO - Fetched 6 tournaments from MLP
+2025-12-23 03:58:07,188 - INFO - Fetching APP Tour tournaments...
+2025-12-23 03:58:07,188 - INFO - Fetched 4 tournaments from APP Tour
+2025-12-23 03:58:07,188 - INFO - Fetching USA Pickleball tournaments...
+2025-12-23 03:58:07,188 - INFO - Fetched 4 tournaments from USA Pickleball
+2025-12-23 03:58:07,188 - INFO - Total tournaments fetched: 14
+2025-12-23 03:58:07,393 - INFO - Created tournament: MLP Orlando
+2025-12-23 03:58:07,652 - INFO - Created tournament: MLP Columbus
+2025-12-23 03:58:07,910 - INFO - Created tournament: MLP Austin
+2025-12-23 03:58:08,168 - INFO - Created tournament: MLP Phoenix
+2025-12-23 03:58:08,426 - INFO - Created tournament: MLP Daytona Beach
+2025-12-23 03:58:08,686 - INFO - Created tournament: MLP Cup
+2025-12-23 03:58:08,944 - INFO - Created tournament: 2025 GEICO APP Tour Championships
+2025-12-23 03:58:09,206 - INFO - Created tournament: 2026 APP Daytona Beach Open
+2025-12-23 03:58:09,465 - INFO - Created tournament: 2026 APP Fort Lauderdale Open
+2025-12-23 03:58:09,724 - INFO - Created tournament: 2026 Humana APP Louisville Open
+2025-12-23 03:58:09,982 - INFO - Created tournament: USA Pickleball National Championships
+2025-12-23 03:58:10,241 - INFO - Created tournament: US Open Pickleball Championships
+2025-12-23 03:58:10,499 - INFO - Created tournament: USA Pickleball Golden Ticket - Colorado Springs
+2025-12-23 03:58:10,758 - INFO - Created tournament: USA Pickleball Golden Ticket - Seattle
+2025-12-23 03:58:10,823 - INFO - ============================================================
+2025-12-23 03:58:10,823 - INFO - Tournament Update Summary:
+2025-12-23 03:58:10,823 - INFO -   Fetched: 14
+2025-12-23 03:58:10,823 - INFO -   Created: 14
+2025-12-23 03:58:10,823 - INFO -   Updated: 0
+2025-12-23 03:58:10,823 - INFO -   Errors: 1
+2025-12-23 03:58:10,823 - INFO - ============================================================
+2025-12-23 03:58:10,823 - INFO - Database connection closed
