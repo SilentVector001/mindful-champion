@@ -19,7 +19,9 @@
     "test:notifications:goals": "cd scripts/tests/notification-system && npx ts-node goal-notifications-tests.ts",
     "test:notifications:email": "cd scripts/tests/notification-system && npx ts-node email-tests.ts",
     "test:notifications:cron": "cd scripts/tests/notification-system && npx ts-node cron-tests.ts",
-    "test:notifications:integration": "cd scripts/tests/notification-system && npx ts-node integration-tests.ts"
+    "test:notifications:integration": "cd scripts/tests/notification-system && npx ts-node integration-tests.ts",
+    "seed:video-achievements": "tsx scripts/seed-video-achievements.ts",
+    "verify:video-analysis": "tsx scripts/verify-video-analysis-setup.ts"
   },
   "prisma": {
     "seed": "tsx --require dotenv/config scripts/seed.ts"
