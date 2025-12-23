@@ -2,7 +2,7 @@
 
 "use client"
 
-import { useState, useEffect, useRef, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -24,15 +24,13 @@ import {
   VolumeX,
   Settings as SettingsIcon,
   Mic,
-  MicOff,
-  Play
+  MicOff
 } from "lucide-react"
 import Image from "next/image"
 import { useSession } from "next-auth/react"
 import { cn } from "@/lib/utils"
 import SpeechToText from "../voice/speech-to-text"
 import VoiceSettingsModal, { VoicePreferences } from "../voice/voice-settings-modal"
-import { useElevenLabsTTS } from "@/hooks/use-elevenlabs-tts"
 
 // Avatar emotional states
 export type AvatarEmotion = 
@@ -159,8 +157,8 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
   const [message, setMessage] = useState('')
   const [chatMessages, setChatMessages] = useState<Array<{role: 'user' | 'assistant', content: string, timestamp: Date}>>([])
   const [isLoading, setIsLoading] = useState(false)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const [speechEnabled, setSpeechEnabled] = useState(true)
-  const [audioUnlockNeeded, setAudioUnlockNeeded] = useState(false)
   
   // Voice-related state
   const [voicePreferences, setVoicePreferences] = useState<VoicePreferences>(defaultVoicePreferences)
@@ -170,32 +168,6 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const isInitialMountRef = useRef(true) // Track if it's the initial mount to prevent auto-scroll
   const hasScrolledOnceRef = useRef(false) // Prevent scroll until user interacts
-  
-  // OpenAI TTS Hook - High-quality neural voice for iOS/mobile compatibility
-  const {
-    speak: speakWithOpenAI,
-    replay: replayAudio,
-    stop: stopOpenAISpeech,
-    unlockAudio,
-    isSpeaking,
-    isLoading: ttsLoading,
-    isAudioUnlocked,
-    hasAudioReady,
-    error: ttsError
-  } = useElevenLabsTTS({
-    voice: 'rachel', // Warm, friendly female voice for Coach Kai
-    onStart: () => console.log('🔊 Coach Kai speaking (ElevenLabs)...'),
-    onEnd: () => console.log('🔇 Coach Kai finished speaking'),
-    onError: (err) => console.error('ElevenLabs TTS Error:', err)
-  })
-  
-  // Check if audio unlock is needed (iOS/Safari)
-  useEffect(() => {
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || 
-      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-    setAudioUnlockNeeded((isIOS || isSafari) && !isAudioUnlocked)
-  }, [isAudioUnlocked])
 
   // Determine avatar emotion based on user data and context
   useEffect(() => {
@@ -357,12 +329,8 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
       }
 
       // Auto-speak response if speech is enabled
-      console.log('🎤 TTS Check:', { speechEnabled, hasContent: !!assistantContent, ttsEnabled: voicePreferences.textToSpeechEnabled })
       if (speechEnabled && assistantContent && voicePreferences.textToSpeechEnabled) {
-        console.log('🔊 Calling speakText with:', assistantContent.substring(0, 50) + '...')
         speakText(assistantContent)
-      } else {
-        console.log('⚠️ TTS NOT triggered - condition not met')
       }
 
     } catch (error) {
@@ -393,44 +361,26 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
     return messages[action as keyof typeof messages] || message
   }
 
-  // Use OpenAI TTS for high-quality, mobile-compatible voice
-  const speakText = useCallback(async (text: string) => {
-    console.log('🎯 speakText called, speechEnabled:', speechEnabled)
-    if (!speechEnabled) {
-      console.log('⚠️ speechEnabled is false, skipping TTS')
-      return
-    }
+  const speakText = (text: string) => {
+    if (!speechEnabled || typeof window === 'undefined' || !('speechSynthesis' in window)) return
     
-    // Clean text for better TTS
-    const cleanedText = text
-      .replace(/[\u{1F000}-\u{1FAFF}]/gu, '') // Remove emojis
-      .replace(/\*\*/g, '') // Remove markdown bold
-      .replace(/\*/g, '') // Remove markdown italic
-      .trim()
+    window.speechSynthesis.cancel()
+    const utterance = new SpeechSynthesisUtterance(text)
+    utterance.rate = 0.95
+    utterance.pitch = 1.0
+    utterance.onstart = () => setIsSpeaking(true)
+    utterance.onend = () => setIsSpeaking(false)
+    utterance.onerror = () => setIsSpeaking(false)
     
-    if (!cleanedText) {
-      console.log('⚠️ cleanedText is empty, skipping TTS')
-      return
-    }
-    
-    console.log('🚀 Calling ElevenLabs TTS with text length:', cleanedText.length)
-    try {
-      await speakWithOpenAI(cleanedText)
-      console.log('✅ speakWithOpenAI completed')
-    } catch (err) {
-      console.error('🚨 TTS speak error:', err)
-    }
-  }, [speechEnabled, speakWithOpenAI])
+    window.speechSynthesis.speak(utterance)
+  }
 
-  const stopSpeaking = useCallback(() => {
-    stopOpenAISpeech()
-  }, [stopOpenAISpeech])
-  
-  // Handle unlock audio for iOS - called on user tap
-  const handleUnlockAudio = useCallback(async () => {
-    await unlockAudio()
-    setAudioUnlockNeeded(false)
-  }, [unlockAudio])
+  const stopSpeaking = () => {
+    if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+      window.speechSynthesis.cancel()
+      setIsSpeaking(false)
+    }
+  }
 
   const getEmotionColor = (emotion: AvatarEmotion) => {
     const colors = {
@@ -564,26 +514,6 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
                 </div>
               </div>
 
-              {/* iOS Audio Unlock Banner */}
-              {audioUnlockNeeded && speechEnabled && (
-                <div className="p-3 bg-gradient-to-r from-teal-50 to-cyan-50 border-b border-teal-100">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Volume2 className="h-4 w-4 text-teal-600" />
-                      <span className="text-sm text-teal-800">Tap to enable Coach Kai&apos;s voice</span>
-                    </div>
-                    <Button
-                      size="sm"
-                      onClick={handleUnlockAudio}
-                      className="bg-teal-600 hover:bg-teal-700 text-white h-7 px-3 text-xs"
-                    >
-                      <Play className="h-3 w-3 mr-1" />
-                      Enable Voice
-                    </Button>
-                  </div>
-                </div>
-              )}
-
               {/* Chat messages */}
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {chatMessages.length === 0 && (
@@ -623,66 +553,6 @@ export default function PersistentAvatar({ currentPage = 'home', className }: Pe
                       <span className="text-sm text-slate-600">Coach Kai is thinking...</span>
                     </div>
                   </div>
-                )}
-                
-                {/* Speaking indicator */}
-                {isSpeaking && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg rounded-bl-none p-3 flex items-center gap-2 border border-teal-200">
-                      <motion.div
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 0.8, repeat: Infinity }}
-                        className="flex items-center gap-1"
-                      >
-                        <div className="w-1.5 h-3 bg-teal-500 rounded-full animate-pulse" style={{ animationDelay: '0ms' }} />
-                        <div className="w-1.5 h-4 bg-teal-600 rounded-full animate-pulse" style={{ animationDelay: '150ms' }} />
-                        <div className="w-1.5 h-3 bg-teal-500 rounded-full animate-pulse" style={{ animationDelay: '300ms' }} />
-                      </motion.div>
-                      <span className="text-sm text-teal-700 font-medium">Coach Kai is speaking...</span>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={stopSpeaking}
-                        className="h-6 w-6 p-0 ml-2 hover:bg-teal-100"
-                      >
-                        <VolumeX className="h-3 w-3 text-teal-600" />
-                      </Button>
-                    </div>
-                  </motion.div>
-                )}
-                
-                {/* Play Response Button - shown when autoplay was blocked */}
-                {hasAudioReady && !isSpeaking && speechEnabled && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <Button
-                      onClick={replayAudio}
-                      className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg px-4 py-2 flex items-center gap-2 shadow-md"
-                    >
-                      <Play className="h-4 w-4" />
-                      <span className="text-sm font-medium">Play Coach Kai&apos;s Response</span>
-                    </Button>
-                  </motion.div>
-                )}
-                
-                {/* TTS Error indicator */}
-                {ttsError && !isSpeaking && !hasAudioReady && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex justify-start"
-                  >
-                    <div className="bg-amber-50 rounded-lg rounded-bl-none p-2 flex items-center gap-2 border border-amber-200 text-amber-700 text-xs">
-                      <span>⚠️ {ttsError}</span>
-                    </div>
-                  </motion.div>
                 )}
                 <div ref={messagesEndRef} />
               </div>

@@ -71,7 +71,7 @@ export default async function SavedPostsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <MainNavigation />
+      <MainNavigation user={null} />
       <main className="container mx-auto px-4 py-8 pt-24">
         <Link href="/community" className="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-6">
           <ArrowLeft className="w-4 h-4" /> Back to Community
@@ -85,7 +85,7 @@ export default async function SavedPostsPage() {
           <p className="text-slate-400">Videos you've bookmarked for later</p>
         </div>
 
-        <CommunityFeed initialPosts={savedPosts} showFilters={false} />
+        <CommunityFeed initialPosts={savedPosts as any} showFilters={false} />
       </main>
     </div>
   )

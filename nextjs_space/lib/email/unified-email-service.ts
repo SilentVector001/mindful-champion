@@ -518,11 +518,11 @@ export const EmailSender = {
   
   // Admin alerts
   adminNewUser: (userName: string, userEmail: string, userId: string, signupDate: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_NEW_USER', userName, userEmail, userId, signupDate }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_NEW_USER', userName, userEmail, userId, signupDate } as any),
     
   adminPayment: (userName: string, userEmail: string, amount: number, planName: string, transactionId: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_PAYMENT', userName, userEmail, amount, planName, transactionId }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_PAYMENT', userName, userEmail, amount, planName, transactionId } as any),
     
   adminError: (errorType: string, errorMessage: string, errorStack: string, userId?: string, timestamp?: string) =>
-    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_ERROR', errorType, errorMessage, errorStack, userId, timestamp }),
+    UnifiedEmailService.sendAdminEmail({ type: 'ADMIN_ERROR', errorType, errorMessage, errorStack, userId, timestamp } as any),
 };

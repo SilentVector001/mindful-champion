@@ -71,6 +71,8 @@ interface DayStructure {
   duration_minutes?: number
   videos?: string[]
   exercises?: string[]
+  videoUrl?: string
+  videoTitle?: string
   warmup?: {
     title?: string
     exercises?: string[]

@@ -223,7 +223,7 @@ function VideoCard({
   analyzing: boolean
   isNew?: boolean
 }) {
-  const statusConfig = {
+  const statusConfig: Record<string, { color: string; icon: any; label: string; textColor: string; animate?: boolean }> = {
     COMPLETED: { color: "bg-green-500", icon: CheckCircle2, label: "Complete", textColor: "text-green-400" },
     PROCESSING: { color: "bg-yellow-500", icon: Loader2, label: "Processing", textColor: "text-yellow-400", animate: true },
     PENDING: { color: "bg-slate-500", icon: Clock, label: "Pending", textColor: "text-slate-400" },

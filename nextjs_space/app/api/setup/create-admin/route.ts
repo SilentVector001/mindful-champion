@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
         isTrialActive: false,
         onboardingCompleted: true,
         rewardPoints: 0,
-        skillLevel: 5.0,
+        skillLevel: "5.0" as any,
         playerRating: 'ADVANCED',
         emailVerified: new Date(),
       }
