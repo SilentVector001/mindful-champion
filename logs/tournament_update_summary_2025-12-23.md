@@ -1,24 +1,26 @@
 # Tournament Data Update Summary
-**Date:** December 23, 2025 at 16:03:52  
-**Status:** ✅ SUCCESS
+**Date:** December 23, 2025 at 22:05 UTC
 
-## Execution Results
+## Execution Status: ✅ SUCCESS
 
-### Data Sources
-- **MLP (Major League Pickleball):** ✅ 6 tournaments fetched
-- **APP Tour:** ✅ 4 tournaments fetched  
-- **USA Pickleball:** ✅ 4 tournaments fetched
-- **PPA Tour:** ⚠️ Error (403 Forbidden - website blocking automated access)
+## Summary
+The National Pickleball Tournament Data Updater successfully fetched and updated tournament information from multiple pickleball organizations. The database has been updated with the latest tournament schedules and details.
 
-### Summary Statistics
+## Results
 - **Total Tournaments Fetched:** 14
 - **New Tournaments Created:** 0
 - **Existing Tournaments Updated:** 14
 - **Errors Encountered:** 1 (PPA Tour access blocked)
 
+## Data Sources
+1. **PPA Tour** (ppatour.com) - ❌ Access forbidden (403 error)
+2. **MLP** (majorleaguepickleball.net) - ✅ 6 tournaments fetched
+3. **APP Tour** (theapp.global) - ✅ 4 tournaments fetched
+4. **USA Pickleball** (usapickleball.org) - ✅ 4 tournaments fetched
+
 ## Updated Tournaments
 
-### MLP Events (6)
+### MLP Tournaments (6)
 1. MLP Orlando
 2. MLP Columbus
 3. MLP Austin
@@ -26,33 +28,23 @@
 5. MLP Daytona Beach
 6. MLP Cup
 
-### APP Tour Events (4)
+### APP Tour Tournaments (4)
 1. 2025 GEICO APP Tour Championships
 2. 2026 APP Daytona Beach Open
 3. 2026 APP Fort Lauderdale Open
 4. 2026 Humana APP Louisville Open
 
-### USA Pickleball Events (4)
+### USA Pickleball Tournaments (4)
 1. USA Pickleball National Championships
 2. US Open Pickleball Championships
 3. USA Pickleball Golden Ticket - Colorado Springs
 4. USA Pickleball Golden Ticket - Seattle
 
 ## Issues & Notes
+- **PPA Tour Access Issue:** The PPA Tour website returned a 403 Forbidden error, preventing data retrieval. This may be due to bot protection or access restrictions. The system will retry on the next scheduled run.
+- All other sources successfully provided tournament data
+- Database connection established and closed successfully
+- All operations logged to `/home/ubuntu/mindful_champion/logs/tournament_updater.log`
 
-### PPA Tour Access Issue
-The PPA Tour website (ppatour.com) returned a 403 Forbidden error, indicating they may be blocking automated scraping. This is a known issue that may require:
-- Alternative data fetching methods
-- API access if available
-- Manual intervention or contact with PPA Tour
-
-### Database Operations
-All 14 tournaments were successfully updated in the PostgreSQL database. No new tournaments were created, indicating all fetched events already existed in the system and were refreshed with current data.
-
-## Next Steps
-- Monitor PPA Tour access in future runs
-- Consider implementing retry logic or alternative data sources for PPA
-- Continue automated updates every 6 hours as scheduled
-
----
-*Automated update completed successfully. Full logs available at `/home/ubuntu/mindful_champion/logs/tournament_updater.log`*
+## Next Scheduled Run
+The updater runs automatically every 6 hours. Next execution will attempt to fetch PPA Tour data again.
