@@ -256,7 +256,7 @@ export default function PremiumTrainingPrograms({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.5 }}
             >
-              <span className="text-sm text-gray-500 mr-2">Filter:</span>
+              <span className="text-sm text-slate-400 mr-2">Filter:</span>
               <Button
                 size="sm"
                 variant={selectedSkillLevel === null ? "default" : "outline"}
@@ -308,7 +308,7 @@ export default function PremiumTrainingPrograms({
                 </div>
                 <div>
                   <h2 className="text-xl font-bold text-white">Your Active Journey</h2>
-                  <p className="text-sm text-gray-400">Continue building your championship skills</p>
+                  <p className="text-sm text-slate-300">Continue building your championship skills</p>
                 </div>
               </div>
 
@@ -430,7 +430,7 @@ export default function PremiumTrainingPrograms({
                     <h3 className="text-lg font-bold text-white mb-1">
                       Your Training Hub
                     </h3>
-                    <p className="text-gray-400 text-sm leading-relaxed mb-3">
+                    <p className="text-slate-300 text-sm leading-relaxed mb-3">
                       Browse <span className="text-cyan-400 font-medium">{programs.length} structured programs</span> designed by world-class coaches. Click &quot;Start Program&quot; to begin!
                     </p>
                     <div className="flex flex-wrap gap-2">
@@ -468,8 +468,8 @@ export default function PremiumTrainingPrograms({
                       <Crown className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className={premiumDesign.typography.heading.h3}>⭐ Featured Program for You</h2>
-                      <p className={premiumDesign.typography.body.small}>Perfect match for your skill level — start here!</p>
+                      <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">⭐ Featured Program for You</h2>
+                      <p className="text-sm text-slate-300">Perfect match for your skill level — start here!</p>
                     </div>
                   </div>
 
@@ -492,8 +492,8 @@ export default function PremiumTrainingPrograms({
                       <Sparkles className="w-6 h-6 text-white" />
                     </div>
                     <div>
-                      <h2 className={premiumDesign.typography.heading.h3}>🎯 Browse All Programs</h2>
-                      <p className={premiumDesign.typography.body.small}>
+                      <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-white">🎯 Browse All Programs</h2>
+                      <p className="text-sm text-slate-300">
                         {selectedSkillLevel 
                           ? `Showing ${filteredPrograms.length} ${skillLevelConfigs[selectedSkillLevel as keyof typeof skillLevelConfigs]?.name} programs` 
                           : `Showing all ${filteredPrograms.length} programs across all levels`}
@@ -540,13 +540,13 @@ export default function PremiumTrainingPrograms({
             >
               <div className="sticky top-8 space-y-4">
                 {/* Header for AI Insights */}
-                <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-200">
+                <Card className="bg-gradient-to-br from-emerald-500/10 to-green-500/10 border-emerald-500/30 backdrop-blur-sm">
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
-                      <Brain className="w-5 h-5 text-emerald-600" />
-                      <h3 className="font-bold text-sm text-gray-900">Coach Kai's Tips</h3>
+                      <Brain className="w-5 h-5 text-emerald-400" />
+                      <h3 className="font-bold text-sm text-white">Coach Kai's Tips</h3>
                     </div>
-                    <p className="text-xs text-gray-600">
+                    <p className="text-xs text-slate-300">
                       AI-powered recommendations based on your progress
                     </p>
                   </CardContent>
@@ -706,10 +706,7 @@ function PremiumProgramCard({
       transition={{ delay: index * 0.1 }}
       {...premiumAnimations.cardHover}
     >
-      <Card className={cn(
-        premiumDesign.components.cards.premium,
-        "h-full flex flex-col overflow-hidden group"
-      )}>
+      <Card className="bg-slate-800/60 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/80 hover:shadow-2xl transition-all duration-300 rounded-2xl h-full flex flex-col overflow-hidden group">
         {/* Header with Icon and Badge */}
         <div className={cn(
           "h-32 bg-gradient-to-br relative",
@@ -731,46 +728,46 @@ function PremiumProgramCard({
 
         <CardContent className="p-6 flex-1 flex flex-col">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-emerald-600 transition-colors">
+            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
               {program.name}
             </h3>
             
             {program.tagline && (
-              <p className="text-emerald-600 font-medium text-sm mb-3">
+              <p className="text-cyan-400 font-medium text-sm mb-3">
                 {program.tagline}
               </p>
             )}
             
-            <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
+            <p className="text-slate-300 text-sm mb-4 leading-relaxed line-clamp-3">
               {program.description}
             </p>
 
             <div className="space-y-3 mb-6">
               <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-500">
+                <div className="flex items-center gap-2 text-slate-400">
                   <Calendar className="w-4 h-4" />
                   <span>Duration</span>
                 </div>
-                <span className="font-semibold text-gray-900">{program.durationDays} days</span>
+                <span className="font-semibold text-white">{program.durationDays} days</span>
               </div>
               
               <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-gray-500">
+                <div className="flex items-center gap-2 text-slate-400">
                   <Clock className="w-4 h-4" />
                   <span>Daily Time</span>
                 </div>
-                <span className="font-semibold text-gray-900">
+                <span className="font-semibold text-white">
                   {program.estimatedTimePerDay || '30min'}
                 </span>
               </div>
               
               {program.enrollmentCount && (
                 <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-gray-500">
+                  <div className="flex items-center gap-2 text-slate-400">
                     <Users className="w-4 h-4" />
                     <span>Enrolled</span>
                   </div>
-                  <span className="font-semibold text-gray-900">
+                  <span className="font-semibold text-white">
                     {program.enrollmentCount.toLocaleString()}+
                   </span>
                 </div>
