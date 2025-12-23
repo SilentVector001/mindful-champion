@@ -26,9 +26,14 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Group tournaments by state and count them
+    // Group UPCOMING tournaments by state and count them
     const stateGrouping = await prisma.tournament.groupBy({
       by: ['state'],
+      where: {
+        startDate: {
+          gte: new Date()
+        }
+      },
       _count: {
         id: true
       },

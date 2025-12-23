@@ -14,6 +14,14 @@ export async function GET(request: NextRequest) {
 
     const where: any = {}
 
+    // Always filter to upcoming tournaments (startDate >= today)
+    const upcoming = searchParams.get('upcoming')
+    if (upcoming !== 'false') {
+      where.startDate = {
+        gte: new Date()
+      }
+    }
+
     if (status) {
       where.status = status as TournamentStatus
     }
