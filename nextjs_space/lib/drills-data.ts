@@ -3248,3 +3248,22 @@ export const drillStats = {
     advanced: getDrillsByDifficulty('advanced').length
   }
 }
+
+// Additional helper functions
+export function getPopularDrills(count: number = 6): Drill[] {
+  // Return a mix of beginner and intermediate drills from different categories
+  const categories: DrillCategory[] = ['serving', 'dinking', 'third-shot', 'volley', 'footwork', 'strategy']
+  const popular: Drill[] = []
+  for (const cat of categories) {
+    const catDrills = getDrillsByCategory(cat)
+    if (catDrills.length > 0) {
+      popular.push(catDrills[0])
+    }
+    if (popular.length >= count) break
+  }
+  return popular.slice(0, count)
+}
+
+export function getDrillsByDuration(maxMinutes: number): Drill[] {
+  return drillsDatabase.filter(d => d.duration <= maxMinutes)
+}

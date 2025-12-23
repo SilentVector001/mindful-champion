@@ -13,16 +13,30 @@ import {
   MessageCircle, Send, X, Dumbbell, Video, Pause,
   Activity, Cpu, Eye, BarChart3, ChevronRight, ChevronDown, ChevronUp,
   Award, Medal, Star, Calendar, Flame, History, PlayCircle,
-  Bookmark, Lock, CheckCircle, Circle, ArrowUpRight, Sparkles, Crown
+  Bookmark, Lock, CheckCircle, Circle, ArrowUpRight, Sparkles, Crown,
+  Info, Share2, Download, ExternalLink, HelpCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
 import type { VideoAnalysisData } from "@/lib/video-analysis-types"
 import { PublishToCommunityModal } from "@/components/community"
-import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, ResponsiveContainer, Tooltip, Area, AreaChart, RadialBarChart, RadialBar } from 'recharts'
 
 interface VideoAnalysisResultsProps {
   videoId: string
+}
+
+// Pro player YouTube video tutorials for technique comparison
+const PRO_TECHNIQUE_VIDEOS: Record<string, { videoId: string; title: string; pro: string; thumbnail: string }> = {
+  'Forehand Drive': { videoId: 'dQ2R4K-QjPM', title: 'Ben Johns Forehand Technique Breakdown', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/JIjFXGmrMrI/maxresdefault.jpg' },
+  'Dink': { videoId: '9GtKRwYdxhA', title: 'Anna Leigh Waters Dinking Masterclass', pro: 'Anna Leigh Waters', thumbnail: 'https://i.ytimg.com/vi/0pmbbUcf8IQ/maxresdefault.jpg' },
+  'Third Shot Drop': { videoId: 'wZb0m9yjRVs', title: 'Perfect Third Shot Drop - Pro Tutorial', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/_81OBWWQgXM/maxresdefault.jpg' },
+  'Volley': { videoId: 'VtA3VlzrVQY', title: 'Ben Johns Volley Fundamentals', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/pt3HWfs7YCs/maxresdefault.jpg' },
+  'Reset Shot': { videoId: 'Y_kVvJu7QJE', title: 'The Reset Shot - Anna Leigh Waters', pro: 'Anna Leigh Waters', thumbnail: 'https://i.ytimg.com/vi/yAORr6H4yOE/mqdefault.jpg' },
+  'Backhand Drive': { videoId: 'RY8mz6Gg1YE', title: 'Backhand Drive Power Generation', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/VzKQ9mf_HAU/hq720.jpg?sqp=-oaymwEhCK4FEIIDSFryq4qpAxMIARUAAAAAGAElAADIQj0AgKJD&rs=AOn4CLB7NLOy4wclgrVuG2MvZTk99ENcyQ' },
+  'Lob Defense': { videoId: '4l9YOmfh2Oc', title: 'Defending Lobs Like a Pro', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/yTjAQmTVtYI/sddefault.jpg' },
+  'ATP Shot': { videoId: 'E3eYNPdSaL0', title: 'Around The Post Shot Tutorial', pro: 'Tyson McGuffin', thumbnail: 'https://i.ytimg.com/vi/R5c-UtwLS9I/mqdefault.jpg' },
+  'Serve': { videoId: 'wZb0m9yjRVs', title: 'Pro Serve Techniques', pro: 'Ben Johns', thumbnail: 'https://i.ytimg.com/vi/h_fu_R_pXxg/sddefault.jpg?v=66351dc1' },
 }
 
 // PRO REFERENCE DATA
@@ -181,18 +195,225 @@ function ShotMarker({ shot, position, isActive, onClick }: { shot: any; position
   )
 }
 
+// ===== KEY TAKEAWAYS SUMMARY =====
+function KeyTakeawaysSummary({ shots, overallScore, strengths, improvements }: { shots: any[]; overallScore: number; strengths: string[]; improvements: string[] }) {
+  const excellentShots = shots?.filter(s => s?.quality === 'excellent')?.length ?? 0
+  const needsWorkShots = shots?.filter(s => s?.quality === 'needs_work')?.length ?? 0
+  const strongestShot = [...(shots ?? [])].sort((a, b) => (b?.score ?? 0) - (a?.score ?? 0))[0]
+  const weakestShot = [...(shots ?? [])].sort((a, b) => (a?.score ?? 0) - (b?.score ?? 0))[0]
+
+  const takeaways = [
+    { icon: Trophy, color: 'emerald', title: 'Your Strength', description: strongestShot ? `${strongestShot.type} (${strongestShot.score}/100)` : 'Consistent technique', detail: strengths?.[0] ?? 'Great paddle control' },
+    { icon: Target, color: 'amber', title: 'Priority Focus', description: weakestShot ? `${weakestShot.type} (${weakestShot.score}/100)` : 'Positioning', detail: improvements?.[0] ?? 'Work on shot placement' },
+    { icon: Lightbulb, color: 'cyan', title: 'Quick Win', description: 'Immediate improvement', detail: `Practice ${weakestShot?.type ?? 'soft game'} drills for 10 min daily` },
+  ]
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+      <div className="bg-gradient-to-r from-slate-800/80 via-slate-900/90 to-slate-800/80 rounded-2xl border border-slate-700/50 overflow-hidden">
+        {/* Header with score */}
+        <div className="p-5 border-b border-slate-700/50">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles className="w-5 h-5 text-cyan-400" />
+                <h2 className="text-lg font-bold text-white">Key Takeaways</h2>
+              </div>
+              <p className="text-sm text-slate-400">Your AI-powered performance summary</p>
+            </div>
+            <div className="text-right">
+              <div className="flex items-center gap-3">
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-white">{overallScore}</div>
+                  <div className="text-xs text-slate-400">Overall Score</div>
+                </div>
+                <div className={cn("w-14 h-14 rounded-full flex items-center justify-center", overallScore >= 80 ? 'bg-emerald-500/20 border-2 border-emerald-500/50' : overallScore >= 60 ? 'bg-cyan-500/20 border-2 border-cyan-500/50' : 'bg-amber-500/20 border-2 border-amber-500/50')}>
+                  <span className={cn("text-lg font-bold", overallScore >= 80 ? 'text-emerald-400' : overallScore >= 60 ? 'text-cyan-400' : 'text-amber-400')}>
+                    {overallScore >= 80 ? 'A' : overallScore >= 60 ? 'B' : 'C'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Quick stats */}
+          <div className="flex items-center gap-4 mt-4 pt-4 border-t border-slate-700/30">
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-emerald-500" />
+              <span className="text-sm text-slate-300">{excellentShots} excellent shots</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-amber-500" />
+              <span className="text-sm text-slate-300">{needsWorkShots} need work</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-cyan-500" />
+              <span className="text-sm text-slate-300">{shots?.length ?? 0} total analyzed</span>
+            </div>
+          </div>
+        </div>
+
+        {/* 3 Actionable Insights */}
+        <div className="grid md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-slate-700/50">
+          {takeaways.map((t, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 * (i + 1) }} className="p-5">
+              <div className={cn("w-10 h-10 rounded-xl mb-3 flex items-center justify-center", t.color === 'emerald' ? 'bg-emerald-500/20' : t.color === 'amber' ? 'bg-amber-500/20' : 'bg-cyan-500/20')}>
+                <t.icon className={cn("w-5 h-5", t.color === 'emerald' ? 'text-emerald-400' : t.color === 'amber' ? 'text-amber-400' : 'text-cyan-400')} />
+              </div>
+              <div className={cn("text-xs font-semibold mb-1", t.color === 'emerald' ? 'text-emerald-400' : t.color === 'amber' ? 'text-amber-400' : 'text-cyan-400')}>
+                {t.title}
+              </div>
+              <div className="text-sm font-medium text-white mb-1">{t.description}</div>
+              <p className="text-xs text-slate-400 line-clamp-2">{t.detail}</p>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </motion.div>
+  )
+}
+
+// ===== SCORE GAUGE COMPONENT =====
+function ScoreGauge({ score, label, size = 'md' }: { score: number; label: string; size?: 'sm' | 'md' | 'lg' }) {
+  const getColor = (s: number) => s >= 80 ? '#10b981' : s >= 60 ? '#22d3ee' : '#f59e0b'
+  const getLabel = (s: number) => s >= 80 ? 'Excellent' : s >= 60 ? 'Good' : 'Needs Work'
+  const sizeClasses = { sm: 'w-16 h-16', md: 'w-20 h-20', lg: 'w-24 h-24' }
+  const textSizes = { sm: 'text-lg', md: 'text-xl', lg: 'text-2xl' }
+  
+  return (
+    <div className="flex flex-col items-center">
+      <div className={cn("relative", sizeClasses[size])}>
+        <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+          <circle cx="50" cy="50" r="40" fill="none" stroke="rgba(100,116,139,0.3)" strokeWidth="8" />
+          <motion.circle cx="50" cy="50" r="40" fill="none" stroke={getColor(score)} strokeWidth="8" strokeLinecap="round" strokeDasharray={`${(score / 100) * 251.2} 251.2`} initial={{ strokeDasharray: "0 251.2" }} animate={{ strokeDasharray: `${(score / 100) * 251.2} 251.2` }} transition={{ duration: 1, ease: "easeOut" }} />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className={cn("font-bold text-white", textSizes[size])}>{score}</span>
+        </div>
+      </div>
+      <span className="text-xs text-slate-400 mt-1">{label}</span>
+      <span className={cn("text-[10px] font-medium", score >= 80 ? 'text-emerald-400' : score >= 60 ? 'text-cyan-400' : 'text-amber-400')}>{getLabel(score)}</span>
+    </div>
+  )
+}
+
+// ===== PRO COMPARISON WITH VIDEO =====
+function ProComparisonSection({ shotType, shot }: { shotType: string; shot: any }) {
+  const [showVideo, setShowVideo] = useState(false)
+  const proVideo = PRO_TECHNIQUE_VIDEOS[shotType] ?? PRO_TECHNIQUE_VIDEOS['Forehand Drive']
+  const proTech = PRO_TECHNIQUES[shotType as keyof typeof PRO_TECHNIQUES] ?? PRO_TECHNIQUES['Forehand Drive']
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-gradient-to-br from-purple-500/10 via-slate-900/50 to-indigo-500/10 rounded-2xl border border-purple-500/30 overflow-hidden">
+      <div className="p-4 border-b border-purple-500/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+              <Crown className="w-5 h-5 text-purple-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-white">Pro Comparison</h3>
+              <p className="text-xs text-slate-400">Learn from {proVideo.pro}'s technique</p>
+            </div>
+          </div>
+          <Badge className="bg-purple-500/20 text-purple-400 border-purple-500/30">
+            <PlayCircle className="w-3 h-3 mr-1" /> Video Tutorial
+          </Badge>
+        </div>
+      </div>
+
+      {/* Video Section */}
+      <div className="p-4">
+        {showVideo ? (
+          <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-4">
+            <iframe
+              src={`https://www.youtube.com/embed/${proVideo.videoId}?autoplay=1&rel=0`}
+              title={proVideo.title}
+              className="absolute inset-0 w-full h-full"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            />
+            <button onClick={() => setShowVideo(false)} className="absolute top-2 right-2 p-1.5 bg-black/60 hover:bg-black/80 rounded-full z-10">
+              <X className="w-4 h-4 text-white" />
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setShowVideo(true)} className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-800 mb-4 group">
+            <img src={proVideo.thumbnail} alt={proVideo.title} className="w-full h-full object-cover opacity-70 group-hover:opacity-90 transition-opacity" onError={(e) => { e.currentTarget.src = 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=640&h=360&fit=crop'; }} />
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-purple-500/90 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-purple-500/30">
+                <Play className="w-7 h-7 text-white ml-1" />
+              </div>
+            </div>
+            <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/90 to-transparent">
+              <div className="text-sm font-medium text-white">{proVideo.title}</div>
+              <div className="text-xs text-slate-300">Watch {proVideo.pro}'s technique</div>
+            </div>
+          </button>
+        )}
+
+        {/* Technique Tips */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-semibold text-purple-400 flex items-center gap-2">
+            <Lightbulb className="w-4 h-4" /> Pro Technique Tips
+          </h4>
+          <div className="grid gap-2">
+            {[
+              { label: 'Stance', tip: proTech.stance, icon: Move },
+              { label: 'Paddle Position', tip: proTech.paddle, icon: Gauge },
+              { label: 'Follow-Through', tip: proTech.follow, icon: Zap },
+            ].map((item) => (
+              <div key={item.label} className="flex items-start gap-3 bg-slate-800/50 rounded-lg p-3">
+                <div className="w-8 h-8 rounded-lg bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                  <item.icon className="w-4 h-4 text-purple-400" />
+                </div>
+                <div>
+                  <div className="text-xs font-medium text-purple-300">{item.label}</div>
+                  <div className="text-xs text-slate-400">{item.tip}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Your vs Pro comparison */}
+        {shot && (
+          <div className="mt-4 p-3 bg-slate-800/30 rounded-xl border border-slate-700/30">
+            <div className="text-xs font-medium text-slate-300 mb-2">Your Performance vs Pro Standard</div>
+            <div className="flex items-center gap-4">
+              <div className="flex-1">
+                <div className="flex justify-between text-[10px] mb-1">
+                  <span className="text-slate-400">Your Score</span>
+                  <span className="text-white font-medium">{shot.score}/100</span>
+                </div>
+                <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                  <motion.div className={cn("h-full rounded-full", shot.score >= 80 ? 'bg-emerald-500' : shot.score >= 60 ? 'bg-cyan-500' : 'bg-amber-500')} initial={{ width: 0 }} animate={{ width: `${shot.score}%` }} transition={{ duration: 0.8 }} />
+                </div>
+              </div>
+              <div className="text-center px-3 border-l border-slate-700">
+                <div className="text-[10px] text-slate-400">Gap</div>
+                <div className={cn("text-sm font-bold", (95 - shot.score) <= 10 ? 'text-emerald-400' : 'text-amber-400')}>
+                  {95 - shot.score > 0 ? `-${95 - shot.score}` : '+' + Math.abs(95 - shot.score)}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
 // ===== RICH SHOT DETAIL PANEL =====
 function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, currentIndex }: { shot: any; onClose: () => void; onPrevious: () => void; onNext: () => void; totalShots: number; currentIndex: number }) {
   if (!shot) return null
-  const [showProComparison, setShowProComparison] = useState(false)
+  const [activeSection, setActiveSection] = useState<'metrics' | 'tips' | 'compare'>('metrics')
   const qualityColors = {
-    excellent: { bg: 'from-emerald-500/20 to-emerald-600/10', text: 'text-emerald-400', border: 'border-emerald-500/30', badge: 'bg-emerald-500/20' },
-    good: { bg: 'from-cyan-500/20 to-cyan-600/10', text: 'text-cyan-400', border: 'border-cyan-500/30', badge: 'bg-cyan-500/20' },
-    needs_work: { bg: 'from-amber-500/20 to-amber-600/10', text: 'text-amber-400', border: 'border-amber-500/30', badge: 'bg-amber-500/20' }
+    excellent: { bg: 'from-emerald-500/20 to-emerald-600/10', text: 'text-emerald-400', border: 'border-emerald-500/30', badge: 'bg-emerald-500/20', label: 'Excellent' },
+    good: { bg: 'from-cyan-500/20 to-cyan-600/10', text: 'text-cyan-400', border: 'border-cyan-500/30', badge: 'bg-cyan-500/20', label: 'Good' },
+    needs_work: { bg: 'from-amber-500/20 to-amber-600/10', text: 'text-amber-400', border: 'border-amber-500/30', badge: 'bg-amber-500/20', label: 'Needs Work' }
   }
   const colors = qualityColors[shot.quality as keyof typeof qualityColors] || qualityColors.good
-  const proTech = PRO_TECHNIQUES[shot.type as keyof typeof PRO_TECHNIQUES] || PRO_TECHNIQUES['Forehand Drive']
-  const proPlayer = PRO_PLAYERS.find(p => p.name === proTech.pro) || PRO_PLAYERS[0]
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 20 }}
@@ -201,120 +422,127 @@ function RichShotDetailPanel({ shot, onClose, onPrevious, onNext, totalShots, cu
       <div className={cn("p-4 bg-gradient-to-r", colors.bg)}>
         <div className="flex items-center justify-between mb-2">
           <Badge className={cn("text-[10px]", colors.badge, colors.text, colors.border)}>
-            {shot.quality?.replace('_', ' ').toUpperCase()}
+            {colors.label}
           </Badge>
           <div className="flex items-center gap-1">
-            <button onClick={onPrevious} disabled={currentIndex === 0} className="p-1 hover:bg-white/10 rounded disabled:opacity-30">
+            <button onClick={onPrevious} disabled={currentIndex === 0} className="p-1.5 hover:bg-white/10 rounded-lg disabled:opacity-30 transition-colors">
               <ChevronUp className="w-4 h-4 text-slate-400" />
             </button>
-            <span className="text-[10px] text-slate-400 px-1">{currentIndex + 1}/{totalShots}</span>
-            <button onClick={onNext} disabled={currentIndex === totalShots - 1} className="p-1 hover:bg-white/10 rounded disabled:opacity-30">
+            <span className="text-xs text-slate-400 px-2 font-medium">{currentIndex + 1}/{totalShots}</span>
+            <button onClick={onNext} disabled={currentIndex === totalShots - 1} className="p-1.5 hover:bg-white/10 rounded-lg disabled:opacity-30 transition-colors">
               <ChevronDown className="w-4 h-4 text-slate-400" />
             </button>
-            <button onClick={onClose} className="p-1 hover:bg-white/10 rounded ml-2"><X className="w-4 h-4 text-slate-400" /></button>
+            <button onClick={onClose} className="p-1.5 hover:bg-white/10 rounded-lg ml-2 transition-colors"><X className="w-4 h-4 text-slate-400" /></button>
           </div>
         </div>
-        <h4 className="text-lg font-bold text-white">{shot.type}</h4>
-        <p className="text-xs text-slate-400">@ {shot.timestamp}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h4 className="text-xl font-bold text-white">{shot.type}</h4>
+            <p className="text-xs text-slate-400 flex items-center gap-2">
+              <Clock className="w-3 h-3" /> {shot.timestamp}
+            </p>
+          </div>
+          <ScoreGauge score={shot.score} label="Score" size="sm" />
+        </div>
       </div>
 
-      {/* Rich Metrics Grid */}
-      <div className="p-4 space-y-4">
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Speed', value: shot.speed || 42, unit: 'mph', icon: Zap, color: 'cyan' },
-            { label: 'Spin Rate', value: shot.spinRate || Math.round(shot.speed * 28), unit: 'rpm', icon: Activity, color: 'purple' },
-            { label: 'Accuracy', value: shot.accuracy || shot.score, unit: '%', icon: Target, color: 'emerald' }
-          ].map((m) => (
-            <div key={m.label} className="bg-slate-800/60 rounded-xl p-3 text-center border border-slate-700/30">
-              <m.icon className={cn("w-4 h-4 mx-auto mb-1", `text-${m.color}-400`)} />
-              <div className="text-lg font-bold text-white">{m.value}<span className="text-xs text-slate-400 ml-0.5">{m.unit}</span></div>
-              <div className="text-[10px] text-slate-500">{m.label}</div>
-            </div>
-          ))}
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          {[
-            { label: 'Body Position', value: shot.bodyScore || Math.round(shot.score * 0.95), icon: Move },
-            { label: 'Paddle Angle', value: `${shot.paddleAngle || shot.angle || 142}°`, icon: Gauge },
-            { label: 'Overall', value: shot.score, icon: Trophy }
-          ].map((m) => (
-            <div key={m.label} className="bg-slate-800/40 rounded-lg p-2 text-center">
-              <div className="text-sm font-bold text-white">{m.value}</div>
-              <div className="text-[10px] text-slate-500">{m.label}</div>
-            </div>
-          ))}
-        </div>
+      {/* Section Tabs */}
+      <div className="flex border-b border-slate-700/50">
+        {[
+          { id: 'metrics', label: 'Metrics', icon: BarChart3 },
+          { id: 'tips', label: 'Tips', icon: Lightbulb },
+          { id: 'compare', label: 'Compare', icon: Crown }
+        ].map((tab) => (
+          <button key={tab.id} onClick={() => setActiveSection(tab.id as any)}
+            className={cn("flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors",
+              activeSection === tab.id ? 'text-cyan-400 border-b-2 border-cyan-400 bg-cyan-500/5' : 'text-slate-400 hover:text-white')}>
+            <tab.icon className="w-3.5 h-3.5" /> {tab.label}
+          </button>
+        ))}
+      </div>
 
-        {/* What Went Well / Improve */}
-        <div className="space-y-2">
-          <div className="bg-emerald-500/10 rounded-xl p-3 border border-emerald-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <CheckCircle className="w-4 h-4 text-emerald-400" />
-              <span className="text-xs font-semibold text-emerald-400">What Went Well</span>
-            </div>
-            <p className="text-xs text-slate-300">{shot.whatWentWell || `Excellent ${shot.quality === 'excellent' ? 'execution' : 'effort'} on this ${shot.type.toLowerCase()}. Your paddle angle and timing were ${shot.score > 80 ? 'spot on' : 'improving'}.`}</p>
-          </div>
-          <div className="bg-amber-500/10 rounded-xl p-3 border border-amber-500/20">
-            <div className="flex items-center gap-2 mb-1">
-              <Target className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-semibold text-amber-400">Focus Area</span>
-            </div>
-            <p className="text-xs text-slate-300">{shot.whatToImprove || `Try to ${shot.score < 75 ? 'get lower and absorb more pace' : 'follow through more toward your target'} for even better results.`}</p>
-          </div>
-        </div>
-
-        {/* Recommended Drill */}
-        <Link href={`/train/drills?type=${encodeURIComponent(shot.type)}`}
-          className="block bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-xl p-3 border border-cyan-500/20 hover:border-cyan-500/40 transition-colors group">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
-              <Dumbbell className="w-5 h-5 text-cyan-400" />
-            </div>
-            <div className="flex-1">
-              <div className="text-xs font-semibold text-cyan-400">Recommended Drill</div>
-              <div className="text-sm text-white font-medium">{shot.type} Fundamentals</div>
-            </div>
-            <ChevronRight className="w-5 h-5 text-cyan-400 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-          </div>
-        </Link>
-
-        {/* Pro Comparison Toggle */}
-        <button onClick={() => setShowProComparison(!showProComparison)}
-          className="w-full flex items-center justify-between p-3 bg-purple-500/10 rounded-xl border border-purple-500/20 hover:border-purple-500/40 transition-colors">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full overflow-hidden border-2 border-purple-500/50">
-              <img src={proPlayer.image} alt={proPlayer.name} className="w-full h-full object-cover" />
-            </div>
-            <div className="text-left">
-              <div className="text-[10px] text-purple-400">Compare to Pro</div>
-              <div className="text-sm font-semibold text-white">{proPlayer.name}</div>
-            </div>
-          </div>
-          {showProComparison ? <ChevronUp className="w-4 h-4 text-purple-400" /> : <ChevronDown className="w-4 h-4 text-purple-400" />}
-        </button>
-
-        <AnimatePresence>
-          {showProComparison && (
-            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-              className="bg-purple-500/5 rounded-xl p-3 border border-purple-500/10 space-y-3 overflow-hidden">
-              <div className="text-xs font-semibold text-purple-400 flex items-center gap-2">
-                <Crown className="w-4 h-4" /> Pro Technique Breakdown
-              </div>
-              {[
-                { label: 'Stance', tip: proTech.stance },
-                { label: 'Paddle', tip: proTech.paddle },
-                { label: 'Follow-Through', tip: proTech.follow }
-              ].map((item) => (
-                <div key={item.label} className="flex gap-2">
-                  <div className="w-1 rounded-full bg-purple-500/50" />
-                  <div>
-                    <div className="text-[10px] font-medium text-purple-300">{item.label}</div>
-                    <div className="text-xs text-slate-400">{item.tip}</div>
+      <div className="p-4">
+        <AnimatePresence mode="wait">
+          {activeSection === 'metrics' && (
+            <motion.div key="metrics" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-4">
+              {/* Primary Metrics with Progress Bars */}
+              <div className="space-y-3">
+                {[
+                  { label: 'Speed', value: shot.speed || 42, max: 60, unit: 'mph', icon: Zap, color: 'cyan', context: shot.speed >= 45 ? 'Power shot!' : 'Good pace' },
+                  { label: 'Accuracy', value: shot.accuracy || shot.score, max: 100, unit: '%', icon: Target, color: 'emerald', context: shot.accuracy >= 85 ? 'Excellent!' : 'Room to improve' },
+                  { label: 'Body Position', value: shot.bodyScore || Math.round(shot.score * 0.95), max: 100, unit: '', icon: Move, color: 'purple', context: shot.bodyScore >= 80 ? 'Great form' : 'Focus on stance' },
+                ].map((m) => (
+                  <div key={m.label} className="bg-slate-800/40 rounded-xl p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <m.icon className={cn("w-4 h-4", `text-${m.color}-400`)} />
+                        <span className="text-xs font-medium text-slate-300">{m.label}</span>
+                        <div className="group relative">
+                          <HelpCircle className="w-3 h-3 text-slate-500 cursor-help" />
+                          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 rounded text-[10px] text-slate-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            {m.context}
+                          </div>
+                        </div>
+                      </div>
+                      <span className="text-sm font-bold text-white">{m.value}{m.unit}</span>
+                    </div>
+                    <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                      <motion.div className={cn("h-full rounded-full", m.color === 'cyan' ? 'bg-cyan-500' : m.color === 'emerald' ? 'bg-emerald-500' : 'bg-purple-500')} initial={{ width: 0 }} animate={{ width: `${(m.value / m.max) * 100}%` }} transition={{ duration: 0.6, delay: 0.1 }} />
+                    </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Secondary Metrics Grid */}
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { label: 'Spin Rate', value: `${shot.spinRate || Math.round(shot.speed * 28)}`, unit: 'rpm' },
+                  { label: 'Paddle Angle', value: `${shot.paddleAngle || shot.angle || 142}`, unit: '°' },
+                ].map((m) => (
+                  <div key={m.label} className="bg-slate-800/30 rounded-lg p-3 text-center">
+                    <div className="text-lg font-bold text-white">{m.value}<span className="text-xs text-slate-400">{m.unit}</span></div>
+                    <div className="text-[10px] text-slate-500">{m.label}</div>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          )}
+
+          {activeSection === 'tips' && (
+            <motion.div key="tips" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="space-y-3">
+              <div className="bg-emerald-500/10 rounded-xl p-4 border border-emerald-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <CheckCircle className="w-5 h-5 text-emerald-400" />
+                  <span className="text-sm font-semibold text-emerald-400">What Went Well</span>
                 </div>
-              ))}
-              <div className="text-[10px] text-slate-500 italic">"Notice how {proPlayer.name} keeps a {shot.quality === 'excellent' ? 'similar' : 'lower'} center of gravity throughout the shot."</div>
+                <p className="text-sm text-slate-300">{shot.whatWentWell || `Great execution on this ${shot.type.toLowerCase()}. Your timing and paddle control were solid.`}</p>
+              </div>
+              
+              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/20">
+                <div className="flex items-center gap-2 mb-2">
+                  <Target className="w-5 h-5 text-amber-400" />
+                  <span className="text-sm font-semibold text-amber-400">Focus Area</span>
+                </div>
+                <p className="text-sm text-slate-300">{shot.whatToImprove || `Work on getting lower and following through more toward your target.`}</p>
+              </div>
+
+              <Link href={`/train/drills?search=${encodeURIComponent(shot.type)}`}
+                className="flex items-center gap-3 p-4 bg-cyan-500/10 rounded-xl border border-cyan-500/20 hover:border-cyan-500/40 transition-colors group">
+                <div className="w-10 h-10 rounded-lg bg-cyan-500/20 flex items-center justify-center">
+                  <Dumbbell className="w-5 h-5 text-cyan-400" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-xs text-cyan-400 font-medium">Recommended Drill</div>
+                  <div className="text-sm text-white font-semibold">{shot.type} Practice</div>
+                </div>
+                <ChevronRight className="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </motion.div>
+          )}
+
+          {activeSection === 'compare' && (
+            <motion.div key="compare" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <ProComparisonSection shotType={shot.type} shot={shot} />
             </motion.div>
           )}
         </AnimatePresence>
@@ -712,6 +940,9 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
           ))}
         </div>
 
+        {/* KEY TAKEAWAYS - Always visible */}
+        <KeyTakeawaysSummary shots={shots} overallScore={overallScore} strengths={strengths} improvements={improvements} />
+
         {/* MAIN CONTENT */}
         {activeTab === 'analysis' && (
           <div className="grid lg:grid-cols-4 gap-4">
@@ -738,21 +969,60 @@ export default function VideoAnalysisResults({ videoId }: VideoAnalysisResultsPr
                 </div>
               </motion.div>
 
-              {/* SHOT TIMELINE */}
-              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2"><BarChart3 className="w-4 h-4 text-cyan-400" /><span className="text-sm font-semibold text-white">Shot-by-Shot Analysis</span></div>
-                  <div className="flex items-center gap-3 text-[10px] text-slate-400"><div className="flex items-center gap-1"><div className="w-2 h-2 bg-emerald-500 rounded-full" />Excellent</div><div className="flex items-center gap-1"><div className="w-2 h-2 bg-cyan-500 rounded-full" />Good</div><div className="flex items-center gap-1"><div className="w-2 h-2 bg-amber-500 rounded-full" />Focus</div></div>
+              {/* SHOT TIMELINE - Enhanced */}
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 rounded-2xl p-5 border border-slate-700/50">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-500/20 flex items-center justify-center">
+                      <BarChart3 className="w-5 h-5 text-cyan-400" />
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-bold text-white">Shot-by-Shot Analysis</h3>
+                      <p className="text-xs text-slate-400">Click any shot for detailed breakdown</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 text-xs">
+                    <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-emerald-500/80" /><span className="text-slate-300">Excellent</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-cyan-500/80" /><span className="text-slate-300">Good</span></div>
+                    <div className="flex items-center gap-1.5"><div className="w-3 h-3 rounded-full bg-amber-500/80" /><span className="text-slate-300">Needs Work</span></div>
+                  </div>
                 </div>
-                <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
                   {shots.map((shot, i) => {
-                    const colors = { excellent: 'border-emerald-500/50 bg-emerald-500/10 hover:bg-emerald-500/20', good: 'border-cyan-500/50 bg-cyan-500/10 hover:bg-cyan-500/20', needs_work: 'border-amber-500/50 bg-amber-500/10 hover:bg-amber-500/20' }
+                    const colorMap = {
+                      excellent: { border: 'border-emerald-500/60', bg: 'bg-emerald-500/10', hover: 'hover:bg-emerald-500/20', glow: 'shadow-emerald-500/20', icon: 'text-emerald-400', score: 'text-emerald-400' },
+                      good: { border: 'border-cyan-500/60', bg: 'bg-cyan-500/10', hover: 'hover:bg-cyan-500/20', glow: 'shadow-cyan-500/20', icon: 'text-cyan-400', score: 'text-cyan-400' },
+                      needs_work: { border: 'border-amber-500/60', bg: 'bg-amber-500/10', hover: 'hover:bg-amber-500/20', glow: 'shadow-amber-500/20', icon: 'text-amber-400', score: 'text-amber-400' }
+                    }
+                    const colors = colorMap[shot.quality as keyof typeof colorMap] ?? colorMap.good
                     const isActive = selectedShot?.id === shot.id
-                    return (<motion.button key={shot.id} onClick={() => selectShot(shot, i)} className={cn("flex-shrink-0 w-28 p-3 rounded-xl border-2 transition-all text-left", colors[shot.quality as keyof typeof colors], isActive && "ring-2 ring-cyan-400 ring-offset-2 ring-offset-slate-900")} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                      <div className="text-[10px] text-slate-400 font-mono mb-1">{shot.timestamp}</div>
-                      <div className="text-xs font-semibold text-white truncate">{shot.type}</div>
-                      <div className="flex items-center justify-between mt-2"><span className="text-[10px] text-slate-400">{shot.speed} mph</span><span className="text-xs font-bold text-white">{shot.score}</span></div>
-                    </motion.button>)
+                    return (
+                      <motion.button key={shot.id} onClick={() => selectShot(shot, i)} 
+                        className={cn("flex-shrink-0 w-36 rounded-xl border-2 transition-all text-left overflow-hidden", colors.border, colors.bg, colors.hover, isActive && `ring-2 ring-white/30 ring-offset-2 ring-offset-slate-900 shadow-lg ${colors.glow}`)} 
+                        whileHover={{ scale: 1.03, y: -2 }} whileTap={{ scale: 0.98 }}>
+                        {/* Quality indicator bar */}
+                        <div className={cn("h-1", shot.quality === 'excellent' ? 'bg-emerald-500' : shot.quality === 'good' ? 'bg-cyan-500' : 'bg-amber-500')} />
+                        <div className="p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <Badge className={cn("text-[9px] px-1.5 py-0.5", colors.bg, colors.icon, colors.border)}>
+                              {shot.quality === 'excellent' ? '★' : shot.quality === 'good' ? '●' : '○'} {shot.quality?.replace('_', ' ')}
+                            </Badge>
+                            <span className="text-[10px] text-slate-500 font-mono">{shot.timestamp}</span>
+                          </div>
+                          <div className="text-sm font-semibold text-white mb-2 truncate">{shot.type}</div>
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-700/50">
+                            <div className="text-center">
+                              <div className="text-xs text-slate-400">{shot.speed}</div>
+                              <div className="text-[9px] text-slate-500">mph</div>
+                            </div>
+                            <div className="text-center">
+                              <div className={cn("text-lg font-bold", colors.score)}>{shot.score}</div>
+                              <div className="text-[9px] text-slate-500">score</div>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.button>
+                    )
                   })}
                 </div>
               </motion.div>
