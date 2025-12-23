@@ -11,10 +11,9 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   typescript: {
-    ignoreBuildErrors: true,
+    ignoreBuildErrors: false,
   },
   images: { unoptimized: true },
 };
 
 module.exports = nextConfig;
-// Build trigger Tue Dec 23 03:48:35 UTC 2025

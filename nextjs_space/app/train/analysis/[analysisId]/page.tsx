@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
-import VideoAnalysisDetail from '@/components/train/video-analysis-detail'
+import VideoAnalysisResults from '@/components/train/video-analysis-results'
 import { ErrorBoundary } from '@/components/error-boundary'
 
 export default async function VideoAnalysisDetailPage({ 
@@ -49,7 +49,7 @@ export default async function VideoAnalysisDetailPage({
 
   return (
     <ErrorBoundary>
-      <VideoAnalysisDetail videoId={analysis.id} />
+      <VideoAnalysisResults videoId={analysis.id} />
     </ErrorBoundary>
   )
 }

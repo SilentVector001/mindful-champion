@@ -1,10 +1,10 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, AnimatePresence } from "framer-motion"
+import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
@@ -19,7 +19,8 @@ import {
   HardDrive, ChevronRight, MoreVertical, Trash2, FileText, ExternalLink,
   Home, Library, HelpCircle, Bookmark, MessageCircle, RotateCcw, Globe,
   Shield, Wifi, Mic, ChevronDown, X, Menu, BookOpen, Settings, Filter,
-  SortDesc, Tag, Calendar, CircleAlert
+  SortDesc, Tag, Calendar, CircleAlert, Crosshair, Move, Waves, ScanLine,
+  Radar, Scan, Focus, Clapperboard
 } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import { cn } from "@/lib/utils"
@@ -31,191 +32,129 @@ import { parseScore, formatScore, getSafeScore } from "@/lib/video-analysis/scor
 import { upload } from '@vercel/blob/client'
 import { celebrateDayComplete, showAchievementToast } from "@/lib/celebrations"
 
-// Onboarding Walkthrough Component - Spotlight Style
-function OnboardingWalkthrough({ 
-  onComplete, 
-  step 
-}: { 
-  onComplete: () => void
-  step: number 
-}) {
-  const steps = [
-    {
-      title: "Upload your game footage",
-      description: "Drop your video here or click to browse. We support MP4, MOV, and AVI files up to 500MB.",
-      target: "upload-dropzone",
-      icon: Upload,
-      position: "below" as const,
-      arrowPosition: "top" as const
-    },
-    {
-      title: "AI analyzes every shot",
-      description: "Coach Kai's neural networks analyze technique, movement patterns, shot selection, and strategic positioning.",
-      target: "how-it-works",
-      icon: Brain,
-      position: "above" as const,
-      arrowPosition: "bottom" as const
-    },
-    {
-      title: "Your videos live here",
-      description: "View your library with AI scores, insights, and track your improvement over time.",
-      target: "library-tab",
-      icon: Library,
-      position: "below" as const,
-      arrowPosition: "top" as const
-    }
-  ]
-
-  const currentStep = steps[step - 1]
-  if (!currentStep) return null
-
-  // Get target element position
-  const [tooltipStyle, setTooltipStyle] = useState<React.CSSProperties>({})
-  const [spotlightStyle, setSpotlightStyle] = useState<React.CSSProperties>({})
-
-  useEffect(() => {
-    const targetEl = document.getElementById(currentStep.target)
-    if (targetEl) {
-      const rect = targetEl.getBoundingClientRect()
-      const scrollY = window.scrollY
-      
-      // Spotlight around target element
-      setSpotlightStyle({
-        top: rect.top + scrollY - 8,
-        left: rect.left - 8,
-        width: rect.width + 16,
-        height: rect.height + 16,
-      })
-      
-      // Position tooltip relative to element
-      if (currentStep.position === 'below') {
-        setTooltipStyle({
-          top: rect.bottom + scrollY + 16,
-          left: Math.max(16, Math.min(rect.left + rect.width / 2 - 200, window.innerWidth - 416)),
-        })
-      } else {
-        setTooltipStyle({
-          top: rect.top + scrollY - 220,
-          left: Math.max(16, Math.min(rect.left + rect.width / 2 - 200, window.innerWidth - 416)),
-        })
-      }
-    }
-  }, [step, currentStep.target, currentStep.position])
-
+// =====================================================
+// ANIMATED BACKGROUND PARTICLES
+// =====================================================
+function FloatingParticles() {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-[100]"
-    >
-      {/* Very light overlay - content clearly visible */}
-      <div 
-        className="absolute inset-0 pointer-events-auto"
-        onClick={onComplete}
-        style={{
-          background: 'rgba(255,255,255,0.15)',
-        }}
-      />
-      
-      {/* Animated spotlight ring around target */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ 
-          opacity: 1, 
-          scale: 1,
-          boxShadow: [
-            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)",
-            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 50px rgba(0,200,255,1), 0 0 100px rgba(0,200,255,0.5)",
-            "0 0 0 9999px rgba(255,255,255,0.15), 0 0 40px rgba(0,200,255,0.8), 0 0 80px rgba(0,200,255,0.4)"
-          ]
-        }}
-        transition={{
-          boxShadow: {
-            duration: 2,
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {Array.from({ length: 30 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-emerald-500/30"
+          initial={{
+            x: Math.random() * (typeof window !== 'undefined' ? window.innerWidth : 1000),
+            y: Math.random() * (typeof window !== 'undefined' ? window.innerHeight : 800),
+          }}
+          animate={{
+            y: [null, Math.random() * -500 - 100],
+            opacity: [0, 1, 0],
+          }}
+          transition={{
+            duration: 10 + Math.random() * 10,
             repeat: Infinity,
-            ease: "easeInOut"
-          }
-        }}
-        className="absolute rounded-xl border-4 border-kai-primary pointer-events-none z-[101]"
-        style={{
-          ...spotlightStyle,
-          background: 'rgba(255,255,255,0.02)',
-        }}
-      />
-      
-      {/* Tooltip with arrow */}
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        className="absolute z-[102] pointer-events-auto"
-        style={tooltipStyle}
-      >
-        {/* Arrow */}
-        <div className={cn(
-          "absolute w-4 h-4 bg-slate-900 border-kai-primary rotate-45 z-[103]",
-          currentStep.arrowPosition === 'top' && "left-1/2 -translate-x-1/2 -top-2 border-l-2 border-t-2",
-          currentStep.arrowPosition === 'bottom' && "left-1/2 -translate-x-1/2 -bottom-2 border-r-2 border-b-2"
-        )} />
-        
-        <Card className="bg-slate-900 border-2 border-kai-primary shadow-2xl shadow-kai-primary/30 w-[400px] relative">
-          <CardContent className="p-5">
-            <div className="flex items-start gap-4">
-              <div className="w-11 h-11 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center flex-shrink-0">
-                <currentStep.icon className="w-5 h-5 text-white" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center gap-2 mb-2">
-                  <Badge className="bg-kai-primary/20 text-kai-primary border-kai-primary/30 text-xs">
-                    Step {step} of 3
-                  </Badge>
-                </div>
-                <h3 className="text-base font-bold text-white mb-1.5">{currentStep.title}</h3>
-                <p className="text-slate-300 text-sm mb-3 leading-relaxed">{currentStep.description}</p>
-                <div className="flex items-center justify-between">
-                  <Link href="/help" className="text-kai-primary text-xs hover:underline flex items-center gap-1">
-                    <HelpCircle className="w-3 h-3" />
-                    Need more help? Visit Help Center
-                  </Link>
-                  <Button
-                    onClick={onComplete}
-                    size="sm"
-                    className="bg-gradient-to-r from-kai-primary to-kai-secondary text-sm px-4"
-                  >
-                    {step === 3 ? "Got it!" : "Next"}
-                    <ArrowRight className="w-4 h-4 ml-1.5" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-            {/* Progress dots */}
-            <div className="flex justify-center gap-2 mt-3">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={cn(
-                    "w-2 h-2 rounded-full transition-colors",
-                    s === step ? "bg-kai-primary" : "bg-slate-600"
-                  )}
-                />
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </motion.div>
-    </motion.div>
+            delay: Math.random() * 5,
+          }}
+          style={{
+            left: `${Math.random() * 100}%`,
+          }}
+        />
+      ))}
+    </div>
   )
 }
 
-// Video Card Component - Redesigned
-function VideoCard({ 
-  video, 
-  onDelete, 
-  onAnalyze, 
+// =====================================================
+// GRID LINES BACKGROUND
+// =====================================================
+function TechGrid() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-20">
+      <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <pattern id="grid" width="60" height="60" patternUnits="userSpaceOnUse">
+            <path d="M 60 0 L 0 0 0 60" fill="none" stroke="rgba(16, 185, 129, 0.3)" strokeWidth="0.5" />
+          </pattern>
+        </defs>
+        <rect width="100%" height="100%" fill="url(#grid)" />
+      </svg>
+      {/* Animated scan line */}
+      <motion.div
+        className="absolute left-0 right-0 h-px bg-gradient-to-r from-transparent via-emerald-500/50 to-transparent"
+        animate={{ y: [0, 800] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+      />
+    </div>
+  )
+}
+
+// =====================================================
+// ANIMATED PROCESS TIMELINE
+// =====================================================
+function ProcessTimeline({ isUploading, isAnalyzing }: { isUploading: boolean; isAnalyzing: boolean }) {
+  const steps = [
+    { icon: Upload, label: "Upload", desc: "Your footage", active: isUploading },
+    { icon: ScanLine, label: "Scan", desc: "Frame analysis", active: isAnalyzing },
+    { icon: Brain, label: "Process", desc: "AI detection", active: isAnalyzing },
+    { icon: BarChart3, label: "Results", desc: "Insights ready", active: false },
+  ]
+
+  return (
+    <div className="relative flex items-center justify-between max-w-2xl mx-auto">
+      {/* Connection line */}
+      <div className="absolute top-6 left-12 right-12 h-0.5 bg-slate-700">
+        <motion.div
+          className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+          initial={{ width: "0%" }}
+          animate={{ width: isAnalyzing ? "75%" : isUploading ? "25%" : "0%" }}
+          transition={{ duration: 1 }}
+        />
+      </div>
+      
+      {steps.map((step, idx) => (
+        <motion.div
+          key={idx}
+          className="relative z-10 flex flex-col items-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: idx * 0.1 }}
+        >
+          <motion.div
+            className={cn(
+              "w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500",
+              step.active
+                ? "bg-gradient-to-br from-emerald-500 to-cyan-500 shadow-lg shadow-emerald-500/50"
+                : "bg-slate-800 border border-slate-700"
+            )}
+            animate={step.active ? { scale: [1, 1.1, 1] } : {}}
+            transition={{ duration: 1, repeat: step.active ? Infinity : 0 }}
+          >
+            <step.icon className={cn("w-5 h-5", step.active ? "text-white" : "text-slate-500")} />
+          </motion.div>
+          <p className={cn(
+            "mt-2 text-sm font-medium",
+            step.active ? "text-emerald-400" : "text-slate-500"
+          )}>
+            {step.label}
+          </p>
+          <p className="text-xs text-slate-600">{step.desc}</p>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// =====================================================
+// PREMIUM VIDEO CARD
+// =====================================================
+function PremiumVideoCard({
+  video,
+  onDelete,
+  onAnalyze,
   onDownloadPDF,
   analyzing,
-  isNew 
-}: { 
+  isNew
+}: {
   video: VideoAnalysisData
   onDelete: (id: string) => void
   onAnalyze: (id: string, url: string) => void
@@ -223,140 +162,168 @@ function VideoCard({
   analyzing: boolean
   isNew?: boolean
 }) {
-  const statusConfig: Record<string, { color: string; icon: any; label: string; textColor: string; animate?: boolean }> = {
-    COMPLETED: { color: "bg-green-500", icon: CheckCircle2, label: "Complete", textColor: "text-green-400" },
-    PROCESSING: { color: "bg-yellow-500", icon: Loader2, label: "Processing", textColor: "text-yellow-400", animate: true },
-    PENDING: { color: "bg-slate-500", icon: Clock, label: "Pending", textColor: "text-slate-400" },
-    FAILED: { color: "bg-red-500", icon: CircleAlert, label: "Failed", textColor: "text-red-400" }
+  const [isHovered, setIsHovered] = useState(false)
+  
+  const statusConfig: Record<string, { color: string; gradient: string; icon: any; label: string }> = {
+    COMPLETED: { color: "emerald", gradient: "from-emerald-500 to-green-500", icon: CheckCircle2, label: "Complete" },
+    PROCESSING: { color: "amber", gradient: "from-amber-500 to-orange-500", icon: Loader2, label: "Processing" },
+    PENDING: { color: "slate", gradient: "from-slate-500 to-slate-600", icon: Clock, label: "Pending" },
+    FAILED: { color: "red", gradient: "from-red-500 to-rose-500", icon: CircleAlert, label: "Failed" }
   }
   
   const status = statusConfig[video.analysisStatus as keyof typeof statusConfig] || statusConfig.PENDING
   const StatusIcon = status.icon
 
-  // Extract tags from video data
-  const tags = video.shotTypes?.slice(0, 2).map(s => s.type) || []
-  const extraTags = (video.shotTypes?.length || 0) - 2
-
   return (
     <motion.div
-      initial={isNew ? { scale: 1.02, boxShadow: "0 0 30px rgba(0, 200, 255, 0.4)" } : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0, scale: 1, boxShadow: "none" }}
-      transition={{ duration: isNew ? 1.5 : 0.3 }}
-      whileHover={{ y: -6 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
       className="relative group"
     >
+      {/* Glow effect */}
+      <motion.div
+        className={cn(
+          "absolute -inset-1 rounded-2xl bg-gradient-to-r opacity-0 blur-xl transition-opacity duration-500",
+          status.gradient,
+          isHovered && "opacity-40"
+        )}
+      />
+      
+      {/* New video highlight */}
       {isNew && (
         <motion.div
           initial={{ opacity: 1 }}
           animate={{ opacity: 0 }}
-          transition={{ duration: 2, delay: 0.5 }}
-          className="absolute -inset-1 rounded-xl bg-gradient-to-r from-kai-primary/50 to-kai-secondary/50 blur-md z-0"
+          transition={{ duration: 3 }}
+          className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-emerald-500/50 to-cyan-500/50 blur-xl"
         />
       )}
       
-      <Card className="relative bg-card/40 backdrop-blur border-border/50 hover:border-kai-primary/50 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-2xl z-10">
-        {/* Thumbnail with Play Overlay */}
-        <div className="aspect-video relative overflow-hidden bg-gradient-to-br from-slate-900 to-slate-800">
+      <Card className="relative overflow-hidden bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 hover:border-emerald-500/50 transition-all duration-500">
+        {/* Thumbnail Section */}
+        <div className="aspect-video relative overflow-hidden">
+          {/* Video thumbnail or placeholder */}
           {video.thumbnailUrl ? (
             <Image
               src={video.thumbnailUrl}
               alt={video.title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-500"
+              className="object-cover transition-transform duration-700 group-hover:scale-110"
             />
           ) : video.videoUrl ? (
             <video
               src={video.videoUrl}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
               muted
               preload="metadata"
-              poster=""
             />
-          ) : null}
-          
-          {/* Attractive Placeholder - always show as fallback layer */}
-          <div className="absolute inset-0 bg-gradient-to-br from-kai-primary/20 via-slate-800 to-kai-secondary/20 flex flex-col items-center justify-center -z-10">
-            {/* Pickleball pattern background */}
-            <div className="absolute inset-0 opacity-10">
-              <div className="absolute top-4 left-4 w-8 h-8 rounded-full border-2 border-white/30" />
-              <div className="absolute top-8 right-6 w-6 h-6 rounded-full border-2 border-white/20" />
-              <div className="absolute bottom-6 left-8 w-5 h-5 rounded-full border-2 border-white/20" />
-              <div className="absolute bottom-4 right-4 w-7 h-7 rounded-full border-2 border-white/30" />
-            </div>
-            <div className="w-14 h-14 rounded-full bg-gradient-to-br from-kai-primary/40 to-kai-secondary/40 flex items-center justify-center mb-3 backdrop-blur-sm border border-white/10">
-              <VideoIcon className="w-7 h-7 text-white/70" />
-            </div>
-            <p className="text-white/60 text-xs font-medium max-w-[80%] text-center truncate px-2">
-              {video.title}
-            </p>
-          </div>
-          
-          {/* Gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/20 to-transparent" />
-          
-          {/* Play overlay - always visible but subtle */}
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
-              <Play className="w-8 h-8 text-white ml-1" />
-            </div>
-          </div>
-
-          {/* Status Badge - Top Right */}
-          <div className="absolute top-3 right-3">
-            <Badge className={cn(
-              "backdrop-blur border-0 shadow-lg flex items-center gap-1.5 px-2.5 py-1",
-              status.color + "/90 text-white"
-            )}>
-              <StatusIcon className={cn("w-3 h-3", status.animate && "animate-spin")} />
-              {status.label}
-            </Badge>
-          </div>
-
-          {/* AI Score - Bottom Left (if completed) */}
-          {video.analysisStatus === 'COMPLETED' && video.overallScore && (
-            <div className="absolute bottom-3 left-3">
-              <div className="bg-black/80 backdrop-blur rounded-xl px-4 py-2 border border-kai-primary/30">
-                <div className="text-2xl font-black text-kai-primary">
-                  {Math.round(video.overallScore)}
-                </div>
-                <div className="text-[10px] text-slate-400 uppercase tracking-wider">
-                  AI Score
-                </div>
+          ) : (
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800 via-slate-900 to-emerald-900/20 flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-slate-800/80 border border-slate-700 flex items-center justify-center">
+                <Film className="w-8 h-8 text-slate-600" />
               </div>
             </div>
           )}
-        </div>
-        
-        <CardContent className="p-4">
-          {/* Title */}
-          <h4 className="font-semibold text-foreground mb-2 truncate group-hover:text-kai-primary transition-colors text-sm">
-            {video.title}
-          </h4>
           
-          {/* Duration + Date */}
-          <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3">
-            {video.duration && video.duration > 0 && (
-              <>
-                <span>{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, '0')}</span>
-                <span>•</span>
-              </>
-            )}
-            <span>Uploaded {new Date(video.uploadedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+          {/* Overlay gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-transparent to-cyan-500/0 opacity-0 group-hover:opacity-20 transition-opacity duration-500" />
+          
+          {/* Play button overlay */}
+          <motion.div
+            className="absolute inset-0 flex items-center justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: isHovered ? 1 : 0 }}
+          >
+            <motion.div
+              className="w-16 h-16 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <Play className="w-6 h-6 text-white ml-1" />
+            </motion.div>
+          </motion.div>
+          
+          {/* Status badge */}
+          <div className="absolute top-3 right-3">
+            <motion.div
+              className={cn(
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full backdrop-blur-md",
+                `bg-${status.color}-500/20 border border-${status.color}-500/40`
+              )}
+              animate={status.label === "Processing" ? { scale: [1, 1.05, 1] } : {}}
+              transition={{ duration: 1.5, repeat: status.label === "Processing" ? Infinity : 0 }}
+            >
+              <StatusIcon className={cn(
+                "w-3.5 h-3.5",
+                status.label === "Processing" && "animate-spin",
+                `text-${status.color}-400`
+              )} />
+              <span className={`text-xs font-medium text-${status.color}-400`}>{status.label}</span>
+            </motion.div>
           </div>
           
-          {/* Tags */}
-          {tags.length > 0 && (
-            <div className="flex items-center gap-1.5 mb-4">
-              {tags.map((tag, i) => (
-                <Badge key={i} variant="outline" className="text-[10px] px-2 py-0.5 bg-card/50 border-border/50">
-                  {tag}
-                </Badge>
-              ))}
-              {extraTags > 0 && (
-                <Badge variant="outline" className="text-[10px] px-2 py-0.5 bg-card/50 border-border/50">
-                  +{extraTags} more
-                </Badge>
+          {/* AI Score - Bottom Left */}
+          {video.analysisStatus === 'COMPLETED' && video.overallScore && (
+            <div className="absolute bottom-3 left-3">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                className="bg-black/80 backdrop-blur-md rounded-xl px-4 py-2 border border-emerald-500/30"
+              >
+                <div className="text-3xl font-black bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                  {Math.round(video.overallScore)}
+                </div>
+                <div className="text-[10px] text-slate-400 uppercase tracking-widest">AI Score</div>
+              </motion.div>
+            </div>
+          )}
+          
+          {/* PRO badge */}
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-gradient-to-r from-emerald-500 to-cyan-500 text-white border-0 shadow-lg">
+              <Brain className="w-3 h-3 mr-1" />
+              PRO Analysis
+            </Badge>
+          </div>
+        </div>
+        
+        {/* Content Section */}
+        <CardContent className="p-4 space-y-4">
+          {/* Title & Date */}
+          <div>
+            <h3 className="font-semibold text-white truncate group-hover:text-emerald-400 transition-colors">
+              {video.title}
+            </h3>
+            <div className="flex items-center gap-2 text-xs text-slate-500 mt-1">
+              {video.duration && video.duration > 0 && (
+                <>
+                  <Timer className="w-3 h-3" />
+                  <span>{Math.floor(video.duration / 60)}:{String(video.duration % 60).padStart(2, '0')}</span>
+                  <span>•</span>
+                </>
               )}
+              <Calendar className="w-3 h-3" />
+              <span>{new Date(video.uploadedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+            </div>
+          </div>
+          
+          {/* Quick Metrics */}
+          {video.analysisStatus === 'COMPLETED' && video.technicalScores && (
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: "Form", value: video.technicalScores?.readyPosition || 0 },
+                { label: "Tech", value: video.technicalScores?.overall || 0 },
+                { label: "Follow", value: video.technicalScores?.followThrough || 0 },
+              ].map((metric, idx) => (
+                <div key={idx} className="text-center p-2 rounded-lg bg-slate-800/50">
+                  <div className="text-lg font-bold text-emerald-400">{metric.value}</div>
+                  <div className="text-[10px] text-slate-500 uppercase">{metric.label}</div>
+                </div>
+              ))}
             </div>
           )}
           
@@ -365,30 +332,30 @@ function VideoCard({
             {video.analysisStatus === 'COMPLETED' ? (
               <Button
                 size="sm"
-                className="flex-1 bg-gradient-to-r from-kai-primary/20 to-kai-secondary/20 border border-kai-primary/40 text-kai-primary hover:from-kai-primary hover:to-kai-secondary hover:text-white text-xs h-8"
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white border-0"
                 asChild
               >
                 <Link href={`/train/analysis/${video.id}`}>
-                  <Eye className="w-3.5 h-3.5 mr-1.5" />
+                  <Eye className="w-4 h-4 mr-2" />
                   View Results
                 </Link>
               </Button>
             ) : video.analysisStatus === 'PENDING' || video.analysisStatus === 'FAILED' ? (
               <Button
                 size="sm"
-                className="flex-1 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 border border-yellow-500/40 text-yellow-400 hover:from-yellow-500 hover:to-orange-500 hover:text-white text-xs h-8"
+                className="flex-1 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white border-0"
                 onClick={() => onAnalyze(video.id, video.videoUrl)}
                 disabled={analyzing}
               >
                 {analyzing ? (
-                  <><Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Analyzing...</>
+                  <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyzing...</>
                 ) : (
-                  <><Zap className="w-3.5 h-3.5 mr-1.5" />Analyze Now</>
+                  <><Zap className="w-4 h-4 mr-2" />Analyze Now</>
                 )}
               </Button>
             ) : (
-              <Button size="sm" variant="outline" className="flex-1 text-xs h-8" disabled>
-                <Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />Processing...
+              <Button size="sm" className="flex-1" disabled>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />Processing...
               </Button>
             )}
             
@@ -397,9 +364,9 @@ function VideoCard({
                 size="sm"
                 variant="outline"
                 onClick={() => onDownloadPDF(video)}
-                className="border-border/50 hover:bg-card h-8 w-8 p-0"
+                className="border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-500/10"
               >
-                <FileText className="w-3.5 h-3.5" />
+                <FileText className="w-4 h-4" />
               </Button>
             )}
             
@@ -407,9 +374,9 @@ function VideoCard({
               size="sm"
               variant="outline"
               onClick={() => onDelete(video.id)}
-              className="text-red-400 hover:text-white hover:bg-red-500 border-red-500/30 h-8 w-8 p-0"
+              className="border-slate-700 hover:border-red-500/50 hover:bg-red-500/10 text-red-400"
             >
-              <Trash2 className="w-3.5 h-3.5" />
+              <Trash2 className="w-4 h-4" />
             </Button>
           </div>
         </CardContent>
@@ -418,334 +385,17 @@ function VideoCard({
   )
 }
 
-// View Examples Modal
-function ViewExamplesModal({ onClose }: { onClose: () => void }) {
-  const exampleVideos = [
-    {
-      id: 1,
-      title: "Pro Serve Analysis",
-      videoUrl: "/videos/examples/IMG_0421.MOV",
-      score: 85,
-      tags: ["Serve", "Technique"],
-      strengths: ["Strong topspin on serve", "Consistent ball toss placement", "Good leg drive and power generation"],
-      improvements: ["Follow-through could be more complete", "Slight hesitation before contact"],
-      keyMetrics: { power: 82, accuracy: 88, consistency: 85 }
-    },
-    {
-      id: 2,
-      title: "Dink Rally Breakdown",
-      videoUrl: "/videos/examples/IMG_0422.MOV",
-      score: 78,
-      tags: ["Dink", "Footwork"],
-      strengths: ["Excellent soft hands at the kitchen", "Good court positioning", "Patient shot selection"],
-      improvements: ["Footwork could be quicker on lateral moves", "Paddle face angle inconsistent"],
-      keyMetrics: { touch: 80, positioning: 82, patience: 75 }
-    }
-  ]
-
-  const [selectedVideo, setSelectedVideo] = useState(exampleVideos[0])
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-slate-900 border border-kai-primary/50 rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-auto shadow-2xl"
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                <Eye className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Example Analyses</h3>
-                <p className="text-sm text-slate-400">See what Coach Kai's analysis looks like</p>
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-slate-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          {/* Video Selector Tabs */}
-          <div className="flex gap-2 mb-4">
-            {exampleVideos.map((video) => (
-              <Button
-                key={video.id}
-                variant={selectedVideo.id === video.id ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSelectedVideo(video)}
-                className={selectedVideo.id === video.id ? "bg-kai-primary" : "border-slate-600"}
-              >
-                {video.title}
-              </Button>
-            ))}
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-6">
-            {/* Video Preview */}
-            <div>
-              <div className="aspect-video rounded-xl overflow-hidden bg-black mb-4">
-                <video
-                  key={selectedVideo.videoUrl}
-                  src={selectedVideo.videoUrl}
-                  controls
-                  className="w-full h-full object-contain"
-                  playsInline
-                />
-              </div>
-              <div className="flex gap-2 flex-wrap">
-                {selectedVideo.tags.map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs border-kai-primary/50 text-kai-primary">
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* Analysis Results */}
-            <div className="space-y-4">
-              {/* Score */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center">
-                    <span className="text-2xl font-black text-white">{selectedVideo.score}</span>
-                  </div>
-                  <div>
-                    <p className="text-sm text-slate-400">AI Performance Score</p>
-                    <p className="text-lg font-semibold text-white">{selectedVideo.title}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Strengths */}
-              <div className="bg-green-500/10 rounded-xl p-4 border border-green-500/30">
-                <h4 className="text-sm font-semibold text-green-400 mb-2 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4" /> Strengths
-                </h4>
-                <ul className="space-y-1 text-sm text-slate-300">
-                  {selectedVideo.strengths.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-green-400 mt-1">•</span> {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Areas to Improve */}
-              <div className="bg-amber-500/10 rounded-xl p-4 border border-amber-500/30">
-                <h4 className="text-sm font-semibold text-amber-400 mb-2 flex items-center gap-2">
-                  <Target className="w-4 h-4" /> Areas to Improve
-                </h4>
-                <ul className="space-y-1 text-sm text-slate-300">
-                  {selectedVideo.improvements.map((s, i) => (
-                    <li key={i} className="flex items-start gap-2">
-                      <span className="text-amber-400 mt-1">•</span> {s}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Key Metrics */}
-              <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700">
-                <h4 className="text-sm font-semibold text-slate-300 mb-3">Key Metrics</h4>
-                <div className="space-y-2">
-                  {Object.entries(selectedVideo.keyMetrics).map(([key, value]) => (
-                    <div key={key} className="flex items-center gap-3">
-                      <span className="text-xs text-slate-400 w-20 capitalize">{key}</span>
-                      <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-gradient-to-r from-kai-primary to-kai-secondary rounded-full"
-                          style={{ width: `${value}%` }}
-                        />
-                      </div>
-                      <span className="text-xs font-medium text-white w-8">{value}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// Quick Start Guide Modal
-function QuickStartModal({ onClose }: { onClose: () => void }) {
-  const steps = [
-    {
-      step: 1,
-      title: "Upload Your Video",
-      description: "Record your pickleball game with any device - phone, GoPro, or camera. Upload the video file (MP4, MOV, or AVI up to 500MB).",
-      icon: Upload,
-      tip: "Tip: Side-angle recordings work best for technique analysis"
-    },
-    {
-      step: 2,
-      title: "AI Analysis Begins",
-      description: "Coach Kai's neural networks analyze every frame - tracking your movements, shots, positioning, and technique.",
-      icon: Brain,
-      tip: "Analysis typically takes 2-5 minutes depending on video length"
-    },
-    {
-      step: 3,
-      title: "Review Your Results",
-      description: "Get detailed insights including an AI score, strengths, areas to improve, shot breakdowns, and key moments.",
-      icon: BarChart3,
-      tip: "Click on any video in your library to see full analysis"
-    },
-    {
-      step: 4,
-      title: "Track Your Progress",
-      description: "Upload multiple videos over time to track your improvement. Download PDF reports to share with coaches.",
-      icon: TrendingUp,
-      tip: "Compare scores across videos to measure your growth"
-    }
-  ]
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-slate-900 border border-kai-primary/50 rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-auto shadow-2xl"
-      >
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                <Play className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h3 className="text-xl font-bold text-white">Quick Start Guide</h3>
-                <p className="text-sm text-slate-400">Get started with video analysis in 4 easy steps</p>
-              </div>
-            </div>
-            <Button variant="ghost" size="sm" onClick={onClose} className="text-slate-400 hover:text-white">
-              <X className="w-5 h-5" />
-            </Button>
-          </div>
-
-          <div className="space-y-4">
-            {steps.map((item) => (
-              <div key={item.step} className="flex gap-4 p-4 bg-slate-800/50 rounded-xl border border-slate-700">
-                <div className="flex-shrink-0">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center">
-                    <item.icon className="w-6 h-6 text-white" />
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge className="bg-kai-primary/20 text-kai-primary border-0 text-xs">Step {item.step}</Badge>
-                    <h4 className="font-semibold text-white">{item.title}</h4>
-                  </div>
-                  <p className="text-sm text-slate-300 mb-2">{item.description}</p>
-                  <p className="text-xs text-kai-primary flex items-center gap-1">
-                    <Lightbulb className="w-3 h-3" />
-                    {item.tip}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 flex gap-3">
-            <Button onClick={onClose} className="flex-1 bg-gradient-to-r from-kai-primary to-kai-secondary">
-              Got it, let's upload!
-            </Button>
-            <Button variant="outline" onClick={onClose} className="border-slate-600 text-slate-300">
-              Close
-            </Button>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// Post-Upload Modal
-function PostUploadModal({ 
-  videoId, 
-  onClose, 
-  onViewVideo 
-}: { 
-  videoId: string
-  onClose: () => void
-  onViewVideo: () => void
-}) {
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-      onClick={onClose}
-    >
-      <motion.div
-        initial={{ scale: 0.95, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.95, opacity: 0 }}
-        onClick={(e) => e.stopPropagation()}
-        className="bg-slate-900 border border-kai-primary/50 rounded-2xl p-6 max-w-sm w-full shadow-2xl"
-      >
-        <div className="text-center">
-          <motion.div
-            animate={{ rotate: 360 }}
-            transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-            className="w-16 h-16 mx-auto mb-4 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center"
-          >
-            <Brain className="w-8 h-8 text-white" />
-          </motion.div>
-          <h3 className="text-xl font-bold text-white mb-2">Your video is being analyzed</h3>
-          <p className="text-slate-400 text-sm mb-6">
-            Coach Kai is analyzing your technique, movement, and strategy. This usually takes 2-5 minutes.
-          </p>
-          <div className="flex gap-3">
-            <Button
-              onClick={onViewVideo}
-              className="flex-1 bg-gradient-to-r from-kai-primary to-kai-secondary hover:opacity-90"
-            >
-              View Video
-            </Button>
-            <Button
-              onClick={onClose}
-              variant="outline"
-              className="flex-1 border-slate-600 text-slate-300 hover:bg-slate-800"
-            >
-              Close
-            </Button>
-          </div>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
+// =====================================================
+// MAIN COMPONENT
+// =====================================================
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
   const { achievements, isShowing, dismissAchievements, checkForAchievements } = useAchievementNotifications()
+  const dropzoneRef = useRef<HTMLDivElement>(null)
   
   const UPLOAD_METHOD: 'client' | 'proxy' = 'client'
   
+  const [mounted, setMounted] = useState(false)
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload')
   const [uploading, setUploading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
@@ -762,47 +412,17 @@ export default function VideoAnalysisHub() {
     recentlyAnalyzed: 0,
     avgImprovement: 0
   })
-
-  // Onboarding state
-  const [showOnboarding, setShowOnboarding] = useState(false)
-  const [onboardingStep, setOnboardingStep] = useState(1)
   
   // Filter & Sort state
-  const [showFilterSort, setShowFilterSort] = useState(false)
   const [sortBy, setSortBy] = useState<'date' | 'score' | 'status'>('date')
   const [filterStatus, setFilterStatus] = useState<'all' | 'complete' | 'processing'>('all')
-  
-  // Post-upload modal
-  const [showPostUploadModal, setShowPostUploadModal] = useState(false)
   const [newVideoId, setNewVideoId] = useState<string | null>(null)
-  
-  // How it works section
-  const [showHowItWorks, setShowHowItWorks] = useState(false)
-  
-  // Modal states
-  const [showViewExamples, setShowViewExamples] = useState(false)
-  const [showQuickStart, setShowQuickStart] = useState(false)
 
   const userTier = (session?.user as any)?.subscriptionTier || 'FREE'
 
-  // Check for first visit
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const hasSeenOnboarding = localStorage.getItem('mc_video_onboarding_complete')
-      if (!hasSeenOnboarding) {
-        setShowOnboarding(true)
-      }
-    }
+    setMounted(true)
   }, [])
-
-  const handleOnboardingComplete = () => {
-    if (onboardingStep < 3) {
-      setOnboardingStep(prev => prev + 1)
-    } else {
-      setShowOnboarding(false)
-      localStorage.setItem('mc_video_onboarding_complete', 'true')
-    }
-  }
 
   // Load video library
   useEffect(() => {
@@ -811,28 +431,6 @@ export default function VideoAnalysisHub() {
       fetchLibraryStats()
     }
   }, [session])
-
-  // Auto-trigger analysis for stuck PENDING videos
-  useEffect(() => {
-    if (!session?.user || videoLibrary.length === 0) return
-    
-    const pendingVideos = videoLibrary.filter(v => v.analysisStatus === 'PENDING')
-    
-    if (pendingVideos.length > 0) {
-      const recentPending = pendingVideos.filter(v => {
-        const uploadTime = new Date(v.uploadedAt).getTime()
-        const minutesAgo = (Date.now() - uploadTime) / (1000 * 60)
-        return minutesAgo <= 10
-      })
-      
-      if (recentPending.length > 0) {
-        const video = recentPending[0]
-        setTimeout(() => {
-          handleManualAnalysis(video.id, video.videoUrl)
-        }, 2000)
-      }
-    }
-  }, [videoLibrary.length])
 
   // Poll for processing videos
   useEffect(() => {
@@ -956,27 +554,16 @@ export default function VideoAnalysisHub() {
       setUploadProgress(100)
       setUploading(false)
       
-      // Clear file selection
       setSelectedFile(null)
       setVideoPreview(null)
-      
-      // Store new video ID for highlighting
       setNewVideoId(videoId || null)
-      
-      // Show post-upload modal (light, non-blocking)
-      setShowPostUploadModal(true)
-      
-      // Switch to library tab to show the new video
       setActiveTab('library')
       
-      // Refresh library immediately
       await fetchVideoLibrary()
       await fetchLibraryStats()
       
-      // Check for achievements
       setTimeout(() => checkForAchievements('video'), 1000)
       
-      // Start analysis in background
       await new Promise(resolve => setTimeout(resolve, 2000))
       setAnalyzing(true)
       await analyzeVideo(videoId!, videoUrl!)
@@ -1005,7 +592,6 @@ export default function VideoAnalysisHub() {
         setCurrentAnalysis(data)
         setAnalyzing(false)
         
-        // Trigger celebration for successful video analysis
         celebrateDayComplete()
         showAchievementToast(
           'Video Analysis Complete! 🎥',
@@ -1091,567 +677,528 @@ export default function VideoAnalysisHub() {
       return new Date(b.uploadedAt).getTime() - new Date(a.uploadedAt).getTime()
     })
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 rounded-full border-2 border-emerald-500 border-t-transparent"
+        />
+      </div>
+    )
+  }
+
   return (
     <>
       <MainNavigation user={session?.user} />
       
-      {/* Onboarding Walkthrough */}
-      <AnimatePresence>
-        {showOnboarding && (
-          <OnboardingWalkthrough
-            step={onboardingStep}
-            onComplete={handleOnboardingComplete}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* View Examples Modal */}
-      <AnimatePresence>
-        {showViewExamples && (
-          <ViewExamplesModal onClose={() => setShowViewExamples(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* Quick Start Guide Modal */}
-      <AnimatePresence>
-        {showQuickStart && (
-          <QuickStartModal onClose={() => setShowQuickStart(false)} />
-        )}
-      </AnimatePresence>
-
-      {/* Post-Upload Modal */}
-      <AnimatePresence>
-        {showPostUploadModal && (
-          <PostUploadModal
-            videoId={newVideoId || ''}
-            onClose={() => setShowPostUploadModal(false)}
-            onViewVideo={() => {
-              setShowPostUploadModal(false)
-              if (newVideoId) {
-                // Scroll to library
-              }
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      <div className="min-h-screen bg-gradient-to-b from-background via-muted/30 to-background">
-        {/* Compact Header */}
-        <div className="sticky top-0 z-40 backdrop-blur-lg bg-background/80 border-b border-border">
-          <div className="container mx-auto max-w-6xl px-4 py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary p-0.5">
-                  <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-kai-primary" />
-                  </div>
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-foreground">Video Analysis Lab</h1>
-                  <p className="text-xs text-muted-foreground">AI-powered game analysis by Coach Kai</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowOnboarding(true)}
-                  className="text-muted-foreground"
-                >
-                  <HelpCircle className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
+      <div className="min-h-screen bg-slate-950 relative overflow-hidden">
+        {/* Background Effects */}
+        <div className="fixed inset-0 z-0">
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950" />
+          <TechGrid />
+          <FloatingParticles />
+          {/* Radial gradient overlays */}
+          <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px]" />
         </div>
-
-        {/* Main Content */}
-        <div className="container mx-auto max-w-6xl px-4 py-6">
-          <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
-            <div className="flex items-center justify-between mb-6">
-              <TabsList className="bg-card/50 border border-border">
-                <TabsTrigger 
-                  value="upload" 
-                  className="data-[state=active]:bg-kai-primary/20 data-[state=active]:text-kai-primary"
-                  id="upload-area"
+        
+        {/* Content */}
+        <div className="relative z-10">
+          {/* ============================================= */}
+          {/* HERO SECTION */}
+          {/* ============================================= */}
+          <section className="pt-8 pb-12">
+            <div className="container mx-auto max-w-6xl px-4">
+              <motion.div
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-center mb-12"
+              >
+                {/* Badge */}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: 0.2, type: "spring" }}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-500/10 border border-emerald-500/30 mb-6"
                 >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Upload Video
-                </TabsTrigger>
-                <TabsTrigger 
-                  value="library" 
-                  className="data-[state=active]:bg-kai-primary/20 data-[state=active]:text-kai-primary"
-                  id="library-tab"
-                >
-                  <Library className="w-4 h-4 mr-2" />
-                  My Library
-                  {libraryStats.totalVideos > 0 && (
-                    <Badge className="ml-2 bg-kai-primary/20 text-kai-primary border-0 text-xs">
-                      {libraryStats.totalVideos}
-                    </Badge>
-                  )}
-                </TabsTrigger>
-              </TabsList>
-
-              {/* Filter & Sort Button (Library tab only) */}
-              {activeTab === 'library' && videoLibrary.length > 0 && (
-                <div className="relative">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowFilterSort(!showFilterSort)}
-                    className="border-border/50"
-                  >
-                    <Filter className="w-4 h-4 mr-2" />
-                    Filter & Sort
-                    <ChevronDown className={cn("w-3 h-3 ml-2 transition-transform", showFilterSort && "rotate-180")} />
-                  </Button>
-                  
-                  <AnimatePresence>
-                    {showFilterSort && (
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 10 }}
-                        className="absolute right-0 top-full mt-2 w-64 bg-card border border-border rounded-lg shadow-xl p-4 z-50"
-                      >
-                        <div className="space-y-4">
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Sort By</label>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {[
-                                { value: 'date', label: 'Date' },
-                                { value: 'score', label: 'AI Score' },
-                                { value: 'status', label: 'Status' }
-                              ].map((opt) => (
-                                <Button
-                                  key={opt.value}
-                                  size="sm"
-                                  variant={sortBy === opt.value ? "default" : "outline"}
-                                  onClick={() => setSortBy(opt.value as any)}
-                                  className={cn("text-xs h-7", sortBy === opt.value && "bg-kai-primary")}
-                                >
-                                  {opt.label}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                          <div>
-                            <label className="text-xs font-medium text-muted-foreground uppercase tracking-wider">Filter</label>
-                            <div className="flex flex-wrap gap-2 mt-2">
-                              {[
-                                { value: 'all', label: 'All' },
-                                { value: 'complete', label: 'Complete' },
-                                { value: 'processing', label: 'Processing' }
-                              ].map((opt) => (
-                                <Button
-                                  key={opt.value}
-                                  size="sm"
-                                  variant={filterStatus === opt.value ? "default" : "outline"}
-                                  onClick={() => setFilterStatus(opt.value as any)}
-                                  className={cn("text-xs h-7", filterStatus === opt.value && "bg-kai-primary")}
-                                >
-                                  {opt.label}
-                                </Button>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )}
-            </div>
-
-            {/* Upload Tab */}
-            <TabsContent value="upload" className="space-y-6">
-              {/* Action Buttons */}
-              <div className="flex flex-wrap justify-center gap-3">
-                <Button 
-                  variant="default" 
-                  className="bg-gradient-to-r from-kai-primary to-kai-secondary"
-                  onClick={() => setShowQuickStart(true)}
-                >
-                  <Play className="w-4 h-4 mr-2" />
-                  Quick Start Guide
-                </Button>
-                <Button 
-                  variant="outline" 
-                  className="border-border/50 hover:bg-card/50"
-                  onClick={() => setShowViewExamples(true)}
-                >
-                  <Eye className="w-4 h-4 mr-2" />
-                  View Examples
-                </Button>
-                <Button variant="outline" className="border-border/50 hover:bg-card/50" asChild>
-                  <Link href="/train/coach">
-                    <MessageCircle className="w-4 h-4 mr-2" />
-                    Ask Coach Kai
-                  </Link>
-                </Button>
-              </div>
-
-              {/* 4-Step Visual Journey Cards */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
-                {[
-                  {
-                    step: 1,
-                    title: "Record Your Game",
-                    bullets: ["Any device", "All formats", "Up to 500MB"],
-                    image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png",
-                    link: "#upload-dropzone"
-                  },
-                  {
-                    step: 2,
-                    title: "AI Analyzes Every Shot",
-                    bullets: ["Shot tracking", "Movement analysis", "Technique scoring"],
-                    image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png",
-                    link: "#"
-                  },
-                  {
-                    step: 3,
-                    title: "Review Detailed Insights",
-                    bullets: ["Pro-level metrics", "Visual heatmaps", "Key moments"],
-                    image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png",
-                    link: "#"
-                  },
-                  {
-                    step: 4,
-                    title: "Track Your Improvement",
-                    bullets: ["Before/after", "Progress trends", "Printable reports"],
-                    image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png",
-                    link: "#"
-                  }
-                ].map((card) => (
                   <motion.div
-                    key={card.step}
-                    whileHover={{ y: -4 }}
-                    className="relative group"
+                    animate={{ scale: [1, 1.2, 1] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-2 h-2 rounded-full bg-emerald-500"
+                  />
+                  <span className="text-emerald-400 text-sm font-medium">AI-Powered Analysis Engine</span>
+                  <Badge className="bg-emerald-500/20 text-emerald-400 border-0">PRO</Badge>
+                </motion.div>
+                
+                {/* Main Title */}
+                <h1 className="text-5xl md:text-7xl font-black mb-4">
+                  <span className="text-white">Video </span>
+                  <span className="bg-gradient-to-r from-emerald-400 via-cyan-400 to-emerald-400 bg-clip-text text-transparent">
+                    Analysis Lab
+                  </span>
+                </h1>
+                
+                {/* Subtitle */}
+                <p className="text-xl text-slate-400 max-w-2xl mx-auto mb-8">
+                  Upload your game footage and let Coach Kai's neural networks
+                  <span className="text-emerald-400 font-medium"> transform your technique</span>
+                </p>
+                
+                {/* Quick Stats */}
+                <div className="flex justify-center gap-8">
+                  {[
+                    { value: "<5min", label: "Analysis Time", icon: Timer },
+                    { value: "50+", label: "Metrics Tracked", icon: Radar },
+                    { value: "99%", label: "Accuracy", icon: Target },
+                  ].map((stat, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.3 + idx * 0.1 }}
+                      className="text-center"
+                    >
+                      <div className="flex items-center justify-center gap-2 mb-1">
+                        <stat.icon className="w-4 h-4 text-emerald-500" />
+                        <span className="text-2xl font-bold text-white">{stat.value}</span>
+                      </div>
+                      <span className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</span>
+                    </motion.div>
+                  ))}
+                </div>
+              </motion.div>
+              
+              {/* Tab Navigation */}
+              <div className="flex justify-center mb-8">
+                <div className="inline-flex p-1 rounded-2xl bg-slate-900/80 backdrop-blur border border-slate-700/50">
+                  <Button
+                    variant="ghost"
+                    onClick={() => setActiveTab('upload')}
+                    className={cn(
+                      "px-8 py-3 rounded-xl font-medium transition-all",
+                      activeTab === 'upload'
+                        ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/25"
+                        : "text-slate-400 hover:text-white"
+                    )}
                   >
-                    <Card className="bg-card/40 backdrop-blur border-border/50 overflow-hidden hover:border-kai-primary/50 transition-all">
-                      {/* Step Badge */}
-                      <div className="absolute top-3 left-3 z-10">
-                        <div className="w-8 h-8 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center font-bold text-white shadow-lg">
-                          {card.step}
-                        </div>
-                      </div>
-                      {/* AI Icon */}
-                      <div className="absolute top-3 right-3 z-10">
-                        <div className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center">
-                          <Brain className="w-3.5 h-3.5 text-kai-primary" />
-                        </div>
-                      </div>
-                      {/* Image */}
-                      <div className="aspect-video relative overflow-hidden">
-                        <Image
-                          src={card.image}
-                          alt={card.title}
-                          fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
-                      </div>
-                      <CardContent className="p-4">
-                        <h4 className="font-semibold text-foreground mb-2">{card.title}</h4>
-                        <ul className="text-xs text-muted-foreground space-y-1 mb-3">
-                          {card.bullets.map((bullet, idx) => (
-                            <li key={idx} className="flex items-center gap-1.5">
-                              <div className="w-1 h-1 rounded-full bg-kai-primary" />
-                              {bullet}
-                            </li>
-                          ))}
-                        </ul>
-                        <Link 
-                          href={card.link}
-                          className="text-kai-primary text-xs font-medium hover:underline flex items-center gap-1 group/link"
-                        >
-                          Learn More
-                          <ArrowRight className="w-3 h-3 group-hover/link:translate-x-1 transition-transform" />
-                        </Link>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
+                    <Upload className="w-5 h-5 mr-2" />
+                    Upload Video
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    onClick={() => setActiveTab('library')}
+                    className={cn(
+                      "px-8 py-3 rounded-xl font-medium transition-all",
+                      activeTab === 'library'
+                        ? "bg-gradient-to-r from-emerald-500 to-cyan-500 text-white shadow-lg shadow-emerald-500/25"
+                        : "text-slate-400 hover:text-white"
+                    )}
+                  >
+                    <Library className="w-5 h-5 mr-2" />
+                    My Library
+                    {libraryStats.totalVideos > 0 && (
+                      <span className="ml-2 px-2 py-0.5 rounded-full bg-white/20 text-xs">
+                        {libraryStats.totalVideos}
+                      </span>
+                    )}
+                  </Button>
+                </div>
               </div>
-
-              <Card className="bg-card/40 backdrop-blur border-border/50">
-                <CardHeader className="pb-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                        <VideoIcon className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <CardTitle className="text-lg">Upload Your Game Footage</CardTitle>
-                        <CardDescription>MP4, MOV, AVI • Up to 500MB</CardDescription>
-                      </div>
-                    </div>
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      <Sparkles className="w-3 h-3 mr-1" />
-                      Coach Kai Ready
-                    </Badge>
+            </div>
+          </section>
+          
+          {/* ============================================= */}
+          {/* UPLOAD TAB */}
+          {/* ============================================= */}
+          <AnimatePresence mode="wait">
+            {activeTab === 'upload' && (
+              <motion.section
+                key="upload"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="pb-20"
+              >
+                <div className="container mx-auto max-w-5xl px-4">
+                  {/* Process Timeline */}
+                  <div className="mb-12">
+                    <ProcessTimeline isUploading={uploading} isAnalyzing={analyzing} />
                   </div>
-                </CardHeader>
-                <CardContent>
-                  {!selectedFile ? (
+                  
+                  {/* Upload Zone */}
+                  <motion.div
+                    ref={dropzoneRef}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.2 }}
+                    className="relative"
+                  >
+                    {/* Outer glow */}
+                    <motion.div
+                      className={cn(
+                        "absolute -inset-1 rounded-3xl bg-gradient-to-r from-emerald-500 to-cyan-500 opacity-0 blur-xl transition-opacity duration-500",
+                        isDragActive && "opacity-50"
+                      )}
+                    />
+                    
                     <div
                       {...getRootProps()}
-                      id="upload-dropzone"
                       className={cn(
-                        "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all duration-300",
-                        isDragActive 
-                          ? "border-kai-primary bg-kai-primary/10" 
-                          : "border-border/50 hover:border-kai-primary/50 hover:bg-card/30"
+                        "relative rounded-3xl border-2 border-dashed p-12 cursor-pointer transition-all duration-500 backdrop-blur-xl",
+                        isDragActive
+                          ? "border-emerald-500 bg-emerald-500/10"
+                          : "border-slate-700 hover:border-emerald-500/50 bg-slate-900/50 hover:bg-slate-900/80"
                       )}
                     >
                       <input {...getInputProps()} />
-                      <motion.div
-                        animate={isDragActive ? { scale: [1, 1.1, 1] } : {}}
-                        transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0 }}
-                      >
-                        <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center">
-                          <Upload className="w-10 h-10 text-white" />
-                        </div>
-                        <h3 className="text-xl font-semibold text-foreground mb-2">
-                          {isDragActive ? "Drop your video here!" : "📹 Drag & drop your video here"}
-                        </h3>
-                        <p className="text-muted-foreground mb-4">or click to browse your files</p>
-                        <Button className="bg-gradient-to-r from-kai-primary to-kai-secondary">
-                          <VideoIcon className="w-4 h-4 mr-2" />
-                          Select Video File
-                        </Button>
-                      </motion.div>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {videoPreview && (
-                        <div className="aspect-video relative rounded-xl overflow-hidden bg-black">
-                          <video src={videoPreview} controls className="w-full h-full" />
-                        </div>
-                      )}
                       
-                      <div className="flex items-center justify-between p-4 bg-card/50 rounded-lg border border-border">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-lg bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                            <FileVideo className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-foreground truncate max-w-[200px]">{selectedFile.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
-                            </p>
+                      {!selectedFile ? (
+                        <div className="text-center">
+                          {/* Upload Icon Animation */}
+                          <motion.div
+                            animate={isDragActive ? { scale: [1, 1.1, 1], y: [0, -10, 0] } : {}}
+                            transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0 }}
+                            className="relative inline-block mb-6"
+                          >
+                            {/* Glowing rings */}
+                            <motion.div
+                              className="absolute inset-0 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                              animate={{ scale: [1, 1.5], opacity: [0.5, 0] }}
+                              transition={{ duration: 2, repeat: Infinity }}
+                              style={{ width: 96, height: 96, left: '50%', top: '50%', transform: 'translate(-50%, -50%)' }}
+                            />
+                            <div className="relative w-24 h-24 rounded-full bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center shadow-2xl shadow-emerald-500/50">
+                              <Upload className="w-10 h-10 text-white" />
+                            </div>
+                          </motion.div>
+                          
+                          <h3 className="text-2xl font-bold text-white mb-2">
+                            {isDragActive ? "Drop your video here!" : "Drag & drop your game footage"}
+                          </h3>
+                          <p className="text-slate-400 mb-6">or click to browse • MP4, MOV, AVI up to 500MB</p>
+                          
+                          <Button
+                            size="lg"
+                            className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white border-0 shadow-lg shadow-emerald-500/25"
+                          >
+                            <Clapperboard className="w-5 h-5 mr-2" />
+                            Select Video File
+                          </Button>
+                          
+                          {/* Feature Tags */}
+                          <div className="flex flex-wrap justify-center gap-3 mt-8">
+                            {[
+                              { icon: Crosshair, label: "Shot Tracking" },
+                              { icon: Move, label: "Movement Analysis" },
+                              { icon: Brain, label: "Technique Scoring" },
+                              { icon: Gauge, label: "Power Metrics" },
+                            ].map((feature, idx) => (
+                              <motion.div
+                                key={idx}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.4 + idx * 0.1 }}
+                                className="flex items-center gap-2 px-4 py-2 rounded-full bg-slate-800/50 border border-slate-700/50"
+                              >
+                                <feature.icon className="w-4 h-4 text-emerald-500" />
+                                <span className="text-sm text-slate-300">{feature.label}</span>
+                              </motion.div>
+                            ))}
                           </div>
                         </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm" 
-                          onClick={() => { setSelectedFile(null); setVideoPreview(null); }}
-                        >
-                          <X className="w-4 h-4 mr-2" />
-                          Remove
-                        </Button>
-                      </div>
-
-                      {uploading && (
-                        <div className="space-y-2">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-muted-foreground flex items-center gap-2">
-                              <Loader2 className="w-4 h-4 animate-spin" />
-                              Uploading...
-                            </span>
-                            <span className="text-foreground font-medium">{uploadProgress}%</span>
+                      ) : (
+                        <div className="space-y-6">
+                          {/* Video Preview */}
+                          {videoPreview && (
+                            <div className="aspect-video relative rounded-2xl overflow-hidden bg-black border border-slate-700">
+                              <video src={videoPreview} controls className="w-full h-full" />
+                              {/* AI Overlay */}
+                              <div className="absolute top-4 left-4">
+                                <Badge className="bg-emerald-500/90 text-white border-0">
+                                  <Brain className="w-3 h-3 mr-1" />
+                                  Ready for AI Analysis
+                                </Badge>
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* File Info */}
+                          <div className="flex items-center justify-between p-4 rounded-xl bg-slate-800/50 border border-slate-700">
+                            <div className="flex items-center gap-4">
+                              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-cyan-500 flex items-center justify-center">
+                                <FileVideo className="w-6 h-6 text-white" />
+                              </div>
+                              <div>
+                                <p className="font-medium text-white truncate max-w-[250px]">{selectedFile.name}</p>
+                                <p className="text-sm text-slate-500">
+                                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                                </p>
+                              </div>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => { e.stopPropagation(); setSelectedFile(null); setVideoPreview(null); }}
+                              className="text-slate-400 hover:text-red-400"
+                            >
+                              <X className="w-5 h-5" />
+                            </Button>
                           </div>
-                          <Progress value={uploadProgress} className="h-2" />
+                          
+                          {/* Progress */}
+                          {uploading && (
+                            <div className="space-y-3">
+                              <div className="flex justify-between text-sm">
+                                <span className="text-emerald-400 flex items-center gap-2">
+                                  <Loader2 className="w-4 h-4 animate-spin" />
+                                  Uploading to cloud...
+                                </span>
+                                <span className="text-white font-bold">{uploadProgress}%</span>
+                              </div>
+                              <div className="h-3 rounded-full bg-slate-800 overflow-hidden">
+                                <motion.div
+                                  className="h-full bg-gradient-to-r from-emerald-500 to-cyan-500"
+                                  initial={{ width: "0%" }}
+                                  animate={{ width: `${uploadProgress}%` }}
+                                  transition={{ duration: 0.3 }}
+                                />
+                              </div>
+                            </div>
+                          )}
+                          
+                          {/* Analyzing State */}
+                          {analyzing && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              className="p-6 rounded-xl bg-emerald-500/10 border border-emerald-500/30"
+                            >
+                              <div className="flex items-center gap-4">
+                                <motion.div
+                                  animate={{ rotate: 360 }}
+                                  transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
+                                  className="w-12 h-12 rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 flex items-center justify-center"
+                                >
+                                  <Brain className="w-6 h-6 text-white" />
+                                </motion.div>
+                                <div>
+                                  <p className="font-semibold text-emerald-400">Coach Kai is analyzing your footage...</p>
+                                  <p className="text-sm text-slate-400">This usually takes 2-5 minutes</p>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                          
+                          {/* Upload Button */}
+                          {!uploading && !analyzing && (
+                            <Button
+                              onClick={(e) => { e.stopPropagation(); handleUploadAndAnalyze(); }}
+                              size="lg"
+                              className="w-full h-14 bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white text-lg font-semibold shadow-2xl shadow-emerald-500/25"
+                            >
+                              <Brain className="w-6 h-6 mr-2" />
+                              Analyze with Coach Kai
+                              <ArrowRight className="w-5 h-5 ml-2" />
+                            </Button>
+                          )}
                         </div>
-                      )}
-
-                      {analyzing && (
-                        <Alert className="bg-kai-primary/10 border-kai-primary/30">
-                          <Brain className="w-4 h-4 text-kai-primary animate-pulse" />
-                          <AlertDescription className="text-foreground">
-                            Coach Kai is analyzing your video... This may take a few minutes.
-                          </AlertDescription>
-                        </Alert>
-                      )}
-
-                      {!uploading && !analyzing && (
-                        <Button
-                          onClick={handleUploadAndAnalyze}
-                          className="w-full bg-gradient-to-r from-kai-primary to-kai-secondary h-12 text-lg font-semibold"
-                          size="lg"
-                        >
-                          <Brain className="w-5 h-5 mr-2" />
-                          Analyze with Coach Kai
-                          <ArrowRight className="w-5 h-5 ml-2" />
-                        </Button>
                       )}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Collapsible How It Works Section - 3 Icon Cards Only */}
-              <div id="how-it-works">
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowHowItWorks(!showHowItWorks)}
-                  className="w-full justify-between text-muted-foreground hover:text-foreground py-3"
-                >
-                  <span className="flex items-center gap-2">
-                    <Lightbulb className="w-4 h-4" />
-                    How Mindful Champion analyzes your game
-                  </span>
-                  <ChevronDown className={cn("w-4 h-4 transition-transform", showHowItWorks && "rotate-180")} />
-                </Button>
-                
-                <AnimatePresence>
-                  {showHowItWorks && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="overflow-hidden"
-                    >
-                      <div className="grid md:grid-cols-3 gap-4 pt-4">
-                        {[
-                          { icon: Cpu, label: "AI-Powered Analysis", desc: "Advanced neural networks", color: "from-cyan-500 to-blue-500" },
-                          { icon: Zap, label: "Results in Minutes", desc: "Lightning-fast processing", color: "from-green-500 to-emerald-500" },
-                          { icon: LineChart, label: "Pro-Level Insights", desc: "Professional-grade metrics", color: "from-purple-500 to-pink-500" }
-                        ].map((feature, idx) => (
-                          <Card key={idx} className="bg-card/30 border-border/50">
-                            <CardContent className="p-6 text-center">
-                              <div className={cn("w-14 h-14 mx-auto rounded-full bg-gradient-to-br flex items-center justify-center mb-4", feature.color)}>
-                                <feature.icon className="w-7 h-7 text-white" />
+                  </motion.div>
+                  
+                  {/* What AI Analyzes */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.4 }}
+                    className="mt-16"
+                  >
+                    <h3 className="text-center text-lg font-semibold text-slate-400 mb-8">What Coach Kai Analyzes</h3>
+                    <div className="grid md:grid-cols-4 gap-4">
+                      {[
+                        { icon: Crosshair, title: "Shot Detection", desc: "Every serve, dink, and drive tracked", color: "emerald" },
+                        { icon: Move, title: "Movement Patterns", desc: "Court coverage and positioning", color: "cyan" },
+                        { icon: Gauge, title: "Power Metrics", desc: "Swing speed and impact force", color: "violet" },
+                        { icon: Target, title: "Accuracy Analysis", desc: "Shot placement and consistency", color: "amber" },
+                      ].map((item, idx) => (
+                        <motion.div
+                          key={idx}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.5 + idx * 0.1 }}
+                          whileHover={{ y: -4, scale: 1.02 }}
+                          className="group"
+                        >
+                          <Card className="h-full bg-slate-900/50 backdrop-blur border-slate-700/50 hover:border-emerald-500/50 transition-all duration-300 overflow-hidden">
+                            <CardContent className="p-6 text-center relative">
+                              {/* Glow */}
+                              <div className={`absolute inset-0 bg-${item.color}-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500`} />
+                              <div className={`w-14 h-14 mx-auto mb-4 rounded-2xl bg-${item.color}-500/10 border border-${item.color}-500/30 flex items-center justify-center`}>
+                                <item.icon className={`w-7 h-7 text-${item.color}-400`} />
                               </div>
-                              <h4 className="font-semibold text-foreground mb-1">{feature.label}</h4>
-                              <p className="text-sm text-muted-foreground">{feature.desc}</p>
+                              <h4 className="font-semibold text-white mb-2">{item.title}</h4>
+                              <p className="text-sm text-slate-500">{item.desc}</p>
                             </CardContent>
                           </Card>
+                        </motion.div>
+                      ))}
+                    </div>
+                  </motion.div>
+                </div>
+              </motion.section>
+            )}
+            
+            {/* ============================================= */}
+            {/* LIBRARY TAB */}
+            {/* ============================================= */}
+            {activeTab === 'library' && (
+              <motion.section
+                key="library"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+                className="pb-20"
+              >
+                <div className="container mx-auto max-w-6xl px-4">
+                  {videoLibrary.length > 0 ? (
+                    <>
+                      {/* Stats Cards */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                        {[
+                          { icon: Film, value: libraryStats.totalVideos, label: "Total Videos", gradient: "from-emerald-500 to-cyan-500" },
+                          { icon: CheckCircle2, value: libraryStats.totalAnalyzed, label: "Analyzed", gradient: "from-green-500 to-emerald-500" },
+                          { icon: BarChart3, value: videoLibrary.filter(v => v.overallScore).length > 0 ? Math.round(videoLibrary.filter(v => v.overallScore).reduce((sum, v) => sum + (v.overallScore || 0), 0) / videoLibrary.filter(v => v.overallScore).length) : '--', label: "Avg Score", gradient: "from-amber-500 to-orange-500" },
+                          { icon: TrendingUp, value: libraryStats.avgImprovement > 0 ? `+${libraryStats.avgImprovement}%` : '--', label: "Improvement", gradient: "from-violet-500 to-purple-500" },
+                        ].map((stat, idx) => (
+                          <motion.div
+                            key={idx}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.1 }}
+                          >
+                            <Card className="bg-slate-900/50 backdrop-blur border-slate-700/50 overflow-hidden">
+                              <CardContent className="p-4 flex items-center gap-4">
+                                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center shadow-lg`}>
+                                  <stat.icon className="w-6 h-6 text-white" />
+                                </div>
+                                <div>
+                                  <div className="text-2xl font-bold text-white">{stat.value}</div>
+                                  <div className="text-xs text-slate-500 uppercase tracking-wider">{stat.label}</div>
+                                </div>
+                              </CardContent>
+                            </Card>
+                          </motion.div>
                         ))}
                       </div>
+                      
+                      {/* Filters */}
+                      <div className="flex flex-wrap gap-3 mb-8">
+                        <div className="flex gap-2 p-1 rounded-xl bg-slate-900/50 border border-slate-700/50">
+                          {[
+                            { value: 'all', label: 'All' },
+                            { value: 'complete', label: 'Complete' },
+                            { value: 'processing', label: 'Processing' },
+                          ].map((filter) => (
+                            <Button
+                              key={filter.value}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setFilterStatus(filter.value as any)}
+                              className={cn(
+                                "rounded-lg transition-all",
+                                filterStatus === filter.value
+                                  ? "bg-emerald-500 text-white"
+                                  : "text-slate-400 hover:text-white"
+                              )}
+                            >
+                              {filter.label}
+                            </Button>
+                          ))}
+                        </div>
+                        <div className="flex gap-2 p-1 rounded-xl bg-slate-900/50 border border-slate-700/50">
+                          {[
+                            { value: 'date', label: 'Date' },
+                            { value: 'score', label: 'Score' },
+                            { value: 'status', label: 'Status' },
+                          ].map((sort) => (
+                            <Button
+                              key={sort.value}
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => setSortBy(sort.value as any)}
+                              className={cn(
+                                "rounded-lg transition-all",
+                                sortBy === sort.value
+                                  ? "bg-slate-700 text-white"
+                                  : "text-slate-400 hover:text-white"
+                              )}
+                            >
+                              {sort.label}
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      {/* Video Grid */}
+                      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {filteredVideos.map((video) => (
+                          <PremiumVideoCard
+                            key={video.id}
+                            video={video}
+                            onDelete={handleDeleteVideo}
+                            onAnalyze={handleManualAnalysis}
+                            onDownloadPDF={downloadPDF}
+                            analyzing={analyzing}
+                            isNew={video.id === newVideoId}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  ) : (
+                    /* Empty State */
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="text-center py-20"
+                    >
+                      <motion.div
+                        animate={{ y: [0, -10, 0] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                        className="w-32 h-32 mx-auto mb-8 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 border border-slate-700 flex items-center justify-center"
+                      >
+                        <Film className="w-14 h-14 text-slate-600" />
+                      </motion.div>
+                      <h3 className="text-2xl font-bold text-white mb-3">Your Library Awaits</h3>
+                      <p className="text-slate-400 mb-8 max-w-md mx-auto">
+                        Upload your first game footage and unlock AI-powered insights to transform your game.
+                      </p>
+                      <Button
+                        size="lg"
+                        onClick={() => setActiveTab('upload')}
+                        className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white shadow-xl shadow-emerald-500/25"
+                      >
+                        <Upload className="w-5 h-5 mr-2" />
+                        Upload Your First Video
+                      </Button>
                     </motion.div>
                   )}
-                </AnimatePresence>
-              </div>
-            </TabsContent>
-
-            {/* Library Tab */}
-            <TabsContent value="library" className="space-y-6">
-              {/* Stats Summary Bar */}
-              {videoLibrary.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <Card className="bg-gradient-to-br from-kai-primary/20 to-kai-secondary/20 border-kai-primary/30">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-kai-primary/30 flex items-center justify-center">
-                        <Film className="w-5 h-5 text-kai-primary" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">{libraryStats.totalVideos}</p>
-                        <p className="text-xs text-muted-foreground">Total Videos</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-gradient-to-br from-green-500/20 to-emerald-500/20 border-green-500/30">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-green-500/30 flex items-center justify-center">
-                        <CheckCircle2 className="w-5 h-5 text-green-400" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">{libraryStats.totalAnalyzed}</p>
-                        <p className="text-xs text-muted-foreground">Analyzed</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-gradient-to-br from-amber-500/20 to-yellow-500/20 border-amber-500/30">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-amber-500/30 flex items-center justify-center">
-                        <BarChart3 className="w-5 h-5 text-amber-400" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">
-                          {videoLibrary.filter(v => v.overallScore).length > 0 
-                            ? Math.round(videoLibrary.filter(v => v.overallScore).reduce((sum, v) => sum + (v.overallScore || 0), 0) / videoLibrary.filter(v => v.overallScore).length)
-                            : '--'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Avg Score</p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  <Card className="bg-gradient-to-br from-purple-500/20 to-pink-500/20 border-purple-500/30">
-                    <CardContent className="p-4 flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-lg bg-purple-500/30 flex items-center justify-center">
-                        <TrendingUp className="w-5 h-5 text-purple-400" />
-                      </div>
-                      <div>
-                        <p className="text-2xl font-bold text-foreground">
-                          {libraryStats.avgImprovement > 0 ? `+${libraryStats.avgImprovement}%` : '--'}
-                        </p>
-                        <p className="text-xs text-muted-foreground">Improvement</p>
-                      </div>
-                    </CardContent>
-                  </Card>
                 </div>
-              )}
-
-              {videoLibrary.length === 0 ? (
-                <Card className="bg-card/30 border-border/50">
-                  <CardContent className="p-12 text-center">
-                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-r from-slate-700 to-slate-600 flex items-center justify-center">
-                      <Film className="w-10 h-10 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-xl font-semibold text-foreground mb-2">No videos yet</h3>
-                    <p className="text-muted-foreground mb-6 max-w-sm mx-auto">
-                      Upload your first game footage and let Coach Kai analyze your technique!
-                    </p>
-                    <Button 
-                      onClick={() => setActiveTab('upload')} 
-                      className="bg-gradient-to-r from-kai-primary to-kai-secondary"
-                    >
-                      <Upload className="w-4 h-4 mr-2" />
-                      Upload Your First Video
-                    </Button>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {filteredVideos.map((video, idx) => (
-                    <VideoCard
-                      key={video.id}
-                      video={video}
-                      onDelete={handleDeleteVideo}
-                      onAnalyze={handleManualAnalysis}
-                      onDownloadPDF={downloadPDF}
-                      analyzing={analyzing}
-                      isNew={video.id === newVideoId}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
+              </motion.section>
+            )}
+          </AnimatePresence>
         </div>
-
-        {/* Floating Coach Kai Button */}
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          transition={{ delay: 1, type: "spring" }}
-          className="fixed bottom-4 right-4 z-40"
-        >
-          <Link href="/coach">
-            <Button className="w-14 h-14 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary shadow-lg hover:shadow-xl">
-              <Brain className="w-7 h-7 text-white" />
-            </Button>
-          </Link>
-        </motion.div>
       </div>
 
       {/* Achievement Toast */}
       {isShowing && (
         <AchievementToast
           achievements={achievements}
-          onDismiss={dismissAchievements}
+                    onDismiss={dismissAchievements}
         />
       )}
     </>
