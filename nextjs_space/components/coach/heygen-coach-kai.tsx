@@ -71,13 +71,38 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       
       // Event listeners
       avatar.on(StreamingEvents.STREAM_READY, (event: any) => {
-        console.log('Stream ready:', event);
-        if (videoRef.current && event.detail) {
-          videoRef.current.srcObject = event.detail;
+        console.log('Stream ready event:', event);
+        // HeyGen SDK provides the MediaStream in event.detail
+        const mediaStream = event?.detail || event;
+        console.log('MediaStream:', mediaStream);
+        
+        if (videoRef.current && mediaStream instanceof MediaStream) {
+          videoRef.current.srcObject = mediaStream;
+          videoRef.current.muted = false; // Ensure audio is not muted
           videoRef.current.onloadedmetadata = () => {
-            videoRef.current?.play().catch(console.error);
-            setHasVideo(true);
+            videoRef.current?.play().then(() => {
+              console.log('Video playback started');
+              setHasVideo(true);
+            }).catch((err) => {
+              console.error('Video play error:', err);
+              // Try playing muted first (autoplay policy)
+              if (videoRef.current) {
+                videoRef.current.muted = true;
+                videoRef.current.play().then(() => {
+                  setHasVideo(true);
+                  console.log('Playing muted due to autoplay policy');
+                }).catch(console.error);
+              }
+            });
           };
+        } else if (videoRef.current) {
+          // Try setting srcObject directly from event
+          try {
+            videoRef.current.srcObject = mediaStream;
+            videoRef.current.play().then(() => setHasVideo(true)).catch(console.error);
+          } catch (e) {
+            console.error('Failed to set video stream:', e);
+          }
         }
         setAvatarState('ready');
       });
@@ -353,7 +378,14 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
                 autoPlay
                 playsInline
                 muted={isMuted}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 className={`w-full h-full object-cover ${hasVideo ? 'opacity-100' : 'opacity-0'}`}
+                onCanPlay={() => {
+                  console.log('Video can play');
+                  if (videoRef.current && !hasVideo) {
+                    videoRef.current.play().catch(console.error);
+                  }
+                }}
               />
               
               {/* Fallback Avatar Placeholder */}
