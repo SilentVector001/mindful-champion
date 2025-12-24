@@ -103,7 +103,7 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         quality: AvatarQuality.Low, // Use low to conserve credits on free plan
         avatarName: 'Wayne_20240711', // Wayne - verified working interactive avatar
         voice: {
-          voiceId: '1bd001e7e50f421d891986aad5571571', // Wayne's default voice
+          voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional (supports interactive avatars)
           rate: 1.0,
           emotion: VoiceEmotion.FRIENDLY
         }
