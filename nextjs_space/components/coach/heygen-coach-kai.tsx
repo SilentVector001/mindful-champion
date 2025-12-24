@@ -54,16 +54,28 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
   const isProcessingRef = useRef(false);
   const initAttemptedRef = useRef(false);
 
-  // Initialize avatar session
-  const initializeAvatar = useCallback(async () => {
+  // Initialize avatar session with retry logic
+  const initializeAvatar = useCallback(async (retryCount = 0) => {
     if (avatarRef.current || avatarState === 'connecting') return;
     
     setAvatarState('connecting');
     setError(null);
     
     try {
+      // First, clean up any stale sessions
+      if (retryCount === 0) {
+        try {
+          await fetch('/api/heygen/cleanup', { method: 'POST' });
+        } catch (e) {
+          console.log('No stale sessions to clean');
+        }
+      }
+      
       const tokenRes = await fetch('/api/heygen/token', { method: 'POST' });
-      if (!tokenRes.ok) throw new Error('Failed to get HeyGen access token');
+      if (!tokenRes.ok) {
+        const errData = await tokenRes.json().catch(() => ({}));
+        throw new Error(errData.error || 'Failed to get HeyGen access token');
+      }
       const { token } = await tokenRes.json();
       
       const avatar = new StreamingAvatar({ token });
@@ -72,20 +84,17 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       // Event listeners
       avatar.on(StreamingEvents.STREAM_READY, (event: any) => {
         console.log('Stream ready event:', event);
-        // HeyGen SDK provides the MediaStream in event.detail
         const mediaStream = event?.detail || event;
-        console.log('MediaStream:', mediaStream);
         
         if (videoRef.current && mediaStream instanceof MediaStream) {
           videoRef.current.srcObject = mediaStream;
-          videoRef.current.muted = false; // Ensure audio is not muted
+          videoRef.current.muted = false;
           videoRef.current.onloadedmetadata = () => {
             videoRef.current?.play().then(() => {
               console.log('Video playback started');
               setHasVideo(true);
             }).catch((err) => {
               console.error('Video play error:', err);
-              // Try playing muted first (autoplay policy)
               if (videoRef.current) {
                 videoRef.current.muted = true;
                 videoRef.current.play().then(() => {
@@ -96,7 +105,6 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
             });
           };
         } else if (videoRef.current) {
-          // Try setting srcObject directly from event
           try {
             videoRef.current.srcObject = mediaStream;
             videoRef.current.play().then(() => setHasVideo(true)).catch(console.error);
@@ -111,10 +119,18 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       avatar.on(StreamingEvents.AVATAR_STOP_TALKING, () => setAvatarState('ready'));
       
       avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
+        console.log('Stream disconnected');
         setAvatarState('offline');
         setHasVideo(false);
         avatarRef.current = null;
         sessionIdRef.current = null;
+        // Auto-retry on unexpected disconnect (up to 2 retries)
+        if (retryCount < 2) {
+          setError('Reconnecting...');
+          setTimeout(() => initializeAvatar(retryCount + 1), 2000);
+        } else {
+          setError('Video unavailable. Text chat is always free!');
+        }
       });
       
       const sessionData = await avatar.createStartAvatar({
@@ -135,7 +151,20 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       
     } catch (err: any) {
       console.error('Avatar init error:', err);
-      setError('Video unavailable. Text chat is always free!');
+      const errorMsg = err.message?.toLowerCase() || '';
+      
+      // Check for specific error types
+      if (errorMsg.includes('concurrent') || errorMsg.includes('limit') || errorMsg.includes('session')) {
+        setError('Session limit reached. Retrying...');
+        if (retryCount < 2) {
+          setTimeout(() => initializeAvatar(retryCount + 1), 3000);
+          return;
+        }
+      } else if (errorMsg.includes('credit') || errorMsg.includes('quota')) {
+        setError('HeyGen credits exhausted. Text chat is free!');
+      } else {
+        setError('Video unavailable. Text chat is always free!');
+      }
       setAvatarState('offline');
     }
   }, [avatarState, userContext?.firstName]);
