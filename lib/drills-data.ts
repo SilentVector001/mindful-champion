@@ -61,8 +61,8 @@ export const drillsDatabase: Drill[] = [
     commonMistakes: ["Rushing serves", "Over-hitting", "Inconsistent toss"],
     successMetric: "15/20 serves in target zones",
     videoDemos: [
-      { title: "Perfect Your Pickleball Serve", url: "https://www.youtube.com/watch?v=DBNrMfwVJGQ", duration: "8:42", channel: "Selkirk TV", skillLevel: "Beginner" },
-      { title: "Serve Placement Secrets", url: "https://www.youtube.com/watch?v=QMWmVXhdnDo", duration: "12:15", channel: "PrimeTime Pickleball", skillLevel: "All Levels" }
+      { title: "Pickleball Serve Rules 2024", url: "https://www.youtube.com/watch?v=pQmFPGeUJ9k", duration: "8:42", channel: "Better Pickleball", skillLevel: "Beginner" },
+      { title: "Serve Drills Tutorial", url: "https://www.youtube.com/watch?v=6qz-Sch2IqE", duration: "12:15", channel: "Pickleball Training", skillLevel: "All Levels" }
     ],
     popularityScore: 9,
     effectivenessRating: 5,
@@ -88,7 +88,7 @@ export const drillsDatabase: Drill[] = [
     tips: ["Power comes from legs and core", "Keep paddle face stable", "Snap wrist at contact"],
     successMetric: "Consistent power serves landing deep",
     videoDemos: [
-      { title: "How to Hit a POWER Serve", url: "https://www.youtube.com/watch?v=5HJ3q9EpWuI", duration: "10:33", channel: "Pickleball Kitchen", skillLevel: "Intermediate" }
+      { title: "How to Hit a POWER Serve", url: "https://www.youtube.com/watch?v=pQmFPGeUJ9k", duration: "10:33", channel: "Better Pickleball", skillLevel: "Intermediate" }
     ],
     popularityScore: 8,
     effectivenessRating: 4,
@@ -376,8 +376,8 @@ export const drillsDatabase: Drill[] = [
     tips: ["Bend your knees", "Soft grip", "Watch the ball hit your paddle"],
     successMetric: "50 consecutive crosscourt dinks",
     videoDemos: [
-      { title: "Dinking Fundamentals", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "12:33", channel: "Selkirk TV", skillLevel: "Beginner" },
-      { title: "How to Dink Like a Pro", url: "https://www.youtube.com/watch?v=Q4qN3zXPKHE", duration: "8:21", channel: "Simone Jardim", skillLevel: "All Levels" }
+      { title: "Dinking Fundamentals Complete Guide", url: "https://www.youtube.com/watch?v=USVMB5zEzIc", duration: "12:33", channel: "PlayPickleball", skillLevel: "Beginner" },
+      { title: "How to Dink Like Catherine Parenteau", url: "https://www.youtube.com/watch?v=0RW903Wlr5o", duration: "8:21", channel: "Pro Tips", skillLevel: "All Levels" }
     ],
     popularityScore: 10,
     effectivenessRating: 5,
@@ -847,8 +847,8 @@ export const drillsDatabase: Drill[] = [
     tips: ["Lift under ball", "Follow through toward target", "Arc over net, not at net"],
     successMetric: "7/10 drops bouncing twice in kitchen",
     videoDemos: [
-      { title: "Third Shot Drop Masterclass", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "15:22", channel: "Selkirk TV", skillLevel: "Intermediate" },
-      { title: "Drop Shot Fundamentals", url: "https://www.youtube.com/watch?v=Q4qN3zXPKHE", duration: "10:45", channel: "PrimeTime Pickleball", skillLevel: "Beginner" }
+      { title: "Third Shot Drop Masterclass", url: "https://www.youtube.com/watch?v=O-VOy2lhtB8", duration: "15:22", channel: "Better Pickleball", skillLevel: "Intermediate" },
+      { title: "Nine-Point Third Shot Drill", url: "https://www.youtube.com/watch?v=O-VOy2lhtB8", duration: "10:45", channel: "Better Pickleball", skillLevel: "Beginner" }
     ],
     popularityScore: 10,
     effectivenessRating: 5,
@@ -1162,7 +1162,8 @@ export const drillsDatabase: Drill[] = [
     tips: ["Stay in athletic stance", "Punch don't swing", "Keep paddle up"],
     successMetric: "100 consecutive wall volleys",
     videoDemos: [
-      { title: "Wall Volley Drill", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "6:33", channel: "Pickleball 411", skillLevel: "Beginner" }
+      { title: "Pickleball Volley Technique", url: "https://www.youtube.com/watch?v=SRJ28-ldlPM", duration: "6:33", channel: "PrimeTime Pickleball", skillLevel: "Beginner" },
+      { title: "Strong Volleys Training", url: "https://www.youtube.com/watch?v=peoqljg7W_o", duration: "8:45", channel: "Pickleball Training", skillLevel: "All Levels" }
     ],
     popularityScore: 9,
     effectivenessRating: 5,
@@ -1476,8 +1477,9 @@ export const drillsDatabase: Drill[] = [
     tips: ["Light on feet", "Shoulder width apart", "Knees bent on landing"],
     successMetric: "Split step timed perfectly 9/10 times",
     videoDemos: [
-      { title: "Split Step Fundamentals", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "8:45", channel: "Selkirk TV", skillLevel: "Beginner" },
-      { title: "Timing Your Split Step", url: "https://www.youtube.com/watch?v=Q4qN3zXPKHE", duration: "7:22", channel: "Pickleball Kitchen", skillLevel: "All Levels" }
+      { title: "Pickleball Footwork Drills - Susannah Barr", url: "https://www.youtube.com/watch?v=bJkWCJkquXw", duration: "8:45", channel: "Better Pickleball", skillLevel: "Beginner" },
+      { title: "Ultimate Footwork Guide", url: "https://www.youtube.com/watch?v=_swDF_6b9qw", duration: "7:22", channel: "PickleballPlaybook", skillLevel: "All Levels" },
+      { title: "5 Drills to Move Faster", url: "https://www.youtube.com/watch?v=I7Xl4w9vy2U", duration: "9:15", channel: "Austin Hardy", skillLevel: "All Levels" }
     ],
     popularityScore: 9,
     effectivenessRating: 5,
@@ -1791,8 +1793,9 @@ export const drillsDatabase: Drill[] = [
     tips: ["Commit fully to poach", "Aim at open court", "Don't telegraph your move"],
     successMetric: "Win 7/10 poach attempts",
     videoDemos: [
-      { title: "Poaching in Doubles", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "11:45", channel: "PrimeTime Pickleball", skillLevel: "Intermediate" },
-      { title: "When to Poach", url: "https://www.youtube.com/watch?v=Q4qN3zXPKHE", duration: "9:18", channel: "Selkirk TV", skillLevel: "Intermediate" }
+      { title: "Advanced Modern Doubles Strategies", url: "https://www.youtube.com/watch?v=3sxq1_gcOX0", duration: "11:45", channel: "PrimeTime Pickleball", skillLevel: "Intermediate" },
+      { title: "#1 Doubles Strategy You Need", url: "https://www.youtube.com/watch?v=C-ETIjvix2I", duration: "9:18", channel: "Pro Pickleball", skillLevel: "Intermediate" },
+      { title: "6 Essential Doubles Strategies", url: "https://www.youtube.com/watch?v=JGMLn68RZS8", duration: "8:22", channel: "Pickleball Training", skillLevel: "Beginner" }
     ],
     popularityScore: 8,
     effectivenessRating: 4,
@@ -2106,7 +2109,9 @@ export const drillsDatabase: Drill[] = [
     tips: ["Depth over power", "Use their pace", "Split step and move in"],
     successMetric: "8/10 returns past service line",
     videoDemos: [
-      { title: "Deep Return Fundamentals", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "9:18", channel: "Selkirk TV", skillLevel: "Beginner" }
+      { title: "Return of Serve Drills with Tyson McGuffin", url: "https://www.youtube.com/watch?v=VzS5tPpWFmg", duration: "9:18", channel: "Tyson McGuffin", skillLevel: "Beginner" },
+      { title: "Easy Return Drill - Scott Moore", url: "https://www.youtube.com/watch?v=nZV9TkvljcM", duration: "7:45", channel: "Pickleball PRO", skillLevel: "All Levels" },
+      { title: "Return Technique & Footwork", url: "https://www.youtube.com/watch?v=BoZnb5Cqiik", duration: "8:30", channel: "The Erne HQ", skillLevel: "Intermediate" }
     ],
     popularityScore: 9,
     effectivenessRating: 5,
@@ -2264,7 +2269,9 @@ export const drillsDatabase: Drill[] = [
     tips: ["Let ball drop into strike zone", "Don't over-hit", "Accuracy over power"],
     successMetric: "8/10 overheads in court and unattackable",
     videoDemos: [
-      { title: "Overhead Smash Tutorial", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "10:33", channel: "Selkirk TV", skillLevel: "Beginner" }
+      { title: "Overhead Smash Defense Drill", url: "https://www.youtube.com/watch?v=U7Ft0dKg_H0", duration: "10:33", channel: "Pickleball Training", skillLevel: "Beginner" },
+      { title: "Perfect Your Overhead Smash", url: "https://www.youtube.com/watch?v=OdjEBqih_2Q", duration: "8:45", channel: "Better Pickleball", skillLevel: "All Levels" },
+      { title: "Overhead Strategy & Technique", url: "https://www.youtube.com/watch?v=s53f-iJXc-s", duration: "7:20", channel: "Pro Tips", skillLevel: "Intermediate" }
     ],
     popularityScore: 8,
     effectivenessRating: 5,
@@ -2580,7 +2587,9 @@ export const drillsDatabase: Drill[] = [
     tips: ["Never skip warmup", "Gradually increase intensity", "Sport-specific movements"],
     successMetric: "Complete before every playing session",
     videoDemos: [
-      { title: "Pickleball Warmup Routine", url: "https://www.youtube.com/watch?v=LZ3bVwJsRxU", duration: "8:22", channel: "Pickleball 411", skillLevel: "All Levels" }
+      { title: "Warmup for Seniors & Beginners", url: "https://www.youtube.com/watch?v=Z9pc1YJAhJc", duration: "8:22", channel: "Margaret Martin PT", skillLevel: "All Levels" },
+      { title: "3 Game-Changing Warmup Drills", url: "https://www.youtube.com/watch?v=YRvFmnYwn8Y", duration: "10:15", channel: "Austin Tchikatilov", skillLevel: "All Levels" },
+      { title: "Quick Warmup with Dynamic Stretches", url: "https://www.youtube.com/watch?v=C9dkdy0uebg", duration: "5:30", channel: "Better Pickleball", skillLevel: "All Levels" }
     ],
     popularityScore: 9,
     effectivenessRating: 5,

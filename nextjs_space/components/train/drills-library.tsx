@@ -605,40 +605,44 @@ export default function DrillsLibrary() {
                         {drill.videoDemos && drill.videoDemos.length > 0 && (
                           <VideoPlayer videos={drill.videoDemos} drillName={drill.name} />
                         )}
+
+                        {/* Mark as Complete Button */}
+                        <div className="pt-4 border-t">
+                          <Button
+                            size="sm"
+                            className={cn(
+                              "w-full transition-all duration-300 hover:scale-105 hover:shadow-lg",
+                              isCompleted
+                                ? "bg-green-600 hover:bg-green-700 text-white hover:shadow-green-500/30"
+                                : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white hover:shadow-purple-500/30"
+                            )}
+                            onClick={() => toggleDrillCompletion(drill.id)}
+                          >
+                            {isCompleted ? (
+                              <>
+                                <CheckCircle2 className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                                Completed! Click to mark incomplete
+                              </>
+                            ) : (
+                              <>
+                                <CheckCircle2 className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                                Mark as Complete
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     )}
 
                     {/* Action Buttons - Enhanced with hover effects */}
                     <div className="flex gap-2 pt-2">
                       <Button
-                        variant="outline"
+                        className="flex-1 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white transition-all duration-200 hover:scale-105 hover:shadow-lg hover:shadow-teal-500/30"
                         size="sm"
-                        className="flex-1 hover:bg-slate-50 dark:hover:bg-gray-700 hover:border-slate-300 dark:hover:border-gray-600 transition-all duration-200 hover:scale-105 hover:shadow-md"
                         onClick={() => setExpandedDrill(isExpanded ? null : drill.id)}
                       >
-                        {isExpanded ? "Hide" : "View"} Details
-                      </Button>
-                      <Button
-                        size="sm"
-                        className={cn(
-                          "flex-1 transition-all duration-300 hover:scale-105 hover:shadow-lg",
-                          isCompleted
-                            ? "bg-green-600 hover:bg-green-700 text-white hover:shadow-green-500/30"
-                            : "bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white hover:shadow-teal-500/30"
-                        )}
-                        onClick={() => toggleDrillCompletion(drill.id)}
-                      >
-                        {isCompleted ? (
-                          <>
-                            <CheckCircle2 className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                            Done
-                          </>
-                        ) : (
-                          <>
-                            <Play className="mr-2 h-4 w-4 transition-transform group-hover:scale-110" />
-                            Start
-                          </>
-                        )}
+                        <Play className="mr-2 h-4 w-4" />
+                        {isExpanded ? "Close" : "Start Drill"}
                       </Button>
                       <Button
                         size="sm"
@@ -683,7 +687,7 @@ export default function DrillsLibrary() {
           <CardContent className="pt-6">
             <div className="flex items-center gap-2 text-slate-600 dark:text-gray-400 text-sm">
               <Info className="h-4 w-4" />
-              <span>Click "View Details" for full instructions • Mark drills complete to track progress • Build custom sessions with the + button</span>
+              <span>Click "Start Drill" to view full instructions and videos • Mark drills complete within the drill details • Build custom sessions with the + button</span>
             </div>
           </CardContent>
         </Card>
