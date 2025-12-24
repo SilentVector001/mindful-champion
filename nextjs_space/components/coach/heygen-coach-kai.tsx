@@ -97,12 +97,12 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         sessionIdRef.current = null;
       });
       
-      // Start avatar session
+      // Start avatar session with valid HeyGen avatar/voice IDs
       const sessionData = await avatar.createStartAvatar({
         quality: AvatarQuality.High,
-        avatarName: 'josh_lite3_20230714', // Professional avatar
+        avatarName: 'Andrew_public_pro1_20230614', // Alex in Black Suit
         voice: {
-          voiceId: '1bd001e7e50f421d891986aad5c1e1a3',
+          voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional
           rate: 1.0,
           emotion: VoiceEmotion.FRIENDLY
         }

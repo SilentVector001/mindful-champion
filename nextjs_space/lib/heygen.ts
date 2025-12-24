@@ -70,11 +70,11 @@ export async function listVoices() {
 
 // Coach Kai avatar configuration
 export const COACH_KAI_CONFIG = {
-  // Using a default HeyGen avatar - can be changed later
-  avatarName: 'josh_lite3_20230714',  // Professional male avatar
+  // Using valid HeyGen avatars from their API
+  avatarName: 'Andrew_public_pro1_20230614',  // Alex in Black Suit
   quality: 'high',
   voice: {
-    voiceId: '1bd001e7e50f421d891986aad5c1e1a3', // Default professional voice
+    voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional (supports interactive avatar)
     rate: 1.0,
     emotion: 'friendly' as const
   },
