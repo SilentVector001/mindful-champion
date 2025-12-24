@@ -97,12 +97,13 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         sessionIdRef.current = null;
       });
       
-      // Start avatar session with valid HeyGen avatar/voice IDs
+      // Start avatar session with Interactive Avatar (REQUIRED for streaming)
+      // Regular avatars from /v2/avatars do NOT work - must use Interactive Avatar IDs
       const sessionData = await avatar.createStartAvatar({
-        quality: AvatarQuality.High,
-        avatarName: 'Andrew_public_pro1_20230614', // Alex in Black Suit
+        quality: AvatarQuality.Low, // Use low to conserve credits on free plan
+        avatarName: 'Wayne_20240711', // Wayne - verified working interactive avatar
         voice: {
-          voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional
+          voiceId: '1bd001e7e50f421d891986aad5571571', // Wayne's default voice
           rate: 1.0,
           emotion: VoiceEmotion.FRIENDLY
         }
@@ -121,8 +122,12 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       console.error('Avatar init error:', err);
       const errorMsg = err.message || 'Failed to connect to video avatar';
       // More helpful error messages
-      if (errorMsg.includes('400') || errorMsg.includes('Bad Request')) {
-        setError('Video avatar unavailable. The HeyGen API may need configuration. Text chat is always available!');
+      if (errorMsg.includes('10004') || errorMsg.includes('Concurrent limit')) {
+        setError('Video avatar session limit reached. Please wait a moment and try again. Text chat is always available!');
+      } else if (errorMsg.includes('10003') || errorMsg.includes('invalid avatar')) {
+        setError('Video avatar configuration error. Text chat is always available!');
+      } else if (errorMsg.includes('400') || errorMsg.includes('Bad Request')) {
+        setError('Video avatar unavailable. Text chat is always available!');
       } else if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
         setError('HeyGen API key not configured. Text chat is always available!');
       } else {
