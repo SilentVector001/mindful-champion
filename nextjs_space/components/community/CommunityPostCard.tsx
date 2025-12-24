@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion, AnimatePresence } from "framer-motion"
@@ -21,13 +21,9 @@ import {
   Trash2,
   Eye,
   Clock,
-  Star,
-  Award,
   Trophy,
   Crown,
   Zap,
-  ChevronDown,
-  ChevronUp,
   Send,
   Loader2,
   Sparkles
@@ -41,6 +37,44 @@ import {
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 
+// Emoji reactions available
+const EMOJI_REACTIONS = [
+  { emoji: "🆒", label: "Cool" },
+  { emoji: "❤️", label: "Love" },
+  { emoji: "👏", label: "Nice" },
+  { emoji: "🔥", label: "Fire" },
+  { emoji: "😂", label: "Funny" }
+]
+
+// Color palette for user avatars/names
+const USER_COLORS = [
+  { bg: "from-rose-500 to-pink-600", border: "border-rose-400", text: "text-rose-400" },
+  { bg: "from-violet-500 to-purple-600", border: "border-violet-400", text: "text-violet-400" },
+  { bg: "from-blue-500 to-cyan-600", border: "border-blue-400", text: "text-blue-400" },
+  { bg: "from-emerald-500 to-teal-600", border: "border-emerald-400", text: "text-emerald-400" },
+  { bg: "from-amber-500 to-orange-600", border: "border-amber-400", text: "text-amber-400" },
+  { bg: "from-red-500 to-rose-600", border: "border-red-400", text: "text-red-400" },
+  { bg: "from-indigo-500 to-blue-600", border: "border-indigo-400", text: "text-indigo-400" },
+  { bg: "from-fuchsia-500 to-pink-600", border: "border-fuchsia-400", text: "text-fuchsia-400" },
+  { bg: "from-lime-500 to-green-600", border: "border-lime-400", text: "text-lime-400" },
+  { bg: "from-cyan-500 to-teal-600", border: "border-cyan-400", text: "text-cyan-400" },
+]
+
+// Get consistent color for a user based on their ID
+function getUserColor(userId: string) {
+  let hash = 0
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return USER_COLORS[Math.abs(hash) % USER_COLORS.length]
+}
+
+interface Reaction {
+  emoji: string
+  count: number
+  userReacted: boolean
+}
+
 interface Comment {
   id: string
   content: string
@@ -51,6 +85,7 @@ interface Comment {
     image: string | null
     subscriptionTier?: string
   }
+  reactions?: Reaction[]
 }
 
 interface CommunityPostCardProps {
@@ -89,7 +124,7 @@ interface CommunityPostCardProps {
   onReport?: (postId: string) => void
   onEdit?: (postId: string) => void
   onDelete?: (postId: string) => void
-  compact?: boolean // New prop for compact mode
+  compact?: boolean
 }
 
 export function CommunityPostCard({
@@ -102,13 +137,12 @@ export function CommunityPostCard({
   onReport,
   onEdit,
   onDelete,
-  compact = true // Default to compact mode
+  compact = true
 }: CommunityPostCardProps) {
   const [isLiked, setIsLiked] = useState(post.isLiked || false)
   const [isSaved, setIsSaved] = useState(post.isSaved || false)
   const [likeCount, setLikeCount] = useState(post.likeCount)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [showAllComments, setShowAllComments] = useState(false)
   const [comments, setComments] = useState<Comment[]>([])
   const [loadingComments, setLoadingComments] = useState(false)
   const [newComment, setNewComment] = useState("")
@@ -159,6 +193,48 @@ export function CommunityPostCard({
     }
   }
 
+  const handleReaction = async (commentId: string, emoji: string) => {
+    try {
+      const res = await fetch(`/api/community/comments/${commentId}/reactions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ emoji })
+      })
+      const data = await res.json()
+      
+      if (data.success) {
+        // Update local state
+        setComments(prev => prev.map(comment => {
+          if (comment.id === commentId) {
+            const existingReactions = comment.reactions || []
+            const reactionIndex = existingReactions.findIndex(r => r.emoji === emoji)
+            
+            if (data.action === 'added') {
+              if (reactionIndex >= 0) {
+                existingReactions[reactionIndex].count++
+                existingReactions[reactionIndex].userReacted = true
+              } else {
+                existingReactions.push({ emoji, count: 1, userReacted: true })
+              }
+            } else if (data.action === 'removed') {
+              if (reactionIndex >= 0) {
+                existingReactions[reactionIndex].count--
+                existingReactions[reactionIndex].userReacted = false
+                if (existingReactions[reactionIndex].count <= 0) {
+                  existingReactions.splice(reactionIndex, 1)
+                }
+              }
+            }
+            return { ...comment, reactions: [...existingReactions] }
+          }
+          return comment
+        }))
+      }
+    } catch (error) {
+      console.error("Error toggling reaction:", error)
+    }
+  }
+
   // Helper to get subscription badge
   const getSubscriptionBadge = (tier?: string) => {
     if (!tier || tier === 'FREE') return null
@@ -181,29 +257,6 @@ export function CommunityPostCard({
     )
   }
 
-  // Helper to get skill level badge
-  const getSkillBadge = (level?: string, rating?: string) => {
-    if (!level) return null
-    
-    const colors = {
-      BEGINNER: "bg-green-500/20 text-green-400 border-green-500/30",
-      INTERMEDIATE: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-      ADVANCED: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-      EXPERT: "bg-orange-500/20 text-orange-400 border-orange-500/30",
-      PRO: "bg-red-500/20 text-red-400 border-red-500/30"
-    }
-    
-    const color = colors[level as keyof typeof colors] || colors.BEGINNER
-    const displayText = rating ? `${rating} • ${level}` : level
-    
-    return (
-      <Badge variant="outline" className={cn("border", color, "text-xs")}>
-        <Award className="w-3 h-3 mr-1" />
-        {displayText}
-      </Badge>
-    )
-  }
-
   const handleLike = async () => {
     setIsLiked(!isLiked)
     setLikeCount(prev => isLiked ? prev - 1 : prev + 1)
@@ -217,48 +270,35 @@ export function CommunityPostCard({
   }
 
   const handleShare = async () => {
-    // Create branded share message
     const postUrl = `${window.location.origin}/connect/community/${post.id}`
     const userName = post.user.name || "A player"
     const caption = post.caption || "Check out this training video"
-    const videoTitle = video?.title || "pickleball training"
     
-    // Format the message with branding
     const shareTitle = "🏓 Mindful Champion Community"
-    const shareText = `🎾 ${userName} shared: "${caption.slice(0, 100)}${caption.length > 100 ? '...' : ''}"\n\n✨ Watch and join the discussion!\n\n🚀 Improve your game with AI-powered coaching at mindfulchampion.com`
+    const shareText = `🎾 ${userName} shared: "${caption.slice(0, 100)}${caption.length > 100 ? '...' : ''}"\n\n✨ Watch and join the discussion!\n\n🚀 Improve your game at mindfulchampion.com`
     
-    // Check if Web Share API is available
     if (navigator.share) {
       try {
-        await navigator.share({
-          title: shareTitle,
-          text: shareText,
-          url: postUrl
-        })
+        await navigator.share({ title: shareTitle, text: shareText, url: postUrl })
         toast.success("Shared successfully! 🎉")
         onShare?.(post.id)
       } catch (err: any) {
-        // User cancelled or error occurred
         if (err.name !== 'AbortError') {
-          // Fallback to clipboard
           await copyToClipboard(shareText, postUrl)
         }
       }
     } else {
-      // Fallback to clipboard copy
       await copyToClipboard(shareText, postUrl)
     }
   }
 
   const copyToClipboard = async (shareText: string, postUrl: string) => {
     try {
-      // Copy formatted text with link
       const fullText = `${shareText}\n\n${postUrl}`
       await navigator.clipboard.writeText(fullText)
       toast.success("📋 Link copied to clipboard!")
       onShare?.(post.id)
     } catch (err) {
-      // If clipboard API fails, show the URL for manual copy
       toast.error("Unable to copy. Please manually copy: " + postUrl)
     }
   }
@@ -292,11 +332,114 @@ export function CommunityPostCard({
     return views.toString()
   }
 
-  const displayedComments = showAllComments ? comments : comments.slice(0, 3)
+  // Comment component with color coding and reactions
+  const CommentItem = ({ comment, isCompact = false }: { comment: Comment; isCompact?: boolean }) => {
+    const [showReactions, setShowReactions] = useState(false)
+    const userColor = getUserColor(comment.user.id)
+    
+    return (
+      <motion.div
+        initial={{ opacity: 0, y: 5 }}
+        animate={{ opacity: 1, y: 0 }}
+        className={cn("flex gap-2", isCompact ? "py-1" : "py-2")}
+      >
+        <Avatar className={cn(
+          "shrink-0 border-2",
+          userColor.border,
+          isCompact ? "h-6 w-6" : "h-8 w-8"
+        )}>
+          <AvatarImage src={comment.user.image || undefined} />
+          <AvatarFallback className={cn("bg-gradient-to-br text-white font-bold", userColor.bg, isCompact ? "text-xs" : "text-sm")}>
+            {comment.user.name?.[0]?.toUpperCase() || "U"}
+          </AvatarFallback>
+        </Avatar>
+        <div className="flex-1 min-w-0">
+          <div className={cn(
+            "bg-slate-800/60 rounded-2xl px-3",
+            isCompact ? "py-1.5" : "py-2"
+          )}>
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className={cn("font-semibold", userColor.text, isCompact ? "text-xs" : "text-sm")}>
+                {comment.user.name || "Anonymous"}
+              </span>
+              {!isCompact && getSubscriptionBadge(comment.user.subscriptionTier)}
+            </div>
+            <p className={cn("text-slate-300 break-words", isCompact ? "text-xs" : "text-sm")}>
+              {comment.content}
+            </p>
+          </div>
+          
+          {/* Reactions row */}
+          <div className="flex items-center gap-2 mt-1 ml-2 flex-wrap">
+            <span className="text-xs text-slate-500">{formatDate(comment.createdAt)}</span>
+            
+            {/* Existing reactions */}
+            {comment.reactions && comment.reactions.length > 0 && (
+              <div className="flex items-center gap-1">
+                {comment.reactions.map((reaction) => (
+                  <motion.button
+                    key={reaction.emoji}
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => handleReaction(comment.id, reaction.emoji)}
+                    className={cn(
+                      "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs transition-all",
+                      reaction.userReacted 
+                        ? "bg-teal-500/30 border border-teal-400/50" 
+                        : "bg-slate-700/50 hover:bg-slate-600/50"
+                    )}
+                  >
+                    <span>{reaction.emoji}</span>
+                    <span className="text-slate-300">{reaction.count}</span>
+                  </motion.button>
+                ))}
+              </div>
+            )}
+            
+            {/* Add reaction button */}
+            <div className="relative">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                onClick={() => setShowReactions(!showReactions)}
+                className="text-xs text-slate-500 hover:text-teal-400 transition-colors px-1"
+              >
+                {showReactions ? "×" : "😊+"}
+              </motion.button>
+              
+              <AnimatePresence>
+                {showReactions && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.8, y: -5 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8, y: -5 }}
+                    className="absolute bottom-full left-0 mb-1 flex gap-1 bg-slate-800 border border-slate-600 rounded-full px-2 py-1 shadow-lg z-10"
+                  >
+                    {EMOJI_REACTIONS.map((reaction) => (
+                      <motion.button
+                        key={reaction.emoji}
+                        whileHover={{ scale: 1.3, y: -2 }}
+                        whileTap={{ scale: 0.9 }}
+                        onClick={() => {
+                          handleReaction(comment.id, reaction.emoji)
+                          setShowReactions(false)
+                        }}
+                        className="text-lg hover:bg-slate-700 rounded-full p-0.5 transition-colors"
+                        title={reaction.label}
+                      >
+                        {reaction.emoji}
+                      </motion.button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+    )
+  }
 
-  const [showComments, setShowComments] = useState(false)
-
-  // Compact card layout (social media style)
+  // Compact card layout (social media style) - comments shown by default
   if (compact) {
     return (
       <motion.div
@@ -308,15 +451,17 @@ export function CommunityPostCard({
           {/* Compact Header */}
           <div className="flex items-center justify-between px-3 py-2">
             <Link href={`/profile/${post.user.id}`} className="flex items-center gap-2 hover:opacity-80 transition-opacity flex-1 min-w-0">
-              <Avatar className="h-8 w-8 border border-teal-500/50">
+              <Avatar className={cn("h-8 w-8 border-2", getUserColor(post.user.id).border)}>
                 <AvatarImage src={post.user.image || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white text-xs font-bold">
+                <AvatarFallback className={cn("bg-gradient-to-br text-white text-xs font-bold", getUserColor(post.user.id).bg)}>
                   {post.user.name?.[0]?.toUpperCase() || "U"}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <p className="font-semibold text-white text-sm truncate">{post.user.name || "Anonymous"}</p>
+                  <p className={cn("font-semibold text-sm truncate", getUserColor(post.user.id).text)}>
+                    {post.user.name || "Anonymous"}
+                  </p>
                   {getSubscriptionBadge(post.user.subscriptionTier)}
                 </div>
                 <div className="flex items-center gap-1.5 text-xs text-slate-400">
@@ -350,7 +495,7 @@ export function CommunityPostCard({
             </DropdownMenu>
           </div>
 
-          {/* Compact Video - smaller aspect ratio */}
+          {/* Compact Video */}
           {video && (
             <div className="relative w-full bg-slate-950" style={{ aspectRatio: '16/9', maxHeight: '180px' }}>
               {isPlaying ? (
@@ -389,15 +534,15 @@ export function CommunityPostCard({
 
           {/* Compact Content */}
           <div className="px-3 py-2 space-y-1.5">
-            {/* Caption - truncated */}
             {post.caption && (
               <p className="text-slate-200 text-sm line-clamp-2">
-                <span className="font-semibold text-white mr-1">{post.user.name}</span>
+                <span className={cn("font-semibold mr-1", getUserColor(post.user.id).text)}>
+                  {post.user.name}
+                </span>
                 {post.caption}
               </p>
             )}
 
-            {/* Tags - compact */}
             {post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {post.tags.slice(0, 4).map(tag => (
@@ -413,7 +558,7 @@ export function CommunityPostCard({
               </div>
             )}
 
-            {/* Compact Stats & Actions Row */}
+            {/* Stats & Actions Row */}
             <div className="flex items-center justify-between pt-1 border-t border-slate-700/30">
               <div className="flex items-center gap-3 text-xs text-slate-400">
                 <span className="flex items-center gap-1">
@@ -430,9 +575,6 @@ export function CommunityPostCard({
                 <Button variant="ghost" size="icon" onClick={handleLike} className={cn("h-7 w-7", isLiked ? "text-red-500" : "text-slate-400 hover:text-red-400")}>
                   <Heart className={cn("w-4 h-4", isLiked && "fill-current")} />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={() => setShowComments(!showComments)} className="h-7 w-7 text-slate-400 hover:text-blue-400">
-                  <MessageCircle className="w-4 h-4" />
-                </Button>
                 <Button variant="ghost" size="icon" onClick={handleShare} className="h-7 w-7 text-slate-400 hover:text-cyan-400">
                   <Share2 className="w-4 h-4" />
                 </Button>
@@ -443,59 +585,55 @@ export function CommunityPostCard({
             </div>
           </div>
 
-          {/* Expandable Comments Section */}
-          <AnimatePresence>
-            {showComments && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                className="border-t border-slate-700/30 overflow-hidden"
-              >
-                <div className="p-2 bg-slate-800/30">
-                  <div className="flex gap-2">
-                    <Textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Add a comment..."
-                      className="bg-slate-900/70 border-slate-600/50 text-white placeholder:text-slate-500 min-h-[36px] max-h-[80px] resize-none text-sm"
-                      onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() }}}
-                    />
-                    <Button onClick={submitComment} disabled={!newComment.trim() || submittingComment} size="icon" className="bg-teal-500 hover:bg-teal-600 h-9 w-9">
-                      {submittingComment ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                    </Button>
-                  </div>
-                </div>
-                {comments.length > 0 && (
-                  <div className="px-2 pb-2 space-y-2 max-h-[150px] overflow-y-auto">
-                    {comments.slice(0, 3).map((comment) => (
-                      <div key={comment.id} className="flex gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage src={comment.user.image || undefined} />
-                          <AvatarFallback className="bg-teal-600 text-white text-xs">{comment.user.name?.[0] || "U"}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 bg-slate-800/50 rounded-lg px-2 py-1">
-                          <span className="font-semibold text-white text-xs mr-1">{comment.user.name}</span>
-                          <span className="text-slate-300 text-xs">{comment.content}</span>
-                        </div>
-                      </div>
-                    ))}
-                    {comments.length > 3 && (
-                      <button className="text-xs text-teal-400 hover:text-teal-300 w-full text-center">
-                        View all {comments.length} comments
-                      </button>
-                    )}
-                  </div>
+          {/* Comments Section - ALWAYS VISIBLE */}
+          <div className="border-t border-slate-700/30">
+            {/* Add Comment Input */}
+            <div className="p-2 bg-slate-800/30">
+              <div className="flex gap-2">
+                <Textarea
+                  value={newComment}
+                  onChange={(e) => setNewComment(e.target.value)}
+                  placeholder="Add a comment..."
+                  className="bg-slate-900/70 border-slate-600/50 text-white placeholder:text-slate-500 min-h-[36px] max-h-[80px] resize-none text-sm"
+                  onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitComment() }}}
+                />
+                <Button onClick={submitComment} disabled={!newComment.trim() || submittingComment} size="icon" className="bg-teal-500 hover:bg-teal-600 h-9 w-9">
+                  {submittingComment ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                </Button>
+              </div>
+            </div>
+            
+            {/* Comments List - Always shown */}
+            {loadingComments ? (
+              <div className="flex justify-center py-3">
+                <Loader2 className="w-5 h-5 animate-spin text-teal-500" />
+              </div>
+            ) : comments.length > 0 ? (
+              <div className="px-2 pb-2 space-y-1 max-h-[200px] overflow-y-auto">
+                {comments.slice(0, 5).map((comment) => (
+                  <CommentItem key={comment.id} comment={comment} isCompact={true} />
+                ))}
+                {comments.length > 5 && (
+                  <Link 
+                    href={`/connect/community/${post.id}`}
+                    className="block text-xs text-teal-400 hover:text-teal-300 w-full text-center py-1"
+                  >
+                    View all {comments.length} comments →
+                  </Link>
                 )}
-              </motion.div>
+              </div>
+            ) : (
+              <div className="px-2 pb-2 text-center py-2">
+                <p className="text-xs text-slate-500">No comments yet. Be the first! 💬</p>
+              </div>
             )}
-          </AnimatePresence>
+          </div>
         </Card>
       </motion.div>
     )
   }
 
-  // Original full-size layout (kept for detail pages)
+  // Full-size layout (for detail pages)
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -503,26 +641,23 @@ export function CommunityPostCard({
       transition={{ duration: 0.3 }}
     >
       <Card className="bg-slate-900/50 border-slate-700/50 overflow-hidden hover:border-teal-500/30 transition-all">
-        {/* Header with User Info & Badges */}
+        {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-slate-700/50">
           <Link href={`/profile/${post.user.id}`} className="flex items-center gap-3 hover:opacity-80 transition-opacity flex-1">
-            <div className="relative">
-              <Avatar className="h-12 w-12 border-2 border-gradient-to-br from-teal-500 to-cyan-600">
-                <AvatarImage src={post.user.image || undefined} />
-                <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white font-bold">
-                  {post.user.name?.[0]?.toUpperCase() || "U"}
-                </AvatarFallback>
-              </Avatar>
-              {/* Online status indicator */}
-              <div className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 border-2 border-slate-900 rounded-full" />
-            </div>
+            <Avatar className={cn("h-12 w-12 border-2", getUserColor(post.user.id).border)}>
+              <AvatarImage src={post.user.image || undefined} />
+              <AvatarFallback className={cn("bg-gradient-to-br text-white font-bold", getUserColor(post.user.id).bg)}>
+                {post.user.name?.[0]?.toUpperCase() || "U"}
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <p className="font-bold text-white text-base truncate">{post.user.name || "Anonymous"}</p>
+                <p className={cn("font-bold text-base truncate", getUserColor(post.user.id).text)}>
+                  {post.user.name || "Anonymous"}
+                </p>
                 {getSubscriptionBadge(post.user.subscriptionTier)}
               </div>
               <div className="flex items-center gap-2 mt-0.5">
-                {getSkillBadge(post.user.skillLevel, post.user.playerRating)}
                 <span className="text-xs text-slate-400">• {formatDate(post.createdAt)}</span>
               </div>
             </div>
@@ -535,7 +670,7 @@ export function CommunityPostCard({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="bg-slate-800 border-slate-700">
-              {isOwner && (
+              {isOwner ? (
                 <>
                   <DropdownMenuItem onClick={() => onEdit?.(post.id)} className="text-slate-300 hover:text-white">
                     <Pencil className="w-4 h-4 mr-2" /> Edit
@@ -544,8 +679,7 @@ export function CommunityPostCard({
                     <Trash2 className="w-4 h-4 mr-2" /> Delete
                   </DropdownMenuItem>
                 </>
-              )}
-              {!isOwner && (
+              ) : (
                 <DropdownMenuItem onClick={() => onReport?.(post.id)} className="text-slate-300 hover:text-white">
                   <Flag className="w-4 h-4 mr-2" /> Report
                 </DropdownMenuItem>
@@ -555,52 +689,34 @@ export function CommunityPostCard({
         </div>
 
         <CardContent className="p-0 space-y-0">
-          {/* Video Section */}
+          {/* Video */}
           {video && (
             <div className="relative w-full bg-slate-950" style={{ aspectRatio: '16/9', maxHeight: '400px' }}>
               {isPlaying ? (
-                <video
-                  src={video.videoUrl}
-                  controls
-                  autoPlay
-                  className="w-full h-full object-cover"
-                />
+                <video src={video.videoUrl} controls autoPlay className="w-full h-full object-cover" />
               ) : (
                 <>
                   {video.thumbnailUrl ? (
-                    <Image
-                      src={video.thumbnailUrl}
-                      alt={video.title}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                      priority={false}
-                    />
+                    <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 via-slate-900 to-slate-950">
-                      <div className="text-center">
-                        <Play className="w-16 h-16 text-slate-600 mx-auto mb-2" />
-                        <p className="text-sm text-slate-500">{video.title}</p>
-                      </div>
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                      <Play className="w-16 h-16 text-slate-600" />
                     </div>
                   )}
                   <button
                     onClick={() => setIsPlaying(true)}
                     className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors group"
-                    aria-label="Play video"
                   >
-                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg shadow-teal-500/30">
+                    <div className="w-16 h-16 rounded-full bg-gradient-to-br from-teal-500 to-cyan-600 flex items-center justify-center group-hover:scale-110 transition-transform shadow-lg">
                       <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
                     </div>
                   </button>
-                  {/* Duration badge */}
-                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 backdrop-blur-sm text-white text-xs font-medium flex items-center gap-1.5 shadow-lg">
+                  <div className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-black/80 text-white text-xs font-medium flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5" />
                     {formatDuration(video.duration)}
                   </div>
-                  {/* AI Score badge */}
                   {video.overallScore && (
-                    <div className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-bold flex items-center gap-1.5 shadow-lg">
+                    <div className="absolute top-3 right-3 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-bold flex items-center gap-1.5">
                       <Trophy className="w-4 h-4" fill="currentColor" />
                       {video.overallScore}/100
                     </div>
@@ -610,9 +726,8 @@ export function CommunityPostCard({
             </div>
           )}
 
-          {/* Caption & Content */}
+          {/* Caption & Stats */}
           <div className="p-4 space-y-3">
-            {/* Prominent View Count & Engagement Stats */}
             <div className="flex items-center gap-4 text-sm">
               <div className="flex items-center gap-1.5 text-teal-400 font-semibold">
                 <Eye className="w-4 h-4" />
@@ -628,19 +743,17 @@ export function CommunityPostCard({
               </div>
             </div>
 
-            {/* Caption */}
             {post.caption && (
               <div className="text-slate-200 text-sm leading-relaxed">
-                <span className="font-semibold text-white mr-2">{post.user.name}</span>
+                <span className={cn("font-semibold mr-2", getUserColor(post.user.id).text)}>{post.user.name}</span>
                 {post.caption}
               </div>
             )}
 
-            {/* Tags */}
             {post.tags.length > 0 && (
               <div className="flex flex-wrap gap-1.5">
                 {post.tags.map(tag => (
-                  <Badge key={tag} className="bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 hover:from-teal-500/30 hover:to-cyan-500/30 border-teal-500/30 text-xs">
+                  <Badge key={tag} className="bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-400 border-teal-500/30 text-xs">
                     #{tag}
                   </Badge>
                 ))}
@@ -648,63 +761,32 @@ export function CommunityPostCard({
             )}
           </div>
 
-          {/* Action Buttons */}
+          {/* Actions */}
           <div className="px-4 pb-3 flex items-center justify-between border-t border-slate-700/30 pt-2">
             <div className="flex items-center gap-1">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleLike}
-                className={cn(
-                  "text-slate-400 hover:text-red-400 transition-colors",
-                  isLiked && "text-red-500"
-                )}
-              >
-                <Heart className={cn("w-5 h-5 mr-1.5 transition-all", isLiked && "fill-current scale-110")} />
+              <Button variant="ghost" size="sm" onClick={handleLike} className={cn("text-slate-400 hover:text-red-400", isLiked && "text-red-500")}>
+                <Heart className={cn("w-5 h-5 mr-1.5", isLiked && "fill-current")} />
                 <span className="font-medium">Like</span>
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => onComment?.(post.id)}
-                className="text-slate-400 hover:text-blue-400 transition-colors"
-              >
-                <MessageCircle className="w-5 h-5 mr-1.5" />
-                <span className="font-medium">Comment</span>
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleShare}
-                className="text-slate-400 hover:text-cyan-400 transition-colors"
-              >
+              <Button variant="ghost" size="sm" onClick={handleShare} className="text-slate-400 hover:text-cyan-400">
                 <Share2 className="w-5 h-5 mr-1.5" />
                 <span className="font-medium">Share</span>
               </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleSave}
-              className={cn(
-                "text-slate-400 hover:text-amber-400 transition-colors",
-                isSaved && "text-amber-500"
-              )}
-            >
-              <Bookmark className={cn("w-5 h-5 transition-all", isSaved && "fill-current scale-110")} />
+            <Button variant="ghost" size="icon" onClick={handleSave} className={cn("text-slate-400 hover:text-amber-400", isSaved && "text-amber-500")}>
+              <Bookmark className={cn("w-5 h-5", isSaved && "fill-current")} />
             </Button>
           </div>
 
-          {/* Comments Section - Visible by Default */}
+          {/* Comments Section - ALWAYS VISIBLE */}
           <div className="border-t border-slate-700/30">
-            {/* Add Comment Input */}
             <div className="p-4 bg-slate-800/30">
               <div className="flex gap-2">
                 <Textarea
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
                   placeholder="Add a comment..."
-                  className="bg-slate-900/70 border-slate-600/50 text-white placeholder:text-slate-500 min-h-[44px] max-h-[120px] resize-none text-sm focus:border-teal-500/50 focus:ring-1 focus:ring-teal-500/20"
+                  className="bg-slate-900/70 border-slate-600/50 text-white placeholder:text-slate-500 min-h-[44px] max-h-[120px] resize-none text-sm focus:border-teal-500/50"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter' && !e.shiftKey) {
                       e.preventDefault()
@@ -716,82 +798,27 @@ export function CommunityPostCard({
                   onClick={submitComment}
                   disabled={!newComment.trim() || submittingComment}
                   size="icon"
-                  className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 h-[44px] w-[44px] shrink-0 shadow-lg shadow-teal-500/20"
+                  className="bg-gradient-to-r from-teal-500 to-cyan-600 hover:from-teal-600 hover:to-cyan-700 h-[44px] w-[44px] shrink-0"
                 >
                   {submittingComment ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                 </Button>
               </div>
             </div>
 
-            {/* Comments List */}
             {loadingComments ? (
               <div className="flex justify-center py-6 bg-slate-800/20">
                 <Loader2 className="w-6 h-6 animate-spin text-teal-500" />
               </div>
             ) : comments.length > 0 ? (
-              <div className="px-4 pb-4 space-y-3 bg-slate-800/20">
-                <AnimatePresence>
-                  {displayedComments.map((comment, index) => (
-                    <motion.div
-                      key={comment.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="flex gap-3 py-2"
-                    >
-                      <Avatar className="h-8 w-8 border border-slate-700/50 shrink-0">
-                        <AvatarImage src={comment.user.image || undefined} />
-                        <AvatarFallback className="bg-gradient-to-br from-teal-600 to-cyan-700 text-white text-xs font-medium">
-                          {comment.user.name?.[0]?.toUpperCase() || "U"}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 min-w-0">
-                        <div className="bg-slate-800/50 rounded-2xl px-3 py-2">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="font-semibold text-white text-sm">{comment.user.name || "Anonymous"}</span>
-                            {getSubscriptionBadge(comment.user.subscriptionTier)}
-                          </div>
-                          <p className="text-slate-300 text-sm leading-relaxed break-words">{comment.content}</p>
-                        </div>
-                        <div className="flex items-center gap-3 mt-1 ml-3">
-                          <span className="text-xs text-slate-500">{formatDate(comment.createdAt)}</span>
-                          <button className="text-xs text-slate-500 hover:text-teal-400 font-medium transition-colors">
-                            Like
-                          </button>
-                          <button className="text-xs text-slate-500 hover:text-teal-400 font-medium transition-colors">
-                            Reply
-                          </button>
-                        </div>
-                      </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
-
-                {/* View More/Less Comments Button */}
-                {comments.length > 3 && (
-                  <button
-                    onClick={() => setShowAllComments(!showAllComments)}
-                    className="w-full py-2 text-sm font-medium text-teal-400 hover:text-teal-300 transition-colors flex items-center justify-center gap-2"
-                  >
-                    {showAllComments ? (
-                      <>
-                        <ChevronUp className="w-4 h-4" />
-                        Show less
-                      </>
-                    ) : (
-                      <>
-                        <ChevronDown className="w-4 h-4" />
-                        View all {comments.length} comments
-                      </>
-                    )}
-                  </button>
-                )}
+              <div className="px-4 pb-4 space-y-2 bg-slate-800/20 max-h-[400px] overflow-y-auto">
+                {comments.map((comment) => (
+                  <CommentItem key={comment.id} comment={comment} />
+                ))}
               </div>
             ) : (
               <div className="px-4 py-6 text-center bg-slate-800/20">
                 <MessageCircle className="w-8 h-8 mx-auto mb-2 text-slate-600" />
-                <p className="text-sm text-slate-400">No comments yet. Be the first!</p>
+                <p className="text-sm text-slate-400">No comments yet. Be the first! 💬</p>
               </div>
             )}
           </div>

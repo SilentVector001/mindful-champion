@@ -113,6 +113,7 @@ model User {
   chatMessages                 ChatMessage[]
   coachKaiReminders            CoachKaiReminder[]              @relation("UserCoachKaiReminders")
   commentLikes                 CommentLike[]
+  commentReactions             CommentReaction[]
   communityPosts               CommunityPost[]
   communityStats               CommunityStats?
   contentBookmarks             ContentBookmark[]
@@ -1026,19 +1027,20 @@ model CommunityPost {
 }
 
 model PostComment {
-  id        String        @id @default(cuid())
+  id        String             @id @default(cuid())
   content   String
   postId    String
   userId    String
   parentId  String?
-  likeCount Int           @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  likeCount Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
   likes     CommentLike[]
-  parent    PostComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   PostComment[] @relation("CommentReplies")
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions CommentReaction[]
+  parent    PostComment?       @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   PostComment[]      @relation("CommentReplies")
+  post      CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([userId])
@@ -1068,6 +1070,20 @@ model CommentLike {
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model CommentReaction {
+  id        String      @id @default(cuid())
+  commentId String
+  userId    String
+  emoji     String      // 🆒, ❤️, 👏, 🔥, 😂
+  createdAt DateTime    @default(now())
+  comment   PostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, emoji])
   @@index([commentId])
   @@index([userId])
 }
