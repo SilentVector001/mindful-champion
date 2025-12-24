@@ -88,6 +88,8 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
         return { icon: TrendingUp, color: 'text-emerald-500', bg: 'bg-emerald-500/10' }
       case 'training_complete':
         return { icon: Target, color: 'text-teal-500', bg: 'bg-teal-500/10' }
+      case 'navigation':
+        return { icon: Eye, color: 'text-indigo-500', bg: 'bg-indigo-500/10' }
       default:
         return { icon: Activity, color: 'text-slate-500', bg: 'bg-slate-500/10' }
     }
@@ -98,6 +100,7 @@ export default function UserActivityFeed({ activities = [] }: UserActivityFeedPr
       case 'signup': return 'New Signup'
       case 'video_upload': return 'Video Upload'
       case 'video_analysis': return 'Video Analyzed'
+      case 'navigation': return 'Page Visit'
       case 'match': return 'Match Recorded'
       case 'goal_created': return 'Goal Created'
       case 'chat': return 'Coach Chat'

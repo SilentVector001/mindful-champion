@@ -2,7 +2,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { X, Mail, Calendar, Shield, Trophy, Video, Target, Users, ExternalLink, ChevronLeft, ChevronRight, Upload, Plus, Check, Lock, Award, TrendingUp, Trash2, AlertTriangle } from "lucide-react"
+import { X, Mail, Calendar, Shield, Trophy, Video, Target, Users, ExternalLink, ChevronLeft, ChevronRight, Upload, Plus, Check, Lock, Award, TrendingUp, Trash2, AlertTriangle, MapPin } from "lucide-react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +26,7 @@ import { format } from "date-fns"
 import { toast } from "sonner"
 import { AdminVideoHub } from "@/components/admin/video/admin-video-hub"
 import UserSubscription from "@/components/admin/user-detail/user-subscription"
+import UserJourneyPanel from "@/components/admin/user-journey-panel"
 
 interface UserDetailPanelProps {
   userId: string
@@ -42,6 +43,7 @@ export default function UserDetailPanel({ userId, onClose, onNavigate, allUserId
   const [deleteConfirmEmail, setDeleteConfirmEmail] = useState("")
   const [deleteReason, setDeleteReason] = useState("")
   const [deleting, setDeleting] = useState(false)
+  const [showJourney, setShowJourney] = useState(false)
 
   // SAFETY CHECK: If no userId provided, close immediately
   useEffect(() => {
@@ -210,6 +212,7 @@ export default function UserDetailPanel({ userId, onClose, onNavigate, allUserId
   const stats = userData.stats || {}
 
   return (
+    <>
     <AnimatePresence>
       <motion.div
         initial={{ opacity: 0 }}
@@ -392,6 +395,14 @@ export default function UserDetailPanel({ userId, onClose, onNavigate, allUserId
 
                 {/* Quick Actions */}
                 <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    className="flex-1"
+                    onClick={() => setShowJourney(true)}
+                  >
+                    <MapPin className="w-4 h-4 mr-2" />
+                    View Journey
+                  </Button>
                   <Button
                     variant="outline"
                     className="flex-1"
@@ -771,5 +782,15 @@ export default function UserDetailPanel({ userId, onClose, onNavigate, allUserId
         </motion.div>
       </motion.div>
     </AnimatePresence>
+
+    {/* User Journey Panel */}
+    {showJourney && userData?.user && (
+      <UserJourneyPanel
+        userId={userId}
+        userName={userData.user.name || userData.user.email}
+        onClose={() => setShowJourney(false)}
+      />
+    )}
+  </>
   )
 }

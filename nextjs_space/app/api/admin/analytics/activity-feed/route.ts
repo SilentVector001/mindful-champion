@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     console.log('[Activity Feed] Fetching activities since:', sevenDaysAgo.toISOString())
 
     // Fetch various activities
-    const [recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments] = await Promise.all([
+    const [recentSignups, recentVideos, recentMatches, recentGoals, recentChats, recentPayments, recentPageViews] = await Promise.all([
       // Recent signups
       prisma.user.findMany({
         where: { createdAt: { gte: sevenDaysAgo } },
@@ -123,6 +123,25 @@ export async function GET(request: NextRequest) {
             }
           }
         }
+      }),
+
+      // Recent page views (navigation events)
+      prisma.pageView.findMany({
+        where: { 
+          timestamp: { gte: sevenDaysAgo },
+          userId: { not: null } // Only logged-in users for now
+        },
+        orderBy: { timestamp: 'desc' },
+        take: 100, // Take more since we'll filter later
+        include: {
+          session: {
+            select: {
+              sessionId: true,
+              deviceType: true,
+              browser: true
+            }
+          }
+        }
       })
     ])
 
@@ -208,6 +227,87 @@ export async function GET(request: NextRequest) {
       })
     })
 
+    // Add page views (navigation events) - Get unique users and group by session
+    const userPageViewsMap = new Map<string, any[]>()
+    
+    recentPageViews.forEach((pageView: any) => {
+      const userId = pageView.userId
+      if (!userId) return
+      
+      if (!userPageViewsMap.has(userId)) {
+        userPageViewsMap.set(userId, [])
+      }
+      userPageViewsMap.get(userId)!.push(pageView)
+    })
+
+    // Get user info for page views
+    const pageViewUserIds = Array.from(userPageViewsMap.keys())
+    const pageViewUsers = await prisma.user.findMany({
+      where: { id: { in: pageViewUserIds } },
+      select: {
+        id: true,
+        name: true,
+        firstName: true,
+        lastName: true,
+        email: true
+      }
+    })
+    
+    const userMap = new Map(pageViewUsers.map(u => [u.id, u]))
+
+    // Format navigation events - create one activity per unique user session
+    userPageViewsMap.forEach((views, userId) => {
+      const user = userMap.get(userId)
+      if (!user) return
+
+      // Group by session
+      const sessionMap = new Map<string, any[]>()
+      views.forEach(view => {
+        const sessionId = view.sessionId || 'unknown'
+        if (!sessionMap.has(sessionId)) {
+          sessionMap.set(sessionId, [])
+        }
+        sessionMap.get(sessionId)!.push(view)
+      })
+
+      // Create activity for each session
+      sessionMap.forEach((sessionViews, sessionId) => {
+        const sortedViews = sessionViews.sort((a, b) => 
+          new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+        )
+        
+        const firstView = sortedViews[0]
+        const lastView = sortedViews[sortedViews.length - 1]
+        
+        // Get unique pages visited
+        const pagesVisited = [...new Set(sortedViews.map(v => v.path))]
+        const totalDuration = sortedViews.reduce((sum, v) => sum + (v.duration || 0), 0)
+        
+        // Create a readable navigation path
+        const pageTitles = sortedViews
+          .map(v => v.title || v.path)
+          .slice(0, 3) // Show first 3 pages
+        
+        const pathDescription = pageTitles.length > 0 
+          ? pageTitles.join(' → ')
+          : 'Browsing session'
+
+        activities.push({
+          id: `pageview-${sessionId}`,
+          type: 'navigation',
+          userId: userId,
+          userName: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
+          description: `Visited ${pagesVisited.length} page${pagesVisited.length !== 1 ? 's' : ''}`,
+          details: `${Math.round(totalDuration / 60)}m session • ${firstView.session?.browser || 'Web'}`,
+          navigationPath: pageTitles,
+          pagesCount: pagesVisited.length,
+          duration: totalDuration,
+          createdAt: firstView.timestamp,
+          timeAgo: getTimeAgo(firstView.timestamp)
+        })
+      })
+    })
+
     // Sort by most recent
     activities.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
 
@@ -221,6 +321,7 @@ export async function GET(request: NextRequest) {
     console.log('  - Goals:', recentGoals.length)
     console.log('  - Chats:', recentChats.length)
     console.log('  - Payments:', recentPayments.length)
+    console.log('  - Navigation Events:', userPageViewsMap.size, 'unique users')
     console.log('  - Total activities:', activities.length)
     console.log('  - Returning:', topActivities.length, 'activities')
 
