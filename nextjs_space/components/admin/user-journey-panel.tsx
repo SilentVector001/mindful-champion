@@ -23,6 +23,7 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
   const [journeyData, setJourneyData] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [days, setDays] = useState(7)
+  const [expandedSessions, setExpandedSessions] = useState<Set<string>>(new Set())
 
   useEffect(() => {
     fetchJourney()
@@ -40,6 +41,9 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
       if (response.ok) {
         const data = await response.json()
         setJourneyData(data)
+        // Expand all sessions by default
+        const allSessionIds = new Set(data.journey.map((s: any) => s.sessionId))
+        setExpandedSessions(allSessionIds)
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Failed to fetch journey' }))
         setError(errorData.error || 'Failed to load user journey')
@@ -273,10 +277,24 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
 
                   {journeyData.journey.map((session: any, idx: number) => {
                     const DeviceIcon = getDeviceIcon(session.deviceType)
+                    const isExpanded = expandedSessions.has(session.sessionId)
+                    
+                    const toggleExpanded = () => {
+                      const newSet = new Set(expandedSessions)
+                      if (isExpanded) {
+                        newSet.delete(session.sessionId)
+                      } else {
+                        newSet.add(session.sessionId)
+                      }
+                      setExpandedSessions(newSet)
+                    }
                     
                     return (
                       <Card key={session.sessionId} className="overflow-hidden">
-                        <CardHeader className="bg-gradient-to-r from-slate-50 to-slate-100 pb-3">
+                        <CardHeader 
+                          className="bg-gradient-to-r from-slate-50 to-slate-100 pb-3 cursor-pointer hover:from-slate-100 hover:to-slate-200 transition-colors"
+                          onClick={toggleExpanded}
+                        >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-sm">
@@ -285,8 +303,14 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
                               <div>
                                 <div className="flex items-center gap-2">
                                   <CardTitle className="text-base">Session {journeyData.journey.length - idx}</CardTitle>
-                                  <Badge variant="outline" className="text-xs">
-                                    {session.totalPages} pages
+                                  <Badge 
+                                    variant="outline" 
+                                    className={cn(
+                                      "text-xs",
+                                      session.totalPages === 0 ? "bg-yellow-50 text-yellow-700 border-yellow-300" : "bg-green-50 text-green-700 border-green-300"
+                                    )}
+                                  >
+                                    {session.totalPages} page{session.totalPages !== 1 ? 's' : ''}
                                   </Badge>
                                 </div>
                                 <CardDescription className="text-xs">
@@ -294,44 +318,82 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
                                 </CardDescription>
                               </div>
                             </div>
-                            {session.duration && (
-                              <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
-                                <Clock className="w-3 h-3 mr-1" />
-                                {formatDuration(session.duration)}
-                              </Badge>
-                            )}
+                            <div className="flex items-center gap-2">
+                              {session.duration && (
+                                <Badge className="bg-indigo-100 text-indigo-700 hover:bg-indigo-100">
+                                  <Clock className="w-3 h-3 mr-1" />
+                                  {formatDuration(session.duration)}
+                                </Badge>
+                              )}
+                              <motion.div
+                                animate={{ rotate: isExpanded ? 90 : 0 }}
+                                transition={{ duration: 0.2 }}
+                              >
+                                <ArrowRight className="w-4 h-4 text-slate-600" />
+                              </motion.div>
+                            </div>
                           </div>
                         </CardHeader>
-                        <CardContent className="p-4">
-                          <div className="space-y-2">
-                            {session.pageViews.map((pv: any, pvIdx: number) => (
-                              <div key={pvIdx} className="flex items-start gap-3">
-                                <div className="flex flex-col items-center">
-                                  <div className="w-2 h-2 bg-indigo-500 rounded-full" />
-                                  {pvIdx < session.pageViews.length - 1 && (
-                                    <div className="w-0.5 h-full bg-gradient-to-b from-indigo-300 to-transparent min-h-[30px]" />
-                                  )}
-                                </div>
-                                <div className="flex-1 pb-3">
-                                  <div className="flex items-center gap-2">
-                                    <span className="font-medium text-slate-900 text-sm">
-                                      {pv.title || formatPath(pv.path)}
-                                    </span>
-                                    {pv.duration && pv.duration > 0 && (
-                                      <Badge variant="secondary" className="text-xs">
-                                        {formatDuration(pv.duration)}
-                                      </Badge>
-                                    )}
+                        
+                        <AnimatePresence>
+                          {isExpanded && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: 'auto', opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <CardContent className="p-4">
+                                {session.pageViews.length === 0 ? (
+                                  <div className="text-center py-8 text-slate-500">
+                                    <Eye className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                                    <p className="text-sm">No page views recorded for this session</p>
+                                    <p className="text-xs mt-1">User may have closed the browser before tracking completed</p>
                                   </div>
-                                  <p className="text-xs text-slate-500 mt-1">
-                                    {new Date(pv.timestamp).toLocaleTimeString()}
-                                    {pv.path !== '/' && ` • ${pv.path}`}
-                                  </p>
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </CardContent>
+                                ) : (
+                                  <div className="space-y-2">
+                                    {session.pageViews.map((pv: any, pvIdx: number) => (
+                                      <div key={pvIdx} className="flex items-start gap-3">
+                                        <div className="flex flex-col items-center">
+                                          <div className="w-2 h-2 bg-indigo-500 rounded-full" />
+                                          {pvIdx < session.pageViews.length - 1 && (
+                                            <div className="w-0.5 h-full bg-gradient-to-b from-indigo-300 to-transparent min-h-[30px]" />
+                                          )}
+                                        </div>
+                                        <div className="flex-1 pb-3">
+                                          <div className="flex items-center gap-2 flex-wrap">
+                                            <span className="font-medium text-slate-900 text-sm">
+                                              {pv.title || formatPath(pv.path)}
+                                            </span>
+                                            {pv.duration && pv.duration > 0 && (
+                                              <Badge variant="secondary" className="text-xs">
+                                                <Clock className="w-3 h-3 mr-1" />
+                                                {formatDuration(pv.duration)}
+                                              </Badge>
+                                            )}
+                                          </div>
+                                          <p className="text-xs text-slate-500 mt-1">
+                                            {new Date(pv.timestamp).toLocaleTimeString()}
+                                            {pv.path !== '/' && (
+                                              <span className="ml-2 font-mono bg-slate-100 px-2 py-0.5 rounded">
+                                                {pv.path}
+                                              </span>
+                                            )}
+                                          </p>
+                                          {pv.referrer && pv.referrer !== pv.path && (
+                                            <p className="text-xs text-slate-400 mt-1">
+                                              From: {pv.referrer}
+                                            </p>
+                                          )}
+                                        </div>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </CardContent>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </Card>
                     )
                   })}
