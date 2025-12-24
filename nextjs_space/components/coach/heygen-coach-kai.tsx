@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Mic, MicOff, MessageCircle, Sparkles, Video, VideoOff, Volume2, VolumeX, Wifi, WifiOff } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -23,7 +23,7 @@ type Message = {
   timestamp: Date;
 };
 
-type AvatarState = 'disconnected' | 'connecting' | 'idle' | 'listening' | 'thinking' | 'speaking';
+type AvatarState = 'offline' | 'connecting' | 'ready' | 'listening' | 'thinking' | 'speaking';
 
 type UserContext = {
   name?: string;
@@ -42,17 +42,17 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [avatarState, setAvatarState] = useState<AvatarState>('disconnected');
-  const [isListening, setIsListening] = useState(false);
+  const [avatarState, setAvatarState] = useState<AvatarState>('offline');
   const [isMuted, setIsMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [credits, setCredits] = useState<number | null>(null);
+  const [hasVideo, setHasVideo] = useState(false);
   
   const avatarRef = useRef<StreamingAvatar | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const sessionIdRef = useRef<string | null>(null);
   const recognitionRef = useRef<any>(null);
   const isProcessingRef = useRef(false);
+  const initAttemptedRef = useRef(false);
 
   // Initialize avatar session
   const initializeAvatar = useCallback(async () => {
@@ -62,110 +62,81 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
     setError(null);
     
     try {
-      // Get access token from our API
       const tokenRes = await fetch('/api/heygen/token', { method: 'POST' });
-      if (!tokenRes.ok) {
-        throw new Error('Failed to get HeyGen access token');
-      }
+      if (!tokenRes.ok) throw new Error('Failed to get HeyGen access token');
       const { token } = await tokenRes.json();
       
-      // Initialize StreamingAvatar
       const avatar = new StreamingAvatar({ token });
       avatarRef.current = avatar;
       
-      // Set up event listeners
+      // Event listeners
       avatar.on(StreamingEvents.STREAM_READY, (event: any) => {
         console.log('Stream ready:', event);
         if (videoRef.current && event.detail) {
           videoRef.current.srcObject = event.detail;
-          videoRef.current.play().catch(console.error);
+          videoRef.current.onloadedmetadata = () => {
+            videoRef.current?.play().catch(console.error);
+            setHasVideo(true);
+          };
         }
-        setAvatarState('idle');
+        setAvatarState('ready');
       });
       
-      avatar.on(StreamingEvents.AVATAR_START_TALKING, () => {
-        setAvatarState('speaking');
-      });
-      
-      avatar.on(StreamingEvents.AVATAR_STOP_TALKING, () => {
-        setAvatarState('idle');
-      });
+      avatar.on(StreamingEvents.AVATAR_START_TALKING, () => setAvatarState('speaking'));
+      avatar.on(StreamingEvents.AVATAR_STOP_TALKING, () => setAvatarState('ready'));
       
       avatar.on(StreamingEvents.STREAM_DISCONNECTED, () => {
-        setAvatarState('disconnected');
+        setAvatarState('offline');
+        setHasVideo(false);
         avatarRef.current = null;
         sessionIdRef.current = null;
       });
       
-      // Start avatar session with Interactive Avatar (REQUIRED for streaming)
-      // Regular avatars from /v2/avatars do NOT work - must use Interactive Avatar IDs
       const sessionData = await avatar.createStartAvatar({
-        quality: AvatarQuality.Low, // Use low to conserve credits on free plan
-        avatarName: 'Wayne_20240711', // Wayne - verified working interactive avatar
+        quality: AvatarQuality.Low,
+        avatarName: 'Wayne_20240711',
         voice: {
-          voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional (supports interactive avatars)
+          voiceId: '1ae3be1e24894ccabdb4d8139399f721',
           rate: 1.0,
           emotion: VoiceEmotion.FRIENDLY
         }
       });
       
       sessionIdRef.current = sessionData.session_id;
-      console.log('Avatar session started:', sessionData.session_id);
       
-      // Say greeting
+      // Greeting
       const name = userContext?.firstName || 'Champion';
-      setTimeout(async () => {
-        await speakText(`Hey ${name}! I'm Coach Kai, your AI pickleball coach. What can I help you with today?`);
-      }, 1000);
+      setTimeout(() => speakText(`Hey ${name}! I'm Coach Kai. Click on me to ask anything about pickleball!`), 1500);
       
     } catch (err: any) {
       console.error('Avatar init error:', err);
-      const errorMsg = err.message || 'Failed to connect to video avatar';
-      // More helpful error messages
-      if (errorMsg.includes('10004') || errorMsg.includes('Concurrent limit')) {
-        setError('Video avatar session limit reached. Please wait a moment and try again. Text chat is always available!');
-      } else if (errorMsg.includes('10003') || errorMsg.includes('invalid avatar')) {
-        setError('Video avatar configuration error. Text chat is always available!');
-      } else if (errorMsg.includes('400') || errorMsg.includes('Bad Request')) {
-        setError('Video avatar unavailable. Text chat is always available!');
-      } else if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
-        setError('HeyGen API key not configured. Text chat is always available!');
-      } else {
-        setError(errorMsg);
-      }
-      setAvatarState('disconnected');
+      setError('Video unavailable. Text chat is always free!');
+      setAvatarState('offline');
     }
   }, [avatarState, userContext?.firstName]);
 
   // Disconnect avatar
   const disconnectAvatar = useCallback(async () => {
     if (avatarRef.current) {
-      try {
-        await avatarRef.current.stopAvatar();
-      } catch (e) {
-        console.error('Error stopping avatar:', e);
-      }
+      try { await avatarRef.current.stopAvatar(); } catch (e) {}
       avatarRef.current = null;
       sessionIdRef.current = null;
     }
-    setAvatarState('disconnected');
+    setAvatarState('offline');
+    setHasVideo(false);
   }, []);
 
-  // Speak text through avatar
+  // Speak text
   const speakText = async (text: string) => {
     if (!avatarRef.current || !sessionIdRef.current) return;
-    
     try {
-      await avatarRef.current.speak({
-        text,
-        taskType: TaskType.REPEAT
-      });
+      await avatarRef.current.speak({ text, taskType: TaskType.REPEAT });
     } catch (err) {
       console.error('Speak error:', err);
     }
   };
 
-  // Send message and get AI response
+  // Send message
   const sendMessage = useCallback(async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading || isProcessingRef.current) return;
@@ -185,7 +156,6 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
     setMessages(prev => [...prev, userMsg]);
     
     try {
-      // Get AI response from Coach Kai API
       const conversationMsgs = [
         ...messages.slice(-9).map(m => ({ role: m.role, content: m.content })),
         { role: 'user', content: msg }
@@ -196,13 +166,11 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: conversationMsgs,
-          // Request shorter responses for video
           systemPromptAddition: 'Keep your response to 2-3 sentences since it will be spoken by a video avatar.'
         })
       });
       
       if (!res.ok) throw new Error('API error');
-      
       const data = await res.json();
       
       if (data.message) {
@@ -215,16 +183,10 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         
         setMessages(prev => [...prev, assistantMsg]);
         
-        // Speak the response through avatar
         if (avatarRef.current && sessionIdRef.current) {
-          // Clean response for speech (remove markdown)
           const cleanText = data.message
-            .replace(/\*\*/g, '')
-            .replace(/\*/g, '')
-            .replace(/#{1,6}\s/g, '')
-            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
-            .substring(0, 500); // Limit length for credits
-          
+            .replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').substring(0, 500);
           await speakText(cleanText);
         }
       }
@@ -236,16 +198,22 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         content: 'Sorry, I had trouble with that. Please try again!',
         timestamp: new Date()
       }]);
-      setAvatarState('idle');
+      setAvatarState('ready');
     } finally {
       setIsLoading(false);
       isProcessingRef.current = false;
     }
   }, [input, isLoading, messages]);
 
-  // Speech recognition
+  // Speech recognition - triggered on avatar click
   const startListening = useCallback(() => {
-    if (isLoading) return;
+    if (isLoading || avatarState === 'listening') return;
+    
+    // If avatar not ready, initialize first
+    if (avatarState === 'offline') {
+      initializeAvatar();
+      return;
+    }
     
     try {
       const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
@@ -264,40 +232,35 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         sendMessage(transcript);
       };
       
-      recognition.onerror = (event: any) => {
-        console.error('Speech error:', event.error);
-        setIsListening(false);
-        setAvatarState(avatarRef.current ? 'idle' : 'disconnected');
-      };
-      
+      recognition.onerror = () => setAvatarState(avatarRef.current ? 'ready' : 'offline');
       recognition.onend = () => {
-        setIsListening(false);
-        setAvatarState(avatarRef.current ? 'idle' : 'disconnected');
+        if (avatarState === 'listening') setAvatarState(avatarRef.current ? 'ready' : 'offline');
       };
       
       recognitionRef.current = recognition;
       recognition.start();
-      setIsListening(true);
       setAvatarState('listening');
     } catch (error) {
       console.error('Failed to start speech recognition:', error);
     }
-  }, [isLoading, sendMessage]);
+  }, [isLoading, avatarState, sendMessage, initializeAvatar]);
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
       recognitionRef.current.stop();
       recognitionRef.current = null;
     }
-    setIsListening(false);
+    setAvatarState(avatarRef.current ? 'ready' : 'offline');
   }, []);
 
-  // Cleanup on unmount
+  // Auto-initialize on mount
   useEffect(() => {
-    return () => {
-      disconnectAvatar();
-    };
-  }, [disconnectAvatar]);
+    if (!initAttemptedRef.current) {
+      initAttemptedRef.current = true;
+      initializeAvatar();
+    }
+    return () => { disconnectAvatar(); };
+  }, []);
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -306,179 +269,194 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
     }
   };
 
-  const getStateColor = () => {
+  // Handle avatar click - start/stop listening
+  const handleAvatarClick = () => {
+    if (avatarState === 'offline' || avatarState === 'connecting') {
+      initializeAvatar();
+    } else if (avatarState === 'listening') {
+      stopListening();
+    } else if (avatarState === 'ready') {
+      startListening();
+    }
+    // Don't interrupt if speaking or thinking
+  };
+
+  // Color-coded states
+  const getStateStyles = () => {
     switch (avatarState) {
-      case 'disconnected': return 'bg-slate-500';
-      case 'connecting': return 'bg-yellow-500 animate-pulse';
-      case 'idle': return 'bg-green-500';
-      case 'listening': return 'bg-yellow-500 animate-pulse';
-      case 'thinking': return 'bg-purple-500 animate-pulse';
-      case 'speaking': return 'bg-cyan-500 animate-pulse';
-      default: return 'bg-slate-500';
+      case 'offline': return { ring: 'ring-slate-500', glow: '', bg: 'bg-slate-800' };
+      case 'connecting': return { ring: 'ring-cyan-500 animate-pulse', glow: 'shadow-cyan-500/50', bg: 'bg-slate-800' };
+      case 'ready': return { ring: 'ring-emerald-500', glow: 'shadow-emerald-500/30', bg: 'bg-slate-800' };
+      case 'listening': return { ring: 'ring-green-400 ring-4', glow: 'shadow-green-500/60 shadow-2xl', bg: 'bg-green-950/30' };
+      case 'thinking': return { ring: 'ring-purple-500 animate-pulse', glow: 'shadow-purple-500/50', bg: 'bg-purple-950/20' };
+      case 'speaking': return { ring: 'ring-amber-500 ring-4', glow: 'shadow-amber-500/60 shadow-2xl', bg: 'bg-amber-950/20' };
+      default: return { ring: 'ring-slate-500', glow: '', bg: 'bg-slate-800' };
     }
   };
 
-  const getStateText = () => {
+  const stateStyles = getStateStyles();
+
+  const getStateLabel = () => {
     switch (avatarState) {
-      case 'disconnected': return 'Offline';
-      case 'connecting': return 'Connecting...';
-      case 'idle': return 'Ready';
-      case 'listening': return 'Listening...';
-      case 'thinking': return 'Thinking...';
-      case 'speaking': return 'Speaking...';
-      default: return 'Unknown';
+      case 'offline': return { text: 'Click to start', color: 'text-slate-400' };
+      case 'connecting': return { text: 'Connecting...', color: 'text-cyan-400' };
+      case 'ready': return { text: 'Click to talk', color: 'text-emerald-400' };
+      case 'listening': return { text: '🎤 Listening...', color: 'text-green-400' };
+      case 'thinking': return { text: 'Thinking...', color: 'text-purple-400' };
+      case 'speaking': return { text: 'Speaking...', color: 'text-amber-400' };
+      default: return { text: '', color: '' };
     }
   };
+
+  const stateLabel = getStateLabel();
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-4 px-4 shadow-2xl">
+      {/* Compact Header */}
+      <div className="bg-gradient-to-r from-teal-600 via-cyan-600 to-blue-600 text-white py-3 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="relative">
-              <div className="w-12 h-12 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 flex items-center justify-center text-2xl font-black shadow-lg">
-                K
-              </div>
-              <div className={`absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${getStateColor()}`} />
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 flex items-center justify-center text-xl font-black shadow-lg">
+              K
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black tracking-tight">COACH KAI</h1>
-                <Badge className="bg-white/20 text-white border-white/30">
-                  <Video className="w-3 h-3 mr-1" />
-                  VIDEO AI
-                </Badge>
+                <h1 className="text-lg font-black tracking-tight">COACH KAI</h1>
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">VIDEO AI</Badge>
               </div>
-              <p className="text-teal-100 text-sm">{getStateText()}</p>
+              <p className={`text-sm ${stateLabel.color}`}>{stateLabel.text}</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-2">
-            {avatarState === 'disconnected' ? (
-              <Button 
-                onClick={initializeAvatar}
-                className="bg-white/20 hover:bg-white/30"
-              >
-                <Video className="w-4 h-4 mr-2" />
-                Start Video
-              </Button>
-            ) : (
-              <Button 
-                onClick={disconnectAvatar}
-                variant="ghost"
-                className="text-white hover:bg-white/20"
-              >
-                <VideoOff className="w-4 h-4 mr-2" />
-                End
-              </Button>
-            )}
-          </div>
+          {avatarState !== 'offline' && avatarState !== 'connecting' && (
+            <Button onClick={disconnectAvatar} variant="ghost" size="sm" className="text-white hover:bg-white/20">
+              End
+            </Button>
+          )}
         </div>
       </div>
 
       <div className="max-w-6xl mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Video Section */}
-          <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
-            <div className="aspect-video bg-slate-900 relative">
-              {avatarState === 'disconnected' ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
+          {/* Interactive Avatar Area */}
+          <Card className={`${stateStyles.bg} border-slate-700 overflow-hidden transition-all duration-300`}>
+            {/* Clickable Avatar Zone */}
+            <motion.div 
+              onClick={handleAvatarClick}
+              className={`aspect-video relative cursor-pointer ring-2 ${stateStyles.ring} transition-all duration-300 ${stateStyles.glow}`}
+              whileHover={{ scale: avatarState === 'speaking' || avatarState === 'thinking' ? 1 : 1.01 }}
+              whileTap={{ scale: 0.99 }}
+            >
+              {/* Video element - always present */}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted={isMuted}
+                className={`w-full h-full object-cover ${hasVideo ? 'opacity-100' : 'opacity-0'}`}
+              />
+              
+              {/* Fallback Avatar Placeholder */}
+              {!hasVideo && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center">
+                  {/* Animated Coach Kai graphic */}
                   <motion.div 
-                    className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-500/30 to-cyan-500/30 flex items-center justify-center mb-4"
-                    animate={{ scale: [1, 1.1, 1] }}
+                    className={`relative w-32 h-32 rounded-full flex items-center justify-center ${
+                      avatarState === 'listening' ? 'bg-gradient-to-br from-green-500 to-emerald-600' :
+                      avatarState === 'speaking' ? 'bg-gradient-to-br from-amber-500 to-orange-600' :
+                      avatarState === 'thinking' ? 'bg-gradient-to-br from-purple-500 to-violet-600' :
+                      avatarState === 'connecting' ? 'bg-gradient-to-br from-cyan-500 to-blue-600' :
+                      'bg-gradient-to-br from-teal-500 to-cyan-600'
+                    }`}
+                    animate={
+                      avatarState === 'listening' ? { scale: [1, 1.1, 1], boxShadow: ['0 0 20px rgba(34, 197, 94, 0.5)', '0 0 40px rgba(34, 197, 94, 0.8)', '0 0 20px rgba(34, 197, 94, 0.5)'] } :
+                      avatarState === 'speaking' ? { scale: [1, 1.05, 1], boxShadow: ['0 0 20px rgba(245, 158, 11, 0.5)', '0 0 35px rgba(245, 158, 11, 0.7)', '0 0 20px rgba(245, 158, 11, 0.5)'] } :
+                      avatarState === 'thinking' ? { rotate: [0, 5, -5, 0] } :
+                      avatarState === 'connecting' ? { scale: [1, 1.05, 1] } :
+                      { scale: [1, 1.02, 1] }
+                    }
+                    transition={{ duration: avatarState === 'listening' ? 0.8 : avatarState === 'speaking' ? 0.6 : 2, repeat: Infinity }}
+                  >
+                    <span className="text-5xl font-black text-white">K</span>
+                    
+                    {/* Recording indicator for listening */}
+                    {avatarState === 'listening' && (
+                      <motion.div 
+                        className="absolute -top-1 -right-1 w-6 h-6 bg-red-500 rounded-full flex items-center justify-center"
+                        animate={{ scale: [1, 1.3, 1] }}
+                        transition={{ duration: 0.5, repeat: Infinity }}
+                      >
+                        <div className="w-2 h-2 bg-white rounded-full" />
+                      </motion.div>
+                    )}
+                  </motion.div>
+                  
+                  {/* State text */}
+                  <motion.p 
+                    className={`mt-4 font-semibold text-lg ${stateLabel.color}`}
+                    animate={{ opacity: [0.7, 1, 0.7] }}
                     transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <Video className="w-12 h-12" />
-                  </motion.div>
-                  <p className="font-semibold mb-2">Click "Start Video" to begin</p>
-                  <p className="text-sm text-slate-500">Interactive video coaching</p>
-                  {error && (
-                    <p className="text-red-400 text-sm mt-2">{error}</p>
+                    {stateLabel.text}
+                  </motion.p>
+                  
+                  {/* Hint text */}
+                  {avatarState === 'ready' && (
+                    <p className="text-slate-500 text-sm mt-1">Tap anywhere to start talking</p>
                   )}
+                  
+                  {error && <p className="text-amber-400 text-sm mt-2">{error}</p>}
                 </div>
-              ) : avatarState === 'connecting' ? (
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-slate-400">
-                  <Loader2 className="w-12 h-12 animate-spin mb-4 text-teal-400" />
-                  <p className="font-semibold">Connecting to Coach Kai...</p>
-                </div>
-              ) : (
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  muted={isMuted}
-                  className="w-full h-full object-cover"
-                />
               )}
               
-              {/* Video overlay controls */}
-              {avatarState !== 'disconnected' && avatarState !== 'connecting' && (
-                <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
-                  <Badge className={`${getStateColor()} text-white`}>
-                    {getStateText()}
+              {/* Video overlay - state indicator when video is showing */}
+              {hasVideo && (
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                  <Badge className={`${
+                    avatarState === 'listening' ? 'bg-green-500' :
+                    avatarState === 'speaking' ? 'bg-amber-500' :
+                    avatarState === 'thinking' ? 'bg-purple-500' :
+                    'bg-emerald-500'
+                  } text-white font-semibold`}>
+                    {stateLabel.text}
                   </Badge>
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={() => setIsMuted(!isMuted)}
+                    onClick={(e) => { e.stopPropagation(); setIsMuted(!isMuted); }}
                     className="bg-black/50 hover:bg-black/70 text-white"
                   >
                     {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                   </Button>
                 </div>
               )}
-            </div>
-            
-            {/* Voice Input */}
-            <div className="p-4 bg-slate-800/30">
-              <div className="flex items-center gap-4">
-                <motion.button
-                  onClick={isListening ? stopListening : startListening}
-                  disabled={isLoading || avatarState === 'disconnected' || avatarState === 'connecting'}
-                  className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${
-                    isListening 
-                      ? 'bg-gradient-to-br from-yellow-400 to-orange-500 scale-110' 
-                      : avatarState === 'disconnected' || avatarState === 'connecting'
-                        ? 'bg-slate-600 cursor-not-allowed'
-                        : 'bg-gradient-to-br from-teal-500 to-cyan-500 hover:scale-105'
-                  }`}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {isListening ? (
-                    <MicOff className="w-8 h-8 text-white" />
-                  ) : (
-                    <Mic className="w-8 h-8 text-white" />
-                  )}
-                </motion.button>
-                <div className="flex-1">
-                  <p className="text-white font-semibold">
-                    {isListening ? '🎤 Listening...' : 'Tap to speak'}
-                  </p>
-                  <p className="text-slate-400 text-sm">
-                    Ask Coach Kai anything about pickleball
-                  </p>
-                </div>
-              </div>
-            </div>
+              
+              {/* Pulse ring animation for listening */}
+              {avatarState === 'listening' && (
+                <motion.div 
+                  className="absolute inset-0 border-4 border-green-400 rounded-lg pointer-events-none"
+                  animate={{ opacity: [0.5, 0, 0.5], scale: [1, 1.02, 1] }}
+                  transition={{ duration: 1, repeat: Infinity }}
+                />
+              )}
+            </motion.div>
           </Card>
 
           {/* Chat Section */}
-          <Card className="bg-slate-800/50 border-slate-700 flex flex-col h-[500px]">
+          <Card className="bg-slate-800/50 border-slate-700 flex flex-col h-[400px] lg:h-auto">
             <div className="px-4 py-3 border-b border-slate-700 flex items-center gap-2">
               <MessageCircle className="w-5 h-5 text-teal-400" />
               <span className="font-bold text-white">Conversation</span>
             </div>
             
-            {/* Messages */}
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
               {messages.length === 0 ? (
                 <div className="text-center py-8 text-slate-500">
-                  <Sparkles className="w-12 h-12 mx-auto mb-3 opacity-30" />
+                  <Sparkles className="w-10 h-10 mx-auto mb-3 opacity-30" />
                   <p>Start a conversation with Coach Kai!</p>
                 </div>
               ) : (
-                messages.map((message, index) => (
+                messages.map((message) => (
                   <motion.div
                     key={message.id}
                     initial={{ opacity: 0, y: 10 }}
@@ -492,9 +470,7 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
                     }`}>
                       {message.role === 'assistant' ? (
                         <div className="prose prose-sm prose-invert max-w-none">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {message.content}
-                          </ReactMarkdown>
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
                         <p>{message.content}</p>
@@ -509,14 +485,13 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
                   <div className="bg-slate-700 rounded-2xl px-4 py-3">
                     <div className="flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin text-teal-400" />
-                      <span className="text-slate-300">Coach Kai is thinking...</span>
+                      <span className="text-slate-300">Thinking...</span>
                     </div>
                   </div>
                 </div>
               )}
             </div>
             
-            {/* Text Input */}
             <div className="p-4 border-t border-slate-700">
               <div className="flex gap-2">
                 <Textarea
@@ -532,18 +507,14 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
                   disabled={!input.trim() || isLoading}
                   className="h-[50px] w-[50px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
                 >
-                  {isLoading ? (
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                  ) : (
-                    <Send className="w-5 h-5" />
-                  )}
+                  {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </Button>
               </div>
             </div>
           </Card>
         </div>
 
-        {/* Quick Actions */}
+        {/* Quick Prompts */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
             { label: 'Serve Tips', prompt: 'Give me your best serve tip', emoji: '🎯' },
@@ -564,7 +535,6 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
           ))}
         </div>
 
-        {/* Credits Notice */}
         <p className="text-center text-slate-500 text-sm mt-6">
           ⚡ Video avatar uses HeyGen credits • Text chat is always free
         </p>
