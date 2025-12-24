@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Suspense } from "react"
 import "./globals.css"
 import "./ios-fixes.css"
 import "./mobile-fixes.css"
@@ -131,7 +132,9 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            <PageTracker />
+            <Suspense fallback={null}>
+              <PageTracker />
+            </Suspense>
             <WarningNotificationPopup />
             <LiveNowBanner />
             {children}
