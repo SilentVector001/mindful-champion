@@ -119,7 +119,15 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       
     } catch (err: any) {
       console.error('Avatar init error:', err);
-      setError(err.message || 'Failed to connect to video avatar');
+      const errorMsg = err.message || 'Failed to connect to video avatar';
+      // More helpful error messages
+      if (errorMsg.includes('400') || errorMsg.includes('Bad Request')) {
+        setError('Video avatar unavailable. The HeyGen API may need configuration. Text chat is always available!');
+      } else if (errorMsg.includes('401') || errorMsg.includes('Unauthorized')) {
+        setError('HeyGen API key not configured. Text chat is always available!');
+      } else {
+        setError(errorMsg);
+      }
       setAvatarState('disconnected');
     }
   }, [avatarState, userContext?.firstName]);
