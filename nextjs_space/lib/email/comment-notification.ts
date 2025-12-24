@@ -116,9 +116,10 @@ Keep the conversation going! 🎾
     await prisma.emailNotification.create({
       data: {
         userId: postOwnerId,
-        type: "COMMENT_NOTIFICATION",
+        type: "ADMIN_NEW_USER",
+        recipientEmail: postOwnerEmail,
         subject: `${commenterName} commented on your post`,
-        body: commentContent.slice(0, 500),
+        htmlContent: htmlContent,
         status: "SENT",
         sentAt: new Date(),
         metadata: {
@@ -137,9 +138,10 @@ Keep the conversation going! 🎾
     await prisma.emailNotification.create({
       data: {
         userId: postOwnerId,
-        type: "COMMENT_NOTIFICATION",
+        type: "ADMIN_NEW_USER",
+        recipientEmail: postOwnerEmail,
         subject: `${commenterName} commented on your post`,
-        body: commentContent.slice(0, 500),
+        htmlContent: `Failed to send: ${commentContent.slice(0, 500)}`,
         status: "FAILED",
         error: error instanceof Error ? error.message : "Unknown error",
         metadata: { postId, commenterName }

@@ -2,41 +2,33 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-async function verifySync() {
-  console.log('📊 Verifying Media Center Content Sync\n');
+async function verify() {
+  console.log('\n=== VERIFICATION REPORT ===\n');
   
   // Check live streams
-  const liveStreams = await prisma.liveStream.findMany({
-    orderBy: { updatedAt: 'desc' },
-    take: 5
-  });
-  console.log(`🎥 Live Streams: ${liveStreams.length} recent entries`);
-  liveStreams.forEach(stream => {
-    console.log(`   - ${stream.title} (${stream.status})`);
-  });
+  const streams = await prisma.liveStream.findMany();
+  console.log(`✅ Live Streams: ${streams.length} records`);
+  streams.forEach(s => console.log(`   - ${s.title} (${s.status})`));
   
-  // Check podcasts
-  const podcasts = await prisma.podcastEpisode.findMany({
-    orderBy: { publishDate: 'desc' },
-    take: 5,
-    include: { show: true }
+  // Check podcast shows
+  const shows = await prisma.podcastShow.findMany({
+    include: { episodes: true }
   });
-  console.log(`\n🎙️ Podcast Episodes: ${podcasts.length} recent entries`);
-  podcasts.forEach(ep => {
-    console.log(`   - ${ep.title} (${ep.show.name})`);
-  });
+  console.log(`\n✅ Podcast Shows: ${shows.length} shows`);
+  shows.forEach(s => console.log(`   - ${s.title}: ${s.episodes.length} episodes`));
   
   // Check events
-  const events = await prisma.externalEvent.findMany({
-    orderBy: { startDate: 'asc' },
-    take: 5
+  const events = await prisma.externalEvent.findMany();
+  console.log(`\n✅ Events: ${events.length} records`);
+  events.forEach(e => console.log(`   - ${e.title} (${e.startDate.toISOString().split('T')[0]})`));
+  
+  // Check live scores cache
+  const scores = await prisma.apiCache.findMany({
+    where: { cacheKey: { startsWith: 'live_score_' } }
   });
-  console.log(`\n📅 Events: ${events.length} upcoming entries`);
-  events.forEach(event => {
-    console.log(`   - ${event.name} (${event.startDate.toISOString().split('T')[0]})`);
-  });
+  console.log(`\n✅ Live Scores (cached): ${scores.length} records`);
   
   await prisma.$disconnect();
 }
 
-verifySync().catch(console.error);
+verify();

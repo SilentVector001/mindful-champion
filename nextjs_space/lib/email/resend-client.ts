@@ -66,3 +66,6 @@ export function getResendClient(): Resend {
 }
 
 export { Resend };
+
+// Convenience export for direct usage
+export const resend = getResendClient();

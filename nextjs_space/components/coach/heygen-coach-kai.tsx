@@ -288,7 +288,7 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       
       recognition.onerror = () => setAvatarState(avatarRef.current ? 'ready' : 'offline');
       recognition.onend = () => {
-        if (avatarState === 'listening') setAvatarState(avatarRef.current ? 'ready' : 'offline');
+        setAvatarState((prev) => prev === 'listening' ? (avatarRef.current ? 'ready' : 'offline') : prev);
       };
       
       recognitionRef.current = recognition;

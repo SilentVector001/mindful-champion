@@ -42,7 +42,7 @@ export default function UserJourneyPanel({ userId, userName, onClose }: UserJour
         const data = await response.json()
         setJourneyData(data)
         // Expand all sessions by default
-        const allSessionIds = new Set(data.journey.map((s: any) => s.sessionId))
+        const allSessionIds = new Set<string>(data.journey.map((s: any) => s.sessionId as string))
         setExpandedSessions(allSessionIds)
       } else {
         const errorData = await response.json().catch(() => ({ error: 'Failed to fetch journey' }))

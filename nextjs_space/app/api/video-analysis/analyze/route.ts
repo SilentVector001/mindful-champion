@@ -250,14 +250,16 @@ export async function POST(request: NextRequest) {
         await prisma.emailNotification.create({
           data: {
             userId: user.id,
-            type: 'VIDEO_ANALYSIS',
+            type: 'VIDEO_ANALYSIS_COMPLETE',
+            recipientEmail: userWithEmail.email,
             subject: `Your Video Analysis is Ready! Score: ${overallScore}/100`,
-            status: emailResult?.id ? 'SENT' : 'FAILED',
+            htmlContent: emailHtml,
+            status: emailResult?.data?.id ? 'SENT' : 'FAILED',
             sentAt: new Date(),
           }
         });
 
-        console.log("[Analyze] Email notification sent:", emailResult?.id);
+        console.log("[Analyze] Email notification sent:", emailResult?.data?.id);
       }
     } catch (emailError) {
       console.error("[Analyze] Email notification failed:", emailError);
