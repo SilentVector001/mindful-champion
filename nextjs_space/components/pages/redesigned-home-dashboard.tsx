@@ -84,7 +84,7 @@ export default function RedesignedHomeDashboard({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" style={{ backgroundColor: '#0a0f1a' }}>
         <MainNavigation user={user} />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -94,7 +94,7 @@ export default function RedesignedHomeDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950" style={{ backgroundColor: '#0a0f1a' }}>
       <MainNavigation user={user} />
       
       {/* Single Screen Dashboard */}
