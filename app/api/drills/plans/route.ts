@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-// Get user's custom drill plans
+// Get user's custom drill plans (not implemented - requires database setup)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -13,24 +12,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session?.user?.id ?? ''
-    const plans = await prisma.customDrillPlan.findMany({
-      where: { userId },
-      include: {
-        drills: {
-          include: {
-            drill: true,
-          },
-          orderBy: { order: 'asc' },
-        },
-      },
-      orderBy: { updatedAt: 'desc' },
-    })
-
+    // Custom drill plans not implemented - return empty array
     return NextResponse.json({
       success: true,
-      plans,
-      total: plans?.length ?? 0,
+      plans: [],
+      total: 0,
     })
   } catch (error) {
     console.error('Error fetching plans:', error)
@@ -41,7 +27,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Create a new custom drill plan
+// Create a new custom drill plan (not implemented - requires database setup)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -49,55 +35,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { name, description, drillIds } = body ?? {}
-
-    if (!name || !drillIds || !Array.isArray(drillIds) || drillIds?.length === 0) {
-      return NextResponse.json(
-        { error: 'Name and drill IDs are required' },
-        { status: 400 }
-      )
-    }
-
-    const userId = session?.user?.id ?? ''
-
-    // Calculate total duration
-    const drills = await prisma.drill.findMany({
-      where: { id: { in: drillIds } },
-      select: { id: true, duration: true },
-    })
-
-    const totalDuration = drills?.reduce((sum, d) => sum + (d?.duration ?? 0), 0) ?? 0
-
-    // Create plan with drills
-    const plan = await prisma.customDrillPlan.create({
-      data: {
-        userId,
-        name,
-        description: description ?? null,
-        totalDuration,
-        drills: {
-          create: drillIds?.map((drillId: string, index: number) => ({
-            drillId,
-            order: index,
-          })) ?? [],
-        },
-      },
-      include: {
-        drills: {
-          include: {
-            drill: true,
-          },
-          orderBy: { order: 'asc' },
-        },
-      },
-    })
-
+    // Custom drill plans require database implementation
     return NextResponse.json({
-      success: true,
-      plan,
-      message: 'Custom drill plan created successfully',
-    })
+      error: 'Custom drill plans not yet implemented. To enable this feature, please add CustomDrillPlan model to the database.',
+    }, { status: 501 })
   } catch (error) {
     console.error('Error creating plan:', error)
     return NextResponse.json(

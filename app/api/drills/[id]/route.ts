@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getDrillById } from '@/lib/drills-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -15,9 +16,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const drill = await prisma.drill.findUnique({
-      where: { id: params?.id ?? '' },
-    })
+    const drill = getDrillById(params?.id ?? '')
 
     if (!drill) {
       return NextResponse.json({ error: 'Drill not found' }, { status: 404 })

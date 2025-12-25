@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { drillsDatabase } from '@/lib/drills-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,72 +18,64 @@ export async function GET(request: NextRequest) {
     const difficulty = searchParams.get('difficulty')
     const ageGroup = searchParams.get('ageGroup')
     const gender = searchParams.get('gender')
-    const skillLevel = searchParams.get('skillLevel')
-    const equipment = searchParams.get('equipment')
     const duration = searchParams.get('duration')
     const search = searchParams.get('search')
-    const featured = searchParams.get('featured')
     const playersRequired = searchParams.get('playersRequired')
 
-    const where: any = {
-      active: true,
-    }
+    // Filter drills using static database
+    let filteredDrills = [...drillsDatabase]
 
     // Category filter
     if (category && category !== 'all') {
-      where.category = category
+      filteredDrills = filteredDrills.filter(d => d.category === category)
     }
 
     // Difficulty filter
     if (difficulty && difficulty !== 'all') {
-      where.difficulty = difficulty
+      filteredDrills = filteredDrills.filter(d => d.difficulty === difficulty)
     }
 
-    // Age group filter (check if ageGroup is in the ageGroups JSON array)
+    // Age group filter
     if (ageGroup && ageGroup !== 'all') {
-      where.ageGroups = {
-        array_contains: ageGroup,
-      }
+      filteredDrills = filteredDrills.filter(d => 
+        d.ageGroup?.includes(ageGroup) || d.ageGroup?.includes('all')
+      )
     }
 
     // Gender filter
     if (gender && gender !== 'all') {
-      where.gender = gender
+      filteredDrills = filteredDrills.filter(d => 
+        d.gender?.includes(gender) || d.gender?.includes('all')
+      )
     }
 
-    // Duration filter (less than or equal)
+    // Duration filter
     if (duration) {
-      where.duration = {
-        lte: parseInt(duration),
-      }
+      const maxDuration = parseInt(duration)
+      filteredDrills = filteredDrills.filter(d => d.duration <= maxDuration)
     }
 
     // Players required filter
     if (playersRequired) {
-      where.playersRequired = playersRequired
+      filteredDrills = filteredDrills.filter(d => d.playerCount === playersRequired)
     }
 
-    // Featured filter
-    if (featured === 'true') {
-      where.featured = true
-    }
-
-    // Search filter (title, tagline, description, or focusAreas)
+    // Search filter
     if (search) {
-      where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { tagline: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-      ]
+      const searchLower = search.toLowerCase()
+      filteredDrills = filteredDrills.filter(d =>
+        d.name.toLowerCase().includes(searchLower) ||
+        d.tagline.toLowerCase().includes(searchLower) ||
+        d.description.toLowerCase().includes(searchLower) ||
+        d.focusAreas.some(f => f.toLowerCase().includes(searchLower))
+      )
     }
 
-    const drills = await prisma.drill.findMany({
-      where,
-      orderBy: [
-        { featured: 'desc' },
-        { popularityScore: 'desc' },
-        { title: 'asc' },
-      ],
+    // Sort drills by popularity and effectiveness
+    filteredDrills.sort((a, b) => {
+      const scoreA = a.popularityScore + a.effectivenessRating * 2
+      const scoreB = b.popularityScore + b.effectivenessRating * 2
+      return scoreB - scoreA
     })
 
     // Get user's favorites and progress
@@ -107,7 +100,7 @@ export async function GET(request: NextRequest) {
     )
 
     // Enhance drills with user data
-    const enhancedDrills = drills?.map(drill => ({
+    const enhancedDrills = filteredDrills?.map(drill => ({
       ...drill,
       isFavorite: favoriteIds?.has(drill?.id ?? '') ?? false,
       userProgress: progressMap?.get(drill?.id ?? '') ?? null,

@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
+import { getDrillById } from '@/lib/drills-data'
 
 export const dynamic = 'force-dynamic'
 
-// Admin: Update a drill
+// Admin: Update a drill (not supported for static drills)
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -16,27 +16,17 @@ export async function PUT(
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
 
-    const body = await request.json()
     const drillId = params?.id ?? ''
-
-    const existing = await prisma.drill.findUnique({
-      where: { id: drillId },
-    })
+    const existing = getDrillById(drillId)
 
     if (!existing) {
       return NextResponse.json({ error: 'Drill not found' }, { status: 404 })
     }
 
-    const updated = await prisma.drill.update({
-      where: { id: drillId },
-      data: body,
-    })
-
+    // Static drills cannot be modified
     return NextResponse.json({
-      success: true,
-      drill: updated,
-      message: 'Drill updated successfully',
-    })
+      error: 'Static drills cannot be modified. To add custom drills, please implement database-backed drills.',
+    }, { status: 501 })
   } catch (error) {
     console.error('Error updating drill:', error)
     return NextResponse.json(
@@ -46,7 +36,7 @@ export async function PUT(
   }
 }
 
-// Admin: Delete a drill
+// Admin: Delete a drill (not supported for static drills)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -58,25 +48,16 @@ export async function DELETE(
     }
 
     const drillId = params?.id ?? ''
-
-    const existing = await prisma.drill.findUnique({
-      where: { id: drillId },
-    })
+    const existing = getDrillById(drillId)
 
     if (!existing) {
       return NextResponse.json({ error: 'Drill not found' }, { status: 404 })
     }
 
-    // Soft delete by setting active to false
-    await prisma.drill.update({
-      where: { id: drillId },
-      data: { active: false },
-    })
-
+    // Static drills cannot be deleted
     return NextResponse.json({
-      success: true,
-      message: 'Drill deleted successfully',
-    })
+      error: 'Static drills cannot be deleted. To add custom drills, please implement database-backed drills.',
+    }, { status: 501 })
   } catch (error) {
     console.error('Error deleting drill:', error)
     return NextResponse.json(
