@@ -582,8 +582,11 @@ export function TournamentHub() {
                   <motion.button
                     key={state?.abbr}
                     onClick={() => {
-                      // Navigate to calendar page with state filter pre-applied
-                      router.push(`/tournaments/calendar?state=${state?.abbr}`)
+                      // Set state filter and scroll to events section
+                      setSelectedState(state?.abbr || null)
+                      setTimeout(() => {
+                        document.getElementById('upcoming-events')?.scrollIntoView({ behavior: 'smooth' })
+                      }, 100)
                     }}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
