@@ -12,7 +12,7 @@ interface VideoDemo {
   title: string
   url: string
   duration: string
-  description: string
+  description?: string
   skillLevel: string
   channel?: string
 }
