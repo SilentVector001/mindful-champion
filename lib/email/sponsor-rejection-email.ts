@@ -1,12 +1,10 @@
 import { getResendClient } from './resend-client';
-import { prisma } from '@/lib/db';
 
 export interface SponsorRejectionEmailData {
   companyName: string;
   contactPerson: string;
   email: string;
   rejectionReason?: string;
-  userId?: string;
 }
 
 export async function sendSponsorRejectionEmail(data: SponsorRejectionEmailData) {
@@ -88,27 +86,6 @@ export async function sendSponsorRejectionEmail(data: SponsorRejectionEmailData)
       subject: `Sponsor Application Update - ${data.companyName}`,
       html: htmlContent,
     });
-
-    // Log the email if userId is provided
-    if (data.userId) {
-      try {
-        await prisma.emailLog.create({
-          data: {
-            userId: data.userId,
-            type: 'SPONSOR_REJECTION',
-            subject: `Sponsor Application Update - ${data.companyName}`,
-            recipient: data.email,
-            status: 'SENT',
-            metadata: {
-              companyName: data.companyName,
-              contactPerson: data.contactPerson,
-            },
-          },
-        });
-      } catch (logError) {
-        console.error('Failed to log rejection email:', logError);
-      }
-    }
 
     return { success: true, messageId: result.data?.id };
   } catch (error) {
