@@ -143,12 +143,12 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         }
       });
       
-      // Try primary avatar, fallback to alternatives if needed
+      // Try female avatars first (Coach Kai is female), with fallbacks
       const avatarOptions = [
-        'josh_lite3_20230714',     // Professional male - good quality
-        'wayne_20240711',          // Wayne - male
-        'Kayla-incasualsuit-20220818',
-        'emily_lite_20240612'
+        'Kayla-incasualsuit-20220818',  // Primary: American blonde female
+        'Kristin_public_2_20240108',    // Backup: Female
+        'Angela-inwhiteskirt-20220820', // Backup: Female  
+        'emily_lite_20240612'           // Fallback
       ];
       
       let sessionData = null;
@@ -158,7 +158,7 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
             quality: AvatarQuality.Low,
             avatarName: avatarName,
             voice: {
-              voiceId: '2d5b0e6cf36f460aa7fc47e3eee4ba54', // Clear female voice
+              voiceId: '1a9bfb4ec9bc43d59ab64a4e66fe46', // Arabella - fluid natural American voice
               rate: 1.0,
               emotion: VoiceEmotion.FRIENDLY
             }
