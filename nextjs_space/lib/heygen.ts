@@ -72,19 +72,19 @@ export async function listVoices() {
 // IMPORTANT: Must use Interactive Avatar IDs from labs.heygen.com/interactive-avatar
 // Regular avatars from /v2/avatars do NOT support streaming
 export const COACH_KAI_CONFIG = {
-  // Using verified Interactive Avatar that supports streaming
-  avatarName: 'Wayne_20240711',  // Wayne - verified working interactive avatar
+  // Using female Interactive Avatar that supports streaming
+  avatarName: 'Kristin_public_2_20240108',  // Kristin - blonde female interactive avatar
   quality: 'low', // Use low quality to conserve credits on free plan
   voice: {
-    voiceId: '1ae3be1e24894ccabdb4d8139399f721', // Tony - Professional (supports interactive avatars)
+    voiceId: '001cc6d54eae4ca2b5fb16ca8e8eb9bb', // Sara - Friendly female voice
     rate: 1.0,
     emotion: 'friendly' as const
   },
-  // Backup avatars if Wayne is unavailable
+  // Backup avatars if Kristin is unavailable
   backupAvatars: [
-    'Josh_lite3_20230714',
-    'Kristin_public_2_20240108', 
-    'Eric_public_pro2_20230608'
+    'Anna_public_3_20240108',
+    'Monica_public_2_20240108', 
+    'Susan_public_2_20240328'
   ],
   // System prompt for Coach Kai personality
   systemPrompt: `You are Coach Kai, an expert AI pickleball coach. You are friendly, encouraging, and knowledgeable about all aspects of pickleball including:

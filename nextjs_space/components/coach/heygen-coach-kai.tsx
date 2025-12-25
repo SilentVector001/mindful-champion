@@ -135,9 +135,9 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
       
       const sessionData = await avatar.createStartAvatar({
         quality: AvatarQuality.Low,
-        avatarName: 'Wayne_20240711',
+        avatarName: 'Kristin_public_2_20240108', // Female avatar
         voice: {
-          voiceId: '1ae3be1e24894ccabdb4d8139399f721',
+          voiceId: '001cc6d54eae4ca2b5fb16ca8e8eb9bb', // Sara - Friendly female voice
           rate: 1.0,
           emotion: VoiceEmotion.FRIENDLY
         }
