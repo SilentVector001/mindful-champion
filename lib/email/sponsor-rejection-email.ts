@@ -5,6 +5,8 @@ export interface SponsorRejectionEmailData {
   contactPerson: string;
   email: string;
   rejectionReason?: string;
+  applicationId?: string;
+  userId?: string;
 }
 
 export async function sendSponsorRejectionEmail(data: SponsorRejectionEmailData) {
