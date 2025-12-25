@@ -2790,3 +2790,13 @@ export function getPopularDrills(count: number = 6): Drill[] {
 export function getDrillById(id: string): Drill | undefined {
   return drillsDatabase.find(drill => drill.id === id)
 }
+
+// Get drills by context
+export function getDrillsByContext(context: DrillContext): Drill[] {
+  return drillsDatabase.filter(drill => drill.context.includes(context))
+}
+
+// Get drills by duration (in minutes)
+export function getDrillsByDuration(maxMinutes: number): Drill[] {
+  return drillsDatabase.filter(drill => drill.duration <= maxMinutes)
+}
