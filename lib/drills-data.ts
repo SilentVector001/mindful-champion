@@ -9,6 +9,7 @@ export interface DrillVideo {
   title: string
   url: string
   duration: string
+  description?: string
   channel: string
   skillLevel: string
 }
