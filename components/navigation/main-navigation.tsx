@@ -52,6 +52,7 @@ import {
   Bell,
   Star,
   Heart,
+  Gamepad2,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -310,6 +311,25 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                 </InfoTooltip>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Play Link */}
+            <InfoTooltip content="Play Court Kings - Practice your pickleball skills in a fun game">
+              <Link href="/play">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={cn(
+                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
+                    isActive("/play")
+                      ? "bg-emerald-500/10 text-emerald-400"
+                      : "text-gray-700 dark:text-gray-300 hover:text-emerald-400 hover:bg-emerald-500/5"
+                  )}
+                >
+                  <Gamepad2 className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
+                  Play
+                </Button>
+              </Link>
+            </InfoTooltip>
 
             {/* Progress Dropdown */}
             <DropdownMenu>
@@ -869,6 +889,13 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <Target className="w-5 h-5 text-orange-500" />
                     Quick Practice
+                  </Button>
+                </Link>
+
+                <Link href="/play" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 hover:from-emerald-500/10">
+                    <Gamepad2 className="w-5 h-5 text-emerald-400" />
+                    <span className="font-semibold">Play Court Kings</span>
                   </Button>
                 </Link>
               </div>
