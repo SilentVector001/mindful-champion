@@ -2779,3 +2779,13 @@ export function getFeaturedDrills(count: number = 6): Drill[] {
     .sort((a, b) => (b.popularityScore + b.effectivenessRating * 2) - (a.popularityScore + a.effectivenessRating * 2))
     .slice(0, count)
 }
+
+// Get popular drills (alias for getFeaturedDrills for backward compatibility)
+export function getPopularDrills(count: number = 6): Drill[] {
+  return getFeaturedDrills(count)
+}
+
+// Get drill by ID
+export function getDrillById(id: string): Drill | undefined {
+  return drillsDatabase.find(drill => drill.id === id)
+}
