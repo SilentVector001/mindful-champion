@@ -1,11 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
-import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-// Get user's favorite drills
+// Get user's favorite drills (not implemented - requires database setup)
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -13,21 +12,11 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userId = session?.user?.id ?? ''
-    const favorites = await prisma.favoriteDrill.findMany({
-      where: { userId },
-      include: {
-        drill: true,
-      },
-      orderBy: { createdAt: 'desc' },
-    })
-
-    const drills = favorites?.map(f => f?.drill)?.filter(Boolean) ?? []
-
+    // Favorites feature not implemented - return empty array
     return NextResponse.json({
       success: true,
-      favorites: drills,
-      total: drills?.length ?? 0,
+      favorites: [],
+      total: 0,
     })
   } catch (error) {
     console.error('Error fetching favorites:', error)
@@ -38,7 +27,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-// Toggle favorite status
+// Toggle favorite status (not implemented - requires database setup)
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
@@ -46,54 +35,10 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const body = await request.json()
-    const { drillId } = body ?? {}
-
-    if (!drillId) {
-      return NextResponse.json(
-        { error: 'Drill ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const userId = session?.user?.id ?? ''
-
-    // Check if already favorited
-    const existing = await prisma.favoriteDrill.findUnique({
-      where: {
-        userId_drillId: {
-          userId,
-          drillId,
-        },
-      },
-    })
-
-    if (existing) {
-      // Remove favorite
-      await prisma.favoriteDrill.delete({
-        where: { id: existing?.id ?? '' },
-      })
-
-      return NextResponse.json({
-        success: true,
-        isFavorite: false,
-        message: 'Drill removed from favorites',
-      })
-    } else {
-      // Add favorite
-      await prisma.favoriteDrill.create({
-        data: {
-          userId,
-          drillId,
-        },
-      })
-
-      return NextResponse.json({
-        success: true,
-        isFavorite: true,
-        message: 'Drill added to favorites',
-      })
-    }
+    // Favorites feature requires database implementation
+    return NextResponse.json({
+      error: 'Favorites feature not yet implemented. To enable this feature, please add FavoriteDrill model to the database.',
+    }, { status: 501 })
   } catch (error) {
     console.error('Error toggling favorite:', error)
     return NextResponse.json(

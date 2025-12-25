@@ -22,36 +22,14 @@ export async function GET(
       return NextResponse.json({ error: 'Drill not found' }, { status: 404 })
     }
 
-    // Get user's favorite status and progress
-    const userId = session?.user?.id ?? ''
-    const favorite = userId
-      ? await prisma.favoriteDrill.findUnique({
-          where: {
-            userId_drillId: {
-              userId,
-              drillId: params?.id ?? '',
-            },
-          },
-        })
-      : null
-
-    const progress = userId
-      ? await prisma.userDrillProgress.findUnique({
-          where: {
-            userId_drillId: {
-              userId,
-              drillId: params?.id ?? '',
-            },
-          },
-        })
-      : null
-
+    // Note: Favorites and progress features not implemented yet
+    // These require FavoriteDrill and UserDrillProgress models in the database
     return NextResponse.json({
       success: true,
       drill: {
         ...drill,
-        isFavorite: !!favorite,
-        userProgress: progress,
+        isFavorite: false,
+        userProgress: null,
       },
     })
   } catch (error) {

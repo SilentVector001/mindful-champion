@@ -78,32 +78,12 @@ export async function GET(request: NextRequest) {
       return scoreB - scoreA
     })
 
-    // Get user's favorites and progress
-    const userId = session?.user?.id ?? ''
-    const favorites = userId
-      ? await prisma.favoriteDrill.findMany({
-          where: { userId },
-          select: { drillId: true },
-        })
-      : []
-
-    const favoriteIds = new Set(favorites?.map(f => f?.drillId ?? '')?.filter(Boolean) ?? [])
-
-    const progress = userId
-      ? await prisma.userDrillProgress.findMany({
-          where: { userId },
-        })
-      : []
-
-    const progressMap = new Map(
-      progress?.map(p => [p?.drillId ?? '', p])?.filter(([id]) => id) ?? []
-    )
-
-    // Enhance drills with user data
+    // Note: Favorites and progress features not implemented yet
+    // These require FavoriteDrill and UserDrillProgress models in the database
     const enhancedDrills = filteredDrills?.map(drill => ({
       ...drill,
-      isFavorite: favoriteIds?.has(drill?.id ?? '') ?? false,
-      userProgress: progressMap?.get(drill?.id ?? '') ?? null,
+      isFavorite: false,
+      userProgress: null,
     })) ?? []
 
     return NextResponse.json({
