@@ -67,5 +67,13 @@ export function getResendClient(): Resend {
 
 export { Resend };
 
-// Convenience export for direct usage
-export const resend = getResendClient();
+// Lazy initialization for build-time safety
+let _resendInstance: Resend | null = null;
+export const resend = {
+  get emails() {
+    if (!_resendInstance) {
+      _resendInstance = getResendClient() as Resend;
+    }
+    return _resendInstance.emails;
+  }
+};
