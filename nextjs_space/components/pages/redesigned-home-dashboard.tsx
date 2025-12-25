@@ -126,9 +126,9 @@ export default function RedesignedHomeDashboard({
           {/* Compact Stats Row */}
           <div className="flex gap-3">
             {[
-              { label: 'Streak', value: dashboardStats?.dayStreak?.count || 0, icon: Flame, color: 'text-orange-400', bg: 'bg-orange-500/20' },
-              { label: 'Points', value: dashboardStats?.rewardPoints?.count || 0, icon: Star, color: 'text-yellow-400', bg: 'bg-yellow-500/20' },
-              { label: 'Level', value: dashboardStats?.skillLevel || '3.0', icon: Award, color: 'text-purple-400', bg: 'bg-purple-500/20' },
+              { label: 'Streak', value: dashboardStats?.dayStreak?.count || 0, icon: Flame, color: 'text-orange-400', bg: 'bg-gradient-to-br from-orange-500/30 to-red-500/30', glow: 'bg-orange-500/40' },
+              { label: 'Points', value: dashboardStats?.rewardPoints?.count || 0, icon: Star, color: 'text-yellow-400', bg: 'bg-gradient-to-br from-yellow-500/30 to-amber-500/30', glow: 'bg-yellow-500/40' },
+              { label: 'Level', value: dashboardStats?.skillLevel || '3.0', icon: Award, color: 'text-purple-400', bg: 'bg-gradient-to-br from-purple-500/30 to-pink-500/30', glow: 'bg-purple-500/40' },
             ].map((stat, i) => {
               const Icon = stat.icon
               return (
@@ -138,16 +138,17 @@ export default function RedesignedHomeDashboard({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10",
+                    "relative flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20 shadow-lg overflow-hidden backdrop-blur-sm",
                     stat.bg
                   )}
                 >
-                  <Icon className={cn("w-5 h-5", stat.color)} />
-                  <div className="text-center">
-                    <div className={cn("text-lg font-bold", stat.color)}>
+                  <div className={cn("absolute top-0 right-0 w-16 h-16 rounded-full blur-2xl", stat.glow)} />
+                  <Icon className={cn("w-5 h-5 relative z-10 drop-shadow-lg", stat.color)} />
+                  <div className="text-center relative z-10">
+                    <div className={cn("text-lg font-bold drop-shadow-sm", stat.color)}>
                       {typeof stat.value === 'number' ? stat.value.toLocaleString() : stat.value}
                     </div>
-                    <div className="text-[10px] text-gray-400 uppercase tracking-wide">{stat.label}</div>
+                    <div className="text-[10px] text-gray-300 uppercase tracking-wide">{stat.label}</div>
                   </div>
                 </motion.div>
               )
@@ -322,24 +323,27 @@ export default function RedesignedHomeDashboard({
             )}
 
             {/* Quick Stats Card */}
-            <div className="p-4 rounded-2xl bg-slate-800/50 border border-white/10">
-              <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">This Week</p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: 'Sessions', value: dashboardStats?.weeklyStats?.sessions || 0, icon: Calendar },
-                  { label: 'Minutes', value: dashboardStats?.weeklyStats?.minutes || 0, icon: TrendingUp },
-                ].map((stat, i) => {
-                  const Icon = stat.icon
-                  return (
-                    <div key={i} className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-gray-500" />
-                      <div>
-                        <p className="text-white font-bold">{stat.value}</p>
-                        <p className="text-gray-500 text-xs">{stat.label}</p>
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-white/10 shadow-xl shadow-black/30 relative overflow-hidden backdrop-blur-sm">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-teal-500/20 rounded-full blur-2xl" />
+              <div className="relative z-10">
+                <p className="text-gray-300 text-xs font-semibold uppercase tracking-wide mb-3">This Week</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Sessions', value: dashboardStats?.weeklyStats?.sessions || 0, icon: Calendar, color: 'text-emerald-400' },
+                    { label: 'Minutes', value: dashboardStats?.weeklyStats?.minutes || 0, icon: TrendingUp, color: 'text-cyan-400' },
+                  ].map((stat, i) => {
+                    const Icon = stat.icon
+                    return (
+                      <div key={i} className="flex items-center gap-2">
+                        <Icon className={cn("w-4 h-4 drop-shadow-lg", stat.color)} />
+                        <div>
+                          <p className="text-white font-bold drop-shadow-sm">{stat.value}</p>
+                          <p className="text-gray-400 text-xs">{stat.label}</p>
+                        </div>
                       </div>
-                    </div>
-                  )
-                })}
+                    )
+                  })}
+                </div>
               </div>
             </div>
           </motion.div>
@@ -368,29 +372,35 @@ export default function RedesignedHomeDashboard({
                   whileHover={{ scale: 1.05, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(item.path)}
-                  className="group relative p-5 rounded-2xl bg-gradient-to-br from-slate-800/90 to-slate-900/90 border border-white/10 hover:border-white/20 transition-all duration-300 text-left shadow-xl shadow-black/20 overflow-hidden"
+                  className="group relative p-5 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-white/10 hover:border-white/30 transition-all duration-300 text-left shadow-xl shadow-black/30 overflow-hidden backdrop-blur-sm"
                 >
-                  {/* Background gradient overlay */}
+                  {/* Background gradient overlay - INCREASED OPACITY */}
                   <div className={cn(
-                    "absolute inset-0 opacity-10 group-hover:opacity-20 transition-opacity",
+                    "absolute inset-0 opacity-25 group-hover:opacity-40 transition-opacity",
                     `bg-gradient-to-br ${item.color}`
                   )} />
                   
-                  {/* Colored glow effect */}
+                  {/* Colored glow effect - INCREASED VISIBILITY */}
                   <div className={cn(
-                    "absolute -top-4 -right-4 w-24 h-24 rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity",
+                    "absolute -top-4 -right-4 w-32 h-32 rounded-full blur-3xl opacity-50 group-hover:opacity-70 transition-opacity",
+                    `bg-gradient-to-br ${item.color}`
+                  )} />
+                  
+                  {/* Secondary glow for more depth */}
+                  <div className={cn(
+                    "absolute -bottom-4 -left-4 w-24 h-24 rounded-full blur-2xl opacity-30 group-hover:opacity-50 transition-opacity",
                     `bg-gradient-to-br ${item.color}`
                   )} />
                   
                   <div className="relative z-10">
                     <div className={cn(
-                      "w-12 h-12 rounded-xl bg-gradient-to-br mb-3 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform",
+                      "w-12 h-12 rounded-xl bg-gradient-to-br mb-3 flex items-center justify-center shadow-xl shadow-black/40 group-hover:scale-110 group-hover:shadow-2xl transition-all",
                       item.color
                     )}>
                       <Icon className="w-6 h-6 text-white drop-shadow-lg" />
                     </div>
-                    <h3 className="font-bold text-white mb-0.5">{item.name}</h3>
-                    <p className="text-xs text-gray-400">{item.description}</p>
+                    <h3 className="font-bold text-white mb-0.5 drop-shadow-sm">{item.name}</h3>
+                    <p className="text-xs text-gray-300">{item.description}</p>
                   </div>
                 </motion.button>
               )
@@ -406,29 +416,33 @@ export default function RedesignedHomeDashboard({
           className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {/* Upcoming - Placeholder */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg">
-            <div className="flex items-center gap-2 text-gray-300 mb-2">
-              <Calendar className="w-4 h-4 text-blue-400" />
-              <span className="text-sm font-semibold">Upcoming</span>
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-white/10 shadow-xl shadow-black/30 relative overflow-hidden backdrop-blur-sm group hover:border-white/20 transition-all">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/30 rounded-full blur-3xl" />
+            <div className="relative z-10">
+              <div className="flex items-center gap-2 text-gray-300 mb-2">
+                <Calendar className="w-4 h-4 text-blue-400 drop-shadow-lg" />
+                <span className="text-sm font-semibold text-white">Upcoming</span>
+              </div>
+              <p className="text-gray-300 text-sm">No scheduled sessions</p>
+              <button
+                onClick={() => router.push('/tournaments')}
+                className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
+              >
+                Browse tournaments <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
-            <p className="text-gray-400 text-sm">No scheduled sessions</p>
-            <button
-              onClick={() => router.push('/tournaments')}
-              className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
-            >
-              Browse tournaments <ChevronRight className="w-4 h-4" />
-            </button>
           </div>
 
           {/* Community Activity */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500/20 rounded-full blur-2xl" />
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-white/10 shadow-xl shadow-black/30 relative overflow-hidden backdrop-blur-sm group hover:border-white/20 transition-all">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/30 rounded-full blur-3xl" />
+            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-purple-500/20 rounded-full blur-2xl" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 text-gray-300 mb-2">
-                <Users className="w-4 h-4 text-indigo-400" />
-                <span className="text-sm font-semibold">Community</span>
+                <Users className="w-4 h-4 text-indigo-400 drop-shadow-lg" />
+                <span className="text-sm font-semibold text-white">Community</span>
               </div>
-              <p className="text-gray-400 text-sm">Connect with local players</p>
+              <p className="text-gray-300 text-sm">Connect with local players</p>
               <button
                 onClick={() => router.push('/connect')}
                 className="mt-3 text-emerald-400 text-sm font-medium hover:text-emerald-300 transition-colors flex items-center gap-1"
@@ -439,14 +453,15 @@ export default function RedesignedHomeDashboard({
           </div>
 
           {/* Rewards Summary */}
-          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/80 to-slate-900/80 border border-white/10 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-500/20 rounded-full blur-2xl" />
+          <div className="p-5 rounded-2xl bg-gradient-to-br from-slate-800/60 to-slate-900/60 border border-white/10 shadow-xl shadow-black/30 relative overflow-hidden backdrop-blur-sm group hover:border-white/20 transition-all">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/30 rounded-full blur-3xl" />
+            <div className="absolute -bottom-4 -left-4 w-24 h-24 bg-yellow-500/20 rounded-full blur-2xl" />
             <div className="relative z-10">
               <div className="flex items-center gap-2 text-gray-300 mb-2">
-                <Gift className="w-4 h-4 text-amber-400" />
-                <span className="text-sm font-semibold">Rewards</span>
+                <Gift className="w-4 h-4 text-amber-400 drop-shadow-lg" />
+                <span className="text-sm font-semibold text-white">Rewards</span>
               </div>
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-300 text-sm">
                 {(dashboardStats?.rewardPoints?.count || 0).toLocaleString()} points available
               </p>
               <button
