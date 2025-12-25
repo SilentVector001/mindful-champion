@@ -2,7 +2,7 @@
 
 export type DrillDifficulty = "beginner" | "intermediate" | "advanced" | "pro"
 export type DrillCategory = "serving" | "dinking" | "third-shot" | "volley" | "overhead" | "footwork" | "strategy" | "mental" | "warmup" | "returns" | "resets" | "drives"
-export type DrillContext = "solo" | "with-partner" | "pre-match" | "tournament-prep" | "skill-specific" | "conditioning" | "mental" | "strategy"
+export type DrillContext = "solo" | "with-partner" | "pre-match" | "tournament-prep" | "skill-specific" | "conditioning" | "mental" | "strategy" | "warmup"
 export type EquipmentNeeded = "full-court" | "half-court" | "wall" | "no-net" | "ball-machine" | "targets" | "cones" | "minimal"
 
 export interface DrillVideo {
