@@ -6,11 +6,13 @@ import { Gamepad2, Maximize2, Trophy, Sparkles, Target, Zap, Star, ArrowLeft } f
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import MainNavigation from "@/components/navigation/main-navigation"
 import { useSession } from "next-auth/react"
 
 export default function CourtKingsGame() {
-  const { data: session } = useSession() || {}
+  const router = useRouter()
+  const { data: session, status } = useSession() || {}
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [mounted, setMounted] = useState(false)
@@ -18,6 +20,13 @@ export default function CourtKingsGame() {
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  // Redirect to sign-in if not authenticated
+  useEffect(() => {
+    if (mounted && status === "unauthenticated") {
+      router.push("/auth/signin")
+    }
+  }, [mounted, status, router])
 
   const toggleFullscreen = () => {
     const iframe = document.getElementById("court-kings-iframe") as HTMLIFrameElement
@@ -40,7 +49,26 @@ export default function CourtKingsGame() {
     return () => document.removeEventListener("fullscreenchange", handleFullscreenChange)
   }, [])
 
-  if (!mounted) return null
+  // Show loading while checking authentication
+  if (!mounted || status === "loading") {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="relative w-16 h-16 mx-auto mb-4">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-full animate-spin" style={{ clipPath: 'polygon(50% 0%, 100% 0%, 100% 100%, 50% 100%)' }} />
+            <div className="absolute inset-1 bg-slate-900 rounded-full" />
+            <Gamepad2 className="absolute inset-0 m-auto w-6 h-6 text-emerald-400" />
+          </div>
+          <p className="text-gray-400 animate-pulse">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't render if not authenticated (redirect will happen)
+  if (status === "unauthenticated") {
+    return null
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
