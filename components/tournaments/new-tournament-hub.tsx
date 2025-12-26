@@ -173,6 +173,7 @@ interface TournamentStats {
   totalPrize: number
   statesCovered: number
   dateRange?: string
+  stateCounts?: Record<string, number>
 }
 
 export function TournamentHub() {
@@ -187,9 +188,20 @@ export function TournamentHub() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Calculate min and max event counts for gradient scaling
-  const minEvents = Math.min(...US_STATES.map(s => s.events))
-  const maxEvents = Math.max(...US_STATES.map(s => s.events))
+  // Get event count for a state - prefer live data from API, fallback to static
+  const getStateEventCount = (abbr: string): number => {
+    if (stats?.stateCounts && stats.stateCounts[abbr] !== undefined) {
+      return stats.stateCounts[abbr]
+    }
+    // Fallback to static data if API doesn't have this state
+    const staticState = US_STATES.find(s => s.abbr === abbr)
+    return staticState?.events || 0
+  }
+
+  // Calculate min and max event counts for gradient scaling (from live data when available)
+  const allEventCounts = US_STATES.map(s => getStateEventCount(s.abbr))
+  const minEvents = Math.min(...allEventCounts)
+  const maxEvents = Math.max(...allEventCounts, 1) // Ensure at least 1 to avoid division by zero
 
   // Generate gradient color based on event count
   const getStateGradient = (eventCount: number) => {
@@ -604,7 +616,8 @@ export function TournamentHub() {
 
           <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
             {filteredStates?.map?.((state) => {
-              const gradient = getStateGradient(state?.events || 0)
+              const eventCount = getStateEventCount(state?.abbr)
+              const gradient = getStateGradient(eventCount)
               return (
                 <motion.button
                   key={state?.abbr}
@@ -635,7 +648,7 @@ export function TournamentHub() {
                     {state?.abbr}
                   </div>
                   <div className={`text-xs relative z-10 ${selectedState === state?.abbr ? 'text-white/80' : 'text-white/70'}`}>
-                    {state?.events} events
+                    {eventCount} {eventCount === 1 ? 'event' : 'events'}
                   </div>
                 </motion.button>
               )

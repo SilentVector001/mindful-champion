@@ -4,11 +4,25 @@ import { TournamentStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
+// Map state abbreviations to full names
+const STATE_ABBR_TO_NAME: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
+}
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
-    const state = searchParams.get('state')
+    const stateParam = searchParams.get('state')
     const limit = searchParams.get('limit')
     const type = searchParams.get('type') // championship, amateur, etc.
 
@@ -18,8 +32,10 @@ export async function GET(request: NextRequest) {
       where.status = status as TournamentStatus
     }
 
-    if (state) {
-      where.state = state
+    // Support both abbreviation (FL) and full name (Florida)
+    if (stateParam) {
+      const stateName = STATE_ABBR_TO_NAME[stateParam.toUpperCase()] || stateParam
+      where.state = stateName
     }
 
     // Fetch tournaments
