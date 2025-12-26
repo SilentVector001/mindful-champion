@@ -284,7 +284,7 @@ export function TournamentHub() {
     fetchTournamentData()
   }, [])
 
-  const fetchTournamentData = async () => {
+  const fetchTournamentData = async (stateFilter?: string | null) => {
     try {
       setLoading(true)
       setError(null)
@@ -301,8 +301,12 @@ export function TournamentHub() {
       const statsData = await statsRes?.json()
       setStats(statsData || null)
 
-      // Fetch upcoming events (first 3 tournaments)
-      const upcomingRes = await fetch('/api/tournaments?limit=3')
+      // Fetch upcoming events with optional state filter
+      const limit = stateFilter ? 20 : 3 // Show more when filtering by state
+      const upcomingUrl = stateFilter 
+        ? `/api/tournaments?limit=${limit}&state=${stateFilter}`
+        : `/api/tournaments?limit=${limit}`
+      const upcomingRes = await fetch(upcomingUrl)
       if (!upcomingRes?.ok) throw new Error('Failed to fetch upcoming events')
       const upcomingData = await upcomingRes?.json()
       setUpcomingEvents(upcomingData?.tournaments || [])
@@ -587,7 +591,10 @@ export function TournamentHub() {
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => setSelectedState(null)}
+                onClick={() => {
+                  setSelectedState(null)
+                  fetchTournamentData(null)
+                }}
                 className="text-gray-400 hover:text-white hover:bg-white/10"
               >
                 Clear Filter ✕
@@ -602,8 +609,16 @@ export function TournamentHub() {
                 <motion.button
                   key={state?.abbr}
                   onClick={() => {
-                    // Navigate to calendar page with state filter pre-applied
-                    router.push(`/tournaments/calendar?state=${state?.abbr}`)
+                    // Set selected state and fetch filtered tournaments
+                    setSelectedState(state?.abbr)
+                    fetchTournamentData(state?.abbr)
+                    // Scroll to upcoming events section
+                    setTimeout(() => {
+                      document.getElementById('upcoming-events')?.scrollIntoView({ 
+                        behavior: 'smooth', 
+                        block: 'start' 
+                      })
+                    }, 100)
                   }}
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
@@ -674,17 +689,11 @@ export function TournamentHub() {
           <div>
             <h2 className="text-2xl font-bold text-white">
               Upcoming Events
-              {selectedState && (() => {
-                const filteredCount = upcomingEvents?.filter?.(e => 
-                  e?.location?.includes?.(selectedState) || 
-                  e?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
-                )?.length || 0
-                return (
-                  <span className="ml-3 text-lg text-champion-green">
-                    ({filteredCount} in {US_STATES.find(s => s.abbr === selectedState)?.name})
-                  </span>
-                )
-              })()}
+              {selectedState && (
+                <span className="ml-3 text-lg text-champion-green">
+                  ({upcomingEvents?.length || 0} in {US_STATES.find(s => s.abbr === selectedState)?.name})
+                </span>
+              )}
             </h2>
             <p className="text-gray-400">Registration open now</p>
           </div>
@@ -699,84 +708,83 @@ export function TournamentHub() {
           <div className="text-center py-12">
             <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
           </div>
-        ) : (() => {
-          // Filter events by selected state
-          const displayEvents = selectedState 
-            ? upcomingEvents?.filter?.(event => 
-                event?.location?.includes?.(selectedState) || 
-                event?.location?.includes?.(US_STATES.find(s => s.abbr === selectedState)?.name || '')
-              )
-            : upcomingEvents
-
-          return displayEvents?.length > 0 ? (
-            <div className="space-y-4">
-              {displayEvents?.map?.((event, index) => (
-                <motion.div
-                  key={event?.id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
-                      <Trophy className="w-6 h-6 text-blue-400" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
-                      <div className="flex items-center gap-3 text-sm text-gray-400">
-                        <span className="flex items-center gap-1">
-                          <MapPin className="w-3 h-3" />
-                          {event?.location || 'TBA'}
-                        </span>
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3" />
-                          {formatDate(event?.startDate, event?.endDate)}
-                        </span>
-                      </div>
+        ) : upcomingEvents?.length > 0 ? (
+          <div className="space-y-4">
+            {upcomingEvents?.map?.((event, index) => (
+              <motion.div
+                key={event?.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
+                    <Trophy className="w-6 h-6 text-blue-400" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
+                    <div className="flex items-center gap-3 text-sm text-gray-400">
+                      <span className="flex items-center gap-1">
+                        <MapPin className="w-3 h-3" />
+                        {event?.location || 'TBA'}
+                      </span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(event?.startDate, event?.endDate)}
+                      </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4">
-                    {event?.registrationOpen ? (
-                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                        Open for Registration
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
-                        Registration Closed
-                      </Badge>
-                    )}
-                    <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
-                      <Button
-                        size="sm"
-                        className="bg-champion-green hover:bg-champion-green/90"
-                      >
-                        <ExternalLink className="w-3 h-3 mr-1" />
-                        {event?.registrationOpen ? "Register" : "View Details"}
-                      </Button>
-                    </a>
-                  </div>
-                </motion.div>
-              )) || []}
-            </div>
-          ) : (
-            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-              <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-gray-400 mb-2">
-                No tournaments found in {US_STATES.find(s => s.abbr === selectedState)?.name}
-              </h3>
-              <p className="text-gray-500 mb-4">
-                Try selecting a different state or view all tournaments
-              </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  {event?.registrationOpen ? (
+                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                      Open for Registration
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                      Registration Closed
+                    </Badge>
+                  )}
+                  <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
+                    <Button
+                      size="sm"
+                      className="bg-champion-green hover:bg-champion-green/90"
+                    >
+                      <ExternalLink className="w-3 h-3 mr-1" />
+                      {event?.registrationOpen ? "Register" : "View Details"}
+                    </Button>
+                  </a>
+                </div>
+              </motion.div>
+            )) || []}
+          </div>
+        ) : (
+          <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+            <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+            <h3 className="text-xl font-semibold text-gray-400 mb-2">
+              {selectedState 
+                ? `No tournaments found in ${US_STATES.find(s => s.abbr === selectedState)?.name}`
+                : 'No upcoming tournaments'}
+            </h3>
+            <p className="text-gray-500 mb-4">
+              {selectedState 
+                ? 'Try selecting a different state or view all tournaments'
+                : 'Check back soon for new events'}
+            </p>
+            {selectedState && (
               <Button
-                onClick={() => setSelectedState(null)}
+                onClick={() => {
+                  setSelectedState(null)
+                  fetchTournamentData(null)
+                }}
                 className="bg-champion-green hover:bg-champion-green/90"
               >
                 View All Tournaments
               </Button>
-            </div>
-          )
-        })()}
+            )}
+          </div>
+        )}
       </section>
 
       {/* CTA Section */}
