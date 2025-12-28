@@ -25,16 +25,6 @@ export async function GET(request: NextRequest) {
             user: {
               select: { id: true, name: true, image: true, skillLevel: true }
             },
-            videoAnalysis: {
-              select: {
-                id: true,
-                videoUrl: true,
-                thumbnailUrl: true,
-                title: true,
-                duration: true,
-                overallScore: true
-              }
-            },
             _count: {
               select: { comments: true, likes: true }
             }

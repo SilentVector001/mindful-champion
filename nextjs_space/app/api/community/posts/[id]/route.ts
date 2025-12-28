@@ -27,18 +27,6 @@ export async function GET(
         user: {
           select: { id: true, name: true, image: true, skillLevel: true }
         },
-        videoAnalysis: {
-          select: {
-            id: true,
-            videoUrl: true,
-            thumbnailUrl: true,
-            title: true,
-            duration: true,
-            overallScore: true,
-            strengths: true,
-            areasForImprovement: true
-          }
-        },
         likes: {
           where: { userId: user.id },
           select: { id: true }

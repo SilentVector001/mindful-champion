@@ -52,17 +52,6 @@ export async function GET(request: NextRequest) {
               playerRating: true
             }
           },
-          videoAnalysis: {
-            select: {
-              id: true,
-              videoUrl: true,
-              thumbnailUrl: true,
-              title: true,
-              duration: true,
-              overallScore: true,
-              analysisStatus: true
-            }
-          },
           likes: {
             where: { userId: user.id },
             select: { id: true }
@@ -170,16 +159,6 @@ export async function POST(request: NextRequest) {
             skillLevel: true,
             subscriptionTier: true,
             playerRating: true
-          }
-        },
-        videoAnalysis: {
-          select: {
-            id: true,
-            videoUrl: true,
-            thumbnailUrl: true,
-            title: true,
-            duration: true,
-            overallScore: true
           }
         }
       }
