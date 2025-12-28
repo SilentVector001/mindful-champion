@@ -113,6 +113,7 @@ model User {
   chatMessages                 ChatMessage[]
   coachKaiReminders            CoachKaiReminder[]              @relation("UserCoachKaiReminders")
   commentLikes                 CommentLike[]
+  commentReactions             CommentReaction[]           @relation("CommentReactions")
   communityPosts               CommunityPost[]
   communityStats               CommunityStats?
   contentBookmarks             ContentBookmark[]
@@ -169,6 +170,8 @@ model User {
   watchHistory                 UserWatchHistory[]
   adminUploadedVideos          VideoAnalysis[]                 @relation("AdminUploads")
   videoAnalyses                VideoAnalysis[]
+  videoAnalysisProgress        VideoAnalysisProgress[]         @relation("VideoAnalysisProgress")
+  videoAnalysisUserAchievements VideoAnalysisUserAchievement[] @relation("VideoAnalysisUserAchievements")
   videoBookmarks               VideoBookmark[]
   clips                        VideoClip[]
   videoPlaylists               VideoPlaylist[]
@@ -415,6 +418,7 @@ model VideoAnalysis {
   emailNotifications      EmailNotification[]
   uploadedByAdmin         User?                  @relation("AdminUploads", fields: [uploadedByAdminId], references: [id])
   user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  communityPost           CommunityPost?
 
   @@index([userId])
   @@index([analysisStatus])
@@ -423,6 +427,53 @@ model VideoAnalysis {
   @@index([flaggedForReview])
   @@index([reviewStatus])
   @@index([emailNotificationSent])
+}
+
+model VideoAnalysisAchievement {
+  id            String                        @id @default(cuid())
+  code          String                        @unique
+  name          String
+  description   String
+  icon          String
+  category      String
+  threshold     Float
+  thresholdType String
+  points        Int                           @default(0)
+  createdAt     DateTime                      @default(now())
+  updatedAt     DateTime                      @updatedAt
+  userAchievements VideoAnalysisUserAchievement[]
+
+  @@index([category])
+  @@index([code])
+}
+
+model VideoAnalysisUserAchievement {
+  id             String                     @id @default(cuid())
+  userId         String
+  achievementId  String
+  value          Float?
+  unlockedAt     DateTime                   @default(now())
+  user           User                       @relation("VideoAnalysisUserAchievements", fields: [userId], references: [id], onDelete: Cascade)
+  achievement    VideoAnalysisAchievement   @relation(fields: [achievementId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId])
+  @@index([achievementId])
+}
+
+model VideoAnalysisProgress {
+  id           String   @id @default(cuid())
+  userId       String
+  skillArea    String
+  averageScore Float
+  totalVideos  Int      @default(0)
+  lastUpdated  DateTime @updatedAt
+  createdAt    DateTime @default(now())
+  user         User     @relation("VideoAnalysisProgress", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, skillArea])
+  @@index([userId])
+  @@index([skillArea])
 }
 
 model Player {
@@ -649,6 +700,8 @@ model UserProgram {
   startDate            DateTime?
   currentDay           Int             @default(1)
   completionPercentage Float           @default(0.0)
+  completedDays        Json?
+  lastTrainedAt        DateTime?
   completedAt          DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
@@ -985,44 +1038,52 @@ model NavigationPath {
 }
 
 model CommunityPost {
-  id           String         @id @default(cuid())
-  title        String
-  content      String
-  category     PostCategory   @default(GENERAL)
-  userId       String
-  isPinned     Boolean        @default(false)
-  isLocked     Boolean        @default(false)
-  views        Int            @default(0)
-  likeCount    Int            @default(0)
-  commentCount Int            @default(0)
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookmarks    PostBookmark[]
-  comments     PostComment[]
-  likes        PostLike[]
-  reports      PostReport[]
+  id              String         @id @default(cuid())
+  title           String
+  content         String
+  caption         String?
+  tags            Json?
+  isVideoPost     Boolean        @default(false)
+  isPublished     Boolean        @default(true)
+  category        PostCategory   @default(GENERAL)
+  userId          String
+  videoAnalysisId String?        @unique
+  isPinned        Boolean        @default(false)
+  isLocked        Boolean        @default(false)
+  views           Int            @default(0)
+  likeCount       Int            @default(0)
+  commentCount    Int            @default(0)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  videoAnalysis   VideoAnalysis? @relation(fields: [videoAnalysisId], references: [id], onDelete: SetNull)
+  bookmarks       PostBookmark[]
+  comments        PostComment[]
+  likes           PostLike[]
+  reports         PostReport[]
 
   @@index([userId])
   @@index([category])
   @@index([createdAt])
   @@index([isPinned])
+  @@index([videoAnalysisId])
 }
 
 model PostComment {
-  id        String        @id @default(cuid())
+  id        String             @id @default(cuid())
   content   String
   postId    String
   userId    String
   parentId  String?
-  likeCount Int           @default(0)
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  likeCount Int                @default(0)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
   likes     CommentLike[]
-  parent    PostComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   PostComment[] @relation("CommentReplies")
-  post      CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reactions CommentReaction[]  @relation("CommentReactions")
+  parent    PostComment?       @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   PostComment[]      @relation("CommentReplies")
+  post      CommunityPost      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user      User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([postId])
   @@index([userId])
@@ -1052,6 +1113,20 @@ model CommentLike {
   user      User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([commentId, userId])
+  @@index([commentId])
+  @@index([userId])
+}
+
+model CommentReaction {
+  id        String      @id @default(cuid())
+  commentId String
+  userId    String
+  emoji     String
+  createdAt DateTime    @default(now())
+  comment   PostComment @relation("CommentReactions", fields: [commentId], references: [id], onDelete: Cascade)
+  user      User        @relation("CommentReactions", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId, emoji])
   @@index([commentId])
   @@index([userId])
 }

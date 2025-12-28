@@ -89,7 +89,7 @@ export async function POST(request: Request) {
     
     let updatedCompletedDays = [...completedDaysArray]
     if (!alreadyCompletedToday) {
-      updatedCompletedDays.push(today)
+      updatedCompletedDays.push(today.toISOString())
     }
 
     const newCurrentDay = Math.min(day + 1, program.durationDays + 1)
