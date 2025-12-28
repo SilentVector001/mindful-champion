@@ -278,12 +278,12 @@ export const drillsDatabase: Drill[] = [
     commonMistakes: ["Going too short (net)", "Telegraphing the angle"],
     successMetric: "12/15 serves landing in target zone",
     videoDemos: [{
-      title: "Mastering the Serve - Technique Breakdown",
-      url: "https://www.youtube.com/watch?v=tnyUYMjmtzM",
-      duration: "10 min",
-      description: "Professional tutorial covering technique and strategy",
-      skillLevel: "All Levels",
-      channel: "PrimeTime Pickleball"
+      title: "Angle Serves That Win Points",
+      url: "https://www.youtube.com/watch?v=BmdnJNCEwxI",
+      duration: "8 min",
+      description: "Creating angles on serve to pull opponents off court",
+      skillLevel: "Intermediate",
+      channel: "Pickleball Tutorial"
     }],
     popularityScore: 7,
     effectivenessRating: 4
