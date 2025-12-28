@@ -1,11 +1,11 @@
 generator client {
-    provider = "prisma-client-js"
-    binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "rhel-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x", "rhel-openssl-3.0.x"]
 }
 
 datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model Account {
@@ -174,7 +174,6 @@ model User {
   videoPlaylists               VideoPlaylist[]
   videoSuggestions             VideoSuggestion[]
   wearableDevices              WearableDevice[]
-  activityLogs                 ActivityLog[]
 }
 
 model VerificationToken {
@@ -416,7 +415,6 @@ model VideoAnalysis {
   emailNotifications      EmailNotification[]
   uploadedByAdmin         User?                  @relation("AdminUploads", fields: [uploadedByAdminId], references: [id])
   user                    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  communityPost           CommunityPost?
 
   @@index([userId])
   @@index([analysisStatus])
@@ -651,8 +649,6 @@ model UserProgram {
   startDate            DateTime?
   currentDay           Int             @default(1)
   completionPercentage Float           @default(0.0)
-  completedDays        DateTime[]      @default([])
-  lastTrainedAt        DateTime?
   completedAt          DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime        @updatedAt
@@ -989,37 +985,28 @@ model NavigationPath {
 }
 
 model CommunityPost {
-  id              String         @id @default(cuid())
-  title           String
-  content         String
-  category        PostCategory   @default(GENERAL)
-  userId          String
-  isPinned        Boolean        @default(false)
-  isLocked        Boolean        @default(false)
-  views           Int            @default(0)
-  likeCount       Int            @default(0)
-  commentCount    Int            @default(0)
-  createdAt       DateTime       @default(now())
-  updatedAt       DateTime       @updatedAt
-  // Video sharing fields
-  videoAnalysisId String?        @unique
-  caption         String?
-  tags            String[]       @default([])
-  isVideoPost     Boolean        @default(false)
-  isPublished     Boolean        @default(true)
-  videoAnalysis   VideoAnalysis? @relation(fields: [videoAnalysisId], references: [id], onDelete: SetNull)
-  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bookmarks       PostBookmark[]
-  comments        PostComment[]
-  likes           PostLike[]
-  reports         PostReport[]
+  id           String         @id @default(cuid())
+  title        String
+  content      String
+  category     PostCategory   @default(GENERAL)
+  userId       String
+  isPinned     Boolean        @default(false)
+  isLocked     Boolean        @default(false)
+  views        Int            @default(0)
+  likeCount    Int            @default(0)
+  commentCount Int            @default(0)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookmarks    PostBookmark[]
+  comments     PostComment[]
+  likes        PostLike[]
+  reports      PostReport[]
 
   @@index([userId])
   @@index([category])
   @@index([createdAt])
   @@index([isPinned])
-  @@index([isVideoPost])
-  @@index([videoAnalysisId])
 }
 
 model PostComment {
@@ -1634,7 +1621,6 @@ model PhoneResetToken {
 model ActivityLog {
   id          String   @id @default(cuid())
   userId      String?
-  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   sessionId   String?
   type        String
   title       String
@@ -2037,24 +2023,24 @@ model EmailNotification {
   recipientEmail       String
   recipientName        String?
   subject              String
-  htmlContent          String                @db.Text
-  textContent          String?               @db.Text
+  htmlContent          String
+  textContent          String?
   status               EmailStatus           @default(PENDING)
   sentAt               DateTime?
   deliveredAt          DateTime?
   openedAt             DateTime?
   clickedAt            DateTime?
   failedAt             DateTime?
-  error                String?               @db.Text
+  error                String?
   metadata             Json?
   resendEmailId        String?
   retryCount           Int                   @default(0)
   lastRetryAt          DateTime?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime              @updatedAt
+  sponsorApplication   SponsorApplication?   @relation(fields: [sponsorApplicationId], references: [id], onDelete: Cascade)
   user                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   videoAnalysis        VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
-  sponsorApplication   SponsorApplication?   @relation(fields: [sponsorApplicationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([videoAnalysisId])
@@ -2115,7 +2101,7 @@ model RecentHighlight {
   date        DateTime
   tournament  String
   location    String?
-  description String   @db.Text
+  description String
   channel     String
   category    String
   featured    Boolean  @default(false)
@@ -2134,7 +2120,7 @@ model CustomStream {
   streamUrl   String
   thumbnail   String?
   platform    String
-  description String?  @db.Text
+  description String?
   isActive    Boolean  @default(true)
   priority    Int      @default(0)
   createdBy   String
@@ -2571,6 +2557,165 @@ model CoachKaiReminder {
   @@index([userId])
   @@index([isActive])
   @@index([nextTrigger])
+}
+
+model CommunityStory {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  excerpt     String?
+  authorName  String
+  authorEmail String
+  photoUrl    String?
+  location    String?
+  skillLevel  String?
+  category    String?
+  approved    Boolean  @default(false)
+  featured    Boolean  @default(false)
+  views       Int      @default(0)
+  likes       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([approved])
+  @@index([featured])
+  @@index([category])
+}
+
+model PlayerSpotlight {
+  id           String   @id @default(cuid())
+  name         String
+  photoUrl     String
+  ranking      String?
+  rating       Float?
+  bio          String
+  achievements Json?
+  stats        Json?
+  socialLinks  Json?
+  organization String?
+  featured     Boolean  @default(false)
+  displayOrder Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([featured])
+  @@index([displayOrder])
+}
+
+model MediaPhoto {
+  id             String   @id @default(cuid())
+  title          String
+  description    String?
+  url            String
+  category       String
+  tags           Json?
+  tournamentId   String?
+  uploadedBy     String
+  uploadedByName String?
+  featured       Boolean  @default(false)
+  views          Int      @default(0)
+  likes          Int      @default(0)
+  createdAt      DateTime @default(now())
+
+  @@index([category])
+  @@index([featured])
+  @@index([tournamentId])
+}
+
+model CustomDrillPlan {
+  id                   String                 @id
+  userId               String
+  name                 String
+  description          String?
+  totalDuration        Int                    @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  CustomDrillPlanDrill CustomDrillPlanDrill[]
+
+  @@index([userId])
+}
+
+model CustomDrillPlanDrill {
+  id              String          @id
+  planId          String
+  drillId         String
+  order           Int
+  Drill           Drill           @relation(fields: [drillId], references: [id], onDelete: Cascade)
+  CustomDrillPlan CustomDrillPlan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, drillId])
+  @@index([drillId])
+  @@index([planId])
+}
+
+model Drill {
+  id                   String                 @id
+  legacyId             Int?                   @unique
+  title                String
+  tagline              String
+  description          String
+  category             DrillCategory
+  difficulty           DrillDifficulty
+  ageGroups            Json
+  gender               String                 @default("All")
+  skillLevelRange      String
+  duration             Int
+  playersRequired      String
+  equipment            Json
+  focusAreas           Json
+  instructions         Json
+  proTips              Json
+  commonMistakes       Json
+  successMetrics       String
+  videos               Json
+  benefits             Json?
+  relatedDrillIds      Json?
+  popularityScore      Int                    @default(0)
+  effectivenessRating  Float                  @default(5.0)
+  featured             Boolean                @default(false)
+  active               Boolean                @default(true)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime
+  CustomDrillPlanDrill CustomDrillPlanDrill[]
+  FavoriteDrill        FavoriteDrill[]
+  UserDrillProgress    UserDrillProgress[]
+
+  @@index([active])
+  @@index([category])
+  @@index([difficulty])
+  @@index([featured])
+  @@index([popularityScore])
+}
+
+model FavoriteDrill {
+  id        String   @id
+  userId    String
+  drillId   String
+  createdAt DateTime @default(now())
+  Drill     Drill    @relation(fields: [drillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, drillId])
+  @@index([drillId])
+  @@index([userId])
+}
+
+model UserDrillProgress {
+  id              String    @id
+  userId          String
+  drillId         String
+  completedCount  Int       @default(0)
+  lastCompletedAt DateTime?
+  totalTimeSpent  Int       @default(0)
+  averageRating   Float?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+  Drill           Drill     @relation(fields: [drillId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, drillId])
+  @@index([drillId])
+  @@index([lastCompletedAt])
+  @@index([userId])
 }
 
 enum WearableDeviceType {
@@ -3014,12 +3159,9 @@ enum EmailStatus {
 }
 
 enum EmailNotificationType {
-  // User Journey
   WELCOME
   PASSWORD_RESET
   EMAIL_VERIFICATION
-  
-  // Subscriptions & Payments
   SUBSCRIPTION_CONFIRMATION
   SUBSCRIPTION_RENEWAL
   SUBSCRIPTION_EXPIRING
@@ -3030,46 +3172,32 @@ enum EmailNotificationType {
   TRIAL_WARNING_3_DAYS
   TRIAL_WARNING_1_DAY
   UPGRADE_REMINDER
-  
-  // Video Analysis
   VIDEO_ANALYSIS_COMPLETE
   VIDEO_ANALYSIS_FAILED
-  
-  // Achievements & Rewards
   ACHIEVEMENT_UNLOCKED
   REDEMPTION_REQUEST
   REDEMPTION_APPROVED
   REDEMPTION_SHIPPED
   REWARD_TIER_UNLOCK
-  
-  // Tournaments
   TOURNAMENT_REGISTRATION
   TOURNAMENT_REMINDER
   TOURNAMENT_RESULTS
-  
-  // Training & Content
   MATCH_REMINDER
   TRAINING_REMINDER
   EVENT_REMINDER
   PODCAST_NEW_EPISODE
   LIVE_STREAM_STARTING
-  
-  // Sponsors & Partners
   SPONSOR_APPLICATION
   SPONSOR_APPROVAL
   SPONSOR_REJECTION
   SPONSOR_ADMIN_NOTIFICATION
   SPONSOR_OFFER_CREATED
   SPONSOR_OFFER_APPROVED
-  
-  // Admin Alerts
   ADMIN_NEW_USER
   ADMIN_PAYMENT
   ADMIN_ERROR
   ADMIN_CUSTOM
   ADMIN_TEST
-  
-  // System
   SYSTEM_UPDATE
   CUSTOM
 }
@@ -3246,69 +3374,24 @@ enum NotificationSource {
   USER
   COACH_KAI
 }
-// ==========================================
-// MEDIA CENTER MODELS
-// ==========================================
 
-model CommunityStory {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   @db.Text
-  excerpt     String?
-  authorName  String
-  authorEmail String
-  photoUrl    String?
-  location    String?
-  skillLevel  String?
-  category    String?  // "success", "tournament", "training", "community"
-  approved    Boolean  @default(false)
-  featured    Boolean  @default(false)
-  views       Int      @default(0)
-  likes       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  
-  @@index([approved])
-  @@index([featured])
-  @@index([category])
+enum DrillCategory {
+  WARMUP_CONDITIONING
+  FOOTWORK_MOVEMENT
+  DINKING
+  SERVING_RETURN
+  VOLLEY
+  THIRD_SHOT_DROP
+  OVERHEAD_LOB
+  STRATEGY_POSITIONING
+  PARTNER_TEAM
+  SOLO_PRACTICE
+  COOLDOWN_RECOVERY
 }
 
-model PlayerSpotlight {
-  id           String   @id @default(cuid())
-  name         String
-  photoUrl     String
-  ranking      String?
-  rating       Float?
-  bio          String   @db.Text
-  achievements Json?    // Array of achievements
-  stats        Json?    // Win/loss, titles, etc.
-  socialLinks  Json?    // Twitter, Instagram, etc.
-  organization String?  // PPA, APP, MLP
-  featured     Boolean  @default(false)
-  displayOrder Int      @default(0)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  
-  @@index([featured])
-  @@index([displayOrder])
-}
-
-model MediaPhoto {
-  id              String   @id @default(cuid())
-  title           String
-  description     String?
-  url             String
-  category        String   // "tournament", "training", "community", "facilities"
-  tags            Json?    // Array of tags
-  tournamentId    String?
-  uploadedBy      String
-  uploadedByName  String?
-  featured        Boolean  @default(false)
-  views           Int      @default(0)
-  likes           Int      @default(0)
-  createdAt       DateTime @default(now())
-  
-  @@index([category])
-  @@index([featured])
-  @@index([tournamentId])
+enum DrillDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+  PRO
 }
