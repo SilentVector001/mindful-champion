@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import PTTAICoach from "@/components/coach/ptt-ai-coach"
+import SimpleCoachKai from "@/components/coach/simple-coach-kai"
 import MainNavigation from "@/components/navigation/main-navigation"
 
 export default async function AICoachPage() {
@@ -59,7 +59,7 @@ export default async function AICoachPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50">
       <MainNavigation user={userData} />
       <div className="pt-16">
-        <PTTAICoach userContext={userContext} />
+        <SimpleCoachKai userContext={userContext} />
       </div>
     </div>
   )
