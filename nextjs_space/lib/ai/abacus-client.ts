@@ -53,8 +53,8 @@ export async function callAbacusAI(
   } = options;
 
   // Check for API key
-  if (!process.env.ABACUSAI_API_KEY) {
-    console.error('[Abacus AI] CRITICAL: ABACUSAI_API_KEY is not configured');
+  if (!process.env.ABACUS_API_KEY) {
+    console.error('[Abacus AI] CRITICAL: ABACUS_API_KEY is not configured');
     return {
       success: false,
       error: 'AI service not configured. Please contact support.',
@@ -96,7 +96,7 @@ export async function callAbacusAI(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+          'Authorization': `Bearer ${process.env.ABACUS_API_KEY}`
         },
         body: JSON.stringify({
           model,

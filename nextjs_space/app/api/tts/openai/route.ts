@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+        'Authorization': `Bearer ${process.env.ABACUS_API_KEY}`
       },
       body: JSON.stringify({
         model: 'tts-1-hd', // High-definition audio quality

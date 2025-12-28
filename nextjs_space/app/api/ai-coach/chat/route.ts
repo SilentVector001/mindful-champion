@@ -16,9 +16,9 @@ import { authOptions } from "@/lib/auth";
 export async function POST(req: NextRequest) {
   try {
     // Check for API key first
-    const apiKey = process.env.ABACUSAI_API_KEY;
+    const apiKey = process.env.ABACUS_API_KEY;
     if (!apiKey) {
-      console.error('[Coach Kai] CRITICAL: ABACUSAI_API_KEY is not configured');
+      console.error('[Coach Kai] CRITICAL: ABACUS_API_KEY is not configured');
       return NextResponse.json(
         { error: "AI service not configured. Please contact support." },
         { status: 503 }
