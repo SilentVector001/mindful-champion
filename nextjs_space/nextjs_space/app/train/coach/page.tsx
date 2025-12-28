@@ -1,9 +1,8 @@
-
 import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import HeyGenCoachKai from "@/components/coach/heygen-coach-kai"
+import SimpleCoachKai from "@/components/coach/simple-coach-kai"
 import MainNavigation from "@/components/navigation/main-navigation"
 
 export default async function AICoachPage() {
@@ -13,7 +12,6 @@ export default async function AICoachPage() {
     redirect("/auth/signin")
   }
 
-  // Get user data with comprehensive context for Coach Kai
   const userData = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
@@ -32,7 +30,6 @@ export default async function AICoachPage() {
     redirect("/auth/signin")
   }
 
-  // Build comprehensive user context for AI - ensuring consistent data
   const userContext = {
     name: userData.name || userData.firstName || 'Champion',
     firstName: userData.firstName || userData.name?.split(' ')[0] || 'Champion',
@@ -49,17 +46,13 @@ export default async function AICoachPage() {
       : typeof userData.biggestChallenges === 'string' 
         ? userData.biggestChallenges.split(',').map(c => c.trim())
         : ['Developing consistency'],
-    recentMatches: userData.matches?.length || 0,
-    sessionCount: userData.mentalSessions?.length || 0,
-    subscriptionTier: userData.subscriptionTier || 'FREE',
-    role: userData.role
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50">
+    <div className="min-h-screen bg-slate-900">
       <MainNavigation user={userData} />
       <div className="pt-16">
-        <HeyGenCoachKai userContext={userContext} />
+        <SimpleCoachKai userContext={userContext} />
       </div>
     </div>
   )
