@@ -73,8 +73,9 @@ export async function POST(request: Request) {
     console.log('Mark day complete: Found program', { programId, programName: program.name, durationDays: program.durationDays })
 
     // Get current completed days array and convert JsonValue to Date[]
-    const completedDaysArray: Date[] = Array.isArray(userProgram.completedDays) 
-      ? userProgram.completedDays.map((date: any) => new Date(date))
+    const completedDaysRaw = userProgram.completedDays as any[]
+    const completedDaysArray: Date[] = Array.isArray(completedDaysRaw) 
+      ? completedDaysRaw.map((date: any) => new Date(date))
       : []
     
     // Add current day to completed days if not already there
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
       return checkDate.getTime() === today.getTime()
     })
     
-    let updatedCompletedDays: Date[] = [...completedDaysArray]
+    const updatedCompletedDays: Date[] = [...completedDaysArray]
     if (!alreadyCompletedToday) {
       updatedCompletedDays.push(today)
     }
