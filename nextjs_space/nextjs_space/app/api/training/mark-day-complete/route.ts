@@ -73,7 +73,7 @@ export async function POST(request: Request) {
     console.log('Mark day complete: Found program', { programId, programName: program.name, durationDays: program.durationDays })
 
     // Get current completed days array and convert JsonValue to Date[]
-    const completedDaysArray = Array.isArray(userProgram.completedDays) 
+    const completedDaysArray: Date[] = Array.isArray(userProgram.completedDays) 
       ? userProgram.completedDays.map((date: any) => new Date(date))
       : []
     
