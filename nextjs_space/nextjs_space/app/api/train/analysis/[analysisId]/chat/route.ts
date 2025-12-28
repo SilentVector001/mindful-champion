@@ -112,7 +112,7 @@ Be encouraging, specific, and conversational. Keep responses concise (2-4 senten
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.ABACUSAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.ABACUS_API_KEY}`,
       },
       body: JSON.stringify({
         model: "gpt-4.1-mini",
