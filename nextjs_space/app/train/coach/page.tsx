@@ -6,6 +6,7 @@ import { prisma } from "@/lib/db"
 import SimpleCoachKai from "@/components/coach/simple-coach-kai"
 import MainNavigation from "@/components/navigation/main-navigation"
 
+// Force rebuild - Pure text chat interface (NO HeyGen)
 export default async function AICoachPage() {
   const session = await getServerSession(authOptions)
   
