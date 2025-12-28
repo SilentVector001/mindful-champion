@@ -1,0 +1,1850 @@
+{
+  "audit_date": "2025-12-28T19:21:16.357410",
+  "summary": {
+    "total_videos": 102,
+    "working": 0,
+    "broken": 102,
+    "success_rate": "0.0%"
+  },
+  "broken_videos": [
+    {
+      "title": "Pickleball Serve Accuracy Drill",
+      "url": "https://www.youtube.com/watch?v=_ew47Dqi-3w",
+      "video_id": "_ew47Dqi-3w",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "5 Pickleball Serves You Need to Know",
+      "url": "https://www.youtube.com/watch?v=sZQ7h8GcQvs",
+      "video_id": "sZQ7h8GcQvs",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Game: Serving Under Pressure",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the Drop Serve",
+      "url": "https://www.youtube.com/watch?v=8OJ0wPQdMzw",
+      "video_id": "8OJ0wPQdMzw",
+      "channel": "Selkirk TV",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Spin Serve Masterclass",
+      "url": "https://www.youtube.com/watch?v=BBnsGVJwUKk",
+      "video_id": "BBnsGVJwUKk",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Add Power to Your Pickleball Serve",
+      "url": "https://www.youtube.com/watch?v=qZ4fNh9Wsuo",
+      "video_id": "qZ4fNh9Wsuo",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Serve and Move Pattern",
+      "url": "https://www.youtube.com/watch?v=dHQm8LXWM7Y",
+      "video_id": "dHQm8LXWM7Y",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Angle Serves That Win Points",
+      "url": "https://www.youtube.com/watch?v=CXlKdGPjgWk",
+      "video_id": "CXlKdGPjgWk",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Body Serve Strategy",
+      "url": "https://www.youtube.com/watch?v=V6a_0j5_5lQ",
+      "video_id": "V6a_0j5_5lQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Lob Serve Nobody Expects",
+      "url": "https://www.youtube.com/watch?v=BcQqxfKmtCA",
+      "video_id": "BcQqxfKmtCA",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Serve and Return Patterns",
+      "url": "https://www.youtube.com/watch?v=9k4m6jNrPGE",
+      "video_id": "9k4m6jNrPGE",
+      "channel": "Pickleball Channel",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Centerline Serve Tactics",
+      "url": "https://www.youtube.com/watch?v=KzWq8VjRz0k",
+      "video_id": "KzWq8VjRz0k",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cross-Court Dinking Fundamentals",
+      "url": "https://www.youtube.com/watch?v=xhBKIWANF9A",
+      "video_id": "xhBKIWANF9A",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Dinking Patterns That Win",
+      "url": "https://www.youtube.com/watch?v=HKq6aJ5qKxM",
+      "video_id": "HKq6aJ5qKxM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Dink Games That Make You Better",
+      "url": "https://www.youtube.com/watch?v=Pj2qQxfZ-vU",
+      "video_id": "Pj2qQxfZ-vU",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Dink Technique",
+      "url": "https://www.youtube.com/watch?v=mNcGW0P4Bw4",
+      "video_id": "mNcGW0P4Bw4",
+      "channel": "Selkirk TV",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Footwork at the Kitchen Line",
+      "url": "https://www.youtube.com/watch?v=rKv5TZ3T7yY",
+      "video_id": "rKv5TZ3T7yY",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the ATP Shot",
+      "url": "https://www.youtube.com/watch?v=tV2G5s8uYAw",
+      "video_id": "tV2G5s8uYAw",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Precision Dinking Practice",
+      "url": "https://www.youtube.com/watch?v=dUJdN0GKNQ0",
+      "video_id": "dUJdN0GKNQ0",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "When to Attack from the Kitchen",
+      "url": "https://www.youtube.com/watch?v=U5gKQjmDvr0",
+      "video_id": "U5gKQjmDvr0",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mastering the Reset Shot",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Shake and Bake Explained",
+      "url": "https://www.youtube.com/watch?v=q4LGjKBMnRQ",
+      "video_id": "q4LGjKBMnRQ",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Wall Dink Drills",
+      "url": "https://www.youtube.com/watch?v=e4oJX3Z9bFo",
+      "video_id": "e4oJX3Z9bFo",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Figure 8 Dink Drill",
+      "url": "https://www.youtube.com/watch?v=NqG9vZzRMqE",
+      "video_id": "NqG9vZzRMqE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the Erne",
+      "url": "https://www.youtube.com/watch?v=y1jO4V_8Frw",
+      "video_id": "y1jO4V_8Frw",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Two-Bounce Dink Challenge",
+      "url": "https://www.youtube.com/watch?v=SL7kN5tLKXM",
+      "video_id": "SL7kN5tLKXM",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Dink Punch Combo",
+      "url": "https://www.youtube.com/watch?v=8GZ3l5xmZnQ",
+      "video_id": "8GZ3l5xmZnQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reading Your Opponent",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Middle Ball Communication",
+      "url": "https://www.youtube.com/watch?v=R4YvKvZWqyE",
+      "video_id": "R4YvKvZWqyE",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Using Height Variation in Dinks",
+      "url": "https://www.youtube.com/watch?v=kO5z8NGQH5M",
+      "video_id": "kO5z8NGQH5M",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shot Drop Technique",
+      "url": "https://www.youtube.com/watch?v=pWLNmfwBUfY",
+      "video_id": "pWLNmfwBUfY",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "When to Drive Your Third Shot",
+      "url": "https://www.youtube.com/watch?v=L1O7U4xqhZM",
+      "video_id": "L1O7U4xqhZM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shot Decision Making",
+      "url": "https://www.youtube.com/watch?v=9YwEMq5FPDI",
+      "video_id": "9YwEMq5FPDI",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Third Shot Drop",
+      "url": "https://www.youtube.com/watch?v=Bk0LM8KLMIU",
+      "video_id": "Bk0LM8KLMIU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Fifth Shot Drop",
+      "url": "https://www.youtube.com/watch?v=C8Bz6VHxCGw",
+      "video_id": "C8Bz6VHxCGw",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shots While Moving",
+      "url": "https://www.youtube.com/watch?v=JLlKs6yLx_Q",
+      "video_id": "JLlKs6yLx_Q",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mid-Court Drop Technique",
+      "url": "https://www.youtube.com/watch?v=aNqU4vTr5Hs",
+      "video_id": "aNqU4vTr5Hs",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Third Shot Lob",
+      "url": "https://www.youtube.com/watch?v=t0DgAZ1fJ8A",
+      "video_id": "t0DgAZ1fJ8A",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Adding Topspin to Your Drop",
+      "url": "https://www.youtube.com/watch?v=2NjR5k3cT-M",
+      "video_id": "2NjR5k3cT-M",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Doubles Third Shot Coordination",
+      "url": "https://www.youtube.com/watch?v=0QPvXA5mH3E",
+      "video_id": "0QPvXA5mH3E",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Drops Under Fatigue",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reading Returns Before They're Hit",
+      "url": "https://www.youtube.com/watch?v=fG4tBjJwm-Q",
+      "video_id": "fG4tBjJwm-Q",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Block Volley Fundamentals",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Punch Volley Technique",
+      "url": "https://www.youtube.com/watch?v=gWK_7yzMqos",
+      "video_id": "gWK_7yzMqos",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Speed Volley Drills",
+      "url": "https://www.youtube.com/watch?v=p_J4LI6tVZg",
+      "video_id": "p_J4LI6tVZg",
+      "channel": "Third Shot Sports",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Volley Mechanics",
+      "url": "https://www.youtube.com/watch?v=QCQ3fK7vrLw",
+      "video_id": "QCQ3fK7vrLw",
+      "channel": "Pickleball 411",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Low Volley Technique",
+      "url": "https://www.youtube.com/watch?v=yJdF3GXv_vU",
+      "video_id": "yJdF3GXv_vU",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Drop Volley",
+      "url": "https://www.youtube.com/watch?v=rqV5mZptHqg",
+      "video_id": "rqV5mZptHqg",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Volley Game Variations",
+      "url": "https://www.youtube.com/watch?v=F9y8GqKj_hQ",
+      "video_id": "F9y8GqKj_hQ",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Creating Angles at the Net",
+      "url": "https://www.youtube.com/watch?v=mNPchZqhYuM",
+      "video_id": "mNPchZqhYuM",
+      "channel": "Zane Navratil",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Volley Combinations",
+      "url": "https://www.youtube.com/watch?v=iHMdZt5vC0Q",
+      "video_id": "iHMdZt5vC0Q",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Split Step Explained",
+      "url": "https://www.youtube.com/watch?v=sJF5uHJrYXE",
+      "video_id": "sJF5uHJrYXE",
+      "channel": "Third Shot Sports",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Inside-Out Volley",
+      "url": "https://www.youtube.com/watch?v=LvJ4ZTm8wq8",
+      "video_id": "LvJ4ZTm8wq8",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Defense to Offense",
+      "url": "https://www.youtube.com/watch?v=UqQk9JPz3kE",
+      "video_id": "UqQk9JPz3kE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pickleball Footwork Drills",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Court Movement Patterns",
+      "url": "https://www.youtube.com/watch?v=PqG9vZzRMqE",
+      "video_id": "PqG9vZzRMqE",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Shadow Pickleball Practice",
+      "url": "https://www.youtube.com/watch?v=Hd0KJpLfnQc",
+      "video_id": "Hd0KJpLfnQc",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Kitchen Line Movement",
+      "url": "https://www.youtube.com/watch?v=rKv5TZ3T7yY",
+      "video_id": "rKv5TZ3T7yY",
+      "channel": "Pickleball 411",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Transition Zone Movement",
+      "url": "https://www.youtube.com/watch?v=JLlKs6yLx_Q",
+      "video_id": "JLlKs6yLx_Q",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reaction Ball Training",
+      "url": "https://www.youtube.com/watch?v=9Bk6k0BWJL4",
+      "video_id": "9Bk6k0BWJL4",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cross-Step Technique",
+      "url": "https://www.youtube.com/watch?v=NqG9vZzRMqE",
+      "video_id": "NqG9vZzRMqE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Adjusting to Ball Depth",
+      "url": "https://www.youtube.com/watch?v=aNqU4vTr5Hs",
+      "video_id": "aNqU4vTr5Hs",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cone Agility Drills",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Chase Ball Drill",
+      "url": "https://www.youtube.com/watch?v=PqG9vZzRMqE",
+      "video_id": "PqG9vZzRMqE",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Balance Training for Pickleball",
+      "url": "https://www.youtube.com/watch?v=Hd0KJpLfnQc",
+      "video_id": "Hd0KJpLfnQc",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Full Point Movement Training",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Doubles Positioning 101",
+      "url": "https://www.youtube.com/watch?v=R4YvKvZWqyE",
+      "video_id": "R4YvKvZWqyE",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Stacking Explained",
+      "url": "https://www.youtube.com/watch?v=0QPvXA5mH3E",
+      "video_id": "0QPvXA5mH3E",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Target Selection Strategy",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How and When to Poach",
+      "url": "https://www.youtube.com/watch?v=q4LGjKBMnRQ",
+      "video_id": "q4LGjKBMnRQ",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pattern Play Strategies",
+      "url": "https://www.youtube.com/watch?v=9YwEMq5FPDI",
+      "video_id": "9YwEMq5FPDI",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Timeout Strategy",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Skinny Singles Tactics",
+      "url": "https://www.youtube.com/watch?v=F9y8GqKj_hQ",
+      "video_id": "F9y8GqKj_hQ",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Playing in Wind",
+      "url": "https://www.youtube.com/watch?v=t0DgAZ1fJ8A",
+      "video_id": "t0DgAZ1fJ8A",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Beating the Bangers",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Playing Against Soft Game",
+      "url": "https://www.youtube.com/watch?v=U5gKQjmDvr0",
+      "video_id": "U5gKQjmDvr0",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mixed Doubles Strategy",
+      "url": "https://www.youtube.com/watch?v=iHMdZt5vC0Q",
+      "video_id": "iHMdZt5vC0Q",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Game: Coming from Behind",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Deep Return Technique",
+      "url": "https://www.youtube.com/watch?v=9k4m6jNrPGE",
+      "video_id": "9k4m6jNrPGE",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Return and Move",
+      "url": "https://www.youtube.com/watch?v=dHQm8LXWM7Y",
+      "video_id": "dHQm8LXWM7Y",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Return Variations",
+      "url": "https://www.youtube.com/watch?v=L1O7U4xqhZM",
+      "video_id": "L1O7U4xqhZM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Body Return Strategy",
+      "url": "https://www.youtube.com/watch?v=V6a_0j5_5lQ",
+      "video_id": "V6a_0j5_5lQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Aggressive Return Tactics",
+      "url": "https://www.youtube.com/watch?v=CXlKdGPjgWk",
+      "video_id": "CXlKdGPjgWk",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Returns Under Pressure",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overhead Smash Technique",
+      "url": "https://www.youtube.com/watch?v=qZ4fNh9Wsuo",
+      "video_id": "qZ4fNh9Wsuo",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Moving Overhead Technique",
+      "url": "https://www.youtube.com/watch?v=BBnsGVJwUKk",
+      "video_id": "BBnsGVJwUKk",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overhead Placement",
+      "url": "https://www.youtube.com/watch?v=2NjR5k3cT-M",
+      "video_id": "2NjR5k3cT-M",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Defensive Overhead Play",
+      "url": "https://www.youtube.com/watch?v=C8Bz6VHxCGw",
+      "video_id": "C8Bz6VHxCGw",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Jump Overhead Technique",
+      "url": "https://www.youtube.com/watch?v=gWK_7yzMqos",
+      "video_id": "gWK_7yzMqos",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overheads Under Fatigue",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pre-Shot Routines",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Enhance Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Visualization for Athletes",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Breathing for Performance",
+      "url": "https://www.youtube.com/watch?v=sJF5uHJrYXE",
+      "video_id": "sJF5uHJrYXE",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Self-Talk in Sports",
+      "url": "https://www.youtube.com/watch?v=LvJ4ZTm8wq8",
+      "video_id": "LvJ4ZTm8wq8",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Handling Errors",
+      "url": "https://www.youtube.com/watch?v=UqQk9JPz3kE",
+      "video_id": "UqQk9JPz3kE",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Tournament Mental Preparation",
+      "url": "https://www.youtube.com/watch?v=fG4tBjJwm-Q",
+      "video_id": "fG4tBjJwm-Q",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pre-Match Warmup Routine",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Partner Warmup Drill",
+      "url": "https://www.youtube.com/watch?v=xhBKIWANF9A",
+      "video_id": "xhBKIWANF9A",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Complete Pre-Match Warmup",
+      "url": "https://www.youtube.com/watch?v=HKq6aJ5qKxM",
+      "video_id": "HKq6aJ5qKxM",
+      "channel": "Third Shot Sports",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Warmup Games",
+      "url": "https://www.youtube.com/watch?v=Pj2qQxfZ-vU",
+      "video_id": "Pj2qQxfZ-vU",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Ball Machine Warmup",
+      "url": "https://www.youtube.com/watch?v=e4oJX3Z9bFo",
+      "video_id": "e4oJX3Z9bFo",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Pre-Match Routine",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    }
+  ],
+  "working_videos": [],
+  "all_results": [
+    {
+      "title": "Pickleball Serve Accuracy Drill",
+      "url": "https://www.youtube.com/watch?v=_ew47Dqi-3w",
+      "video_id": "_ew47Dqi-3w",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "5 Pickleball Serves You Need to Know",
+      "url": "https://www.youtube.com/watch?v=sZQ7h8GcQvs",
+      "video_id": "sZQ7h8GcQvs",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Game: Serving Under Pressure",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the Drop Serve",
+      "url": "https://www.youtube.com/watch?v=8OJ0wPQdMzw",
+      "video_id": "8OJ0wPQdMzw",
+      "channel": "Selkirk TV",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Spin Serve Masterclass",
+      "url": "https://www.youtube.com/watch?v=BBnsGVJwUKk",
+      "video_id": "BBnsGVJwUKk",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Add Power to Your Pickleball Serve",
+      "url": "https://www.youtube.com/watch?v=qZ4fNh9Wsuo",
+      "video_id": "qZ4fNh9Wsuo",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Serve and Move Pattern",
+      "url": "https://www.youtube.com/watch?v=dHQm8LXWM7Y",
+      "video_id": "dHQm8LXWM7Y",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Angle Serves That Win Points",
+      "url": "https://www.youtube.com/watch?v=CXlKdGPjgWk",
+      "video_id": "CXlKdGPjgWk",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Body Serve Strategy",
+      "url": "https://www.youtube.com/watch?v=V6a_0j5_5lQ",
+      "video_id": "V6a_0j5_5lQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Lob Serve Nobody Expects",
+      "url": "https://www.youtube.com/watch?v=BcQqxfKmtCA",
+      "video_id": "BcQqxfKmtCA",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Serve and Return Patterns",
+      "url": "https://www.youtube.com/watch?v=9k4m6jNrPGE",
+      "video_id": "9k4m6jNrPGE",
+      "channel": "Pickleball Channel",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Centerline Serve Tactics",
+      "url": "https://www.youtube.com/watch?v=KzWq8VjRz0k",
+      "video_id": "KzWq8VjRz0k",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cross-Court Dinking Fundamentals",
+      "url": "https://www.youtube.com/watch?v=xhBKIWANF9A",
+      "video_id": "xhBKIWANF9A",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Dinking Patterns That Win",
+      "url": "https://www.youtube.com/watch?v=HKq6aJ5qKxM",
+      "video_id": "HKq6aJ5qKxM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Dink Games That Make You Better",
+      "url": "https://www.youtube.com/watch?v=Pj2qQxfZ-vU",
+      "video_id": "Pj2qQxfZ-vU",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Dink Technique",
+      "url": "https://www.youtube.com/watch?v=mNcGW0P4Bw4",
+      "video_id": "mNcGW0P4Bw4",
+      "channel": "Selkirk TV",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Footwork at the Kitchen Line",
+      "url": "https://www.youtube.com/watch?v=rKv5TZ3T7yY",
+      "video_id": "rKv5TZ3T7yY",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the ATP Shot",
+      "url": "https://www.youtube.com/watch?v=tV2G5s8uYAw",
+      "video_id": "tV2G5s8uYAw",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Precision Dinking Practice",
+      "url": "https://www.youtube.com/watch?v=dUJdN0GKNQ0",
+      "video_id": "dUJdN0GKNQ0",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "When to Attack from the Kitchen",
+      "url": "https://www.youtube.com/watch?v=U5gKQjmDvr0",
+      "video_id": "U5gKQjmDvr0",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mastering the Reset Shot",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Shake and Bake Explained",
+      "url": "https://www.youtube.com/watch?v=q4LGjKBMnRQ",
+      "video_id": "q4LGjKBMnRQ",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Wall Dink Drills",
+      "url": "https://www.youtube.com/watch?v=e4oJX3Z9bFo",
+      "video_id": "e4oJX3Z9bFo",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Figure 8 Dink Drill",
+      "url": "https://www.youtube.com/watch?v=NqG9vZzRMqE",
+      "video_id": "NqG9vZzRMqE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How to Hit the Erne",
+      "url": "https://www.youtube.com/watch?v=y1jO4V_8Frw",
+      "video_id": "y1jO4V_8Frw",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Two-Bounce Dink Challenge",
+      "url": "https://www.youtube.com/watch?v=SL7kN5tLKXM",
+      "video_id": "SL7kN5tLKXM",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Dink Punch Combo",
+      "url": "https://www.youtube.com/watch?v=8GZ3l5xmZnQ",
+      "video_id": "8GZ3l5xmZnQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reading Your Opponent",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Middle Ball Communication",
+      "url": "https://www.youtube.com/watch?v=R4YvKvZWqyE",
+      "video_id": "R4YvKvZWqyE",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Using Height Variation in Dinks",
+      "url": "https://www.youtube.com/watch?v=kO5z8NGQH5M",
+      "video_id": "kO5z8NGQH5M",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shot Drop Technique",
+      "url": "https://www.youtube.com/watch?v=pWLNmfwBUfY",
+      "video_id": "pWLNmfwBUfY",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "When to Drive Your Third Shot",
+      "url": "https://www.youtube.com/watch?v=L1O7U4xqhZM",
+      "video_id": "L1O7U4xqhZM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shot Decision Making",
+      "url": "https://www.youtube.com/watch?v=9YwEMq5FPDI",
+      "video_id": "9YwEMq5FPDI",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Third Shot Drop",
+      "url": "https://www.youtube.com/watch?v=Bk0LM8KLMIU",
+      "video_id": "Bk0LM8KLMIU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Fifth Shot Drop",
+      "url": "https://www.youtube.com/watch?v=C8Bz6VHxCGw",
+      "video_id": "C8Bz6VHxCGw",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Third Shots While Moving",
+      "url": "https://www.youtube.com/watch?v=JLlKs6yLx_Q",
+      "video_id": "JLlKs6yLx_Q",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mid-Court Drop Technique",
+      "url": "https://www.youtube.com/watch?v=aNqU4vTr5Hs",
+      "video_id": "aNqU4vTr5Hs",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Third Shot Lob",
+      "url": "https://www.youtube.com/watch?v=t0DgAZ1fJ8A",
+      "video_id": "t0DgAZ1fJ8A",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Adding Topspin to Your Drop",
+      "url": "https://www.youtube.com/watch?v=2NjR5k3cT-M",
+      "video_id": "2NjR5k3cT-M",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Doubles Third Shot Coordination",
+      "url": "https://www.youtube.com/watch?v=0QPvXA5mH3E",
+      "video_id": "0QPvXA5mH3E",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Drops Under Fatigue",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reading Returns Before They're Hit",
+      "url": "https://www.youtube.com/watch?v=fG4tBjJwm-Q",
+      "video_id": "fG4tBjJwm-Q",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Block Volley Fundamentals",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Punch Volley Technique",
+      "url": "https://www.youtube.com/watch?v=gWK_7yzMqos",
+      "video_id": "gWK_7yzMqos",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Speed Volley Drills",
+      "url": "https://www.youtube.com/watch?v=p_J4LI6tVZg",
+      "video_id": "p_J4LI6tVZg",
+      "channel": "Third Shot Sports",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Backhand Volley Mechanics",
+      "url": "https://www.youtube.com/watch?v=QCQ3fK7vrLw",
+      "video_id": "QCQ3fK7vrLw",
+      "channel": "Pickleball 411",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Low Volley Technique",
+      "url": "https://www.youtube.com/watch?v=yJdF3GXv_vU",
+      "video_id": "yJdF3GXv_vU",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Drop Volley",
+      "url": "https://www.youtube.com/watch?v=rqV5mZptHqg",
+      "video_id": "rqV5mZptHqg",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Volley Game Variations",
+      "url": "https://www.youtube.com/watch?v=F9y8GqKj_hQ",
+      "video_id": "F9y8GqKj_hQ",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Creating Angles at the Net",
+      "url": "https://www.youtube.com/watch?v=mNPchZqhYuM",
+      "video_id": "mNPchZqhYuM",
+      "channel": "Zane Navratil",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Volley Combinations",
+      "url": "https://www.youtube.com/watch?v=iHMdZt5vC0Q",
+      "video_id": "iHMdZt5vC0Q",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "The Split Step Explained",
+      "url": "https://www.youtube.com/watch?v=sJF5uHJrYXE",
+      "video_id": "sJF5uHJrYXE",
+      "channel": "Third Shot Sports",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Inside-Out Volley",
+      "url": "https://www.youtube.com/watch?v=LvJ4ZTm8wq8",
+      "video_id": "LvJ4ZTm8wq8",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Defense to Offense",
+      "url": "https://www.youtube.com/watch?v=UqQk9JPz3kE",
+      "video_id": "UqQk9JPz3kE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pickleball Footwork Drills",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Court Movement Patterns",
+      "url": "https://www.youtube.com/watch?v=PqG9vZzRMqE",
+      "video_id": "PqG9vZzRMqE",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Shadow Pickleball Practice",
+      "url": "https://www.youtube.com/watch?v=Hd0KJpLfnQc",
+      "video_id": "Hd0KJpLfnQc",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Kitchen Line Movement",
+      "url": "https://www.youtube.com/watch?v=rKv5TZ3T7yY",
+      "video_id": "rKv5TZ3T7yY",
+      "channel": "Pickleball 411",
+      "skill_level": "Beginner",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Transition Zone Movement",
+      "url": "https://www.youtube.com/watch?v=JLlKs6yLx_Q",
+      "video_id": "JLlKs6yLx_Q",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Reaction Ball Training",
+      "url": "https://www.youtube.com/watch?v=9Bk6k0BWJL4",
+      "video_id": "9Bk6k0BWJL4",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cross-Step Technique",
+      "url": "https://www.youtube.com/watch?v=NqG9vZzRMqE",
+      "video_id": "NqG9vZzRMqE",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Adjusting to Ball Depth",
+      "url": "https://www.youtube.com/watch?v=aNqU4vTr5Hs",
+      "video_id": "aNqU4vTr5Hs",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Cone Agility Drills",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Chase Ball Drill",
+      "url": "https://www.youtube.com/watch?v=PqG9vZzRMqE",
+      "video_id": "PqG9vZzRMqE",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Balance Training for Pickleball",
+      "url": "https://www.youtube.com/watch?v=Hd0KJpLfnQc",
+      "video_id": "Hd0KJpLfnQc",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Full Point Movement Training",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Doubles Positioning 101",
+      "url": "https://www.youtube.com/watch?v=R4YvKvZWqyE",
+      "video_id": "R4YvKvZWqyE",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Stacking Explained",
+      "url": "https://www.youtube.com/watch?v=0QPvXA5mH3E",
+      "video_id": "0QPvXA5mH3E",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Target Selection Strategy",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "How and When to Poach",
+      "url": "https://www.youtube.com/watch?v=q4LGjKBMnRQ",
+      "video_id": "q4LGjKBMnRQ",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pattern Play Strategies",
+      "url": "https://www.youtube.com/watch?v=9YwEMq5FPDI",
+      "video_id": "9YwEMq5FPDI",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Timeout Strategy",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Skinny Singles Tactics",
+      "url": "https://www.youtube.com/watch?v=F9y8GqKj_hQ",
+      "video_id": "F9y8GqKj_hQ",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Playing in Wind",
+      "url": "https://www.youtube.com/watch?v=t0DgAZ1fJ8A",
+      "video_id": "t0DgAZ1fJ8A",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Beating the Bangers",
+      "url": "https://www.youtube.com/watch?v=B8Q3BSwCqZU",
+      "video_id": "B8Q3BSwCqZU",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Playing Against Soft Game",
+      "url": "https://www.youtube.com/watch?v=U5gKQjmDvr0",
+      "video_id": "U5gKQjmDvr0",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mixed Doubles Strategy",
+      "url": "https://www.youtube.com/watch?v=iHMdZt5vC0Q",
+      "video_id": "iHMdZt5vC0Q",
+      "channel": "Simone Jardim",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Game: Coming from Behind",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Deep Return Technique",
+      "url": "https://www.youtube.com/watch?v=9k4m6jNrPGE",
+      "video_id": "9k4m6jNrPGE",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Return and Move",
+      "url": "https://www.youtube.com/watch?v=dHQm8LXWM7Y",
+      "video_id": "dHQm8LXWM7Y",
+      "channel": "Selkirk TV",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Return Variations",
+      "url": "https://www.youtube.com/watch?v=L1O7U4xqhZM",
+      "video_id": "L1O7U4xqhZM",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Body Return Strategy",
+      "url": "https://www.youtube.com/watch?v=V6a_0j5_5lQ",
+      "video_id": "V6a_0j5_5lQ",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Aggressive Return Tactics",
+      "url": "https://www.youtube.com/watch?v=CXlKdGPjgWk",
+      "video_id": "CXlKdGPjgWk",
+      "channel": "Zane Navratil",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Returns Under Pressure",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overhead Smash Technique",
+      "url": "https://www.youtube.com/watch?v=qZ4fNh9Wsuo",
+      "video_id": "qZ4fNh9Wsuo",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Moving Overhead Technique",
+      "url": "https://www.youtube.com/watch?v=BBnsGVJwUKk",
+      "video_id": "BBnsGVJwUKk",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overhead Placement",
+      "url": "https://www.youtube.com/watch?v=2NjR5k3cT-M",
+      "video_id": "2NjR5k3cT-M",
+      "channel": "Pickleball 411",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Defensive Overhead Play",
+      "url": "https://www.youtube.com/watch?v=C8Bz6VHxCGw",
+      "video_id": "C8Bz6VHxCGw",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Jump Overhead Technique",
+      "url": "https://www.youtube.com/watch?v=gWK_7yzMqos",
+      "video_id": "gWK_7yzMqos",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Overheads Under Fatigue",
+      "url": "https://www.youtube.com/watch?v=uR3Lg9aS8Lg",
+      "video_id": "uR3Lg9aS8Lg",
+      "channel": "Pickleball Channel",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pre-Shot Routines",
+      "url": "https://www.youtube.com/watch?v=JqV4RcZUmWs",
+      "video_id": "JqV4RcZUmWs",
+      "channel": "Enhance Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Visualization for Athletes",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Breathing for Performance",
+      "url": "https://www.youtube.com/watch?v=sJF5uHJrYXE",
+      "video_id": "sJF5uHJrYXE",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Self-Talk in Sports",
+      "url": "https://www.youtube.com/watch?v=LvJ4ZTm8wq8",
+      "video_id": "LvJ4ZTm8wq8",
+      "channel": "Third Shot Sports",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Handling Errors",
+      "url": "https://www.youtube.com/watch?v=UqQk9JPz3kE",
+      "video_id": "UqQk9JPz3kE",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Tournament Mental Preparation",
+      "url": "https://www.youtube.com/watch?v=fG4tBjJwm-Q",
+      "video_id": "fG4tBjJwm-Q",
+      "channel": "Tyson McGuffin",
+      "skill_level": "Advanced",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Pre-Match Warmup Routine",
+      "url": "https://www.youtube.com/watch?v=dJx5KZ_mKlg",
+      "video_id": "dJx5KZ_mKlg",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Partner Warmup Drill",
+      "url": "https://www.youtube.com/watch?v=xhBKIWANF9A",
+      "video_id": "xhBKIWANF9A",
+      "channel": "PrimeTime Pickleball",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Complete Pre-Match Warmup",
+      "url": "https://www.youtube.com/watch?v=HKq6aJ5qKxM",
+      "video_id": "HKq6aJ5qKxM",
+      "channel": "Third Shot Sports",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Warmup Games",
+      "url": "https://www.youtube.com/watch?v=Pj2qQxfZ-vU",
+      "video_id": "Pj2qQxfZ-vU",
+      "channel": "Pickleball Kitchen",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Ball Machine Warmup",
+      "url": "https://www.youtube.com/watch?v=e4oJX3Z9bFo",
+      "video_id": "e4oJX3Z9bFo",
+      "channel": "Selkirk TV",
+      "skill_level": "All Levels",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    },
+    {
+      "title": "Mental Pre-Match Routine",
+      "url": "https://www.youtube.com/watch?v=7WqXfbsQvLQ",
+      "video_id": "7WqXfbsQvLQ",
+      "channel": "Enhance Pickleball",
+      "skill_level": "Intermediate",
+      "is_available": false,
+      "status": "Network error: Expecting value: line 1 column 1 (char 0)"
+    }
+  ]
+}
