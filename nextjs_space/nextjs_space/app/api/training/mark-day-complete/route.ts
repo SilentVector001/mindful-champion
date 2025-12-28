@@ -72,19 +72,19 @@ export async function POST(request: Request) {
 
     console.log('Mark day complete: Found program', { programId, programName: program.name, durationDays: program.durationDays })
 
-    // Get current completed days array
+    // Get current completed days array and convert JsonValue to Date[]
     const completedDaysArray = Array.isArray(userProgram.completedDays) 
-      ? userProgram.completedDays 
+      ? userProgram.completedDays.map((date: any) => new Date(date))
       : []
     
     // Add current day to completed days if not already there
     const today = new Date()
     today.setHours(0, 0, 0, 0)
     
-    const alreadyCompletedToday = completedDaysArray.some((date: any) => {
-      const completedDate = new Date(date)
-      completedDate.setHours(0, 0, 0, 0)
-      return completedDate.getTime() === today.getTime()
+    const alreadyCompletedToday = completedDaysArray.some((completedDate: Date) => {
+      const checkDate = new Date(completedDate)
+      checkDate.setHours(0, 0, 0, 0)
+      return checkDate.getTime() === today.getTime()
     })
     
     let updatedCompletedDays: Date[] = [...completedDaysArray]
@@ -101,7 +101,7 @@ export async function POST(request: Request) {
     // Calculate streak
     let streak = 0
     const sortedDays = updatedCompletedDays
-      .map((d: any) => {
+      .map((d: Date) => {
         const date = new Date(d)
         date.setHours(0, 0, 0, 0)
         return date
