@@ -139,7 +139,7 @@ export async function POST(request: Request) {
       data: {
         currentDay: newCurrentDay,
         completionPercentage: completionPercentage,
-        completedDays: updatedCompletedDays,
+        completedDays: updatedCompletedDays.map(d => d.toISOString()) as any,
         lastTrainedAt: new Date(),
         status: isCompleted ? 'COMPLETED' : 'IN_PROGRESS',
         completedAt: isCompleted ? new Date() : undefined
