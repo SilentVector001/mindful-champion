@@ -19,20 +19,9 @@ export async function GET(request: NextRequest) {
 
     const posts = await prisma.communityPost.findMany({
       where: {
-        userId: user.id,
-        isVideoPost: true
+        userId: user.id
       },
       include: {
-        videoAnalysis: {
-          select: {
-            id: true,
-            videoUrl: true,
-            thumbnailUrl: true,
-            title: true,
-            duration: true,
-            overallScore: true
-          }
-        },
         _count: {
           select: { comments: true, likes: true }
         }
