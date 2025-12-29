@@ -1,0 +1,614 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
+
+export const dynamic = "force-dynamic"
+
+async function safeQuery<T>(
+  queryFn: () => Promise<T>,
+  defaultValue: T,
+  errorLabel: string
+): Promise<T> {
+  try {
+    return await queryFn()
+  } catch (error) {
+    console.error(`Analytics query error [${errorLabel}]:`, error)
+    return defaultValue
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const session = await getServerSession(authOptions)
+    
+    // Check admin authentication
+    if (!session?.user?.email || session.user.role !== 'ADMIN') {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+    }
+
+    const { searchParams } = new URL(req.url)
+    const period = parseInt(searchParams.get('period') || '30')
+    
+    // Calculate date range
+    const endDate = new Date()
+    const startDate = new Date()
+    startDate.setDate(startDate.getDate() - period)
+
+    console.log(`Analytics: Fetching data for period ${period} days`)
+
+    // Run analytics queries with individual error handling
+    const totalUsers = await safeQuery(() => prisma.user.count(), 0, 'totalUsers')
+    const activeUsers = await safeQuery(() => prisma.user.count({
+      where: { lastActiveDate: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } }
+    }), 0, 'activeUsers')
+    const newUsers = await safeQuery(() => prisma.user.count({
+      where: { createdAt: { gte: startDate, lte: endDate } }
+    }), 0, 'newUsers')
+    const trialUsers = await safeQuery(() => prisma.user.count({
+      where: { isTrialActive: true, subscriptionTier: 'FREE' }
+    }), 0, 'trialUsers')
+    const premiumUsers = await safeQuery(() => prisma.user.count({
+      where: { subscriptionTier: 'PREMIUM' }
+    }), 0, 'premiumUsers')
+    const proUsers = await safeQuery(() => prisma.user.count({
+      where: { subscriptionTier: 'PRO' }
+    }), 0, 'proUsers')
+    const onboardingCompleted = await safeQuery(() => prisma.user.count({
+      where: { onboardingCompleted: true }
+    }), 0, 'onboardingCompleted')
+    const lockedAccounts = await safeQuery(() => prisma.user.count({
+      where: { accountLocked: true }
+    }), 0, 'lockedAccounts')
+
+    // Engagement Metrics
+    const totalSessions = await safeQuery(() => prisma.userSession.count({
+      where: { startTime: { gte: startDate, lte: endDate } }
+    }), 0, 'totalSessions')
+    const totalPageViews = await safeQuery(() => prisma.pageView.count({
+      where: { timestamp: { gte: startDate, lte: endDate } }
+    }), 0, 'totalPageViews')
+    const totalVideoWatches = await safeQuery(() => prisma.videoInteraction.count({
+      where: {
+        timestamp: { gte: startDate, lte: endDate },
+        interactionType: { in: ['PLAY', 'COMPLETE'] }
+      }
+    }), 0, 'totalVideoWatches')
+    const totalDrillCompletions = await safeQuery(() => prisma.drillCompletion.count({
+      where: { startTime: { gte: startDate, lte: endDate } }
+    }), 0, 'totalDrillCompletions')
+    const totalMatches = await safeQuery(() => prisma.match.count({
+      where: { date: { gte: startDate, lte: endDate } }
+    }), 0, 'totalMatches')
+    const avgSessionDuration = await safeQuery(async () => {
+      const result = await prisma.userSession.aggregate({
+        where: {
+          startTime: { gte: startDate, lte: endDate },
+          duration: { not: null }
+        },
+        _avg: { duration: true }
+      })
+      return result._avg.duration || 0
+    }, 0, 'avgSessionDuration')
+
+    // Revenue Metrics
+    const totalRevenue = await safeQuery(async () => {
+      const result = await prisma.payment.aggregate({
+        where: {
+          createdAt: { gte: startDate, lte: endDate },
+          status: 'succeeded'
+        },
+        _sum: { amount: true }
+      })
+      return result._sum.amount || 0
+    }, 0, 'totalRevenue')
+    const payments = await safeQuery(() => prisma.payment.count({
+      where: {
+        createdAt: { gte: startDate, lte: endDate },
+        status: 'succeeded'
+      }
+    }), 0, 'payments')
+    const revenueByTier = await safeQuery(() => prisma.payment.groupBy({
+      by: ['subscriptionTier'],
+      where: {
+        createdAt: { gte: startDate, lte: endDate },
+        status: 'succeeded'
+      },
+      _sum: { amount: true },
+      _count: { id: true }
+    }), [], 'revenueByTier')
+
+    // Conversion & Retention
+    const trialConversions = await safeQuery(() => prisma.user.count({
+      where: {
+        subscriptionTier: { in: ['PREMIUM', 'PRO'] },
+        createdAt: { gte: startDate, lte: endDate }
+      }
+    }), 0, 'trialConversions')
+    const churnedUsers = await safeQuery(() => prisma.user.count({
+      where: {
+        subscriptionStatus: 'CANCELED',
+        updatedAt: { gte: startDate, lte: endDate }
+      }
+    }), 0, 'churnedUsers')
+
+    // Growth Trends - simplified without raw SQL
+    const userGrowthTrend: any[] = []
+    const dauTrend: any[] = []
+
+    // Popular Content
+    const popularPages = await safeQuery(() => prisma.pageView.groupBy({
+      by: ['path'],
+      where: {
+        timestamp: { gte: startDate, lte: endDate }
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 10
+    }), [], 'popularPages')
+
+    const popularVideos = await safeQuery(() => prisma.videoInteraction.groupBy({
+      by: ['videoId', 'videoTitle'],
+      where: {
+        timestamp: { gte: startDate, lte: endDate },
+        interactionType: 'COMPLETE'
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 10
+    }), [], 'popularVideos')
+
+    const popularDrills = await safeQuery(() => prisma.drillCompletion.groupBy({
+      by: ['drillName', 'drillCategory'],
+      where: {
+        startTime: { gte: startDate, lte: endDate }
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 10
+    }), [], 'popularDrills')
+
+    const popularAchievements = await safeQuery(() => prisma.userAchievement.groupBy({
+      by: ['name'],
+      where: {
+        earnedAt: { gte: startDate, lte: endDate }
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: 'desc' } },
+      take: 10
+    }), [], 'popularAchievements')
+
+    // AI Coach & Mental Training
+    const totalAIConversations = await safeQuery(() => prisma.aICoachSession.count({
+      where: {
+        createdAt: { gte: startDate, lte: endDate }
+      }
+    }), 0, 'totalAIConversations')
+
+    const totalMentalSessions = await safeQuery(() => prisma.mentalTrainingSession.count({
+      where: {
+        startTime: { gte: startDate, lte: endDate }
+      }
+    }), 0, 'totalMentalSessions')
+
+    // Calculate derived metrics
+    const [
+      // User Overview Stats
+      totalUsers,
+      activeUsers,
+      newUsers,
+      trialUsers,
+      premiumUsers,
+      proUsers,
+      onboardingCompleted,
+      lockedAccounts,
+
+      // Engagement Metrics
+      totalSessions,
+      totalPageViews,
+      totalVideoWatches,
+      totalDrillCompletions,
+      totalMatches,
+      avgSessionDuration,
+
+      // Revenue Metrics
+      totalRevenue,
+      payments,
+      revenueByTier,
+
+      // Conversion & Retention
+      trialConversions,
+      churnedUsers,
+
+      // Growth Trends
+      userGrowthTrend,
+      dauTrend,
+
+      // Popular Content
+      popularPages,
+      popularVideos,
+      popularDrills,
+      popularAchievements,
+
+      // AI Coach & Mental Training
+      totalAIConversations,
+      totalMentalSessions
+    ] = await Promise.all([
+      // User Overview Stats
+      prisma.user.count(),
+      prisma.user.count({
+        where: {
+          lastActiveDate: {
+            gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) // Last 7 days
+          }
+        }
+      }),
+      prisma.user.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.user.count({
+        where: {
+          isTrialActive: true,
+          subscriptionTier: 'FREE'
+        }
+      }),
+      prisma.user.count({
+        where: {
+          subscriptionTier: 'PREMIUM'
+        }
+      }),
+      prisma.user.count({
+        where: {
+          subscriptionTier: 'PRO'
+        }
+      }),
+      prisma.user.count({
+        where: {
+          onboardingCompleted: true
+        }
+      }),
+      prisma.user.count({
+        where: {
+          accountLocked: true
+        }
+      }),
+
+      // Engagement Metrics
+      prisma.userSession.count({
+        where: {
+          startTime: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.pageView.count({
+        where: {
+          timestamp: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.videoInteraction.count({
+        where: {
+          timestamp: {
+            gte: startDate,
+            lte: endDate
+          },
+          interactionType: {
+            in: ['PLAY', 'COMPLETE']
+          }
+        }
+      }),
+      prisma.drillCompletion.count({
+        where: {
+          startTime: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.match.count({
+        where: {
+          date: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.userSession.aggregate({
+        where: {
+          startTime: {
+            gte: startDate,
+            lte: endDate
+          },
+          duration: {
+            not: null
+          }
+        },
+        _avg: {
+          duration: true
+        }
+      }),
+
+      // Revenue Metrics
+      prisma.payment.aggregate({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          },
+          status: 'succeeded'
+        },
+        _sum: {
+          amount: true
+        }
+      }),
+      prisma.payment.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          },
+          status: 'succeeded'
+        }
+      }),
+      prisma.payment.groupBy({
+        by: ['subscriptionTier'],
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          },
+          status: 'succeeded'
+        },
+        _sum: {
+          amount: true
+        },
+        _count: {
+          id: true
+        }
+      }),
+
+      // Conversion & Retention
+      prisma.user.count({
+        where: {
+          subscriptionTier: {
+            in: ['PREMIUM', 'PRO']
+          },
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.user.count({
+        where: {
+          subscriptionStatus: 'CANCELED',
+          updatedAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+
+      // Growth Trends
+      prisma.$queryRaw`
+        SELECT DATE(created_at) as date, COUNT(*)::int as count
+        FROM "User"
+        WHERE created_at >= ${startDate} AND created_at <= ${endDate}
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+      `,
+      prisma.$queryRaw`
+        SELECT DATE(start_time) as date, COUNT(DISTINCT user_id)::int as users
+        FROM "UserSession"
+        WHERE start_time >= ${startDate} AND start_time <= ${endDate}
+        AND user_id IS NOT NULL
+        GROUP BY DATE(start_time)
+        ORDER BY date ASC
+      `,
+
+      // Popular Content
+      prisma.pageView.groupBy({
+        by: ['path'],
+        where: {
+          timestamp: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        _count: {
+          id: true
+        },
+        orderBy: {
+          _count: {
+            id: 'desc'
+          }
+        },
+        take: 10
+      }),
+      prisma.videoInteraction.groupBy({
+        by: ['videoId', 'videoTitle'],
+        where: {
+          timestamp: {
+            gte: startDate,
+            lte: endDate
+          },
+          interactionType: 'COMPLETE'
+        },
+        _count: {
+          id: true
+        },
+        orderBy: {
+          _count: {
+            id: 'desc'
+          }
+        },
+        take: 10
+      }),
+      prisma.drillCompletion.groupBy({
+        by: ['drillName', 'drillCategory'],
+        where: {
+          startTime: {
+            gte: startDate,
+            lte: endDate
+          },
+          status: 'COMPLETED'
+        },
+        _count: {
+          id: true
+        },
+        orderBy: {
+          _count: {
+            id: 'desc'
+          }
+        },
+        take: 10
+      }),
+      prisma.userAchievement.groupBy({
+        by: ['achievementId'],
+        where: {
+          unlockedAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        },
+        _count: {
+          id: true
+        },
+        orderBy: {
+          _count: {
+            id: 'desc'
+          }
+        },
+        take: 5
+      }).then(async (achievements) => {
+        // Get achievement names
+        const achievementIds = achievements.map(a => a.achievementId)
+        const achievementData = await prisma.achievement.findMany({
+          where: {
+            id: {
+              in: achievementIds
+            }
+          },
+          select: {
+            id: true,
+            name: true
+          }
+        })
+        
+        return achievements.map(a => ({
+          ...a,
+          name: achievementData.find(ad => ad.id === a.achievementId)?.name || 'Unknown Achievement'
+        }))
+      }),
+
+      // AI Coach & Mental Training
+      prisma.aIConversation.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      }),
+      prisma.mentalSession.count({
+        where: {
+          createdAt: {
+            gte: startDate,
+            lte: endDate
+          }
+        }
+      })
+    ])
+
+    // Calculate conversion rates
+    const trialConversionRate = totalUsers > 0 ? Math.round((trialConversions / totalUsers) * 100) : 0
+    const churnRate = totalUsers > 0 ? Math.round((churnedUsers / totalUsers) * 100) : 0
+
+    // Calculate MRR (Monthly Recurring Revenue estimate)
+    const monthlyRevenue = totalRevenue._sum.amount ? (totalRevenue._sum.amount / 100) : 0
+    const mrr = period <= 30 ? monthlyRevenue : (monthlyRevenue / period) * 30
+
+    console.log(`Analytics: Successfully computed metrics for ${totalUsers} total users`)
+
+    const analyticsData = {
+      overview: {
+        totalUsers,
+        activeUsers,
+        newUsers,
+        trialUsers,
+        premiumUsers,
+        proUsers,
+        onboardingCompleted,
+        lockedAccounts
+      },
+      engagement: {
+        totalSessions,
+        totalPageViews,
+        totalVideoWatches,
+        totalDrillCompletions,
+        totalMatches,
+        avgSessionDuration: avgSessionDuration._avg?.duration || 0,
+        totalAIConversations,
+        totalMentalSessions
+      },
+      revenue: {
+        totalRevenue: monthlyRevenue,
+        mrr: mrr,
+        payments,
+        revenueByTier: revenueByTier.map(tier => ({
+          tier: tier.subscriptionTier,
+          amount: (tier._sum.amount || 0) / 100,
+          count: tier._count?.id || 0
+        }))
+      },
+      conversions: {
+        trialConversionRate,
+        trialConversions,
+        churnRate,
+        churnedUsers
+      },
+      trends: {
+        userGrowth: userGrowthTrend,
+        dauTrend: dauTrend
+      },
+      popular: {
+        pages: popularPages.map(page => ({
+          path: page.path,
+          views: page._count?.id || 0
+        })),
+        videos: popularVideos.map(video => ({
+          id: video.videoId,
+          title: video.videoTitle || video.videoId,
+          completions: video._count?.id || 0
+        })),
+        drills: popularDrills.map(drill => ({
+          name: drill.drillName,
+          category: drill.drillCategory,
+          completions: drill._count?.id || 0
+        })),
+        achievements: popularAchievements.map(achievement => ({
+          name: achievement.name,
+          count: achievement._count?.id || 0
+        }))
+      }
+    }
+
+    return NextResponse.json(analyticsData)
+
+  } catch (error) {
+    console.error('Analytics API Error:', error)
+    return NextResponse.json({
+      error: 'Failed to fetch analytics data',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
+  }
+}

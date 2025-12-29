@@ -1,0 +1,53 @@
+{
+  "task_name": "National Pickleball Tournament Data Updater",
+  "description": "Automatically fetches and updates national pickleball tournament data from PPA Tour, MLP, APP Tour, and USA Pickleball",
+  "schedule": "Every 6 hours",
+  "version": "1.0.0",
+  "created_date": "2025-12-17",
+  "data_sources": [
+    {
+      "name": "PPA Tour",
+      "url": "https://ppatour.com/schedule/",
+      "status": "active",
+      "notes": "Professional Pickleball Association - Main professional tour"
+    },
+    {
+      "name": "Major League Pickleball (MLP)",
+      "url": "https://majorleaguepickleball.co/events-2025/",
+      "status": "active",
+      "notes": "Team-based professional pickleball league"
+    },
+    {
+      "name": "APP Tour",
+      "url": "https://www.theapp.global/tour",
+      "status": "active",
+      "notes": "Association of Pickleball Players - Professional tour"
+    },
+    {
+      "name": "USA Pickleball",
+      "url": "https://usapickleball.org/tournaments/",
+      "status": "active",
+      "notes": "National governing body for pickleball in the USA"
+    }
+  ],
+  "database": {
+    "table": "PickleballEvent",
+    "connection": "PostgreSQL via DATABASE_URL environment variable"
+  },
+  "scripts": {
+    "main": "/home/ubuntu/mindful_champion/scripts/tournament_data_updater.py",
+    "wrapper": "/home/ubuntu/mindful_champion/scripts/run_tournament_updater.sh"
+  },
+  "logs": {
+    "file": "/home/ubuntu/mindful_champion/logs/tournament_updater.log",
+    "level": "INFO"
+  },
+  "last_run": {
+    "timestamp": "2025-12-17T21:32:52Z",
+    "status": "success",
+    "tournaments_fetched": 14,
+    "tournaments_created": 13,
+    "tournaments_updated": 1,
+    "errors": 1
+  }
+}
