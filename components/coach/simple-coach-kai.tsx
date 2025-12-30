@@ -249,6 +249,9 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold">COACH KAI</h1>
               <span className="px-2 py-0.5 bg-white/20 rounded text-xs font-medium">AI COACH</span>
+              <span className="px-2 py-0.5 bg-amber-500/30 border border-amber-400/50 rounded text-xs font-bold text-amber-200 animate-pulse">
+                BETA
+              </span>
             </div>
             <p className="text-white/80 text-sm mt-1">
               {avatarState === 'listening' && '🎤 Listening...'}
@@ -323,19 +326,35 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
           {/* Input Area */}
           <form id="chat-form" onSubmit={handleSubmit} className="p-4 border-t border-slate-700">
             <div className="flex items-center gap-3">
-              {/* Microphone Button */}
-              <button
-                type="button"
-                onClick={toggleListening}
-                disabled={isLoading}
-                className={`p-3 rounded-full transition-all ${
-                  isListening
-                    ? 'bg-green-500 text-white animate-pulse'
-                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
-                } disabled:opacity-50`}
-              >
-                {isListening ? <Mic className="w-5 h-5" /> : <MicOff className="w-5 h-5" />}
-              </button>
+              {/* Microphone Button - PROMINENT */}
+              <div className="relative group">
+                <button
+                  type="button"
+                  onClick={toggleListening}
+                  disabled={isLoading}
+                  className={`relative p-4 rounded-full transition-all shadow-lg ${
+                    isListening
+                      ? 'bg-gradient-to-br from-green-500 to-emerald-600 text-white scale-110 shadow-green-500/50'
+                      : 'bg-gradient-to-br from-teal-500 to-cyan-600 text-white hover:scale-105 hover:shadow-teal-500/50'
+                  } disabled:opacity-50 disabled:cursor-not-allowed`}
+                  title={isListening ? 'Stop Recording' : 'Push to Talk'}
+                >
+                  {/* Animated Pulse Ring when listening */}
+                  {isListening && (
+                    <div className="absolute inset-0 rounded-full bg-green-500 animate-ping opacity-75" />
+                  )}
+                  
+                  {/* Icon */}
+                  <div className="relative z-10">
+                    {isListening ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                  </div>
+                </button>
+                
+                {/* Tooltip */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1 bg-slate-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  {isListening ? '🎤 Listening...' : '🎤 Click to speak'}
+                </div>
+              </div>
               
               {/* Text Input */}
               <input
