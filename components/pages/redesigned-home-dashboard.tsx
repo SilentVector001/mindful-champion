@@ -84,7 +84,7 @@ export default function RedesignedHomeDashboard({
 
   if (!mounted) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+      <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
         <MainNavigation user={user} />
         <div className="flex items-center justify-center h-[calc(100vh-80px)]">
           <div className="w-12 h-12 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin" />
@@ -94,7 +94,7 @@ export default function RedesignedHomeDashboard({
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900/20 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
       <MainNavigation user={user} />
       
       {/* Single Screen Dashboard */}
@@ -138,7 +138,7 @@ export default function RedesignedHomeDashboard({
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: i * 0.1 }}
                   className={cn(
-                    "flex items-center gap-2 px-4 py-2 rounded-xl border border-white/10",
+                    "flex items-center gap-2 px-4 py-2 rounded-xl border border-white/20 backdrop-blur-sm shadow-lg",
                     stat.bg
                   )}
                 >
@@ -253,7 +253,7 @@ export default function RedesignedHomeDashboard({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
-                className="mt-4 p-4 rounded-2xl bg-slate-800/50 border border-emerald-500/20 backdrop-blur-sm"
+                className="mt-4 p-4 rounded-2xl bg-slate-800 border border-emerald-500/30 backdrop-blur-sm shadow-lg"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
@@ -288,7 +288,7 @@ export default function RedesignedHomeDashboard({
             className="space-y-4"
           >
             {/* Today's Tip */}
-            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20">
+            <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/30 backdrop-blur shadow-lg">
               <div className="flex items-start gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
                   <Sparkles className="w-5 h-5 text-white" />
@@ -304,7 +304,7 @@ export default function RedesignedHomeDashboard({
 
             {/* Recent Achievement */}
             {achievements?.length > 0 && (
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 border border-purple-500/30 backdrop-blur shadow-lg">
                 <div className="flex items-center gap-3">
                   <motion.div
                     className="w-12 h-12 bg-gradient-to-br from-purple-400 to-pink-500 rounded-xl flex items-center justify-center"
@@ -322,7 +322,7 @@ export default function RedesignedHomeDashboard({
             )}
 
             {/* Quick Stats Card */}
-            <div className="p-4 rounded-2xl bg-slate-800/50 border border-white/10">
+            <div className="p-4 rounded-2xl bg-slate-800 border border-white/20 backdrop-blur shadow-lg">
               <p className="text-gray-400 text-xs font-semibold uppercase tracking-wide mb-3">This Week</p>
               <div className="grid grid-cols-2 gap-3">
                 {[
@@ -368,7 +368,7 @@ export default function RedesignedHomeDashboard({
                   whileHover={{ scale: 1.05, y: -4 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => router.push(item.path)}
-                  className="group relative p-4 rounded-2xl bg-slate-800/50 border border-white/10 hover:border-emerald-500/30 hover:bg-slate-800 transition-all duration-300 text-left"
+                  className="group relative p-4 rounded-2xl bg-slate-800 border border-white/20 hover:border-emerald-500/50 hover:bg-slate-700 transition-all duration-300 text-left shadow-lg"
                 >
                   {/* Gradient Glow on Hover */}
                   <div className={cn(
@@ -400,7 +400,7 @@ export default function RedesignedHomeDashboard({
           className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
         >
           {/* Upcoming - Placeholder */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
+          <div className="p-4 rounded-2xl bg-slate-800/80 border border-white/20 backdrop-blur shadow-lg">
             <div className="flex items-center gap-2 text-gray-400 mb-2">
               <Calendar className="w-4 h-4" />
               <span className="text-sm font-medium">Upcoming</span>
@@ -415,7 +415,7 @@ export default function RedesignedHomeDashboard({
           </div>
 
           {/* Community Activity */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
+          <div className="p-4 rounded-2xl bg-slate-800/80 border border-white/20 backdrop-blur shadow-lg">
             <div className="flex items-center gap-2 text-gray-400 mb-2">
               <Users className="w-4 h-4" />
               <span className="text-sm font-medium">Community</span>
@@ -430,7 +430,7 @@ export default function RedesignedHomeDashboard({
           </div>
 
           {/* Rewards Summary */}
-          <div className="p-4 rounded-2xl bg-slate-800/30 border border-white/5">
+          <div className="p-4 rounded-2xl bg-slate-800/80 border border-white/20 backdrop-blur shadow-lg">
             <div className="flex items-center gap-2 text-gray-400 mb-2">
               <Gift className="w-4 h-4" />
               <span className="text-sm font-medium">Rewards</span>

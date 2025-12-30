@@ -32,12 +32,6 @@ export const metadata: Metadata = {
   applicationName: "Mindful Champion",
   category: "Sports & Recreation",
   
-  // Theme color for browser UI
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#00D084" },
-    { media: "(prefers-color-scheme: dark)", color: "#1A1D29" },
-  ],
-  
   // Comprehensive favicon and app icons
   icons: {
     icon: [
