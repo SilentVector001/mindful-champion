@@ -19,3 +19,4 @@ out
 .logs
 *.tsbuildinfo
 core
+nextjs_space/

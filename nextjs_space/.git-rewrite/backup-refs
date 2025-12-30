@@ -1,7 +1,0 @@
-1e3b72b241c61041a4b25133c74b9d9fe2b01d02 commit	refs/heads/master
-4efa67b3416b88f3d4d23f67f049054dafe5b10e commit	refs/original/refs/heads/master
-9ce60a0b2193bd9ae3447a7d6d34328783ab3da3 commit	refs/original/refs/remotes/origin/master
-19d188c63069cbdf5ba86be37cff1f2c04af28d8 commit	refs/original/refs/stash
-1da977d0f7dda87e3e07a42956dfc27df8a9a6ec commit	refs/remotes/origin/fix/reset-admin-password
-a12db9e4f6841f7c9ef304a8f41f8f064136d5c7 commit	refs/remotes/origin/master
-19d188c63069cbdf5ba86be37cff1f2c04af28d8 commit	refs/stash
