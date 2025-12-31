@@ -22,8 +22,9 @@ import { parseKaiResponse } from "@/lib/coach-kai/response-parser";
 
 export async function POST(req: NextRequest) {
   try {
-    if (!process.env.ABACUSAI_API_KEY) {
-      console.error('[Coach Kai] ABACUSAI_API_KEY not configured');
+    const apiKey = process.env.ABACUSAI_API_KEY || process.env.ABACUS_API_KEY;
+    if (!apiKey) {
+      console.error('[Coach Kai] No Abacus AI API key configured');
       return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
     }
 
@@ -134,10 +135,10 @@ export async function POST(req: NextRequest) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+        'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-4o-mini',
         messages: conversationMessages,
         stream: true,
         max_tokens: 800,
