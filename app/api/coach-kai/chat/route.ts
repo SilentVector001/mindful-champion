@@ -131,110 +131,47 @@ export async function POST(req: NextRequest) {
     // STREAM RESPONSE FROM LLM
     // ============================================
     
-    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
+    const response = await fetch('https://api.abacus.ai/api/v0/llm/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${apiKey}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',
+        llmName: 'OPENAI_GPT4O',
         messages: conversationMessages,
-        stream: true,
-        max_tokens: 800,
-        temperature: 0.9,
-        presence_penalty: 0.6,
-        frequency_penalty: 0.5
+        maxTokens: 800,
+        temperature: 0.9
       })
     });
 
     if (!response.ok) {
-      console.error('[Coach Kai] LLM API error:', response.status);
+      const errorText = await response.text();
+      console.error('[Coach Kai] LLM API error:', response.status, errorText);
       return NextResponse.json({ error: "AI service unavailable" }, { status: 503 });
     }
 
-    // Create streaming response
-    const encoder = new TextEncoder();
-    const decoder = new TextDecoder();
+    const data = await response.json();
+    const fullResponse = data.content || data.response || data.message || '';
     
-    let fullResponse = '';
-    
-    const stream = new ReadableStream({
-      async start(controller) {
-        const reader = response.body?.getReader();
-        if (!reader) {
-          controller.close();
-          return;
-        }
-        
-        try {
-          while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            
-            const chunk = decoder.decode(value);
-            const lines = chunk.split('\n');
-            
-            for (const line of lines) {
-              if (line.startsWith('data: ')) {
-                const data = line.slice(6);
-                if (data === '[DONE]') continue;
-                
-                try {
-                  const parsed = JSON.parse(data);
-                  const content = parsed.choices?.[0]?.delta?.content || '';
-                  if (content) {
-                    fullResponse += content;
-                    
-                    // Stream text content (stop at action cards marker)
-                    if (!fullResponse.includes('[ACTION_CARDS]')) {
-                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content })}\n\n`));
-                    }
-                  }
-                } catch (e) {
-                  // Skip invalid JSON
-                }
-              }
-            }
-          }
-          
-          // Parse complete response for action cards
-          const parsed = parseKaiResponse(fullResponse);
-          
-          // Send action cards
-          if (parsed.actionCards.length > 0) {
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-              type: 'actions', 
-              cards: parsed.actionCards 
-            })}\n\n`));
-          }
-          
-          // Send completion with metadata
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-            type: 'complete',
-            emotion: emotionAnalysis.primaryEmotion,
-            techniques: detectedTechniques,
-            needsSupport: emotionAnalysis.needsSupport
-          })}\n\n`));
-          
-          // Save to database (async, don't block response)
-          saveConversation(session.user.id, messageText, parsed.message).catch(console.error);
-          
-        } catch (error) {
-          console.error('[Coach Kai] Stream error:', error);
-          controller.error(error);
-        } finally {
-          controller.close();
-        }
-      }
-    });
+    if (!fullResponse) {
+      console.error('[Coach Kai] Empty response from LLM:', JSON.stringify(data));
+      return NextResponse.json({ error: "Empty AI response" }, { status: 503 });
+    }
 
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/event-stream',
-        'Cache-Control': 'no-cache',
-        'Connection': 'keep-alive'
-      }
+    // Parse response for action cards
+    const parsed = parseKaiResponse(fullResponse);
+    
+    // Save to database (async, don't block response)
+    saveConversation(session.user.id, messageText, parsed.message).catch(console.error);
+
+    // Return JSON response
+    return NextResponse.json({
+      message: parsed.message,
+      actionCards: parsed.actionCards,
+      emotion: emotionAnalysis.primaryEmotion,
+      techniques: detectedTechniques,
+      needsSupport: emotionAnalysis.needsSupport
     });
 
   } catch (error: any) {
