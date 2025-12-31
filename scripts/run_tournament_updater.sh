@@ -8,14 +8,27 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Load environment variables
-ENV_FILE="$PROJECT_DIR/nextjs_space/.env.local"
-if [ -f "$ENV_FILE" ]; then
-    set -a
-    source "$ENV_FILE"
-    set +a
-    echo "Loaded environment variables from .env.local"
-else
-    echo "Warning: .env.local file not found at $ENV_FILE"
+# Try multiple .env file locations
+ENV_FILES=(
+    "$PROJECT_DIR/nextjs_space/.env.local"
+    "$PROJECT_DIR/nextjs_space/.env"
+    "$PROJECT_DIR/.env"
+)
+
+ENV_LOADED=false
+for ENV_FILE in "${ENV_FILES[@]}"; do
+    if [ -f "$ENV_FILE" ]; then
+        set -a
+        source "$ENV_FILE"
+        set +a
+        echo "Loaded environment variables from $ENV_FILE"
+        ENV_LOADED=true
+        break
+    fi
+done
+
+if [ "$ENV_LOADED" = false ]; then
+    echo "Warning: No .env file found in expected locations"
 fi
 
 # Ensure log directory exists
