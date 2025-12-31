@@ -59,8 +59,11 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
   const [interimTranscript, setInterimTranscript] = useState('');
   const [pendingActions, setPendingActions] = useState<ActionSuggestion[]>([]);
   const [executingAction, setExecutingAction] = useState<string | null>(null);
+  const [isPTTActive, setIsPTTActive] = useState(false);
+  const [pttTranscript, setPttTranscript] = useState('');
   
   const avatarRef = useRef<StreamingAvatar | null>(null);
+  const pttRecognitionRef = useRef<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const sessionIdRef = useRef<string | null>(null);
   const recognitionRef = useRef<any>(null);
@@ -489,6 +492,86 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
     setVadEnabled(!vadEnabled);
   }, [vadEnabled, stopContinuousListening, startContinuousListening]);
 
+  // Push-to-Talk: Start listening when button is pressed
+  const startPTT = useCallback(() => {
+    // Disable VAD while PTT is active
+    if (vadEnabled) {
+      stopContinuousListening();
+    }
+    
+    try {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        setError('Speech recognition not supported in this browser');
+        return;
+      }
+      
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+      
+      recognition.onresult = (event: any) => {
+        let interim = '';
+        let finalTranscript = '';
+        
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interim += transcript;
+          }
+        }
+        
+        setPttTranscript(interim || finalTranscript);
+      };
+      
+      recognition.onerror = (e: any) => {
+        console.log('PTT error:', e.error);
+        if (e.error !== 'no-speech' && e.error !== 'aborted') {
+          setError('Voice recognition error. Try again.');
+        }
+      };
+      
+      recognition.onend = () => {
+        // Recognition ended - handled by stopPTT
+      };
+      
+      pttRecognitionRef.current = recognition;
+      recognition.start();
+      setIsPTTActive(true);
+      setAvatarState('listening');
+      setPttTranscript('');
+    } catch (error) {
+      console.error('PTT start error:', error);
+      setError('Could not start voice recognition');
+    }
+  }, [vadEnabled, stopContinuousListening]);
+
+  // Push-to-Talk: Stop listening and send message
+  const stopPTT = useCallback(() => {
+    if (pttRecognitionRef.current) {
+      pttRecognitionRef.current.stop();
+      pttRecognitionRef.current = null;
+    }
+    
+    setIsPTTActive(false);
+    setAvatarState(avatarRef.current ? 'ready' : 'offline');
+    
+    // Send the captured transcript
+    if (pttTranscript.trim()) {
+      sendMessage(pttTranscript.trim());
+    }
+    
+    setPttTranscript('');
+    
+    // Restore VAD if it was enabled
+    if (vadEnabled) {
+      setTimeout(() => startContinuousListening(), 500);
+    }
+  }, [pttTranscript, vadEnabled, startContinuousListening, sendMessage]);
+
   // Auto-initialize on mount
   useEffect(() => {
     if (!initAttemptedRef.current) {
@@ -828,23 +911,71 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
             </div>
             
             <div className="p-4 border-t border-slate-700">
+              {/* PTT Transcript Display */}
+              {isPTTActive && pttTranscript && (
+                <div className="mb-3 p-3 rounded-lg bg-green-900/30 border border-green-500/50">
+                  <p className="text-green-300 text-sm flex items-center gap-2">
+                    <motion.span 
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.5, repeat: Infinity }}
+                      className="w-2 h-2 bg-red-500 rounded-full"
+                    />
+                    <span className="font-medium">Listening:</span> {pttTranscript}
+                  </p>
+                </div>
+              )}
+              
               <div className="flex gap-2">
-                <Textarea
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Type your question..."
+                {/* Push-to-Talk Button */}
+                <motion.button
+                  onMouseDown={startPTT}
+                  onMouseUp={stopPTT}
+                  onMouseLeave={isPTTActive ? stopPTT : undefined}
+                  onTouchStart={startPTT}
+                  onTouchEnd={stopPTT}
                   disabled={isLoading}
-                  className="flex-1 min-h-[50px] resize-none bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
+                  className={`h-[50px] w-[50px] rounded-lg flex items-center justify-center transition-all duration-200 ${
+                    isPTTActive 
+                      ? 'bg-gradient-to-r from-red-500 to-pink-500 shadow-lg shadow-red-500/50 scale-110' 
+                      : 'bg-gradient-to-r from-purple-500 to-violet-500 hover:from-purple-600 hover:to-violet-600'
+                  } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  whileTap={{ scale: 1.1 }}
+                  title="Hold to talk"
+                >
+                  {isPTTActive ? (
+                    <motion.div
+                      animate={{ scale: [1, 1.2, 1] }}
+                      transition={{ duration: 0.3, repeat: Infinity }}
+                    >
+                      <Mic className="w-5 h-5 text-white" />
+                    </motion.div>
+                  ) : (
+                    <Mic className="w-5 h-5 text-white" />
+                  )}
+                </motion.button>
+                
+                <Textarea
+                  value={isPTTActive ? pttTranscript : input}
+                  onChange={(e) => !isPTTActive && setInput(e.target.value)}
+                  onKeyDown={handleKeyPress}
+                  placeholder={isPTTActive ? "Listening... release to send" : "Type or hold 🎤 to talk..."}
+                  disabled={isLoading || isPTTActive}
+                  className={`flex-1 min-h-[50px] resize-none bg-slate-700 border-slate-600 text-white placeholder:text-slate-400 ${
+                    isPTTActive ? 'border-green-500/50 bg-green-900/20' : ''
+                  }`}
                 />
                 <Button
                   onClick={() => sendMessage()}
-                  disabled={!input.trim() || isLoading}
+                  disabled={!input.trim() || isLoading || isPTTActive}
                   className="h-[50px] w-[50px] bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600"
                 >
                   {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
                 </Button>
               </div>
+              
+              <p className="text-slate-500 text-xs mt-2 text-center">
+                💡 Hold the 🎤 button to speak, or type your message
+              </p>
             </div>
           </Card>
         </div>
