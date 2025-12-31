@@ -22,9 +22,8 @@ import { parseKaiResponse } from "@/lib/coach-kai/response-parser";
 
 export async function POST(req: NextRequest) {
   try {
-    const apiKey = process.env.ABACUSAI_API_KEY || process.env.ABACUS_API_KEY;
-    if (!apiKey) {
-      console.error('[Coach Kai] No Abacus AI API key configured');
+    if (!process.env.ABACUSAI_API_KEY) {
+      console.error('[Coach Kai] ABACUSAI_API_KEY not configured');
       return NextResponse.json({ error: "AI service not configured" }, { status: 503 });
     }
 
@@ -131,47 +130,110 @@ export async function POST(req: NextRequest) {
     // STREAM RESPONSE FROM LLM
     // ============================================
     
-    const response = await fetch('https://api.abacus.ai/api/v0/llm/chat', {
+    const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiKey}`
+        'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
       },
       body: JSON.stringify({
-        llmName: 'OPENAI_GPT4O',
+        model: 'gpt-4.1-mini',
         messages: conversationMessages,
-        maxTokens: 800,
-        temperature: 0.9
+        stream: true,
+        max_tokens: 800,
+        temperature: 0.9,
+        presence_penalty: 0.6,
+        frequency_penalty: 0.5
       })
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[Coach Kai] LLM API error:', response.status, errorText);
+      console.error('[Coach Kai] LLM API error:', response.status);
       return NextResponse.json({ error: "AI service unavailable" }, { status: 503 });
     }
 
-    const data = await response.json();
-    const fullResponse = data.content || data.response || data.message || '';
+    // Create streaming response
+    const encoder = new TextEncoder();
+    const decoder = new TextDecoder();
     
-    if (!fullResponse) {
-      console.error('[Coach Kai] Empty response from LLM:', JSON.stringify(data));
-      return NextResponse.json({ error: "Empty AI response" }, { status: 503 });
-    }
-
-    // Parse response for action cards
-    const parsed = parseKaiResponse(fullResponse);
+    let fullResponse = '';
     
-    // Save to database (async, don't block response)
-    saveConversation(session.user.id, messageText, parsed.message).catch(console.error);
+    const stream = new ReadableStream({
+      async start(controller) {
+        const reader = response.body?.getReader();
+        if (!reader) {
+          controller.close();
+          return;
+        }
+        
+        try {
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+            
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+                
+                try {
+                  const parsed = JSON.parse(data);
+                  const content = parsed.choices?.[0]?.delta?.content || '';
+                  if (content) {
+                    fullResponse += content;
+                    
+                    // Stream text content (stop at action cards marker)
+                    if (!fullResponse.includes('[ACTION_CARDS]')) {
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content })}\n\n`));
+                    }
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
+          }
+          
+          // Parse complete response for action cards
+          const parsed = parseKaiResponse(fullResponse);
+          
+          // Send action cards
+          if (parsed.actionCards.length > 0) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              type: 'actions', 
+              cards: parsed.actionCards 
+            })}\n\n`));
+          }
+          
+          // Send completion with metadata
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+            type: 'complete',
+            emotion: emotionAnalysis.primaryEmotion,
+            techniques: detectedTechniques,
+            needsSupport: emotionAnalysis.needsSupport
+          })}\n\n`));
+          
+          // Save to database (async, don't block response)
+          saveConversation(session.user.id, messageText, parsed.message).catch(console.error);
+          
+        } catch (error) {
+          console.error('[Coach Kai] Stream error:', error);
+          controller.error(error);
+        } finally {
+          controller.close();
+        }
+      }
+    });
 
-    // Return JSON response
-    return NextResponse.json({
-      message: parsed.message,
-      actionCards: parsed.actionCards,
-      emotion: emotionAnalysis.primaryEmotion,
-      techniques: detectedTechniques,
-      needsSupport: emotionAnalysis.needsSupport
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive'
+      }
     });
 
   } catch (error: any) {
