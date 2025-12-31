@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Mic, MicOff, MessageCircle, Sparkles, Volume2, Brain, Target } from 'lucide-react';
+import { Send, Loader2, Mic, MicOff, MessageCircle, Sparkles, Volume2, VolumeX, Brain, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -21,7 +21,7 @@ type Message = {
   emotion?: string;
 };
 
-type AvatarState = 'idle' | 'listening' | 'processing' | 'responding';
+type AvatarState = 'idle' | 'listening' | 'processing' | 'responding' | 'speaking';
 
 type UserContext = {
   name?: string;
@@ -31,6 +31,76 @@ type UserContext = {
   primaryGoals?: string[];
   biggestChallenges?: string[];
 };
+
+// TTS Hook - Cross-platform Web Speech API
+function useTTS() {
+  const [isTTSEnabled, setIsTTSEnabled] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const utteranceRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  useEffect(() => {
+    // Load TTS preference from localStorage
+    const saved = localStorage.getItem('coachKai_tts');
+    if (saved === 'true') setIsTTSEnabled(true);
+  }, []);
+
+  const toggleTTS = useCallback(() => {
+    const newValue = !isTTSEnabled;
+    setIsTTSEnabled(newValue);
+    localStorage.setItem('coachKai_tts', String(newValue));
+    if (!newValue) stopSpeaking();
+  }, [isTTSEnabled]);
+
+  const stopSpeaking = useCallback(() => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      setIsSpeaking(false);
+    }
+  }, []);
+
+  const speak = useCallback((text: string) => {
+    if (!isTTSEnabled || typeof window === 'undefined' || !window.speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+    
+    // Clean text for speech (remove markdown, emojis)
+    const cleanText = text
+      .replace(/\*\*/g, '')
+      .replace(/\*/g, '')
+      .replace(/#{1,6}\s/g, '')
+      .replace(/[🎯👟🧠♟️💪✅👋🏓🤔✓👂✍️]/g, '')
+      .replace(/\[.*?\]/g, '')
+      .trim();
+    
+    if (!cleanText) return;
+    
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    // Try to find a natural voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferredVoice = voices.find(v => 
+      v.name.includes('Samantha') || // iOS/Mac
+      v.name.includes('Google') || // Chrome
+      v.name.includes('Microsoft') || // Windows
+      v.lang.startsWith('en')
+    ) || voices[0];
+    
+    if (preferredVoice) utterance.voice = preferredVoice;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = () => setIsSpeaking(false);
+    
+    utteranceRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  }, [isTTSEnabled]);
+
+  return { isTTSEnabled, isSpeaking, toggleTTS, speak, stopSpeaking };
+}
 
 // Format message timestamp
 function formatMessageTime(date: Date): string {
@@ -228,6 +298,8 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
   
+  const { isTTSEnabled, isSpeaking, toggleTTS, speak, stopSpeaking } = useTTS();
+  
   const isProcessingRef = useRef(false);
   const lastMessageRef = useRef('');
   const historyLoadedRef = useRef(false);
@@ -270,10 +342,11 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   }, []);
 
   useEffect(() => {
-    if (isListening) setAvatarState('listening');
+    if (isSpeaking) setAvatarState('speaking');
+    else if (isListening) setAvatarState('listening');
     else if (isLoading) setAvatarState('processing');
     else setAvatarState('idle');
-  }, [isListening, isLoading]);
+  }, [isListening, isLoading, isSpeaking]);
 
   useEffect(() => {
     scrollToBottom();
@@ -345,10 +418,11 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
       }
       
       // Add final message with action cards
+      const finalContent = fullContent || 'I\'m here to help! What would you like to work on?';
       const assistantMsg: Message = {
         id: `assistant-${Date.now()}`,
         role: 'assistant',
-        content: fullContent || 'I\'m here to help! What would you like to work on?',
+        content: finalContent,
         timestamp: new Date(),
         actionCards,
         emotion
@@ -356,6 +430,10 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
       
       setMessages(prev => [...prev, assistantMsg]);
       setStreamingContent('');
+      
+      // Auto-speak response if TTS is enabled
+      speak(finalContent);
+      
       setTimeout(() => setAvatarState('idle'), 500);
       
     } catch (error) {
@@ -394,50 +472,85 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      {/* Hero Header - Dark Theme */}
-      <div className="bg-gradient-to-r from-emerald-950 via-teal-950 to-cyan-950 border-b border-emerald-500/20 text-white py-6 px-4">
-        <div className="max-w-4xl mx-auto flex items-center gap-6">
-          <AnimatedAvatar state={avatarState} size="md" />
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-2xl md:text-3xl font-black tracking-tight">COACH KAI</h1>
-              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+      {/* Hero Header - Dark Theme with TTS Toggle */}
+      <div className="bg-gradient-to-r from-emerald-950 via-teal-950 to-cyan-950 border-b border-emerald-500/20 text-white py-4 md:py-6 px-3 md:px-4">
+        <div className="max-w-4xl mx-auto flex items-center gap-3 md:gap-6">
+          {/* Avatar - smaller on mobile */}
+          <div className="hidden sm:block">
+            <AnimatedAvatar state={avatarState} size="md" />
+          </div>
+          <div className="sm:hidden">
+            <AnimatedAvatar state={avatarState} size="sm" />
+          </div>
+          
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 md:gap-3 mb-1 flex-wrap">
+              <h1 className="text-xl md:text-3xl font-black tracking-tight">COACH KAI</h1>
+              <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/30 text-xs hidden sm:inline-flex">
                 <Brain className="w-3 h-3 mr-1" /> AI COACH
               </Badge>
               <Badge variant="outline" className="text-amber-400 border-amber-500/30 text-xs">
                 BETA
               </Badge>
             </div>
-            <p className="text-emerald-200/70 text-sm">Your AI Pickleball Coach • Emotionally Intelligent • Action-Focused</p>
-            <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium mt-2 ${
+            <p className="text-emerald-200/70 text-xs md:text-sm hidden sm:block">Your AI Pickleball Coach • Emotionally Intelligent • Action-Focused</p>
+            <div className={`inline-flex items-center gap-1.5 px-2 md:px-3 py-1 rounded-full text-xs font-medium mt-1 md:mt-2 ${
+              avatarState === 'speaking' ? 'bg-cyan-500/20 text-cyan-300' :
               avatarState === 'listening' ? 'bg-amber-500/20 text-amber-300' :
               avatarState === 'processing' ? 'bg-purple-500/20 text-purple-300' :
               avatarState === 'responding' ? 'bg-cyan-500/20 text-cyan-300' :
               'bg-emerald-500/20 text-emerald-300'
             }`}>
-              {avatarState === 'listening' ? '👂 Listening...' :
+              {avatarState === 'speaking' ? '🔊 Speaking...' :
+               avatarState === 'listening' ? '👂 Listening...' :
                avatarState === 'processing' ? '🤔 Thinking...' :
                avatarState === 'responding' ? '✍️ Responding...' :
-               '✓ Ready to help'}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="max-w-4xl mx-auto px-4 py-6 space-y-6">
-        {/* Voice & Input Section - Dark Theme */}
-        <Card className="shadow-xl border border-emerald-500/20 bg-slate-900/80 backdrop-blur overflow-hidden">
-          <div className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 px-4 py-2 border-b border-emerald-500/20">
-            <div className="flex items-center gap-2">
-              <Mic className="w-5 h-5 text-emerald-400" />
-              <span className="text-white font-bold">Talk to Coach Kai</span>
+               '✓ Ready'}
             </div>
           </div>
           
-          <div className="p-6">
-            <div className="flex flex-col md:flex-row items-center gap-6">
-              <PushToTalkButton onTranscript={sendMessage} disabled={isLoading} isListening={isListening} setIsListening={setIsListening} />
+          {/* TTS Toggle Button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={isSpeaking ? stopSpeaking : toggleTTS}
+            className={`shrink-0 h-10 w-10 md:h-auto md:w-auto md:px-3 rounded-full md:rounded-lg ${
+              isTTSEnabled 
+                ? 'bg-cyan-500/20 border-cyan-500/50 text-cyan-300 hover:bg-cyan-500/30' 
+                : 'bg-slate-800/50 border-slate-600 text-slate-400 hover:text-white hover:border-slate-500'
+            }`}
+            title={isTTSEnabled ? 'Turn off voice' : 'Turn on voice'}
+          >
+            {isSpeaking ? (
+              <VolumeX className="w-5 h-5" />
+            ) : isTTSEnabled ? (
+              <Volume2 className="w-5 h-5" />
+            ) : (
+              <VolumeX className="w-5 h-5" />
+            )}
+            <span className="hidden md:inline ml-2">{isSpeaking ? 'Stop' : isTTSEnabled ? 'Voice On' : 'Voice Off'}</span>
+          </Button>
+        </div>
+      </div>
+
+      <div className="max-w-4xl mx-auto px-3 md:px-4 py-4 md:py-6 space-y-4 md:space-y-6">
+        {/* Voice & Input Section - Dark Theme - Mobile Optimized */}
+        <Card className="shadow-xl border border-emerald-500/20 bg-slate-900/80 backdrop-blur overflow-hidden">
+          <div className="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 px-3 md:px-4 py-2 border-b border-emerald-500/20">
+            <div className="flex items-center gap-2">
+              <Mic className="w-4 md:w-5 h-4 md:h-5 text-emerald-400" />
+              <span className="text-white font-bold text-sm md:text-base">Talk to Coach Kai</span>
+            </div>
+          </div>
+          
+          <div className="p-3 md:p-6">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              {/* PTT Button - Compact on mobile */}
+              <div className="w-full md:w-auto flex justify-center">
+                <PushToTalkButton onTranscript={sendMessage} disabled={isLoading} isListening={isListening} setIsListening={setIsListening} />
+              </div>
               
+              {/* Divider */}
               <div className="hidden md:flex flex-col items-center h-24">
                 <div className="h-full w-px bg-slate-700" />
                 <span className="px-2 py-1 text-slate-500 text-xs">or type</span>
@@ -449,44 +562,45 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                 <div className="flex-1 h-px bg-slate-700" />
               </div>
               
-              <div className="flex gap-3 w-full md:flex-1">
+              {/* Text Input */}
+              <div className="flex gap-2 md:gap-3 w-full md:flex-1">
                 <Textarea
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   onKeyDown={handleKeyPress}
-                  placeholder="Tell me what's on your mind... (e.g., 'I'm frustrated, my backhand keeps failing')"
+                  placeholder="What's on your mind?"
                   disabled={isLoading}
-                  className="flex-1 min-h-[70px] resize-none bg-slate-800 border-slate-700 focus:border-emerald-500 text-white placeholder:text-slate-500 rounded-xl"
+                  className="flex-1 min-h-[50px] md:min-h-[70px] resize-none bg-slate-800 border-slate-700 focus:border-emerald-500 text-white placeholder:text-slate-500 rounded-xl text-sm md:text-base"
                 />
                 <Button
                   onClick={() => sendMessage()}
                   disabled={!input.trim() || isLoading}
-                  className="h-[70px] w-[70px] bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 rounded-xl shadow-lg shadow-emerald-500/20"
+                  className="h-[50px] w-[50px] md:h-[70px] md:w-[70px] bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 rounded-xl shadow-lg shadow-emerald-500/20"
                 >
-                  {isLoading ? <Loader2 className="w-7 h-7 animate-spin" /> : <Send className="w-7 h-7" />}
+                  {isLoading ? <Loader2 className="w-5 md:w-7 h-5 md:h-7 animate-spin" /> : <Send className="w-5 md:w-7 h-5 md:h-7" />}
                 </Button>
               </div>
             </div>
           </div>
         </Card>
 
-        {/* Conversation Display - Dark Theme */}
+        {/* Conversation Display - Dark Theme - Mobile Optimized */}
         <Card className="shadow-xl border border-slate-700/50 bg-slate-900/80 backdrop-blur overflow-hidden">
-          <div className="bg-slate-800/50 px-4 py-2 border-b border-slate-700/50 flex items-center gap-2">
+          <div className="bg-slate-800/50 px-3 md:px-4 py-2 border-b border-slate-700/50 flex items-center gap-2">
             <MessageCircle className="w-4 h-4 text-emerald-400" />
-            <span className="font-bold text-white">Conversation</span>
+            <span className="font-bold text-white text-sm md:text-base">Conversation</span>
           </div>
           
-          <div className="p-4 space-y-4 max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
+          <div className="p-3 md:p-4 space-y-3 md:space-y-4 max-h-[400px] md:max-h-[500px] overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700">
             {isLoadingHistory ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 animate-spin text-emerald-500 mr-2" />
-                <span className="text-slate-400">Loading...</span>
+              <div className="flex items-center justify-center py-8 md:py-12">
+                <Loader2 className="w-6 md:w-8 h-6 md:h-8 animate-spin text-emerald-500 mr-2" />
+                <span className="text-slate-400 text-sm">Loading...</span>
               </div>
             ) : messages.length === 0 ? (
-              <div className="text-center py-12 text-slate-500">
-                <MessageCircle className="w-16 h-16 mx-auto mb-3 opacity-30" />
-                <p className="font-semibold">Start a conversation!</p>
+              <div className="text-center py-8 md:py-12 text-slate-500">
+                <MessageCircle className="w-12 md:w-16 h-12 md:h-16 mx-auto mb-3 opacity-30" />
+                <p className="font-semibold text-sm">Start a conversation!</p>
               </div>
             ) : (
               <>
@@ -498,23 +612,23 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                     transition={{ delay: index * 0.02 }}
                     className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
                   >
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-lg ${
+                    <div className={`max-w-[90%] md:max-w-[85%] rounded-2xl px-3 md:px-4 py-2 md:py-3 shadow-lg ${
                       message.role === 'user'
                         ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white'
                         : 'bg-slate-800 text-slate-100 border border-slate-700'
                     }`}>
                       {message.role === 'assistant' ? (
-                        <div className="prose prose-sm prose-invert max-w-none">
+                        <div className="prose prose-sm prose-invert max-w-none text-sm md:text-base">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p>{message.content}</p>
+                        <p className="text-sm md:text-base">{message.content}</p>
                       )}
                     </div>
                     
                     {/* Action Cards */}
                     {message.role === 'assistant' && message.actionCards && message.actionCards.length > 0 && (
-                      <div className="w-full max-w-[85%] mt-2">
+                      <div className="w-full max-w-[90%] md:max-w-[85%] mt-2">
                         <ActionCardsList cards={message.actionCards} onAction={handleActionComplete} />
                       </div>
                     )}
@@ -528,8 +642,8 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                 {/* Streaming content */}
                 {streamingContent && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-start">
-                    <div className="max-w-[85%] rounded-2xl px-4 py-3 shadow-lg bg-slate-800 text-slate-100 border border-slate-700">
-                      <div className="prose prose-sm prose-invert max-w-none">
+                    <div className="max-w-[90%] md:max-w-[85%] rounded-2xl px-3 md:px-4 py-2 md:py-3 shadow-lg bg-slate-800 text-slate-100 border border-slate-700">
+                      <div className="prose prose-sm prose-invert max-w-none text-sm md:text-base">
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
                       </div>
                       <span className="inline-block w-2 h-4 bg-emerald-400 ml-1 animate-pulse" />
@@ -539,10 +653,10 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                 
                 {isLoading && !streamingContent && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
-                    <div className="bg-slate-800 rounded-2xl px-4 py-3 border border-slate-700">
+                    <div className="bg-slate-800 rounded-2xl px-3 md:px-4 py-2 md:py-3 border border-slate-700">
                       <div className="flex items-center gap-2">
                         <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
-                        <span className="text-slate-300">Coach Kai is thinking...</span>
+                        <span className="text-slate-300 text-sm">Coach Kai is thinking...</span>
                       </div>
                     </div>
                   </motion.div>
@@ -554,8 +668,8 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
           </div>
         </Card>
 
-        {/* Quick Actions - Dark Theme */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {/* Quick Actions - Dark Theme - Mobile Optimized */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
           {[
             { label: 'Serve Help', prompt: 'Help me improve my serve technique', emoji: '🎯' },
             { label: 'Footwork', prompt: 'Give me footwork drills and tips', emoji: '👟' },
@@ -567,10 +681,10 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
               variant="outline"
               onClick={() => sendMessage(action.prompt)}
               disabled={isLoading}
-              className="h-auto py-3 flex flex-col items-center gap-1 bg-slate-800/50 border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-950/30 text-slate-300 hover:text-white"
+              className="h-auto py-2 md:py-3 flex flex-col items-center gap-0.5 md:gap-1 bg-slate-800/50 border-slate-700 hover:border-emerald-500/50 hover:bg-emerald-950/30 text-slate-300 hover:text-white"
             >
-              <span className="text-2xl">{action.emoji}</span>
-              <span className="text-sm font-medium">{action.label}</span>
+              <span className="text-xl md:text-2xl">{action.emoji}</span>
+              <span className="text-xs md:text-sm font-medium">{action.label}</span>
             </Button>
           ))}
         </div>
