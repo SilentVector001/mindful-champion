@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, MessageCircle, Sparkles, Volume2, VolumeX, X, Mic, MicOff } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Sparkles, Volume2, VolumeX, X, Mic, MicOff, Calendar, Target, Dumbbell, Video, Check, X as XIcon, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -16,11 +16,20 @@ import StreamingAvatar, {
   VoiceEmotion 
 } from '@heygen/streaming-avatar';
 
+type ActionSuggestion = {
+  type: 'calendar' | 'message' | 'resource' | 'analysis';
+  action: string;
+  data: Record<string, any>;
+  requiresConfirmation: boolean;
+  confirmationPrompt?: string;
+};
+
 type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  actions?: ActionSuggestion[];
 };
 
 type AvatarState = 'offline' | 'connecting' | 'ready' | 'listening' | 'thinking' | 'speaking';
@@ -48,6 +57,8 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
   const [hasVideo, setHasVideo] = useState(false);
   const [vadEnabled, setVadEnabled] = useState(true);
   const [interimTranscript, setInterimTranscript] = useState('');
+  const [pendingActions, setPendingActions] = useState<ActionSuggestion[]>([]);
+  const [executingAction, setExecutingAction] = useState<string | null>(null);
   
   const avatarRef = useRef<StreamingAvatar | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -304,7 +315,52 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
     }
   }, [vadEnabled, isLoading, avatarState]);
 
-  // Send message
+  // Execute a suggested action
+  const executeAction = useCallback(async (action: ActionSuggestion) => {
+    setExecutingAction(action.action);
+    try {
+      const res = await fetch('/api/coach-kai/execute-action', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          actionType: action.type === 'resource' ? action.data?.type || 'drill' : action.type,
+          data: action.data
+        })
+      });
+      
+      if (!res.ok) throw new Error('Action failed');
+      const result = await res.json();
+      
+      // Add confirmation message
+      setMessages(prev => [...prev, {
+        id: `action-${Date.now()}`,
+        role: 'assistant',
+        content: `✅ ${result.message}${result.xpAwarded ? ` (+${result.xpAwarded} XP!)` : ''}`,
+        timestamp: new Date()
+      }]);
+      
+      // Remove from pending
+      setPendingActions(prev => prev.filter(a => a !== action));
+      
+    } catch (err) {
+      console.error('Action execution error:', err);
+      setMessages(prev => [...prev, {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: '❌ Sorry, I couldn\'t complete that action. Please try again.',
+        timestamp: new Date()
+      }]);
+    } finally {
+      setExecutingAction(null);
+    }
+  }, []);
+
+  // Dismiss an action
+  const dismissAction = useCallback((action: ActionSuggestion) => {
+    setPendingActions(prev => prev.filter(a => a !== action));
+  }, []);
+
+  // Send message - now using enhanced Coach Kai API with streaming
   const sendMessage = useCallback(async (text?: string) => {
     const msg = text || input.trim();
     if (!msg || isLoading || isProcessingRef.current) return;
@@ -331,35 +387,77 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
         { role: 'user', content: msg }
       ];
       
-      const res = await fetch('/api/ai-coach/chat', {
+      // Use enhanced Coach Kai API with streaming
+      const res = await fetch('/api/coach-kai/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: conversationMsgs,
-          systemPromptAddition: 'Keep your response to 2-3 sentences since it will be spoken by a video avatar.'
-        })
+        body: JSON.stringify({ messages: conversationMsgs })
       });
       
       if (!res.ok) throw new Error('API error');
-      const data = await res.json();
       
-      if (data.message) {
+      // Handle streaming response
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+      let fullContent = '';
+      let actionSuggestions: ActionSuggestion[] = [];
+      
+      if (reader) {
+        let partialRead = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          
+          partialRead += decoder.decode(value, { stream: true });
+          const lines = partialRead.split('\n');
+          partialRead = lines.pop() || '';
+          
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+              if (data === '[DONE]') continue;
+              
+              try {
+                const parsed = JSON.parse(data);
+                if (parsed.type === 'text' && parsed.content) {
+                  fullContent += parsed.content;
+                } else if (parsed.type === 'actions' && parsed.suggestions) {
+                  actionSuggestions = parsed.suggestions;
+                }
+              } catch (e) {
+                // Skip invalid JSON
+              }
+            }
+          }
+        }
+      }
+      
+      if (fullContent) {
         const assistantMsg: Message = {
           id: `assistant-${Date.now()}`,
           role: 'assistant',
-          content: data.message,
-          timestamp: new Date()
+          content: fullContent,
+          timestamp: new Date(),
+          actions: actionSuggestions
         };
         
         setMessages(prev => [...prev, assistantMsg]);
         
+        // Add to pending actions if any need confirmation
+        if (actionSuggestions.length > 0) {
+          setPendingActions(prev => [...prev, ...actionSuggestions.filter(a => a.requiresConfirmation)]);
+        }
+        
         if (avatarRef.current && sessionIdRef.current) {
-          const cleanText = data.message
-            .replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '')
-            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1').substring(0, 500);
+          // Clean markdown for speech
+          const cleanText = fullContent
+            .replace(/\*\*/g, '')
+            .replace(/\*/g, '')
+            .replace(/#{1,6}\s/g, '')
+            .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')
+            .substring(0, 500);
           await speakText(cleanText);
         } else {
-          // No avatar - restart listening after text response
           setAvatarState('ready');
           if (vadEnabled) setTimeout(() => startContinuousListening(), 500);
         }
@@ -668,6 +766,65 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
                   </div>
                 </div>
               )}
+              
+              {/* Pending Action Cards */}
+              {pendingActions.length > 0 && (
+                <div className="space-y-2 mt-4">
+                  <p className="text-xs text-slate-400 uppercase tracking-wide">Suggested Actions</p>
+                  {pendingActions.map((action, idx) => (
+                    <motion.div
+                      key={`action-${idx}`}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="bg-gradient-to-r from-teal-900/50 to-cyan-900/50 border border-teal-500/30 rounded-xl p-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
+                          action.type === 'calendar' ? 'bg-blue-500/20 text-blue-400' :
+                          action.type === 'resource' ? 'bg-emerald-500/20 text-emerald-400' :
+                          action.type === 'message' ? 'bg-purple-500/20 text-purple-400' :
+                          'bg-amber-500/20 text-amber-400'
+                        }`}>
+                          {action.type === 'calendar' ? <Calendar className="w-5 h-5" /> :
+                           action.type === 'resource' && action.data?.type === 'goal' ? <Target className="w-5 h-5" /> :
+                           action.type === 'resource' ? <Dumbbell className="w-5 h-5" /> :
+                           action.type === 'analysis' ? <Video className="w-5 h-5" /> :
+                           <MessageCircle className="w-5 h-5" />}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-white font-medium text-sm">{action.action}</p>
+                          <p className="text-slate-400 text-xs mt-0.5 line-clamp-2">
+                            {action.confirmationPrompt || action.data?.title || action.data?.description}
+                          </p>
+                        </div>
+                        <div className="flex gap-1 flex-shrink-0">
+                          <Button
+                            size="sm"
+                            onClick={() => executeAction(action)}
+                            disabled={!!executingAction}
+                            className="h-8 px-3 bg-teal-500 hover:bg-teal-600 text-white"
+                          >
+                            {executingAction === action.action ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <><Check className="w-4 h-4 mr-1" /> Yes</>
+                            )}
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => dismissAction(action)}
+                            disabled={!!executingAction}
+                            className="h-8 w-8 p-0 text-slate-400 hover:text-white hover:bg-slate-700"
+                          >
+                            <XIcon className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <div className="p-4 border-t border-slate-700">
@@ -692,13 +849,13 @@ export default function HeyGenCoachKai({ userContext }: HeyGenCoachKaiProps) {
           </Card>
         </div>
 
-        {/* Quick Prompts */}
+        {/* Quick Prompts - Enhanced for function calling */}
         <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Serve Tips', prompt: 'Give me your best serve tip', emoji: '🎯' },
-            { label: 'Dinking', prompt: 'How can I improve my dinking?', emoji: '🏓' },
-            { label: 'Third Shot', prompt: 'Teach me the third shot drop', emoji: '📊' },
-            { label: 'Mental Game', prompt: 'Help me stay focused during matches', emoji: '🧠' },
+            { label: 'Fix My Backhand', prompt: 'My backhand keeps going into the net. Can you help?', emoji: '🏓' },
+            { label: 'Add Tournament', prompt: 'I have a tournament this Saturday at 2pm', emoji: '📅' },
+            { label: 'Serve Drill', prompt: 'I need a drill to improve my serve consistency', emoji: '🎯' },
+            { label: 'Set a Goal', prompt: 'Help me set a goal to improve my dinking', emoji: '🏆' },
           ].map((action) => (
             <Button
               key={action.label}
