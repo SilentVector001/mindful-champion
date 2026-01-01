@@ -13,7 +13,7 @@ const SIMLI_API_KEY = process.env.SIMLI_API_KEY;
 
 // Default face ID for Coach Kai avatar (Frank - friendly, coach-like)
 // Users can customize later via Simli dashboard
-const DEFAULT_FACE_ID = process.env.SIMLI_FACE_ID || "5514e24d-6086-46a3-ace4-6a7264e5cb7c";
+const DEFAULT_FACE_ID = process.env.SIMLI_FACE_ID || "5fc23ea5-8175-4a82-aaaf-cdd8c88543dc";
 
 export async function POST(req: NextRequest) {
   try {
