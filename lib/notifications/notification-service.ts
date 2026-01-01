@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 import { NotificationCategory, NotificationStatus, NotificationDeliveryMethod, NotificationSource } from '@/lib/prisma-types';
 import type { NotificationPreferences, ScheduledNotification } from '@/lib/prisma-types';
 import { sendNotificationEmail } from './email-templates';
+import { sendSMS, sendGoalReminderSMS, sendAchievementSMS, sendDailyMotivationSMS } from './sms-service';
 
 export interface SendNotificationParams {
   userId: string;
@@ -291,6 +292,10 @@ async function deliverNotification(notification: ScheduledNotification): Promise
       });
       break;
     
+    case 'SMS':
+      await sendSMSNotification(notification);
+      break;
+    
     case 'PUSH':
       // TODO: Implement push notification logic
       console.log('Push notifications not yet implemented');
@@ -303,5 +308,92 @@ async function deliverNotification(notification: ScheduledNotification): Promise
     
     default:
       throw new Error(`Unknown delivery method: ${notification.deliveryMethod}`);
+  }
+}
+
+/**
+ * Send SMS notification based on category and type
+ */
+async function sendSMSNotification(notification: ScheduledNotification): Promise<void> {
+  // Get user's phone number
+  const user = await prisma.user.findUnique({
+    where: { id: notification.userId },
+    select: { phoneNumber: true, phoneNumberVerified: true }
+  });
+
+  if (!user?.phoneNumber || !user?.phoneNumberVerified) {
+    throw new Error('User phone number not verified');
+  }
+
+  const data = notification.data as any;
+
+  // Route to appropriate SMS function based on category
+  switch (notification.category) {
+    case 'GOALS':
+      await sendGoalReminderSMS(user.phoneNumber, data?.goalTitle || notification.title, notification.message);
+      break;
+    
+    case 'ACHIEVEMENTS':
+      await sendAchievementSMS(user.phoneNumber, notification.title, notification.message);
+      break;
+    
+    case 'COACH_KAI':
+      if (notification.type === 'DAILY_MOTIVATION') {
+        await sendDailyMotivationSMS(user.phoneNumber, notification.message);
+      } else {
+        await sendSMS(user.phoneNumber, `🏸 Coach Kai: ${notification.message}`);
+      }
+      break;
+    
+    default:
+      // Generic SMS
+      await sendSMS(user.phoneNumber, `🏸 Mindful Champion: ${notification.message}`);
+  }
+}
+
+/**
+ * Send notification via all enabled channels for a user
+ */
+export async function sendMultiChannelNotification(params: SendNotificationParams): Promise<void> {
+  const { userId, category } = params;
+
+  // Get user preferences for this category
+  const prefs = await prisma.notificationPreferences.findUnique({
+    where: {
+      userId_category: { userId, category }
+    }
+  });
+
+  // Get user's phone status
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { phoneNumber: true, phoneNumberVerified: true }
+  });
+
+  // Send via email if enabled
+  if (!prefs || prefs.emailEnabled) {
+    try {
+      await sendNotification({ ...params, deliveryMethod: 'EMAIL' });
+    } catch (error) {
+      console.error('Failed to send email notification:', error);
+    }
+  }
+
+  // Send via SMS if enabled and phone verified
+  if (prefs?.smsEnabled && user?.phoneNumber && user?.phoneNumberVerified) {
+    try {
+      await sendNotification({ ...params, deliveryMethod: 'SMS' as any });
+    } catch (error) {
+      console.error('Failed to send SMS notification:', error);
+    }
+  }
+
+  // Send in-app if enabled
+  if (!prefs || prefs.inAppEnabled) {
+    try {
+      await sendNotification({ ...params, deliveryMethod: 'IN_APP' });
+    } catch (error) {
+      console.error('Failed to send in-app notification:', error);
+    }
   }
 }

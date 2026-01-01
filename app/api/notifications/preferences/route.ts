@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic';
 // Default preferences for each category
 const DEFAULT_PREFERENCES = {
   emailEnabled: true,
+  smsEnabled: false,
   pushEnabled: false,
   inAppEnabled: true,
   frequency: NotificationFrequency.DAILY,
@@ -95,6 +96,7 @@ export async function PUT(request: NextRequest) {
           },
           update: {
             emailEnabled: pref.emailEnabled ?? true,
+            smsEnabled: pref.smsEnabled ?? false,
             pushEnabled: pref.pushEnabled ?? false,
             inAppEnabled: pref.inAppEnabled ?? true,
             frequency: pref.frequency ?? 'DAILY',
@@ -105,6 +107,7 @@ export async function PUT(request: NextRequest) {
             userId: session.user.id,
             category: pref.category,
             emailEnabled: pref.emailEnabled ?? true,
+            smsEnabled: pref.smsEnabled ?? false,
             pushEnabled: pref.pushEnabled ?? false,
             inAppEnabled: pref.inAppEnabled ?? true,
             frequency: pref.frequency ?? 'DAILY',

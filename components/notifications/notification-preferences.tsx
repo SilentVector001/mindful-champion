@@ -7,6 +7,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { motion } from 'framer-motion';
 import { Bell, Check, X, Loader2, Save, RotateCcw } from 'lucide-react';
 import CategoryPreference from './category-preferences';
+import SMSSettings from './sms-settings';
 import { toast } from 'sonner';
 
 const CATEGORIES = [
@@ -68,10 +69,24 @@ export default function NotificationPreferences() {
   const [hasChanges, setHasChanges] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [phoneVerified, setPhoneVerified] = useState(false);
 
   useEffect(() => {
     fetchPreferences();
+    fetchPhoneStatus();
   }, []);
+
+  const fetchPhoneStatus = async () => {
+    try {
+      const response = await fetch('/api/notifications/phone');
+      if (response.ok) {
+        const data = await response.json();
+        setPhoneVerified(data.verified);
+      }
+    } catch (error) {
+      console.error('Failed to fetch phone status:', error);
+    }
+  };
 
   const fetchPreferences = async () => {
     try {
@@ -190,6 +205,12 @@ export default function NotificationPreferences() {
         </Alert>
       )}
 
+      {/* SMS Settings */}
+      <SMSSettings onVerified={() => {
+        setPhoneVerified(true);
+        fetchPhoneStatus();
+      }} />
+
       {/* Categories */}
       <div className="space-y-4">
         {CATEGORIES.map(category => {
@@ -203,6 +224,7 @@ export default function NotificationPreferences() {
               category={category}
               preferences={categoryPrefs}
               onChange={(newPrefs) => handlePreferenceChange(category.id, newPrefs)}
+              phoneVerified={phoneVerified}
             />
           );
         })}

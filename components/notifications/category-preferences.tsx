@@ -20,6 +20,7 @@ interface CategoryPreferenceProps {
   };
   preferences: {
     emailEnabled: boolean;
+    smsEnabled: boolean;
     pushEnabled: boolean;
     inAppEnabled: boolean;
     frequency: string;
@@ -27,6 +28,7 @@ interface CategoryPreferenceProps {
     timezone: string;
   };
   onChange: (preferences: any) => void;
+  phoneVerified?: boolean;
 }
 
 const FREQUENCIES = [
@@ -45,7 +47,7 @@ const TIMEZONES = [
   { value: 'Pacific/Honolulu', label: 'Hawaii Time (HT)' }
 ];
 
-export default function CategoryPreference({ category, preferences, onChange }: CategoryPreferenceProps) {
+export default function CategoryPreference({ category, preferences, onChange, phoneVerified = false }: CategoryPreferenceProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isEnabled, setIsEnabled] = useState(
     preferences.emailEnabled || preferences.pushEnabled || preferences.inAppEnabled
@@ -63,7 +65,7 @@ export default function CategoryPreference({ category, preferences, onChange }: 
     }
   };
 
-  const handleDeliveryChange = (method: 'emailEnabled' | 'pushEnabled' | 'inAppEnabled', checked: boolean) => {
+  const handleDeliveryChange = (method: 'emailEnabled' | 'smsEnabled' | 'pushEnabled' | 'inAppEnabled', checked: boolean) => {
     onChange({ ...preferences, [method]: checked });
   };
 
@@ -143,6 +145,23 @@ export default function CategoryPreference({ category, preferences, onChange }: 
                         className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                       >
                         📧 Email Notifications
+                      </label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`${category.id}-sms`}
+                        checked={preferences.smsEnabled}
+                        onCheckedChange={(checked) => handleDeliveryChange('smsEnabled', checked as boolean)}
+                        disabled={!isEnabled || !phoneVerified}
+                      />
+                      <label
+                        htmlFor={`${category.id}-sms`}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        💬 SMS Text Messages
+                        {!phoneVerified && (
+                          <span className="ml-2 text-xs text-amber-600">(Add phone number first)</span>
+                        )}
                       </label>
                     </div>
                     <div className="flex items-center space-x-2">
