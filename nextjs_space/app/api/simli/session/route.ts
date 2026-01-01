@@ -9,11 +9,9 @@ import { authOptions } from "@/lib/auth";
  * Creates a session token for Simli WebRTC streaming
  */
 
-const SIMLI_API_KEY = process.env.SIMLI_API_KEY;
-
-// Default face ID for Coach Kai avatar (Frank - friendly, coach-like)
-// Users can customize later via Simli dashboard
-const DEFAULT_FACE_ID = process.env.SIMLI_FACE_ID || "5fc23ea5-8175-4a82-aaaf-cdd8c88543dc";
+// HARDCODED for Vercel deployment (env vars not loading properly)
+const SIMLI_API_KEY = "wr2n23svu8fq87uezd5qb8";
+const DEFAULT_FACE_ID = "5fc23ea5-8175-4a82-aaaf-cdd8c88543dc";
 
 export async function POST(req: NextRequest) {
   try {
