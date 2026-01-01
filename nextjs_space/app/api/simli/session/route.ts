@@ -64,7 +64,8 @@ export async function POST(req: NextRequest) {
       success: true,
       sessionId: sessionData.sessionId,
       iceServers: sessionData.iceServers,
-      faceId: selectedFaceId
+      faceId: selectedFaceId,
+      apiKey: SIMLI_API_KEY
     });
 
   } catch (error: any) {
