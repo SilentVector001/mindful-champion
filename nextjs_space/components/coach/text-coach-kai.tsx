@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Sparkles, Calendar, Target, Dumbbell, Video, Check, X as XIcon, Mic, MicOff } from 'lucide-react';
+import { Send, Loader2, Sparkles, Calendar, Target, Dumbbell, Video, Check, X as XIcon, Mic, MicOff, MessageSquarePlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -25,6 +25,7 @@ type Message = {
   content: string;
   timestamp: Date;
   actions?: ActionSuggestion[];
+  isExpanded?: boolean; // Track if "Tell me more" has been used
 };
 
 type UserContext = {
@@ -311,6 +312,119 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
     handleSend(prompt);
   };
 
+  // Tell me more handler
+  const handleTellMeMore = async (messageId: string) => {
+    const message = messages.find(m => m.id === messageId);
+    if (!message || message.role !== 'assistant' || message.isExpanded) return;
+
+    // Send request for more details
+    const expandPrompt = "Tell me more about that last response. Please provide more details and explanation.";
+    
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: expandPrompt,
+      timestamp: new Date(),
+    };
+
+    // Mark message as expanded and add user message
+    setMessages(prev => [
+      ...prev.map(m => m.id === messageId ? { ...m, isExpanded: true } : m),
+      userMessage
+    ]);
+    setIsLoading(true);
+
+    try {
+      // Build messages array with the expanded flag update
+      const updatedMessages = messages.map(m => 
+        m.id === messageId ? { ...m, isExpanded: true } : m
+      );
+      
+      const response = await fetch('/api/coach-kai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: [...updatedMessages, userMessage].map(m => ({
+            role: m.role,
+            content: m.content,
+          })),
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get response');
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('No response stream');
+
+      const decoder = new TextDecoder();
+      let assistantContent = '';
+      let actions: ActionSuggestion[] = [];
+      
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+      };
+      
+      setMessages(prev => [...prev, assistantMessage]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              
+              if (data.type === 'text') {
+                assistantContent += data.content;
+                setMessages(prev => 
+                  prev.map(m => 
+                    m.id === assistantMessage.id 
+                      ? { ...m, content: assistantContent }
+                      : m
+                  )
+                );
+              } else if (data.type === 'actions') {
+                actions = data.suggestions || [];
+                setPendingActions(actions);
+              }
+            } catch (e) {
+              // Skip invalid JSON
+            }
+          }
+        }
+      }
+
+      // Final update with actions
+      setMessages(prev =>
+        prev.map(m =>
+          m.id === assistantMessage.id
+            ? { ...m, content: assistantContent, actions }
+            : m
+        )
+      );
+    } catch (error) {
+      console.error('Tell me more error:', error);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: "I'm having trouble expanding on that right now. Please try again! 🏓",
+          timestamp: new Date(),
+        },
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const getActionIcon = (type: string) => {
     switch (type) {
       case 'calendar': return <Calendar className="w-4 h-4" />;
@@ -362,32 +476,55 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
                 <p className="text-slate-400">Start a conversation with Coach Kai!</p>
               </div>
             ) : (
-              messages.map((message) => (
-                <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                      message.role === 'user'
-                        ? 'bg-teal-600 text-white'
-                        : 'bg-slate-700 text-slate-100'
-                    }`}
+              messages.map((message, index) => (
+                <div key={message.id}>
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                   >
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm]}
-                      components={{
-                        p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                        ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
-                        li: ({ children }) => <li className="mb-1">{children}</li>,
-                      }}
+                    <div
+                      className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                        message.role === 'user'
+                          ? 'bg-teal-600 text-white'
+                          : 'bg-slate-700 text-slate-100'
+                      }`}
                     >
-                      {message.content}
-                    </ReactMarkdown>
-                  </div>
-                </motion.div>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                          ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+                          li: ({ children }) => <li className="mb-1">{children}</li>,
+                        }}
+                      >
+                        {message.content}
+                      </ReactMarkdown>
+                    </div>
+                  </motion.div>
+                  
+                  {/* Tell me more button for assistant messages */}
+                  {message.role === 'assistant' && 
+                   !message.isExpanded && 
+                   index === messages.length - 1 && 
+                   !isLoading && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="flex justify-start mt-2 ml-2"
+                    >
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleTellMeMore(message.id)}
+                        className="border-teal-500/30 text-teal-400 hover:bg-teal-900/30 hover:text-teal-300 hover:border-teal-500/50 text-xs"
+                      >
+                        <MessageSquarePlus className="w-3 h-3 mr-1" />
+                        Tell me more
+                      </Button>
+                    </motion.div>
+                  )}
+                </div>
               ))
             )}
             
@@ -552,10 +689,6 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
           ))}
         </div>
 
-        {/* Footer Note */}
-        <p className="text-center text-slate-500 text-xs mt-4">
-          ⚡ Coach Kai uses GPT-4o intelligence • Text chat is always free
-        </p>
       </div>
     </div>
   );
