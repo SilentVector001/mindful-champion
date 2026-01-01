@@ -320,6 +320,7 @@ export default function VideoAnalysisHub() {
                   </Link>
                   <ChevronRight className="w-4 h-4 text-slate-600" />
                   <span className="text-kai-primary font-medium">Video Analysis</span>
+                  <Badge className="ml-2 bg-purple-600/80 text-white text-[10px] px-1.5 py-0.5">Beta</Badge>
                 </div>
               </div>
             </div>
