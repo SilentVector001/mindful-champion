@@ -64,8 +64,8 @@ export default function SimliAvatar({
         apiKey: data.apiKey || '',
         faceID: data.faceId,
         handleSilence: true,
-        videoRef: videoRef,
-        audioRef: audioRef
+        videoRef: videoRef.current,
+        audioRef: audioRef.current
       });
 
       // Set up event handlers
