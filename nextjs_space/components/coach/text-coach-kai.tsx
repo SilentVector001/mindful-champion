@@ -60,7 +60,11 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
   const [pttTranscript, setPttTranscript] = useState('');
   const [pttSupported, setPttSupported] = useState(false);
   
+  // Beta badge blinking animation state
+  const [isBetaBlinking, setIsBetaBlinking] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const recognitionRef = useRef<any>(null);
   
@@ -74,10 +78,55 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
     }
   }, []);
 
-  // Scroll to bottom on new messages
+  // Beta badge blinking animation - blink every 5 seconds for 3 blinks
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    const startBlinking = () => {
+      setIsBetaBlinking(true);
+      
+      // Blink 3 times (on-off-on-off-on-off = 6 state changes)
+      let blinkCount = 0;
+      const blinkInterval = setInterval(() => {
+        blinkCount++;
+        setIsBetaBlinking(prev => !prev);
+        
+        if (blinkCount >= 6) { // 3 complete blinks (on-off cycles)
+          clearInterval(blinkInterval);
+          setIsBetaBlinking(false);
+        }
+      }, 250); // 250ms for each blink state change
+    };
+
+    // Start blinking every 5 seconds
+    const mainInterval = setInterval(startBlinking, 5000);
+    
+    // Cleanup
+    return () => {
+      clearInterval(mainInterval);
+    };
+  }, []);
+
+  // Improved auto-scroll to bottom on new messages - ensures latest message is always visible
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      // Use requestAnimationFrame for smoother scroll
+      requestAnimationFrame(() => {
+        messagesEndRef.current?.scrollIntoView({ 
+          behavior: 'smooth',
+          block: 'end',
+          inline: 'nearest'
+        });
+      });
+    }
+    
+    // Also scroll the container to ensure visibility
+    if (messagesContainerRef.current) {
+      requestAnimationFrame(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      });
+    }
+  }, [messages, isLoading]);
 
   // PTT - Start listening
   const startPTT = useCallback(() => {
@@ -290,14 +339,23 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
               <Sparkles className="w-3 h-3 text-white" />
             </div>
           </motion.div>
-          <h1 className="text-2xl font-bold text-white mt-4">Coach Kai</h1>
+          <div className="flex items-center justify-center gap-3 mt-4">
+            <h1 className="text-2xl font-bold text-white">Coach Kai</h1>
+            <Badge 
+              className={`bg-purple-600 text-white px-2 py-1 text-xs font-semibold transition-opacity duration-200 ${
+                isBetaBlinking ? 'opacity-30' : 'opacity-100'
+              }`}
+            >
+              Beta
+            </Badge>
+          </div>
           <p className="text-teal-400 text-sm">Your AI Pickleball Coach</p>
         </div>
 
         {/* Chat Container */}
         <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm overflow-hidden">
           {/* Messages */}
-          <div className="h-[400px] overflow-y-auto p-4 space-y-4">
+          <div ref={messagesContainerRef} className="h-[400px] overflow-y-auto p-4 space-y-4">
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <Sparkles className="w-12 h-12 text-teal-500/50 mb-4" />

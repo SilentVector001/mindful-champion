@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-4o',  // Fixed: was 'gpt-4.1-mini' (invalid model)
         messages: conversationMessages,
         stream: true,
         max_tokens: 1000,
