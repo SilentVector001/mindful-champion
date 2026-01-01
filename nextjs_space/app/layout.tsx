@@ -21,6 +21,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#00D084" },
+    { media: "(prefers-color-scheme: dark)", color: "#1A1D29" },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -32,12 +36,6 @@ export const metadata: Metadata = {
   publisher: "Mindful Champion",
   applicationName: "Mindful Champion",
   category: "Sports & Recreation",
-  
-  // Theme color for browser UI
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#00D084" },
-    { media: "(prefers-color-scheme: dark)", color: "#1A1D29" },
-  ],
   
   // Comprehensive favicon and app icons
   icons: {
