@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import { useRouter } from "next/navigation"
 import { cn } from "@/lib/utils"
+import { APP_VERSION } from "@/lib/version"
 import MainNavigation from "@/components/navigation/main-navigation"
 import {
   Trophy,
@@ -473,6 +474,11 @@ export default function RedesignedHomeDashboard({
             </div>
           </div>
         </motion.div>
+      </div>
+      
+      {/* Version Footer */}
+      <div className="text-center py-4 text-gray-500 text-xs">
+        {APP_VERSION}
       </div>
     </div>
   )
