@@ -32,16 +32,17 @@ export async function POST(req: NextRequest) {
     const { faceId } = await req.json().catch(() => ({}));
     const selectedFaceId = faceId || DEFAULT_FACE_ID;
 
-    // Create Simli session
-    const simliResponse = await fetch('https://api.simli.ai/startE2ESession', {
+    // Create Simli session using Audio-to-Video (simpler, no ElevenLabs needed)
+    const simliResponse = await fetch('https://api.simli.ai/startAudioToVideoSession', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': SIMLI_API_KEY
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        apiKey: SIMLI_API_KEY,
         faceId: selectedFaceId,
-        voiceId: process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL", // Default to Rachel
+        syncAudio: true,
+        handleSilence: true,
         maxSessionLength: 1800, // 30 minutes max
         maxIdleTime: 300 // 5 minutes idle timeout
       })
@@ -57,11 +58,11 @@ export async function POST(req: NextRequest) {
     }
 
     const sessionData = await simliResponse.json();
+    console.log('[Simli] Session created:', sessionData);
 
     return NextResponse.json({
       success: true,
-      sessionId: sessionData.sessionId,
-      iceServers: sessionData.iceServers,
+      sessionToken: sessionData.sessionToken || sessionData.session_token,
       faceId: selectedFaceId,
       apiKey: SIMLI_API_KEY
     });
