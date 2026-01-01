@@ -451,23 +451,28 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
             animate={{ scale: 1, opacity: 1 }}
             className="relative inline-block"
           >
-            {/* Simli Avatar or Static K */}
+            {/* Simli Avatar (CENTERPIECE when enabled) or Static K */}
             {avatarEnabled ? (
-              <SimliAvatar
-                isActive={avatarEnabled}
-                audioData={avatarAudioData}
-                onReady={() => setAvatarReady(true)}
-                onError={() => setAvatarEnabled(false)}
-                className="w-24 h-24"
-              />
+              <div className="relative">
+                <SimliAvatar
+                  isActive={avatarEnabled}
+                  audioData={avatarAudioData}
+                  onReady={() => setAvatarReady(true)}
+                  onError={() => setAvatarEnabled(false)}
+                  className="w-48 h-48 md:w-64 md:h-64 rounded-2xl shadow-2xl shadow-teal-500/40 border-4 border-teal-500/50"
+                />
+                <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-slate-900 flex items-center justify-center animate-pulse">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+              </div>
             ) : (
               <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg shadow-teal-500/30">
                 K
+                <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
+                  <Sparkles className="w-3 h-3 text-white" />
+                </div>
               </div>
             )}
-            <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
-              <Sparkles className="w-3 h-3 text-white" />
-            </div>
           </motion.div>
           <div className="flex items-center justify-center gap-3 mt-4">
             <h1 className="text-2xl font-bold text-white">Coach Kai</h1>
@@ -478,16 +483,20 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
             >
               Beta
             </Badge>
-            {/* Avatar toggle button */}
+            {/* Avatar toggle button - prominent styling */}
             <Button
               size="sm"
-              variant="ghost"
+              variant={avatarEnabled ? "default" : "outline"}
               onClick={() => setAvatarEnabled(!avatarEnabled)}
-              className={`text-xs px-2 py-1 h-6 ${avatarEnabled ? 'text-teal-400 bg-teal-900/30' : 'text-slate-400 hover:text-teal-400'}`}
-              title={avatarEnabled ? 'Disable video avatar' : 'Enable video avatar'}
+              className={`text-xs px-3 py-1 transition-all ${
+                avatarEnabled 
+                  ? 'bg-teal-500 text-white hover:bg-teal-600 shadow-lg shadow-teal-500/30' 
+                  : 'border-teal-500/50 text-teal-400 hover:bg-teal-900/30 hover:border-teal-400'
+              }`}
+              title={avatarEnabled ? 'Disable video avatar' : 'Enable video avatar (Trinity)'}
             >
               <User className="w-3 h-3 mr-1" />
-              {avatarEnabled ? 'Avatar On' : 'Avatar'}
+              Avatar{avatarEnabled ? ' ✓' : ''}
             </Button>
           </div>
           <p className="text-teal-400 text-sm">Your AI Pickleball Coach</p>

@@ -61,7 +61,7 @@ export default function SimliAvatar({
       const simliClient = new SimliClient();
       
       simliClient.Initialize({
-        apiKey: process.env.NEXT_PUBLIC_SIMLI_API_KEY || '',
+        apiKey: data.apiKey || '',
         faceID: data.faceId,
         handleSilence: true,
         videoRef: videoRef,
