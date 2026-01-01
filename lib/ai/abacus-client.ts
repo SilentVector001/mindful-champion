@@ -52,9 +52,10 @@ export async function callAbacusAI(
     timeoutMs = 60000  // 60 seconds default timeout
   } = options;
 
-  // Check for API key
-  if (!process.env.ABACUSAI_API_KEY) {
-    console.error('[Abacus AI] CRITICAL: ABACUSAI_API_KEY is not configured');
+  // Check for API key (support both ABACUSAI_API_KEY and OPENAI_API_KEY)
+  const apiKey = process.env.ABACUSAI_API_KEY || process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    console.error('[Abacus AI] CRITICAL: ABACUSAI_API_KEY or OPENAI_API_KEY is not configured');
     return {
       success: false,
       error: 'AI service not configured. Please contact support.',
@@ -96,7 +97,7 @@ export async function callAbacusAI(
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
+          'Authorization': `Bearer ${apiKey}`
         },
         body: JSON.stringify({
           model,

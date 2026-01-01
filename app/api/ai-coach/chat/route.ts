@@ -20,9 +20,9 @@ import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    // Check for API key first
-    if (!process.env.ABACUSAI_API_KEY) {
-      console.error('[Coach Kai] CRITICAL: ABACUSAI_API_KEY is not configured');
+    // Check for API key first (support both ABACUSAI_API_KEY and OPENAI_API_KEY)
+    if (!process.env.ABACUSAI_API_KEY && !process.env.OPENAI_API_KEY) {
+      console.error('[Coach Kai] CRITICAL: ABACUSAI_API_KEY or OPENAI_API_KEY is not configured');
       return NextResponse.json(
         { error: "AI service not configured. Please contact support." },
         { status: 503 }
