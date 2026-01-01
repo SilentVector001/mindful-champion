@@ -59,6 +59,7 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
   const [hasMore, setHasMore] = useState(true)
   const [commentingPostId, setCommentingPostId] = useState<string | null>(null)
   const [reportingPostId, setReportingPostId] = useState<string | null>(null)
+  const [showFilterExpanded, setShowFilterExpanded] = useState(false)
 
   const fetchPosts = useCallback(async (reset = false) => {
     try {
@@ -144,59 +145,84 @@ export function CommunityFeed({ initialPosts, showFilters = true, userId, pageTi
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header Stats */}
+    <div className="space-y-4">
+      {/* Compact Header with Filter Toggle */}
       {pageTitle && (
         <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold text-white">{pageTitle}</h1>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => fetchPosts(true)}
-            className="text-slate-400 hover:text-white"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Refresh
-          </Button>
+          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+            <Video className="w-5 h-5 text-teal-400" />
+            {pageTitle}
+          </h2>
+          <div className="flex items-center gap-2">
+            {showFilters && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowFilterExpanded(!showFilterExpanded)}
+                className="text-slate-400 hover:text-white hover:bg-slate-800/50"
+              >
+                <Filter className="w-4 h-4 mr-1" />
+                {showFilterExpanded ? 'Hide' : 'Filter'}
+                {selectedTag && !showFilterExpanded && (
+                  <Badge className="ml-2 bg-teal-500 text-white text-[10px] px-1.5 py-0">
+                    #{selectedTag}
+                  </Badge>
+                )}
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => fetchPosts(true)}
+              className="text-slate-400 hover:text-white hover:bg-slate-800/50"
+            >
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
       )}
 
-      {/* Tag Filters */}
-      {showFilters && (
-        <Card className="bg-slate-900/50 border-slate-700/50">
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2 mb-3">
-              <Filter className="w-4 h-4 text-teal-400" />
-              <span className="text-sm font-medium text-slate-300">Filter by skill</span>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              <Badge
-                variant={selectedTag === null ? "default" : "secondary"}
-                className={selectedTag === null 
-                  ? "bg-teal-500 text-white cursor-pointer"
-                  : "bg-slate-700 text-slate-300 cursor-pointer hover:bg-slate-600"
-                }
-                onClick={() => setSelectedTag(null)}
-              >
-                All
-              </Badge>
-              {SKILL_TAGS.map(tag => (
-                <Badge
-                  key={tag}
-                  variant={selectedTag === tag ? "default" : "secondary"}
-                  className={selectedTag === tag
-                    ? "bg-teal-500 text-white cursor-pointer"
-                    : "bg-slate-700 text-slate-300 cursor-pointer hover:bg-slate-600"
-                  }
-                  onClick={() => setSelectedTag(tag)}
-                >
-                  #{tag}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Collapsible Tag Filters - Compact */}
+      <AnimatePresence>
+        {showFilters && showFilterExpanded && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card className="bg-slate-900/30 border-slate-700/30 overflow-hidden">
+              <CardContent className="p-3">
+                <div className="flex flex-wrap gap-1.5">
+                  <Badge
+                    variant={selectedTag === null ? "default" : "secondary"}
+                    className={selectedTag === null 
+                      ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white cursor-pointer text-xs"
+                      : "bg-slate-700/50 text-slate-300 cursor-pointer hover:bg-slate-600/50 text-xs"
+                    }
+                    onClick={() => setSelectedTag(null)}
+                  >
+                    All
+                  </Badge>
+                  {SKILL_TAGS.map(tag => (
+                    <Badge
+                      key={tag}
+                      variant={selectedTag === tag ? "default" : "secondary"}
+                      className={selectedTag === tag
+                        ? "bg-gradient-to-r from-teal-500 to-cyan-500 text-white cursor-pointer text-xs"
+                        : "bg-slate-700/50 text-slate-300 cursor-pointer hover:bg-slate-600/50 text-xs"
+                      }
+                      onClick={() => setSelectedTag(tag)}
+                    >
+                      #{tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Posts - Grid Layout for compact cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
