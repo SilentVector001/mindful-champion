@@ -1,4 +1,3 @@
-
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
@@ -19,7 +18,7 @@ import {
   Timer, Award, Users, Star, Download, Share2, ArrowRight, VideoIcon,
   HardDrive, ChevronRight, MoreVertical, Trash2, FileText, ExternalLink,
   Home, Library, HelpCircle, Bookmark, MessageCircle, RotateCcw, Globe,
-  Shield, Wifi, Mic, ChevronDown, X, Menu, BookOpen, Settings
+  Shield, Wifi, Mic, ChevronDown, X, Menu, BookOpen, Settings, FolderOpen
 } from "lucide-react"
 import { useDropzone } from "react-dropzone"
 import { cn } from "@/lib/utils"
@@ -41,22 +40,19 @@ export default function VideoAnalysisHub() {
     totalVideos: 0,
     totalAnalyzed: 0,
     storageUsed: 0,
-    storageLimit: 5000, // 5GB
+    storageLimit: 5000,
     recentlyAnalyzed: 0,
     avgImprovement: 0
   })
 
-  // New interactive states
   const [showCoachKaiChat, setShowCoachKaiChat] = useState(false)
   const [showTipsDropdown, setShowTipsDropdown] = useState(false)
   const [showHowItWorks, setShowHowItWorks] = useState(false)
-  const [showRecentAnalyses, setShowRecentAnalyses] = useState(false)
   const [coachTipOfDay, setCoachTipOfDay] = useState("")
 
   const userTier = (session?.user as any)?.subscriptionTier || 'FREE'
   const isPro = userTier === 'PRO'
 
-  // Coach Kai tips for the day
   const coachKaiTips = [
     "Film 10-30 sec clips from baseline, side-on view 📹",
     "Shoot in daylight - natural light = better analysis ☀️", 
@@ -65,7 +61,6 @@ export default function VideoAnalysisHub() {
     "Use 1080p, position camera 10-15 ft from court ⚡"
   ]
 
-  // Initialize tip of the day
   useEffect(() => {
     if (!coachTipOfDay) {
       const randomTip = coachKaiTips[Math.floor(Math.random() * coachKaiTips.length)]
@@ -73,7 +68,6 @@ export default function VideoAnalysisHub() {
     }
   }, [])
 
-  // Load video library
   useEffect(() => {
     if (session?.user) {
       fetchVideoLibrary()
@@ -81,22 +75,16 @@ export default function VideoAnalysisHub() {
     }
   }, [session])
 
-  // Poll for processing videos
   useEffect(() => {
     if (!session?.user) return
-    
     const hasProcessingVideos = videoLibrary.some(
       v => v.analysisStatus === 'PROCESSING' || v.analysisStatus === 'PENDING'
     )
-    
     if (!hasProcessingVideos) return
-    
-    // Poll every 5 seconds if there are processing videos
     const interval = setInterval(() => {
       fetchVideoLibrary()
       fetchLibraryStats()
     }, 5000)
-    
     return () => clearInterval(interval)
   }, [session, videoLibrary])
 
@@ -105,7 +93,6 @@ export default function VideoAnalysisHub() {
       const res = await fetch('/api/video-analysis/library')
       if (res.ok) {
         const data = await res.json()
-        // API returns 'analyses', not 'videos'
         setVideoLibrary(data.analyses || data.videos || [])
       }
     } catch (error) {
@@ -136,13 +123,12 @@ export default function VideoAnalysisHub() {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: { 'video/*': ['.mp4', '.mov', '.avi'] },
-    maxSize: 500 * 1024 * 1024, // 500MB
+    maxSize: 500 * 1024 * 1024,
     multiple: false
   })
 
   const handleUploadAndAnalyze = async () => {
     if (!selectedFile) return
-
     setUploading(true)
     setUploadProgress(0)
 
@@ -150,7 +136,6 @@ export default function VideoAnalysisHub() {
       const formData = new FormData()
       formData.append('file', selectedFile)
 
-      // Track upload progress
       const xhr = new XMLHttpRequest()
       const uploadPromise = new Promise<any>((resolve, reject) => {
         xhr.upload.addEventListener('progress', (e) => {
@@ -159,7 +144,6 @@ export default function VideoAnalysisHub() {
             setUploadProgress(Math.round(percentComplete))
           }
         })
-
         xhr.addEventListener('load', () => {
           if (xhr.status === 200) {
             try {
@@ -172,10 +156,8 @@ export default function VideoAnalysisHub() {
             reject(new Error(`Upload failed with status ${xhr.status}`))
           }
         })
-
         xhr.addEventListener('error', () => reject(new Error('Network error during upload')))
         xhr.addEventListener('abort', () => reject(new Error('Upload cancelled')))
-
         xhr.open('POST', '/api/video-analysis/upload')
         xhr.send(formData)
       })
@@ -183,11 +165,7 @@ export default function VideoAnalysisHub() {
       const data = await uploadPromise
       setUploadProgress(100)
       setUploading(false)
-      
-      // Show success message
       alert('✅ Upload complete! Starting AI analysis...')
-      
-      // Start analysis
       setAnalyzing(true)
       await analyzeVideo(data.videoId, data.videoUrl)
     } catch (error) {
@@ -210,16 +188,10 @@ export default function VideoAnalysisHub() {
         const data = await res.json()
         setCurrentAnalysis(data)
         setAnalyzing(false)
-        
-        // Show success message with clear next steps
-        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.overallScore)}/100\n\n📊 Your video has been analyzed! Switch to the "My Library" tab to view detailed results and insights.`)
-        
-        // Refresh library and switch to library tab
+        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.overallScore)}/100\n\n📊 Check "My Analyzed Videos" tab to view detailed results!`)
         await fetchVideoLibrary()
         await fetchLibraryStats()
         setActiveTab('library')
-        
-        // Clear selected file
         setSelectedFile(null)
         setVideoPreview(null)
       } else {
@@ -230,24 +202,16 @@ export default function VideoAnalysisHub() {
       console.error('Analysis error:', error)
       setAnalyzing(false)
       const errorMessage = error instanceof Error ? error.message : 'Analysis failed'
-      alert(`❌ Analysis Failed\n\n${errorMessage}\n\nPlease try uploading your video again. If the problem persists, contact support.`)
+      alert(`❌ Analysis Failed\n\n${errorMessage}\n\nPlease try uploading your video again.`)
     }
   }
 
   const handleDeleteVideo = async (videoId: string) => {
-    if (!confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
-      return
-    }
-
+    if (!confirm('Are you sure you want to delete this video?')) return
     try {
-      const res = await fetch(`/api/video-analysis/${videoId}`, {
-        method: 'DELETE'
-      })
-
+      const res = await fetch(`/api/video-analysis/${videoId}`, { method: 'DELETE' })
       if (res.ok) {
-        // Remove from local state
         setVideoLibrary(prev => prev.filter(v => v.id !== videoId))
-        // Refresh stats
         await fetchLibraryStats()
         alert('✅ Video deleted successfully')
       } else {
@@ -273,8 +237,6 @@ export default function VideoAnalysisHub() {
       technicalScores: analysis.technicalScores,
       keyMoments: analysis.keyMoments || []
     })
-
-    // Open in new window for print/save
     const printWindow = window.open('', '_blank')
     if (printWindow) {
       printWindow.document.write(pdfHTML)
@@ -284,608 +246,251 @@ export default function VideoAnalysisHub() {
 
   return (
     <>
-      {/* Main Navigation Header with Hamburger Menu */}
       <MainNavigation user={session?.user} />
       
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted to-background relative">
-      {/* Decorative background elements */}
-      <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        <div className="absolute top-0 left-1/4 w-96 h-96 bg-kai-primary/10 rounded-full blur-3xl animate-pulse-glow"></div>
-        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-kai-secondary/10 rounded-full blur-3xl animate-pulse-glow" style={{ animationDelay: '1s' }}></div>
-      </div>
+      <div className="min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 relative">
+        {/* Subtle background */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl"></div>
+          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
+        </div>
 
-      {/* Top Navigation Bar */}
-      <motion.div
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border shadow-lg"
-      >
-        <div className="container mx-auto max-w-7xl px-4 py-3">
-          <div className="flex items-center justify-between">
-            {/* Breadcrumbs & Coach Kai Avatar */}
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary p-0.5 shadow-lg shadow-kai-primary/50">
-                  <div className="w-full h-full rounded-full bg-background flex items-center justify-center">
-                    <Brain className="w-5 h-5 text-kai-primary animate-breathing" />
+        {/* Header with Breadcrumb */}
+        <div className="sticky top-0 z-50 backdrop-blur-lg bg-slate-900/80 border-b border-slate-700">
+          <div className="container mx-auto max-w-7xl px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 p-0.5">
+                  <div className="w-full h-full rounded-full bg-slate-900 flex items-center justify-center">
+                    <Brain className="w-5 h-5 text-cyan-400" />
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <Link href="/dashboard" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Home
-                  </Link>
+                  <Link href="/dashboard" className="text-slate-400 hover:text-white transition-colors">Home</Link>
                   <ChevronRight className="w-4 h-4 text-slate-600" />
-                  <Link href="/train" className="text-muted-foreground hover:text-foreground transition-colors">
-                    Train
-                  </Link>
+                  <Link href="/train" className="text-slate-400 hover:text-white transition-colors">Train</Link>
                   <ChevronRight className="w-4 h-4 text-slate-600" />
-                  <span className="text-kai-primary font-medium">Video Analysis</span>
+                  <span className="text-cyan-400 font-medium">Video Analysis</span>
                   <Badge className="ml-2 bg-purple-600/80 text-white text-[10px] px-1.5 py-0.5">Beta</Badge>
                 </div>
               </div>
-            </div>
-
-            {/* Quick Action Buttons */}
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowRecentAnalyses(!showRecentAnalyses)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <Library className="w-4 h-4 mr-2" />
-                Library
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowHowItWorks(!showHowItWorks)}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <HelpCircle className="w-4 h-4 mr-2" />
-                Help
-              </Button>
-              <div className="relative">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowTipsDropdown(!showTipsDropdown)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <Lightbulb className="w-4 h-4 mr-2" />
-                  Pro Tips
-                  <ChevronDown className="w-3 h-3 ml-1" />
+              <div className="flex items-center gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setShowHowItWorks(true)} className="text-slate-400 hover:text-white">
+                  <HelpCircle className="w-4 h-4 mr-1" /> Help
                 </Button>
-                <AnimatePresence>
-                  {showTipsDropdown && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: 10 }}
-                      className="absolute right-0 top-full mt-2 w-80 bg-slate-900 border-2 border-kai-primary/50 rounded-lg shadow-2xl p-4 z-50"
-                    >
-                      <h4 className="font-bold text-white mb-3 flex items-center gap-2 text-lg">
-                        <Brain className="w-5 h-5 text-kai-primary" />
-                        Coach Kai's Pro Tips
-                      </h4>
-                      <div className="space-y-2">
-                        {coachKaiTips.map((tip, idx) => (
-                          <div key={idx} className="text-sm text-white font-medium p-3 bg-slate-800 rounded border-l-4 border-kai-primary shadow-md">
-                            {tip}
-                          </div>
-                        ))}
-                      </div>
-                    </motion.div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Page Title & Tab Navigation - THE KEY REDESIGN */}
+        <div className="container mx-auto max-w-7xl px-4 pt-6">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h1 className="text-3xl font-bold text-white flex items-center gap-3">
+                  <Sparkles className="w-8 h-8 text-cyan-400" />
+                  AI Video Analysis
+                </h1>
+                <p className="text-slate-400 mt-1">Coach Kai analyzes your technique, movement & strategy</p>
+              </div>
+            </div>
+
+            {/* PROMINENT TAB NAVIGATION */}
+            <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
+              <TabsList className="w-full max-w-lg grid grid-cols-2 h-14 bg-slate-800/80 border border-slate-700 p-1 rounded-xl">
+                <TabsTrigger 
+                  value="upload" 
+                  className="h-full rounded-lg text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=inactive]:text-slate-400 transition-all"
+                >
+                  <Upload className="w-5 h-5 mr-2" />
+                  Upload & Analyze
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="library" 
+                  className="h-full rounded-lg text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=inactive]:text-slate-400 transition-all relative"
+                >
+                  <FolderOpen className="w-5 h-5 mr-2" />
+                  My Analyzed Videos
+                  {libraryStats.totalVideos > 0 && (
+                    <Badge className="ml-2 bg-white/20 text-white border-0 text-xs">
+                      {libraryStats.totalVideos}
+                    </Badge>
                   )}
-                </AnimatePresence>
-              </div>
-            </div>
-          </div>
-        </div>
-      </motion.div>
+                </TabsTrigger>
+              </TabsList>
 
-      {/* Hero Section with Coach Kai Integration */}
-      <section className="relative overflow-hidden py-20 px-4">
-        <div className="absolute inset-0 bg-gradient-to-r from-kai-primary/10 to-kai-secondary/10" />
-        <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-cyan-500/20 rounded-full blur-3xl"></div>
-          <div className="absolute bottom-20 right-10 w-40 h-40 bg-blue-500/20 rounded-full blur-3xl"></div>
-        </div>
-        <div className="container mx-auto max-w-7xl relative z-10">
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <Badge className="mb-4 bg-gradient-to-r from-kai-primary to-kai-secondary text-white border-0 px-4 py-2">
-              <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
-              Powered by Coach Kai AI
-            </Badge>
-            <h1 className="text-5xl md:text-7xl font-black text-white mb-6 drop-shadow-2xl">
-              See What You Can't{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 relative drop-shadow-2xl">
-                See
-                <motion.div
-                  className="absolute -inset-1 bg-gradient-to-r from-cyan-400/30 to-blue-400/30 rounded-lg blur-xl"
-                  animate={{ opacity: [0.6, 1, 0.6] }}
-                  transition={{ duration: 2, repeat: Infinity }}
-                />
-              </span>
-            </h1>
-            <p className="text-xl text-white font-medium max-w-3xl mx-auto mb-8 drop-shadow-lg">
-              Coach Kai's advanced AI analyzes every shot, movement, and decision—giving you insights that transform your game.
-            </p>
-
-            {/* Coach Kai Welcome Message - Enhanced for better readability */}
-            <motion.div
-              initial={{ scale: 0.95, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 backdrop-blur border-4 border-kai-primary/70 rounded-3xl p-8 max-w-3xl mx-auto mb-8 shadow-2xl shadow-kai-primary/30 hover:shadow-kai-primary/50 transition-all duration-300"
-            >
-              <div className="flex items-start gap-6">
-                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center flex-shrink-0 shadow-lg ring-4 ring-kai-primary/30">
-                  <Brain className="w-10 h-10 text-white drop-shadow-lg" />
-                </div>
-                <div className="flex-1 text-left">
-                  <h3 className="font-black text-white mb-3 text-3xl drop-shadow-lg tracking-tight">💡 Today's Pro Tip from Coach Kai</h3>
-                  <p className="text-white text-2xl font-bold leading-relaxed drop-shadow-md">{coachTipOfDay}</p>
-                </div>
-              </div>
-            </motion.div>
-
-            {/* Quick Action Buttons */}
-            <div className="flex flex-wrap items-center justify-center gap-4 mb-12">
-              <Button
-                onClick={() => setShowHowItWorks(!showHowItWorks)}
-                className="bg-gradient-to-r from-cyan-600 to-blue-600 border-2 border-cyan-400/50 text-white font-bold hover:from-cyan-500 hover:to-blue-500 shadow-xl shadow-cyan-500/30"
-              >
-                <Play className="w-4 h-4 mr-2" />
-                Quick Start Guide
-              </Button>
-              <Button
-                className="border-2 border-white bg-transparent text-white font-bold hover:bg-white hover:text-slate-900 shadow-xl"
-              >
-                <Eye className="w-4 h-4 mr-2" />
-                View Examples
-              </Button>
-              <Button
-                onClick={() => setShowCoachKaiChat(true)}
-                className="bg-gradient-to-r from-purple-600 to-pink-600 border-2 border-purple-400/50 text-white font-bold hover:from-purple-500 hover:to-pink-500 shadow-xl shadow-purple-500/30"
-              >
-                <MessageCircle className="w-4 h-4 mr-2" />
-                Ask Coach Kai
-              </Button>
-            </div>
-          </motion.div>
-
-          {/* Enhanced Floating Feature Cards */}
-          <div className="grid md:grid-cols-4 gap-6 mb-16">
-            {[
-              {
-                image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png",
-                step: "1",
-                title: "Record Your Game",
-                desc: "Any device • All formats • Up to 500MB",
-                color: "from-green-500 to-emerald-500",
-                delay: 0.1
-              },
-              {
-                image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png",
-                step: "2",
-                title: "AI Analyzes Every Shot",
-                desc: "Shot tracking • Movement analysis • Technique scoring",
-                color: "from-blue-500 to-cyan-500",
-                delay: 0.2
-              },
-              {
-                image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png",
-                step: "3",
-                title: "Review Detailed Insights",
-                desc: "Pro-level metrics • Visual heatmaps • Key moments",
-                color: "from-purple-500 to-pink-500",
-                delay: 0.3
-              },
-              {
-                image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png",
-                step: "4",
-                title: "Track Your Improvement",
-                desc: "Before/after • Progress trends • Printable reports",
-                color: "from-orange-500 to-yellow-500",
-                delay: 0.4
-              }
-            ].map((item, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ y: 40, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: item.delay }}
-                whileHover={{ y: -8, scale: 1.02 }}
-                className="relative group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-kai-primary/10 to-kai-secondary/10 rounded-xl blur-xl group-hover:from-cyan-500/20 group-hover:to-blue-500/20 transition-all duration-500"></div>
-                <Card className="relative bg-card/50 backdrop-blur border-border/50 hover:border-kai-primary/50 transition-all duration-300 overflow-hidden shadow-2xl hover:shadow-kai-primary/20">
-                  <div className="aspect-video relative rounded-t-lg overflow-hidden">
-                    <Image
-                      src={item.image}
-                      alt={item.title}
-                      fill
-                      className="object-cover group-hover:scale-110 transition-transform duration-500"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
-                    <div className="absolute top-3 left-3">
-                      <div className={cn("w-12 h-12 rounded-full bg-gradient-to-br flex items-center justify-center text-white font-bold text-lg shadow-2xl border-2 border-white/20", item.color)}>
-                        {item.step}
-                      </div>
-                    </div>
-                    <div className="absolute top-3 right-3">
-                      <div className="w-8 h-8 rounded-full bg-slate-900/80 backdrop-blur flex items-center justify-center">
-                        <Sparkles className="w-4 h-4 text-kai-primary" />
-                      </div>
-                    </div>
-                  </div>
-                  <CardContent className="p-6">
-                    <h3 className="text-lg font-bold text-white mb-2 group-hover:text-kai-primary transition-colors">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-white font-medium mb-4 leading-relaxed">{item.desc}</p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-kai-primary hover:text-white hover:bg-cyan-500/10 w-full font-semibold"
-                    >
-                      Learn More
-                      <ArrowRight className="w-3 h-3 ml-2" />
-                    </Button>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Enhanced Features Grid */}
-          <motion.div
-            initial={{ y: 40, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.6 }}
-            className="grid md:grid-cols-4 gap-4 mb-12"
-          >
-            {[
-              { icon: Brain, label: "AI-Powered Analysis", color: "from-purple-500 to-pink-500", description: "Advanced neural networks" },
-              { icon: Zap, label: "Results in Minutes", color: "from-yellow-500 to-orange-500", description: "Lightning-fast processing" },
-              { icon: TrendingUp, label: "Pro-Level Insights", color: "from-green-500 to-emerald-500", description: "Professional-grade metrics" },
-              { icon: Users, label: "10,000+ Players", color: "from-blue-500 to-cyan-500", description: "Trusted worldwide" }
-            ].map((feature, idx) => (
-              <motion.div
-                key={idx}
-                whileHover={{ y: -4, scale: 1.05 }}
-                className="bg-card/30 backdrop-blur border border-border/50 rounded-xl p-6 text-center group hover:border-kai-primary/30 transition-all duration-300 shadow-lg hover:shadow-2xl"
-              >
-                <div className={cn("w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg group-hover:shadow-xl transition-all duration-300", feature.color)}>
-                  <feature.icon className="w-8 h-8 text-white" />
-                </div>
-                <div className="text-lg font-semibold text-white mb-1 group-hover:text-kai-primary transition-colors">
-                  {feature.label}
-                </div>
-                <div className="text-xs text-slate-200 group-hover:text-slate-100 transition-colors">
-                  {feature.description}
-                </div>
-              </motion.div>
-            ))}
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Main Content */}
-      <section className="container mx-auto max-w-7xl px-4 pb-20">
-        <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.8 }}
-        >
-          <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)}>
-            <TabsList className="grid w-full max-w-md mx-auto grid-cols-2 mb-8 bg-card/50 border border-border">
-              <TabsTrigger value="upload" className="flex items-center gap-2 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-kai-primary">
-                <Upload className="w-4 h-4" />
-                Upload Video
-              </TabsTrigger>
-              <TabsTrigger value="library" className="flex items-center gap-2 data-[state=active]:bg-cyan-500/20 data-[state=active]:text-kai-primary">
-                <Film className="w-4 h-4" />
-                My Library
-                {libraryStats.totalVideos > 0 && (
-                  <Badge variant="secondary" className="ml-1 bg-cyan-500/20 text-kai-primary border-kai-primary/30">
-                    {libraryStats.totalVideos}
-                  </Badge>
-                )}
-              </TabsTrigger>
-            </TabsList>
-
-            {/* Enhanced Upload Tab */}
-            <TabsContent value="upload">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="relative"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-kai-primary/5 to-kai-secondary/5 rounded-xl blur-xl"></div>
-                <Card className="relative bg-card/30 backdrop-blur border-border/50 hover:border-kai-primary/30 transition-all duration-300 shadow-2xl">
-                  <CardHeader>
-                    <CardTitle className="text-white flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                        <VideoIcon className="w-4 h-4 text-white" />
-                      </div>
-                      Upload Your Game Footage
-                      <Badge className="ml-auto bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0">
-                        Coach Kai Ready
-                      </Badge>
-                    </CardTitle>
-                    <CardDescription className="text-slate-200">
-                      🎯 Record with any device • Supports MP4, MOV, AVI formats • Up to 500MB
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    {!selectedFile ? (
-                      <div
-                        {...getRootProps()}
-                        className={cn(
-                          "relative border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300",
-                          isDragActive 
-                            ? "border-kai-primary bg-cyan-500/10 shadow-lg shadow-cyan-500/20" 
-                            : "border-muted hover:border-kai-primary/50 hover:bg-card/30",
-                          "bg-card/30 backdrop-blur group"
-                        )}
-                      >
-                        <input {...getInputProps()} />
-                        <div className="absolute inset-0 bg-gradient-to-br from-kai-primary/5 to-kai-secondary/5 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                        <motion.div
-                          animate={isDragActive ? { scale: [1, 1.1, 1] } : {}}
-                          transition={{ duration: 0.5, repeat: isDragActive ? Infinity : 0 }}
-                          className="relative z-10"
-                        >
-                          <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-br from-kai-primary to-kai-secondary flex items-center justify-center shadow-2xl">
-                            <Upload className="w-12 h-12 text-white" />
-                          </div>
-                          <h3 className="text-2xl font-semibold text-white mb-2">
-                            {isDragActive ? "🎯 Drop your video here!" : "📹 Drag & drop your video here"}
-                          </h3>
-                          <p className="text-slate-200 mb-6">or click to browse your files</p>
-                          <Button className="bg-gradient-to-r from-kai-primary to-kai-secondary hover:from-kai-primary/90 hover:to-kai-secondary/90 shadow-lg hover:shadow-xl transition-all duration-300">
-                            <VideoIcon className="w-4 h-4 mr-2" />
-                            Select Video File
-                          </Button>
-                        </motion.div>
-                      </div>
-                    ) : (
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        className="space-y-6"
-                      >
-                        {videoPreview && (
-                          <div className="aspect-video relative rounded-xl overflow-hidden bg-black shadow-2xl">
-                            <video src={videoPreview} controls className="w-full h-full" />
-                            <div className="absolute top-4 right-4">
-                              <Badge className="bg-green-500/90 text-white">
-                                <CheckCircle2 className="w-3 h-3 mr-1" />
-                                Ready for Analysis
-                              </Badge>
+              {/* UPLOAD TAB - Streamlined with upload at top */}
+              <TabsContent value="upload" className="mt-6">
+                <div className="grid lg:grid-cols-3 gap-6">
+                  {/* Upload Section - IMMEDIATELY VISIBLE */}
+                  <div className="lg:col-span-2">
+                    <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
+                      <CardHeader className="pb-4">
+                        <CardTitle className="text-white flex items-center gap-2">
+                          <VideoIcon className="w-5 h-5 text-cyan-400" />
+                          Upload Your Game Footage
+                        </CardTitle>
+                        <CardDescription className="text-slate-300">
+                          MP4, MOV, AVI • Up to 500MB • Best: 10-30 second clips
+                        </CardDescription>
+                      </CardHeader>
+                      <CardContent>
+                        {!selectedFile ? (
+                          <div
+                            {...getRootProps()}
+                            className={cn(
+                              "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all",
+                              isDragActive 
+                                ? "border-cyan-400 bg-cyan-500/10" 
+                                : "border-slate-600 hover:border-cyan-500/50 hover:bg-slate-700/30"
+                            )}
+                          >
+                            <input {...getInputProps()} />
+                            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                              <Upload className="w-10 h-10 text-white" />
                             </div>
+                            <h3 className="text-xl font-semibold text-white mb-2">
+                              {isDragActive ? "Drop your video here!" : "Drag & drop your video"}
+                            </h3>
+                            <p className="text-slate-400 mb-4">or click to browse</p>
+                            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400">
+                              <VideoIcon className="w-4 h-4 mr-2" /> Select Video
+                            </Button>
                           </div>
-                        )}
-                        
-                        <Card className="bg-card/50 border-border">
-                          <CardContent className="p-6">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-4">
-                                <div className="w-12 h-12 rounded-lg bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                                  <FileVideo className="w-6 h-6 text-white" />
-                                </div>
+                        ) : (
+                          <div className="space-y-4">
+                            {videoPreview && (
+                              <div className="aspect-video relative rounded-xl overflow-hidden bg-black">
+                                <video src={videoPreview} controls className="w-full h-full" />
+                              </div>
+                            )}
+                            <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
+                              <div className="flex items-center gap-3">
+                                <FileVideo className="w-8 h-8 text-cyan-400" />
                                 <div>
-                                  <p className="font-semibold text-white">{selectedFile.name}</p>
-                                  <p className="text-sm text-slate-200">
-                                    {(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Ready for Coach Kai
-                                  </p>
+                                  <p className="font-medium text-white">{selectedFile.name}</p>
+                                  <p className="text-sm text-slate-400">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
                                 </div>
                               </div>
-                              <Button 
-                                variant="outline" 
-                                size="sm" 
-                                onClick={() => { setSelectedFile(null); setVideoPreview(null); }}
-                                className="border-muted hover:bg-slate-800"
-                              >
-                                <X className="w-4 h-4 mr-2" />
-                                Remove
+                              <Button variant="ghost" size="sm" onClick={() => { setSelectedFile(null); setVideoPreview(null); }}>
+                                <X className="w-4 h-4" />
                               </Button>
                             </div>
-                          </CardContent>
-                        </Card>
 
-                        {uploading && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="space-y-3"
-                          >
-                            <div className="flex justify-between text-sm">
-                              <span className="text-slate-200 flex items-center gap-2">
-                                <Loader2 className="w-4 h-4 animate-spin" />
-                                Uploading to Coach Kai...
-                              </span>
-                              <span className="text-white font-medium">{uploadProgress}%</span>
-                            </div>
-                            <Progress value={uploadProgress} className="h-3 bg-slate-700">
-                              <div className="h-full bg-gradient-to-r from-kai-primary to-kai-secondary transition-all duration-300 rounded-full" />
-                            </Progress>
-                          </motion.div>
-                        )}
-
-                        {analyzing && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                          >
-                            <Alert className="bg-gradient-to-r from-kai-primary/10 to-kai-secondary/10 border-kai-primary/50 shadow-lg">
-                              <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                                  <Brain className="w-5 h-5 text-white animate-pulse" />
+                            {uploading && (
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-sm">
+                                  <span className="text-slate-300"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />Uploading...</span>
+                                  <span className="text-white font-medium">{uploadProgress}%</span>
                                 </div>
-                                <div>
-                                  <AlertDescription className="text-cyan-100 font-medium">
-                                    🧠 Coach Kai is analyzing your video...
-                                  </AlertDescription>
-                                  <p className="text-xs text-cyan-300/80 mt-1">
-                                    This may take a few minutes. Analyzing technique, movement, and strategy.
-                                  </p>
-                                </div>
+                                <Progress value={uploadProgress} className="h-2" />
                               </div>
-                            </Alert>
-                          </motion.div>
-                        )}
+                            )}
 
-                        {!uploading && !analyzing && (
-                          <motion.div
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.2 }}
-                          >
-                            <Button
-                              onClick={handleUploadAndAnalyze}
-                              className="w-full bg-gradient-to-r from-kai-primary to-kai-secondary hover:from-kai-primary/90 hover:to-kai-secondary/90 h-14 text-lg font-semibold shadow-2xl hover:shadow-kai-primary/20 transition-all duration-300"
-                              size="lg"
-                            >
-                              <Brain className="w-6 h-6 mr-3" />
-                              Analyze with Coach Kai AI
-                              <ArrowRight className="w-6 h-6 ml-3" />
-                            </Button>
-                          </motion.div>
-                        )}
-                      </motion.div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
-            </TabsContent>
+                            {analyzing && (
+                              <Alert className="bg-cyan-500/10 border-cyan-500/50">
+                                <Brain className="w-4 h-4 text-cyan-400" />
+                                <AlertDescription className="text-cyan-100">
+                                  Coach Kai is analyzing your video... This may take a few minutes.
+                                </AlertDescription>
+                              </Alert>
+                            )}
 
-            {/* Enhanced Library Tab */}
-            <TabsContent value="library" className="space-y-6">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="space-y-6"
-              >
-                {/* Enhanced Stats Dashboard */}
-                <div className="grid md:grid-cols-4 gap-4">
-                  {[
-                    {
-                      icon: Film,
-                      label: "Total Videos",
-                      value: libraryStats.totalVideos,
-                      gradient: "from-kai-primary/20 to-kai-secondary/20",
-                      border: "border-kai-primary/30",
-                      iconColor: "text-kai-primary",
-                      delay: 0.1
-                    },
-                    {
-                      icon: CheckCircle2,
-                      label: "Analyzed",
-                      value: libraryStats.totalAnalyzed,
-                      gradient: "from-green-500/20 to-emerald-500/20",
-                      border: "border-green-500/30",
-                      iconColor: "text-green-400",
-                      delay: 0.2
-                    },
-                    {
-                      icon: HardDrive,
-                      label: "Storage Used",
-                      value: `${(libraryStats.storageUsed / 1024).toFixed(1)}GB`,
-                      gradient: "from-purple-500/20 to-pink-500/20",
-                      border: "border-purple-500/30",
-                      iconColor: "text-purple-400",
-                      delay: 0.3,
-                      extra: (
-                        <div className="mt-2">
-                          <Progress 
-                            value={(libraryStats.storageUsed / libraryStats.storageLimit) * 100} 
-                            className="h-2 bg-slate-700"
-                          />
-                          <p className="text-xs text-slate-300 mt-1">
-                            of {(libraryStats.storageLimit / 1024).toFixed(0)}GB limit
-                          </p>
-                        </div>
-                      )
-                    },
-                    {
-                      icon: TrendingUp,
-                      label: "Avg Improvement",
-                      value: `+${libraryStats.avgImprovement}%`,
-                      gradient: "from-orange-500/20 to-yellow-500/20",
-                      border: "border-orange-500/30",
-                      iconColor: "text-orange-400",
-                      delay: 0.4
-                    }
-                  ].map((stat, idx) => (
-                    <motion.div
-                      key={idx}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: stat.delay }}
-                      whileHover={{ y: -4, scale: 1.02 }}
-                    >
-                      <Card className={cn("bg-gradient-to-br backdrop-blur group hover:shadow-2xl transition-all duration-300", stat.gradient, stat.border)}>
-                        <CardContent className="p-6">
-                          <div className="flex items-center justify-between mb-3">
-                            <div className={cn("w-12 h-12 rounded-lg bg-card/50 flex items-center justify-center shadow-lg", stat.iconColor)}>
-                              <stat.icon className="w-6 h-6" />
-                            </div>
-                            <Badge className="bg-card/50 text-white border-border">
-                              {typeof stat.value === 'number' ? stat.value : stat.value}
-                            </Badge>
+                            {!uploading && !analyzing && (
+                              <Button onClick={handleUploadAndAnalyze} className="w-full h-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-lg font-semibold">
+                                <Brain className="w-5 h-5 mr-2" /> Analyze with Coach Kai
+                              </Button>
+                            )}
                           </div>
-                          <p className="text-2xl font-bold text-white mb-1 group-hover:scale-105 transition-transform">
-                            {stat.value}
-                          </p>
-                          <p className="text-sm text-slate-100 group-hover:text-white transition-colors">
-                            {stat.label}
-                          </p>
-                          {stat.extra}
-                        </CardContent>
-                      </Card>
-                    </motion.div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </div>
+
+                  {/* Sidebar - Tips & 4 Easy Steps */}
+                  <div className="space-y-4">
+                    {/* Coach Kai Tip */}
+                    <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30">
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center flex-shrink-0">
+                            <Brain className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h4 className="font-semibold text-white text-sm mb-1">💡 Pro Tip</h4>
+                            <p className="text-cyan-100 text-sm">{coachTipOfDay}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+
+                    {/* 4 Easy Steps */}
+                    <Card className="bg-slate-800/50 border-slate-700">
+                      <CardHeader className="pb-3">
+                        <CardTitle className="text-white text-base">4 Easy Steps</CardTitle>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        {[
+                          { step: "1", title: "Record", desc: "10-30 sec clip", color: "from-green-500 to-emerald-500", image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png" },
+                          { step: "2", title: "Upload", desc: "Drop file here", color: "from-blue-500 to-cyan-500", image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png" },
+                          { step: "3", title: "Analyze", desc: "AI does the work", color: "from-purple-500 to-pink-500", image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png" },
+                          { step: "4", title: "Improve", desc: "Review insights", color: "from-orange-500 to-yellow-500", image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png" }
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/30 transition-colors">
+                            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
+                              <Image src={item.image} alt={item.title} fill className="object-cover" />
+                              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60", item.color)}></div>
+                              <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">{item.step}</span>
+                            </div>
+                            <div>
+                              <p className="font-medium text-white text-sm">{item.title}</p>
+                              <p className="text-xs text-slate-400">{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </CardContent>
+                    </Card>
+                  </div>
+                </div>
+              </TabsContent>
+
+              {/* LIBRARY TAB - Main destination, prominent */}
+              <TabsContent value="library" className="mt-6">
+                {/* Stats Row */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  {[
+                    { icon: Film, label: "Total Videos", value: libraryStats.totalVideos, color: "text-cyan-400" },
+                    { icon: CheckCircle2, label: "Analyzed", value: libraryStats.totalAnalyzed, color: "text-green-400" },
+                    { icon: HardDrive, label: "Storage", value: `${(libraryStats.storageUsed / 1024).toFixed(1)}GB`, color: "text-purple-400" },
+                    { icon: TrendingUp, label: "Avg Improvement", value: `+${libraryStats.avgImprovement}%`, color: "text-orange-400" }
+                  ].map((stat, idx) => (
+                    <Card key={idx} className="bg-slate-800/50 border-slate-700">
+                      <CardContent className="p-4 flex items-center gap-3">
+                        <stat.icon className={cn("w-8 h-8", stat.color)} />
+                        <div>
+                          <p className="text-2xl font-bold text-white">{stat.value}</p>
+                          <p className="text-xs text-slate-400">{stat.label}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
 
-                {/* Enhanced Video Grid */}
+                {/* Video Grid */}
                 {videoLibrary.length === 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5 }}
-                  >
-                    <Card className="bg-card/30 backdrop-blur border-border/50 hover:border-kai-primary/30 transition-all duration-300 shadow-xl">
-                      <CardContent className="p-12 text-center">
-                        <motion.div
-                          animate={{ rotate: [0, 10, -10, 0] }}
-                          transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                          className="w-24 h-24 mx-auto mb-6 rounded-full bg-gradient-to-r from-slate-700 to-slate-600 flex items-center justify-center shadow-2xl"
-                        >
-                          <Film className="w-12 h-12 text-slate-200" />
-                        </motion.div>
-                        <h3 className="text-2xl font-semibold text-white mb-3">🎬 No videos yet</h3>
-                        <p className="text-slate-200 mb-8 max-w-md mx-auto">
-                          Upload your first game footage and let Coach Kai analyze your technique, movement, and strategy!
-                        </p>
-                        <Button 
-                          onClick={() => setActiveTab('upload')} 
-                          className="bg-gradient-to-r from-kai-primary to-kai-secondary hover:from-kai-primary/90 hover:to-kai-secondary/90 shadow-lg hover:shadow-xl transition-all duration-300"
-                          size="lg"
-                        >
-                          <Upload className="w-5 h-5 mr-2" />
-                          Upload Your First Video
-                        </Button>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
+                  <Card className="bg-slate-800/50 border-slate-700">
+                    <CardContent className="p-12 text-center">
+                      <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-slate-700 flex items-center justify-center">
+                        <Film className="w-10 h-10 text-slate-500" />
+                      </div>
+                      <h3 className="text-xl font-semibold text-white mb-2">No videos yet</h3>
+                      <p className="text-slate-400 mb-6">Upload your first video to get AI-powered analysis!</p>
+                      <Button onClick={() => setActiveTab('upload')} className="bg-gradient-to-r from-cyan-500 to-blue-500">
+                        <Upload className="w-4 h-4 mr-2" /> Upload Your First Video
+                      </Button>
+                    </CardContent>
+                  </Card>
                 ) : (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {videoLibrary.map((video, idx) => (
@@ -893,124 +498,56 @@ export default function VideoAnalysisHub() {
                         key={video.id}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ delay: 0.6 + idx * 0.1 }}
-                        whileHover={{ y: -8, scale: 1.02 }}
-                        className="relative group"
+                        transition={{ delay: idx * 0.05 }}
                       >
-                        <div className="absolute inset-0 bg-gradient-to-r from-kai-primary/5 to-kai-secondary/5 rounded-xl blur-xl group-hover:from-cyan-500/10 group-hover:to-blue-500/10 transition-all duration-500"></div>
-                        <Card className="relative bg-card/30 backdrop-blur border-border/50 hover:border-kai-primary/50 transition-all duration-300 overflow-hidden shadow-2xl hover:shadow-kai-primary/20">
-                          <div className="aspect-video relative rounded-t-lg overflow-hidden bg-slate-900">
+                        <Card className="bg-slate-800/50 border-slate-700 overflow-hidden hover:border-cyan-500/50 transition-all group">
+                          <div className="aspect-video relative bg-slate-900">
                             {video.thumbnailUrl ? (
-                              <Image
-                                src={video.thumbnailUrl}
-                                alt={video.title}
-                                fill
-                                className="object-cover group-hover:scale-110 transition-transform duration-500"
-                              />
+                              <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" />
                             ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-900 to-slate-800">
-                                <VideoIcon className="w-16 h-16 text-slate-600" />
+                              <div className="w-full h-full flex items-center justify-center">
+                                <VideoIcon className="w-12 h-12 text-slate-600" />
                               </div>
                             )}
-                            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent"></div>
-                            
-                            <div className="absolute top-3 right-3">
+                            <div className="absolute top-2 right-2">
                               <Badge className={cn(
-                                "backdrop-blur border-0 shadow-lg",
-                                video.analysisStatus === 'COMPLETED' ? "bg-green-500/90 text-white" :
-                                video.analysisStatus === 'PROCESSING' ? "bg-yellow-500/90 text-white animate-pulse" :
-                                "bg-slate-500/90 text-white"
+                                "text-xs",
+                                video.analysisStatus === 'COMPLETED' ? "bg-green-500/90" :
+                                video.analysisStatus === 'PROCESSING' ? "bg-yellow-500/90 animate-pulse" : "bg-slate-500/90"
                               )}>
-                                {video.analysisStatus === 'COMPLETED' && <CheckCircle2 className="w-3 h-3 mr-1" />}
-                                {video.analysisStatus === 'PROCESSING' && <Loader2 className="w-3 h-3 mr-1 animate-spin" />}
                                 {video.analysisStatus === 'COMPLETED' ? '✅ Analyzed' : 
-                                 video.analysisStatus === 'PROCESSING' ? '🔄 Analyzing...' : '⏳ Pending'}
+                                 video.analysisStatus === 'PROCESSING' ? '🔄 Processing' : '⏳ Pending'}
                               </Badge>
                             </div>
-                            
                             {video.analysisStatus === 'COMPLETED' && video.overallScore && (
-                              <div className="absolute bottom-3 left-3">
-                                <div className="bg-black/80 backdrop-blur px-4 py-2 rounded-full border border-kai-primary/30">
-                                  <span className="text-kai-primary font-bold text-sm">
-                                    🎯 {video.overallScore}/100
-                                  </span>
-                                </div>
+                              <div className="absolute bottom-2 left-2 bg-black/80 px-3 py-1 rounded-full">
+                                <span className="text-cyan-400 font-bold text-sm">🎯 {video.overallScore}/100</span>
                               </div>
                             )}
-
-                            <div className="absolute top-3 left-3">
-                              <div className="w-8 h-8 rounded-full bg-slate-900/80 backdrop-blur flex items-center justify-center">
-                                <Brain className="w-4 h-4 text-kai-primary" />
-                              </div>
-                            </div>
                           </div>
-                          
-                          <CardContent className="p-6">
-                            <h4 className="font-bold text-white mb-2 truncate group-hover:text-kai-primary transition-colors">
-                              {video.title}
-                            </h4>
-                            <p className="text-sm text-slate-200 mb-4 flex items-center gap-2">
-                              <Clock className="w-3 h-3" />
-                              {new Date(video.uploadedAt).toLocaleDateString()}
-                              {video.duration && video.duration > 0 && (
-                                <>
-                                  <span>•</span>
-                                  <Timer className="w-3 h-3" />
-                                  {Math.floor(video.duration / 60)}min
-                                </>
-                              )}
+                          <CardContent className="p-4">
+                            <h4 className="font-semibold text-white truncate mb-1">{video.title}</h4>
+                            <p className="text-xs text-slate-400 mb-3 flex items-center gap-2">
+                              <Clock className="w-3 h-3" /> {new Date(video.uploadedAt).toLocaleDateString()}
                             </p>
-                            
                             <div className="flex gap-2">
                               {video.analysisStatus === 'COMPLETED' ? (
-                                <Button
-                                  size="sm"
-                                  className="flex-1 bg-gradient-to-r from-kai-primary/20 to-kai-secondary/20 border border-kai-primary/50 text-kai-primary hover:from-kai-primary/30 hover:to-kai-secondary/30 hover:text-white"
-                                  asChild
-                                >
+                                <Button size="sm" className="flex-1 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/30" asChild>
                                   <Link href={`/train/analysis/${video.id}`}>
-                                    <Eye className="w-4 h-4 mr-2" />
-                                    View Analysis
+                                    <Eye className="w-4 h-4 mr-1" /> View
                                   </Link>
                                 </Button>
                               ) : (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="flex-1 border-muted"
-                                  disabled
-                                >
-                                  {video.analysisStatus === 'PROCESSING' ? (
-                                    <>
-                                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                      Processing...
-                                    </>
-                                  ) : (
-                                    <>
-                                      <Clock className="w-4 h-4 mr-2" />
-                                      Pending
-                                    </>
-                                  )}
+                                <Button size="sm" variant="outline" className="flex-1" disabled>
+                                  {video.analysisStatus === 'PROCESSING' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Clock className="w-4 h-4" />}
                                 </Button>
                               )}
-                              
                               {video.analysisStatus === 'COMPLETED' && (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  onClick={() => downloadPDF(video)}
-                                  className="border-muted hover:bg-slate-800 text-muted-foreground hover:text-foreground"
-                                >
+                                <Button size="sm" variant="outline" onClick={() => downloadPDF(video)} className="border-slate-600">
                                   <FileText className="w-4 h-4" />
                                 </Button>
                               )}
-                              
-                              <Button
-                                size="sm"
-                                variant="outline"
-                                onClick={() => handleDeleteVideo(video.id)}
-                                className="text-red-400 hover:text-red-300 hover:bg-red-500/10 border-red-500/30"
-                              >
+                              <Button size="sm" variant="outline" onClick={() => handleDeleteVideo(video.id)} className="text-red-400 border-red-500/30 hover:bg-red-500/10">
                                 <Trash2 className="w-4 h-4" />
                               </Button>
                             </div>
@@ -1020,201 +557,110 @@ export default function VideoAnalysisHub() {
                     ))}
                   </div>
                 )}
-              </motion.div>
-            </TabsContent>
-          </Tabs>
-        </motion.div>
-      </section>
-
-      {/* Floating Coach Kai Chat Panel */}
-      <AnimatePresence>
-        {showCoachKaiChat && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="fixed bottom-4 right-4 z-50 w-96 max-w-[calc(100vw-2rem)]"
-          >
-            <Card className="bg-slate-800/95 backdrop-blur border-kai-primary/50 shadow-2xl">
-              <CardHeader className="pb-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                      <Brain className="w-5 h-5 text-white" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-white text-lg">Coach Kai</CardTitle>
-                      <p className="text-xs text-slate-200">Your AI Pickleball Coach</p>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="ghost"
-                    onClick={() => setShowCoachKaiChat(false)}
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-card/50 rounded-lg p-4 border-l-4 border-kai-primary">
-                  <p className="text-sm text-slate-100 mb-2">
-                    👋 Hi there! I'm Coach Kai, your AI pickleball analyst.
-                  </p>
-                  <p className="text-sm text-slate-200">
-                    Upload a video and I'll analyze your technique, movement patterns, and strategy to help you improve your game!
-                  </p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    size="sm"
-                    onClick={() => setActiveTab('upload')}
-                    className="flex-1 bg-gradient-to-r from-kai-primary/20 to-kai-secondary/20 border border-kai-primary/50 text-kai-primary hover:from-kai-primary/30 hover:to-kai-secondary/30"
-                  >
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Video
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => setShowHowItWorks(true)}
-                    className="border-muted text-slate-300 hover:bg-slate-700"
-                  >
-                    <HelpCircle className="w-4 h-4" />
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              </TabsContent>
+            </Tabs>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </div>
 
-      {/* Floating Coach Kai Action Button */}
-      <motion.div
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 1, type: "spring", stiffness: 200 }}
-        className="fixed bottom-4 right-4 z-40"
-      >
+        {/* Floating Coach Kai Button */}
         {!showCoachKaiChat && (
-          <Button
-            onClick={() => setShowCoachKaiChat(true)}
-            className="w-16 h-16 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary hover:from-kai-primary/90 hover:to-kai-secondary/90 shadow-2xl hover:shadow-kai-primary/25 group"
-          >
-            <motion.div
-              animate={{ rotate: [0, 10, -10, 0] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-            >
-              <Brain className="w-8 h-8 text-white group-hover:scale-110 transition-transform" />
-            </motion.div>
-          </Button>
-        )}
-      </motion.div>
-
-      {/* How It Works Modal */}
-      <AnimatePresence>
-        {showHowItWorks && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur z-50 flex items-center justify-center p-4"
-            onClick={() => setShowHowItWorks(false)}
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-slate-800 border border-border rounded-2xl p-8 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
-            >
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-2xl font-bold text-white flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-r from-kai-primary to-kai-secondary flex items-center justify-center">
-                    <Brain className="w-6 h-6 text-white" />
-                  </div>
-                  How Coach Kai Works
-                </h3>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setShowHowItWorks(false)}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-              
-              <div className="space-y-6">
-                {[
-                  {
-                    step: "1",
-                    title: "Upload Your Game",
-                    description: "Film 10-30 second clips showing 1-3 shots. Position camera at baseline, side-on, 10-15 ft away. Use daylight and keep steady.",
-                    icon: VideoIcon,
-                    color: "from-green-500 to-emerald-500"
-                  },
-                  {
-                    step: "2", 
-                    title: "AI Analysis",
-                    description: "Advanced computer vision analyzes your technique, movement patterns, shot selection, and strategic positioning.",
-                    icon: Brain,
-                    color: "from-blue-500 to-cyan-500"
-                  },
-                  {
-                    step: "3",
-                    title: "Detailed Insights",
-                    description: "Get professional-grade analysis with technique scores, movement heatmaps, and specific improvement recommendations.",
-                    icon: BarChart3,
-                    color: "from-purple-500 to-pink-500"
-                  },
-                  {
-                    step: "4",
-                    title: "Track Progress",
-                    description: "Monitor your improvement over time with before/after comparisons and personalized training suggestions.",
-                    icon: TrendingUp,
-                    color: "from-orange-500 to-yellow-500"
-                  }
-                ].map((item, idx) => (
-                  <div key={idx} className="flex gap-4 p-4 bg-card/30 rounded-xl border border-border">
-                    <div className={cn("w-16 h-16 rounded-xl bg-gradient-to-br flex items-center justify-center flex-shrink-0 shadow-lg", item.color)}>
-                      <item.icon className="w-8 h-8 text-white" />
-                    </div>
-                    <div>
-                      <h4 className="text-lg font-semibold text-white mb-2">
-                        Step {item.step}: {item.title}
-                      </h4>
-                      <p className="text-slate-100 text-sm">{item.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              
-              <div className="flex gap-3 mt-8">
-                <Button
-                  onClick={() => {
-                    setShowHowItWorks(false)
-                    setActiveTab('upload')
-                  }}
-                  className="flex-1 bg-gradient-to-r from-kai-primary to-kai-secondary hover:from-kai-primary/90 hover:to-kai-secondary/90"
-                >
-                  <Upload className="w-4 h-4 mr-2" />
-                  Start Analyzing
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setShowHowItWorks(false)}
-                  className="border-muted text-slate-300"
-                >
-                  Got It!
-                </Button>
-              </div>
-            </motion.div>
+          <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.5 }} className="fixed bottom-4 right-4 z-40">
+            <Button onClick={() => setShowCoachKaiChat(true)} className="w-14 h-14 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 shadow-xl">
+              <Brain className="w-7 h-7 text-white" />
+            </Button>
           </motion.div>
         )}
-      </AnimatePresence>
-    </div>
+
+        {/* Coach Kai Chat Panel */}
+        <AnimatePresence>
+          {showCoachKaiChat && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="fixed bottom-4 right-4 z-50 w-80"
+            >
+              <Card className="bg-slate-800 border-cyan-500/50 shadow-2xl">
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center">
+                        <Brain className="w-4 h-4 text-white" />
+                      </div>
+                      <CardTitle className="text-white text-base">Coach Kai</CardTitle>
+                    </div>
+                    <Button size="sm" variant="ghost" onClick={() => setShowCoachKaiChat(false)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <p className="text-sm text-slate-300">Need help? Upload a video and I'll analyze your technique!</p>
+                  <div className="flex gap-2">
+                    <Button size="sm" onClick={() => setActiveTab('upload')} className="flex-1 bg-cyan-500/20 border border-cyan-500/50 text-cyan-400">
+                      <Upload className="w-4 h-4 mr-1" /> Upload
+                    </Button>
+                    <Button size="sm" variant="outline" onClick={() => setShowHowItWorks(true)} className="border-slate-600">
+                      <HelpCircle className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* How It Works Modal */}
+        <AnimatePresence>
+          {showHowItWorks && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur z-50 flex items-center justify-center p-4"
+              onClick={() => setShowHowItWorks(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.9 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-lg w-full"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                    <Brain className="w-6 h-6 text-cyan-400" /> How It Works
+                  </h3>
+                  <Button variant="ghost" size="sm" onClick={() => setShowHowItWorks(false)}>
+                    <X className="w-5 h-5" />
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {[
+                    { step: "1", title: "Record", desc: "Film 10-30 sec clips, side-on from baseline, 10-15 ft away", icon: VideoIcon, color: "from-green-500 to-emerald-500" },
+                    { step: "2", title: "Upload", desc: "Drag & drop your video file (MP4, MOV, AVI up to 500MB)", icon: Upload, color: "from-blue-500 to-cyan-500" },
+                    { step: "3", title: "AI Analysis", desc: "Coach Kai analyzes technique, movement & strategy", icon: Brain, color: "from-purple-500 to-pink-500" },
+                    { step: "4", title: "Improve", desc: "Review insights, track progress, download reports", icon: TrendingUp, color: "from-orange-500 to-yellow-500" }
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex gap-3 p-3 bg-slate-700/50 rounded-lg">
+                      <div className={cn("w-12 h-12 rounded-lg bg-gradient-to-br flex items-center justify-center flex-shrink-0", item.color)}>
+                        <item.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white">Step {item.step}: {item.title}</h4>
+                        <p className="text-sm text-slate-300">{item.desc}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <Button onClick={() => { setShowHowItWorks(false); setActiveTab('upload'); }} className="w-full mt-4 bg-gradient-to-r from-cyan-500 to-blue-500">
+                  <Upload className="w-4 h-4 mr-2" /> Start Analyzing
+                </Button>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </>
   )
 }
