@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -25,6 +25,83 @@ import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
 import type { VideoAnalysisData, VideoLibraryStats } from "@/lib/video-analysis-types"
 import MainNavigation from "@/components/navigation/main-navigation"
+
+// Step images for the 4 Easy Steps
+const STEP_IMAGES = [
+  { step: "1", title: "Record", desc: "Capture 10-30 second clips of your shots", color: "from-green-500 to-emerald-500", image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png" },
+  { step: "2", title: "Upload", desc: "Drag & drop your video here", color: "from-blue-500 to-cyan-500", image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png" },
+  { step: "3", title: "AI Analyzes", desc: "Coach Kai reviews your technique", color: "from-purple-500 to-pink-500", image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png" },
+  { step: "4", title: "Improve", desc: "Get personalized drill recommendations", color: "from-orange-500 to-yellow-500", image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png" }
+]
+
+// Helper function to generate thumbnail from video URL
+function VideoThumbnail({ videoUrl, className }: { videoUrl: string; className?: string }) {
+  const [thumbnail, setThumbnail] = useState<string | null>(null)
+  const [loading, setLoading] = useState(true)
+  const videoRef = useRef<HTMLVideoElement>(null)
+
+  useEffect(() => {
+    if (!videoUrl) {
+      setLoading(false)
+      return
+    }
+
+    const video = document.createElement('video')
+    video.crossOrigin = 'anonymous'
+    video.preload = 'metadata'
+    video.muted = true
+    
+    video.onloadeddata = () => {
+      // Seek to 1 second to get a frame (avoid black intro frames)
+      video.currentTime = Math.min(1, video.duration * 0.1)
+    }
+    
+    video.onseeked = () => {
+      try {
+        const canvas = document.createElement('canvas')
+        canvas.width = video.videoWidth || 320
+        canvas.height = video.videoHeight || 180
+        const ctx = canvas.getContext('2d')
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height)
+          setThumbnail(canvas.toDataURL('image/jpeg', 0.7))
+        }
+      } catch (e) {
+        console.error('Error generating thumbnail:', e)
+      }
+      setLoading(false)
+    }
+    
+    video.onerror = () => {
+      setLoading(false)
+    }
+    
+    video.src = videoUrl
+    video.load()
+    
+    return () => {
+      video.src = ''
+    }
+  }, [videoUrl])
+
+  if (loading) {
+    return (
+      <div className={cn("w-full h-full flex items-center justify-center bg-slate-800", className)}>
+        <Loader2 className="w-8 h-8 text-slate-500 animate-spin" />
+      </div>
+    )
+  }
+
+  if (thumbnail) {
+    return <img src={thumbnail} alt="Video thumbnail" className={cn("w-full h-full object-cover", className)} />
+  }
+
+  return (
+    <div className={cn("w-full h-full flex items-center justify-center bg-slate-800", className)}>
+      <VideoIcon className="w-12 h-12 text-slate-600" />
+    </div>
+  )
+}
 
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
@@ -283,7 +360,7 @@ export default function VideoAnalysisHub() {
           </div>
         </div>
 
-        {/* Page Title & Tab Navigation - THE KEY REDESIGN */}
+        {/* Page Title & Tab Navigation */}
         <div className="container mx-auto max-w-7xl px-4 pt-6">
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6">
             <div className="flex items-center justify-between mb-4">
@@ -320,10 +397,88 @@ export default function VideoAnalysisHub() {
                 </TabsTrigger>
               </TabsList>
 
-              {/* UPLOAD TAB - Streamlined with upload at top */}
+              {/* UPLOAD TAB - Redesigned with marketing and prominent steps */}
               <TabsContent value="upload" className="mt-6">
+                {/* VALUE PROPOSITION - Marketing Section */}
+                <Card className="bg-gradient-to-r from-cyan-500/10 via-blue-500/10 to-purple-500/10 border-cyan-500/30 mb-6">
+                  <CardContent className="p-6">
+                    <div className="flex flex-col md:flex-row gap-6 items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
+                          <Brain className="w-10 h-10 text-white" />
+                        </div>
+                      </div>
+                      <div className="flex-1 text-center md:text-left">
+                        <h2 className="text-xl md:text-2xl font-bold text-white mb-2">
+                          Transform Your Game with AI-Powered Coaching
+                        </h2>
+                        <p className="text-slate-300 leading-relaxed">
+                          Upload your pickleball footage and let <span className="text-cyan-400 font-semibold">Coach Kai</span> analyze every aspect of your game. 
+                          Our AI identifies technique flaws, movement patterns, and strategic opportunities invisible to the naked eye. 
+                          Receive <span className="text-cyan-400 font-semibold">personalized drill recommendations</span> that target your specific weaknesses, 
+                          track your progress over time, and see exactly what's holding you back from the next level. 
+                          It's like having a pro coach in your pocket — available 24/7.
+                        </p>
+                        <div className="flex flex-wrap gap-3 mt-4 justify-center md:justify-start">
+                          <Badge className="bg-cyan-500/20 text-cyan-300 border-cyan-500/30">
+                            <Target className="w-3 h-3 mr-1" /> Technique Scoring
+                          </Badge>
+                          <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/30">
+                            <TrendingUp className="w-3 h-3 mr-1" /> Progress Tracking
+                          </Badge>
+                          <Badge className="bg-orange-500/20 text-orange-300 border-orange-500/30">
+                            <Lightbulb className="w-3 h-3 mr-1" /> Drill Recommendations
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* 4 EASY STEPS - PROMINENT IMAGE CARDS */}
+                <div className="mb-6">
+                  <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-cyan-400" />
+                    4 Easy Steps to Better Pickleball
+                  </h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {STEP_IMAGES.map((item, idx) => (
+                      <motion.div
+                        key={idx}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: idx * 0.1 }}
+                      >
+                        <Card className="bg-slate-800/50 border-slate-700 overflow-hidden hover:border-cyan-500/50 transition-all group h-full">
+                          {/* Large Image */}
+                          <div className="relative aspect-[4/3] overflow-hidden">
+                            <Image 
+                              src={item.image} 
+                              alt={item.title} 
+                              fill 
+                              className="object-cover group-hover:scale-105 transition-transform duration-300" 
+                            />
+                            <div className={cn("absolute inset-0 bg-gradient-to-t opacity-70", item.color)}></div>
+                            {/* Step Number Badge */}
+                            <div className="absolute top-3 left-3">
+                              <div className={cn("w-10 h-10 rounded-full bg-gradient-to-br flex items-center justify-center shadow-lg", item.color)}>
+                                <span className="text-white font-bold text-lg">{item.step}</span>
+                              </div>
+                            </div>
+                          </div>
+                          {/* Title & Description */}
+                          <CardContent className="p-4">
+                            <h4 className="font-bold text-white text-lg mb-1">{item.title}</h4>
+                            <p className="text-sm text-slate-400">{item.desc}</p>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
                 <div className="grid lg:grid-cols-3 gap-6">
-                  {/* Upload Section - IMMEDIATELY VISIBLE */}
+                  {/* Upload Section - Main Area */}
                   <div className="lg:col-span-2">
                     <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
                       <CardHeader className="pb-4">
@@ -408,7 +563,7 @@ export default function VideoAnalysisHub() {
                     </Card>
                   </div>
 
-                  {/* Sidebar - Tips & 4 Easy Steps */}
+                  {/* Sidebar - Tips */}
                   <div className="space-y-4">
                     {/* Coach Kai Tip */}
                     <Card className="bg-gradient-to-br from-cyan-500/10 to-blue-500/10 border-cyan-500/30">
@@ -418,35 +573,32 @@ export default function VideoAnalysisHub() {
                             <Brain className="w-5 h-5 text-white" />
                           </div>
                           <div>
-                            <h4 className="font-semibold text-white text-sm mb-1">💡 Pro Tip</h4>
+                            <h4 className="font-semibold text-white text-sm mb-1">💡 Pro Tip from Coach Kai</h4>
                             <p className="text-cyan-100 text-sm">{coachTipOfDay}</p>
                           </div>
                         </div>
                       </CardContent>
                     </Card>
 
-                    {/* 4 Easy Steps */}
+                    {/* Recording Tips Card */}
                     <Card className="bg-slate-800/50 border-slate-700">
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-white text-base">4 Easy Steps</CardTitle>
+                        <CardTitle className="text-white text-base flex items-center gap-2">
+                          <VideoIcon className="w-4 h-4 text-cyan-400" />
+                          Recording Tips
+                        </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-3">
                         {[
-                          { step: "1", title: "Record", desc: "10-30 sec clip", color: "from-green-500 to-emerald-500", image: "https://cdn.abacus.ai/images/e2b1aa1b-d6f2-4341-9296-324156f05f0e.png" },
-                          { step: "2", title: "Upload", desc: "Drop file here", color: "from-blue-500 to-cyan-500", image: "https://cdn.abacus.ai/images/2470ac2a-c810-4c3b-982f-f95bd2b187b6.png" },
-                          { step: "3", title: "Analyze", desc: "AI does the work", color: "from-purple-500 to-pink-500", image: "https://cdn.abacus.ai/images/bbe20fff-0d44-4a08-90af-f116a554a05a.png" },
-                          { step: "4", title: "Improve", desc: "Review insights", color: "from-orange-500 to-yellow-500", image: "https://cdn.abacus.ai/images/cd3440d7-0eab-48a5-b4c6-97da95c330e9.png" }
+                          { icon: "📹", tip: "Film side-on from the baseline" },
+                          { icon: "☀️", tip: "Natural light works best" },
+                          { icon: "📱", tip: "Use a tripod or stable surface" },
+                          { icon: "🎯", tip: "Capture 1-3 shots per clip" },
+                          { icon: "📏", tip: "Position 10-15 ft from court" }
                         ].map((item, idx) => (
-                          <div key={idx} className="flex items-center gap-3 p-2 rounded-lg hover:bg-slate-700/30 transition-colors">
-                            <div className="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0">
-                              <Image src={item.image} alt={item.title} fill className="object-cover" />
-                              <div className={cn("absolute inset-0 bg-gradient-to-br opacity-60", item.color)}></div>
-                              <span className="absolute inset-0 flex items-center justify-center text-white font-bold text-lg">{item.step}</span>
-                            </div>
-                            <div>
-                              <p className="font-medium text-white text-sm">{item.title}</p>
-                              <p className="text-xs text-slate-400">{item.desc}</p>
-                            </div>
+                          <div key={idx} className="flex items-center gap-2 text-sm">
+                            <span className="text-lg">{item.icon}</span>
+                            <span className="text-slate-300">{item.tip}</span>
                           </div>
                         ))}
                       </CardContent>
@@ -455,7 +607,7 @@ export default function VideoAnalysisHub() {
                 </div>
               </TabsContent>
 
-              {/* LIBRARY TAB - Main destination, prominent */}
+              {/* LIBRARY TAB - Video Grid with generated thumbnails */}
               <TabsContent value="library" className="mt-6">
                 {/* Stats Row */}
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -502,8 +654,11 @@ export default function VideoAnalysisHub() {
                       >
                         <Card className="bg-slate-800/50 border-slate-700 overflow-hidden hover:border-cyan-500/50 transition-all group">
                           <div className="aspect-video relative bg-slate-900">
+                            {/* Use custom VideoThumbnail component that generates from video URL */}
                             {video.thumbnailUrl ? (
                               <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" />
+                            ) : video.videoUrl || (video as any).cloud_storage_path ? (
+                              <VideoThumbnail videoUrl={video.videoUrl || (video as any).cloud_storage_path} />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center">
                                 <VideoIcon className="w-12 h-12 text-slate-600" />
