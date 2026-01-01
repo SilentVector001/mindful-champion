@@ -93,11 +93,9 @@ export default function VideoPlayer({ videos, drillName }: VideoPlayerProps) {
                           {video.title}
                         </h5>
                       </div>
-                      {video.description && (
-                        <p className="text-xs text-slate-600 dark:text-gray-400 line-clamp-2 mb-2">
-                          {video.description}
-                        </p>
-                      )}
+                      <p className="text-xs text-slate-600 dark:text-gray-400 line-clamp-2 mb-2">
+                        {video.description}
+                      </p>
                       <div className="flex flex-wrap gap-2 items-center">
                         <Badge variant="outline" className="text-xs">
                           <Clock className="h-2.5 w-2.5 mr-1" />

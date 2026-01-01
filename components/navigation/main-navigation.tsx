@@ -312,25 +312,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {/* Play Link */}
-            <InfoTooltip content="Play Court Kings - Practice your pickleball skills in a fun game">
-              <Link href="/play">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className={cn(
-                    "gap-1.5 font-medium transition-all text-xs lg:text-sm px-2 lg:px-3 whitespace-nowrap",
-                    isActive("/play")
-                      ? "bg-emerald-500/10 text-emerald-400"
-                      : "text-gray-700 dark:text-gray-300 hover:text-emerald-400 hover:bg-emerald-500/5"
-                  )}
-                >
-                  <Gamepad2 className="w-3.5 h-3.5 lg:w-4 lg:h-4 flex-shrink-0" />
-                  Play
-                </Button>
-              </Link>
-            </InfoTooltip>
-
             {/* Progress Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -492,6 +473,21 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                           <Badge className="bg-teal-500/20 text-teal-600 dark:text-teal-400 text-xs">New</Badge>
                         </div>
                         <p className="text-xs text-gray-500">Share & discover videos</p>
+                      </div>
+                    </Link>
+                  </DropdownMenuItem>
+                </InfoTooltip>
+                
+                <InfoTooltip content="Play Court Kings - Practice your pickleball skills in a fun game" side="right">
+                  <DropdownMenuItem asChild>
+                    <Link href="/play" className="flex items-center gap-3 py-3 cursor-pointer bg-gradient-to-r from-emerald-50/50 to-green-50/50 dark:from-emerald-900/20 dark:to-green-900/20">
+                      <Gamepad2 className="w-4 h-4 text-emerald-500" />
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium">Court Kings Play</p>
+                          <Badge className="bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-xs">Game</Badge>
+                        </div>
+                        <p className="text-xs text-gray-500">Fun pickleball practice</p>
                       </div>
                     </Link>
                   </DropdownMenuItem>
@@ -891,13 +887,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     Quick Practice
                   </Button>
                 </Link>
-
-                <Link href="/play" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-emerald-500/5 to-cyan-500/5 hover:from-emerald-500/10">
-                    <Gamepad2 className="w-5 h-5 text-emerald-400" />
-                    <span className="font-semibold">Play Court Kings</span>
-                  </Button>
-                </Link>
               </div>
 
               <Separator className="my-4" />
@@ -985,14 +974,13 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   </Button>
                 </Link>
 
-                {/* TEMPORARILY HIDDEN - Can be restored later
-                <Link href="/connect/community" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <MessageCircle className="w-5 h-5 text-emerald-500" />
-                    Community Board
+                <Link href="/play" onClick={closeMobileMenu}>
+                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base bg-gradient-to-r from-emerald-50/50 to-green-50/50 hover:from-emerald-100/50 hover:to-green-100/50">
+                    <Gamepad2 className="w-5 h-5 text-emerald-500" />
+                    <span className="font-semibold">Court Kings Play</span>
+                    <Badge className="ml-auto bg-emerald-500/20 text-emerald-600 text-xs">Game</Badge>
                   </Button>
                 </Link>
-                */}
 
                 <Link href="/coaches" onClick={closeMobileMenu}>
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">

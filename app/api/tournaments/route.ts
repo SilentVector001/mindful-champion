@@ -4,43 +4,30 @@ import { TournamentStatus } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-// Map full state names to abbreviations (database stores abbreviations)
-const STATE_NAME_TO_ABBR: Record<string, string> = {
-  'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
-  'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
-  'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
-  'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
-  'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
-  'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
-  'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
-  'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
-  'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
-  'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
-}
-
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const status = searchParams.get('status')
-    const stateParam = searchParams.get('state')
+    const state = searchParams.get('state')
     const limit = searchParams.get('limit')
     const type = searchParams.get('type') // championship, amateur, etc.
 
     const where: any = {}
 
+    // Always filter to upcoming tournaments (startDate >= today)
+    const upcoming = searchParams.get('upcoming')
+    if (upcoming !== 'false') {
+      where.startDate = {
+        gte: new Date()
+      }
+    }
+
     if (status) {
       where.status = status as TournamentStatus
     }
 
-    // Support both abbreviation (FL) and full name (Florida)
-    // Database stores state abbreviations, so we need to convert full names to abbreviations
-    if (stateParam) {
-      // If it's already an abbreviation (2 characters), use it as-is
-      // If it's a full name, convert to abbreviation
-      const stateAbbr = stateParam.length === 2 
-        ? stateParam.toUpperCase() 
-        : STATE_NAME_TO_ABBR[stateParam] || stateParam
-      where.state = stateAbbr
+    if (state) {
+      where.state = state
     }
 
     // Fetch tournaments

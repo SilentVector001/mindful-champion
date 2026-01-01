@@ -4,20 +4,18 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { buildKaiSystemPrompt } from "@/lib/coach-kai/system-prompt";
-import { extractTechniquesFromText, matchDrillsToTechniques } from "@/lib/coach-kai/drill-matcher";
-import { detectEmotion, getEmotionalAcknowledgment } from "@/lib/coach-kai/emotion-detector";
-import { parseKaiResponse } from "@/lib/coach-kai/response-parser";
+import { buildEnhancedKaiSystemPrompt, FUNCTION_TOOLS, PICKLEBALL_KNOWLEDGE_BASE } from "@/lib/coach-kai/enhanced-system-prompt";
+import { detectIntent, matchDeficiency, processFunctionCall, FunctionResult } from "@/lib/coach-kai/function-handler";
 
 /**
- * Enhanced Coach Kai - Emotionally Intelligent AI Coach with Action Cards
+ * Enhanced Coach Kai - Emotionally Intelligent AI Coach with Function Calling
  * 
  * Features:
- * - Emotional intelligence (detects frustration, excitement, anxiety)
- * - Technical insight extraction (identifies technique issues)
- * - Action cards (drills, goals, video analysis, pro comparison)
- * - Conversation memory
- * - Streaming responses
+ * - GPT-4o level intelligence with custom system prompt
+ * - Function calling for calendar, messaging, drills, analysis
+ * - Pickleball deficiency knowledge base
+ * - Emotional intelligence and intent detection
+ * - Streaming responses with action suggestions
  */
 
 export async function POST(req: NextRequest) {
@@ -32,13 +30,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { messages } = await req.json();
+    const { messages, hasMedia } = await req.json();
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Messages required" }, { status: 400 });
     }
 
     const lastUserMessage = messages[messages.length - 1];
-    const messageText = lastUserMessage.content;
+    const messageText = lastUserMessage?.content || '';
 
     // ============================================
     // LOAD USER DATA AND CONTEXT
@@ -84,42 +82,46 @@ export async function POST(req: NextRequest) {
     // ANALYZE USER MESSAGE
     // ============================================
     
-    // Detect emotional state
-    const emotionAnalysis = detectEmotion(messageText);
+    const detectedIntent = detectIntent(messageText);
+    const matchedDeficiency = matchDeficiency(messageText);
     
-    // Extract technical topics
-    const detectedTechniques = extractTechniquesFromText(messageText);
-    
-    // Match relevant drills
-    const relevantDrills = matchDrillsToTechniques(detectedTechniques, skillLevel, 5);
-    
-    // Get recent conversation topics
-    const recentTopics = conversation?.messages
-      ?.filter((m: any) => m.role === 'user')
+    // Build conversation history context
+    const recentHistory = conversation?.messages
       ?.slice(0, 3)
-      ?.flatMap((m: any) => extractTechniquesFromText(m.content)) || [];
+      ?.map((m: any) => `${m.role}: ${m.content?.substring(0, 100)}`)
+      ?.join('\n') || '';
 
     // ============================================
-    // BUILD SYSTEM PROMPT
+    // BUILD ENHANCED SYSTEM PROMPT
     // ============================================
     
-    const systemPrompt = buildKaiSystemPrompt(
+    const systemPrompt = buildEnhancedKaiSystemPrompt(
       userName,
       skillLevel,
       rating,
       goals,
       challenges,
-      relevantDrills,
-      userGoals.map(g => ({ title: g.title, progress: g.progress })),
-      [...new Set(recentTopics)]
+      recentHistory
     );
 
+    // Add context hints based on detected intent
+    let contextHint = '';
+    if (detectedIntent === 'scheduling') {
+      contextHint = '\n\n[SYSTEM HINT: User appears to be discussing scheduling. Consider using add_to_calendar function.]';
+    } else if (detectedIntent === 'social') {
+      contextHint = '\n\n[SYSTEM HINT: User wants to connect with someone. Ask for confirmation before using send_message function.]';
+    } else if (detectedIntent === 'technique' && matchedDeficiency) {
+      contextHint = `\n\n[SYSTEM HINT: User has ${matchedDeficiency.category} issue. Recommend: "${matchedDeficiency.drill}" - ${matchedDeficiency.drillDescription}]`;
+    } else if (detectedIntent === 'analysis' || hasMedia) {
+      contextHint = '\n\n[SYSTEM HINT: User is discussing video/image analysis. Use analyze_technique function if appropriate.]';
+    }
+
     // ============================================
-    // BUILD CONVERSATION CONTEXT
+    // BUILD CONVERSATION FOR LLM
     // ============================================
     
     const conversationMessages = [
-      { role: "system", content: systemPrompt },
+      { role: "system", content: systemPrompt + contextHint },
       ...messages.slice(-9).map((msg: any) => ({
         role: msg.role,
         content: msg.content
@@ -127,7 +129,7 @@ export async function POST(req: NextRequest) {
     ];
 
     // ============================================
-    // STREAM RESPONSE FROM LLM
+    // STREAM RESPONSE FROM LLM WITH FUNCTION CALLING
     // ============================================
     
     const response = await fetch('https://apps.abacus.ai/v1/chat/completions', {
@@ -137,13 +139,15 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4.1-mini',
+        model: 'gpt-4o',  // Fixed: was 'gpt-4.1-mini' (invalid model)
         messages: conversationMessages,
         stream: true,
-        max_tokens: 800,
-        temperature: 0.9,
-        presence_penalty: 0.6,
-        frequency_penalty: 0.5
+        max_tokens: 1000,
+        temperature: 0.85,
+        presence_penalty: 0.5,
+        frequency_penalty: 0.4,
+        tools: FUNCTION_TOOLS,
+        tool_choice: 'auto'
       })
     });
 
@@ -157,6 +161,8 @@ export async function POST(req: NextRequest) {
     const decoder = new TextDecoder();
     
     let fullResponse = '';
+    let toolCalls: any[] = [];
+    let currentToolCall: any = null;
     
     const stream = new ReadableStream({
       async start(controller) {
@@ -181,13 +187,31 @@ export async function POST(req: NextRequest) {
                 
                 try {
                   const parsed = JSON.parse(data);
-                  const content = parsed.choices?.[0]?.delta?.content || '';
-                  if (content) {
-                    fullResponse += content;
-                    
-                    // Stream text content (stop at action cards marker)
-                    if (!fullResponse.includes('[ACTION_CARDS]')) {
-                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'text', content })}\n\n`));
+                  const delta = parsed.choices?.[0]?.delta;
+                  
+                  // Handle text content
+                  if (delta?.content) {
+                    fullResponse += delta.content;
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                      type: 'text', 
+                      content: delta.content 
+                    })}\n\n`));
+                  }
+                  
+                  // Handle tool calls
+                  if (delta?.tool_calls) {
+                    for (const tc of delta.tool_calls) {
+                      if (tc.index !== undefined) {
+                        if (!toolCalls[tc.index]) {
+                          toolCalls[tc.index] = { id: tc.id, function: { name: '', arguments: '' } };
+                        }
+                        if (tc.function?.name) {
+                          toolCalls[tc.index].function.name = tc.function.name;
+                        }
+                        if (tc.function?.arguments) {
+                          toolCalls[tc.index].function.arguments += tc.function.arguments;
+                        }
+                      }
                     }
                   }
                 } catch (e) {
@@ -197,27 +221,58 @@ export async function POST(req: NextRequest) {
             }
           }
           
-          // Parse complete response for action cards
-          const parsed = parseKaiResponse(fullResponse);
+          // Process completed tool calls into action suggestions
+          const actionSuggestions: FunctionResult[] = [];
           
-          // Send action cards
-          if (parsed.actionCards.length > 0) {
+          for (const tc of toolCalls) {
+            if (tc?.function?.name && tc?.function?.arguments) {
+              try {
+                const args = JSON.parse(tc.function.arguments);
+                const result = processFunctionCall({
+                  name: tc.function.name,
+                  arguments: args
+                });
+                actionSuggestions.push(result);
+              } catch (e) {
+                console.error('[Coach Kai] Failed to parse tool call:', e);
+              }
+            }
+          }
+          
+          // Also detect actions from text if no tool calls
+          if (actionSuggestions.length === 0 && matchedDeficiency) {
+            actionSuggestions.push({
+              type: 'resource',
+              action: 'Start Drill',
+              data: {
+                type: 'drill',
+                title: matchedDeficiency.drill,
+                details: matchedDeficiency.drillDescription,
+                category: matchedDeficiency.category,
+                whyItHelps: matchedDeficiency.whyItHelps
+              },
+              requiresConfirmation: true,
+              confirmationPrompt: `Start the "${matchedDeficiency.drill}" to improve your ${matchedDeficiency.category.toLowerCase()}?`
+            });
+          }
+          
+          // Send action suggestions
+          if (actionSuggestions.length > 0) {
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
               type: 'actions', 
-              cards: parsed.actionCards 
+              suggestions: actionSuggestions 
             })}\n\n`));
           }
           
           // Send completion with metadata
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
             type: 'complete',
-            emotion: emotionAnalysis.primaryEmotion,
-            techniques: detectedTechniques,
-            needsSupport: emotionAnalysis.needsSupport
+            intent: detectedIntent,
+            deficiency: matchedDeficiency?.category || null
           })}\n\n`));
           
           // Save to database (async, don't block response)
-          saveConversation(session.user.id, messageText, parsed.message).catch(console.error);
+          saveConversation(session.user.id, messageText, fullResponse).catch(console.error);
           
         } catch (error) {
           console.error('[Coach Kai] Stream error:', error);

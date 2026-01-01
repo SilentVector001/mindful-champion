@@ -2,6 +2,7 @@
 
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
+import { Suspense } from "react"
 import "./globals.css"
 import "./ios-fixes.css"
 import "./mobile-fixes.css"
@@ -20,6 +21,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#00D084" },
+    { media: "(prefers-color-scheme: dark)", color: "#1A1D29" },
+  ],
 }
 
 export const metadata: Metadata = {
@@ -121,11 +126,13 @@ export default function RootLayout({
         <SessionProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="light"
-            enableSystem
+            defaultTheme="dark"
+            enableSystem={false}
             disableTransitionOnChange
           >
-            <PageTracker />
+            <Suspense fallback={null}>
+              <PageTracker />
+            </Suspense>
             <WarningNotificationPopup />
             <LiveNowBanner />
             {children}

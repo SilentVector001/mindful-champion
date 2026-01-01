@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { prisma } from '@/lib/db';
 import { SponsorApplicationStatus, SponsorTier } from '@/lib/prisma-types';
 import { sendSponsorApprovalEmail } from '@/lib/email/sponsor-approval-email';
+import { sendSponsorRejectionEmail } from '@/lib/email/sponsor-rejection-email';
 
 // Approve/reject application
 export async function PATCH(
@@ -149,6 +150,29 @@ export async function PATCH(
           console.error(`❌ Failed to send approval notification to ${application.email}:`, emailError);
           // Continue with approval even if email fails
         }
+      }
+    }
+
+    // If rejected, send rejection email to applicant
+    if (status === 'REJECTED') {
+      // Find if user exists for this email
+      const user = await prisma.user.findUnique({
+        where: { email: application.email }
+      });
+
+      try {
+        await sendSponsorRejectionEmail({
+          companyName: application.companyName,
+          contactPerson: application.contactPerson,
+          email: application.email,
+          rejectionReason: reviewNotes || undefined,
+          applicationId: application.id,
+          userId: user?.id, // Log to database if user exists
+        });
+        console.log(`✅ Rejection email sent to ${application.email} for ${application.companyName}`);
+      } catch (emailError: any) {
+        console.error(`❌ Failed to send rejection email to ${application.email}:`, emailError);
+        // Continue with rejection even if email fails
       }
     }
 

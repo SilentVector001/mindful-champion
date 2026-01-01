@@ -34,70 +34,20 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatPrizeMoney } from "@/lib/utils/currency"
 
-// Helper to extract state from location and build registration URL
-const getRegistrationUrl = (location?: string) => {
-  if (!location) return "https://pickleballtournaments.com/"
-  // Extract state abbreviation from "City, ST" format
-  const match = location.match(/,\s*([A-Z]{2})$/)
-  if (match) {
-    return `https://pickleballtournaments.com/?state=${match[1]}`
-  }
-  return "https://pickleballtournaments.com/"
+// Helper to get registration URL - directs to official tour sites
+const getRegistrationUrl = (tournament?: any) => {
+  // If tournament has a specific registration URL, use it
+  if (tournament?.registrationUrl) return tournament.registrationUrl
+  // Default to PPA Tour schedule page
+  return "https://ppatour.com/schedule/"
 }
 
-// States sorted by tournament count (descending) for heat map effect
-const US_STATES = [
-  { abbr: "FL", name: "Florida", events: 156 },
-  { abbr: "CA", name: "California", events: 128 },
-  { abbr: "TX", name: "Texas", events: 89 },
-  { abbr: "AZ", name: "Arizona", events: 45 },
-  { abbr: "NY", name: "New York", events: 35 },
-  { abbr: "CO", name: "Colorado", events: 34 },
-  { abbr: "GA", name: "Georgia", events: 28 },
-  { abbr: "WA", name: "Washington", events: 28 },
-  { abbr: "PA", name: "Pennsylvania", events: 27 },
-  { abbr: "NC", name: "North Carolina", events: 26 },
-  { abbr: "NJ", name: "New Jersey", events: 24 },
-  { abbr: "OH", name: "Ohio", events: 23 },
-  { abbr: "IL", name: "Illinois", events: 22 },
-  { abbr: "NV", name: "Nevada", events: 22 },
-  { abbr: "VA", name: "Virginia", events: 22 },
-  { abbr: "MA", name: "Massachusetts", events: 21 },
-  { abbr: "UT", name: "Utah", events: 21 },
-  { abbr: "MI", name: "Michigan", events: 19 },
-  { abbr: "SC", name: "South Carolina", events: 19 },
-  { abbr: "MD", name: "Maryland", events: 18 },
-  { abbr: "OR", name: "Oregon", events: 18 },
-  { abbr: "TN", name: "Tennessee", events: 17 },
-  { abbr: "MN", name: "Minnesota", events: 16 },
-  { abbr: "CT", name: "Connecticut", events: 15 },
-  { abbr: "IN", name: "Indiana", events: 14 },
-  { abbr: "WI", name: "Wisconsin", events: 14 },
-  { abbr: "AL", name: "Alabama", events: 12 },
-  { abbr: "MO", name: "Missouri", events: 12 },
-  { abbr: "ID", name: "Idaho", events: 11 },
-  { abbr: "LA", name: "Louisiana", events: 11 },
-  { abbr: "KY", name: "Kentucky", events: 10 },
-  { abbr: "OK", name: "Oklahoma", events: 10 },
-  { abbr: "IA", name: "Iowa", events: 9 },
-  { abbr: "NM", name: "New Mexico", events: 9 },
-  { abbr: "AR", name: "Arkansas", events: 8 },
-  { abbr: "HI", name: "Hawaii", events: 8 },
-  { abbr: "NH", name: "New Hampshire", events: 8 },
-  { abbr: "KS", name: "Kansas", events: 7 },
-  { abbr: "NE", name: "Nebraska", events: 7 },
-  { abbr: "ME", name: "Maine", events: 6 },
-  { abbr: "MS", name: "Mississippi", events: 6 },
-  { abbr: "DE", name: "Delaware", events: 5 },
-  { abbr: "MT", name: "Montana", events: 5 },
-  { abbr: "RI", name: "Rhode Island", events: 5 },
-  { abbr: "VT", name: "Vermont", events: 5 },
-  { abbr: "WV", name: "West Virginia", events: 5 },
-  { abbr: "ND", name: "North Dakota", events: 4 },
-  { abbr: "SD", name: "South Dakota", events: 4 },
-  { abbr: "AK", name: "Alaska", events: 3 },
-  { abbr: "WY", name: "Wyoming", events: 3 },
-]
+// State type for real database data
+interface StateData {
+  abbr: string
+  name: string
+  events: number
+}
 
 const CATEGORIES = [
   {
@@ -173,7 +123,6 @@ interface TournamentStats {
   totalPrize: number
   statesCovered: number
   dateRange?: string
-  stateCounts?: Record<string, number>
 }
 
 export function TournamentHub() {
@@ -185,23 +134,14 @@ export function TournamentHub() {
   const [featuredTournaments, setFeaturedTournaments] = useState<Tournament[]>([])
   const [upcomingEvents, setUpcomingEvents] = useState<Tournament[]>([])
   const [stats, setStats] = useState<TournamentStats | null>(null)
+  const [stateData, setStateData] = useState<StateData[]>([])
   const [loading, setLoading] = useState(true)
+  const [statesLoading, setStatesLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Get event count for a state - prefer live data from API, fallback to static
-  const getStateEventCount = (abbr: string): number => {
-    if (stats?.stateCounts && stats.stateCounts[abbr] !== undefined) {
-      return stats.stateCounts[abbr]
-    }
-    // Fallback to static data if API doesn't have this state
-    const staticState = US_STATES.find(s => s.abbr === abbr)
-    return staticState?.events || 0
-  }
-
-  // Calculate min and max event counts for gradient scaling (from live data when available)
-  const allEventCounts = US_STATES.map(s => getStateEventCount(s.abbr))
-  const minEvents = Math.min(...allEventCounts)
-  const maxEvents = Math.max(...allEventCounts, 1) // Ensure at least 1 to avoid division by zero
+  // Calculate min and max event counts for gradient scaling from real data
+  const minEvents = stateData?.length > 0 ? Math.min(...stateData.filter(s => s.events > 0).map(s => s.events), 1) : 1
+  const maxEvents = stateData?.length > 0 ? Math.max(...stateData.map(s => s.events), 1) : 1
 
   // Generate gradient color based on event count
   const getStateGradient = (eventCount: number) => {
@@ -294,9 +234,10 @@ export function TournamentHub() {
   useEffect(() => {
     setIsClient(true)
     fetchTournamentData()
+    fetchStateData()
   }, [])
 
-  const fetchTournamentData = async (stateFilter?: string | null) => {
+  const fetchTournamentData = async () => {
     try {
       setLoading(true)
       setError(null)
@@ -313,12 +254,8 @@ export function TournamentHub() {
       const statsData = await statsRes?.json()
       setStats(statsData || null)
 
-      // Fetch upcoming events with optional state filter
-      const limit = stateFilter ? 20 : 3 // Show more when filtering by state
-      const upcomingUrl = stateFilter 
-        ? `/api/tournaments?limit=${limit}&state=${stateFilter}`
-        : `/api/tournaments?limit=${limit}`
-      const upcomingRes = await fetch(upcomingUrl)
+      // Fetch upcoming events (first 3 tournaments)
+      const upcomingRes = await fetch('/api/tournaments?limit=3')
       if (!upcomingRes?.ok) throw new Error('Failed to fetch upcoming events')
       const upcomingData = await upcomingRes?.json()
       setUpcomingEvents(upcomingData?.tournaments || [])
@@ -330,7 +267,23 @@ export function TournamentHub() {
     }
   }
 
-  const filteredStates = US_STATES?.filter?.(state =>
+  const fetchStateData = async () => {
+    try {
+      setStatesLoading(true)
+      const res = await fetch('/api/tournaments/by-state')
+      if (!res?.ok) throw new Error('Failed to fetch state data')
+      const data = await res?.json()
+      setStateData(data?.states || [])
+    } catch (err) {
+      console.error('Error fetching state data:', err)
+      // Set empty array on error
+      setStateData([])
+    } finally {
+      setStatesLoading(false)
+    }
+  }
+
+  const filteredStates = stateData?.filter?.(state =>
     state?.name?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '') ||
     state?.abbr?.toLowerCase?.()?.includes?.(searchQuery?.toLowerCase?.() || '')
   ) || []
@@ -518,7 +471,7 @@ export function TournamentHub() {
                       <div className="text-champion-gold font-semibold">
                         {tournament?.prizePool ? formatPrizeMoney(tournament?.prizePool) : 'Prize TBA'}
                       </div>
-                      <a href={getRegistrationUrl(tournament?.location)} target="_blank" rel="noopener noreferrer">
+                      <a href={getRegistrationUrl(tournament)} target="_blank" rel="noopener noreferrer">
                         <Button size="sm" className="bg-champion-green hover:bg-champion-green/90">
                           <ExternalLink className="w-3 h-3 mr-1" />
                           Register
@@ -598,15 +551,12 @@ export function TournamentHub() {
               className="mb-4 flex items-center justify-center gap-2"
             >
               <Badge className="bg-champion-green/20 text-champion-green border-champion-green/30 px-4 py-2 text-base">
-                Showing tournaments in {US_STATES.find(s => s.abbr === selectedState)?.name || selectedState}
+                Showing tournaments in {stateData?.find?.(s => s?.abbr === selectedState)?.name || selectedState}
               </Badge>
               <Button
                 size="sm"
                 variant="ghost"
-                onClick={() => {
-                  setSelectedState(null)
-                  fetchTournamentData(null)
-                }}
+                onClick={() => setSelectedState(null)}
                 className="text-gray-400 hover:text-white hover:bg-white/10"
               >
                 Clear Filter ✕
@@ -614,46 +564,52 @@ export function TournamentHub() {
             </motion.div>
           )}
 
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
-            {filteredStates?.map?.((state) => {
-              const eventCount = getStateEventCount(state?.abbr)
-              const gradient = getStateGradient(eventCount)
-              return (
-                <motion.button
-                  key={state?.abbr}
-                  onClick={() => {
-                    // Set selected state and fetch filtered tournaments
-                    setSelectedState(state?.abbr)
-                    fetchTournamentData(state?.abbr)
-                    // Scroll to upcoming events section
-                    setTimeout(() => {
-                      document.getElementById('upcoming-events')?.scrollIntoView({ 
-                        behavior: 'smooth', 
-                        block: 'start' 
-                      })
-                    }, 100)
-                  }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`p-3 rounded-lg border transition-all text-center relative overflow-hidden group ${
-                    selectedState === state?.abbr
-                      ? "bg-champion-green border-champion-green text-white shadow-lg shadow-champion-green/50"
-                      : `bg-gradient-to-br ${gradient.from} ${gradient.to} ${gradient.border} ${gradient.glow} hover:scale-105 shadow-lg backdrop-blur-sm`
-                  }`}
-                >
-                  {/* Shimmer effect on hover */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
-                  
-                  <div className={`text-lg font-bold relative z-10 ${selectedState === state?.abbr ? 'text-white' : gradient.text}`}>
-                    {state?.abbr}
-                  </div>
-                  <div className={`text-xs relative z-10 ${selectedState === state?.abbr ? 'text-white/80' : 'text-white/70'}`}>
-                    {eventCount} {eventCount === 1 ? 'event' : 'events'}
-                  </div>
-                </motion.button>
-              )
-            }) || []}
-          </div>
+          {statesLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="w-8 h-8 text-champion-green mx-auto animate-spin" />
+              <p className="text-gray-400 mt-2">Loading state data...</p>
+            </div>
+          ) : filteredStates?.length === 0 ? (
+            <div className="text-center py-12">
+              <Globe className="w-12 h-12 text-gray-500 mx-auto mb-3" />
+              <p className="text-gray-400">No states found matching your search</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+              {filteredStates?.map?.((state) => {
+                const gradient = getStateGradient(state?.events || 0)
+                return (
+                  <motion.button
+                    key={state?.abbr}
+                    onClick={() => {
+                      // Set state filter and scroll to events section
+                      setSelectedState(state?.abbr || null)
+                      setTimeout(() => {
+                        document.getElementById('upcoming-events')?.scrollIntoView({ behavior: 'smooth' })
+                      }, 100)
+                    }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`p-3 rounded-lg border transition-all text-center relative overflow-hidden group ${
+                      selectedState === state?.abbr
+                        ? "bg-champion-green border-champion-green text-white shadow-lg shadow-champion-green/50"
+                        : `bg-gradient-to-br ${gradient.from} ${gradient.to} ${gradient.border} ${gradient.glow} hover:scale-105 shadow-lg backdrop-blur-sm`
+                    }`}
+                  >
+                    {/* Shimmer effect on hover */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
+                    
+                    <div className={`text-lg font-bold relative z-10 ${selectedState === state?.abbr ? 'text-white' : gradient.text}`}>
+                      {state?.abbr}
+                    </div>
+                    <div className={`text-xs relative z-10 ${selectedState === state?.abbr ? 'text-white/80' : 'text-white/70'}`}>
+                      {state?.events} event{state?.events !== 1 ? 's' : ''}
+                    </div>
+                  </motion.button>
+                )
+              }) || []}
+            </div>
+          )}
 
           {/* Color Legend */}
           <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-white/5 rounded-lg border border-white/10">
@@ -702,11 +658,17 @@ export function TournamentHub() {
           <div>
             <h2 className="text-2xl font-bold text-white">
               Upcoming Events
-              {selectedState && (
-                <span className="ml-3 text-lg text-champion-green">
-                  ({upcomingEvents?.length || 0} in {US_STATES.find(s => s.abbr === selectedState)?.name})
-                </span>
-              )}
+              {selectedState && (() => {
+                const filteredCount = upcomingEvents?.filter?.(e => 
+                  e?.location?.includes?.(selectedState) || 
+                  e?.location?.includes?.(stateData?.find?.(s => s?.abbr === selectedState)?.name || '')
+                )?.length || 0
+                return (
+                  <span className="ml-3 text-lg text-champion-green">
+                    ({filteredCount} in {stateData?.find?.(s => s?.abbr === selectedState)?.name})
+                  </span>
+                )
+              })()}
             </h2>
             <p className="text-gray-400">Registration open now</p>
           </div>
@@ -721,83 +683,84 @@ export function TournamentHub() {
           <div className="text-center py-12">
             <Loader2 className="w-12 h-12 text-champion-green mx-auto animate-spin" />
           </div>
-        ) : upcomingEvents?.length > 0 ? (
-          <div className="space-y-4">
-            {upcomingEvents?.map?.((event, index) => (
-              <motion.div
-                key={event?.id}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
-                    <Trophy className="w-6 h-6 text-blue-400" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
-                    <div className="flex items-center gap-3 text-sm text-gray-400">
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-3 h-3" />
-                        {event?.location || 'TBA'}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {formatDate(event?.startDate, event?.endDate)}
-                      </span>
+        ) : (() => {
+          // Filter events by selected state
+          const displayEvents = selectedState 
+            ? upcomingEvents?.filter?.(event => 
+                event?.location?.includes?.(selectedState) || 
+                event?.location?.includes?.(stateData?.find?.(s => s?.abbr === selectedState)?.name || '')
+              )
+            : upcomingEvents
+
+          return displayEvents?.length > 0 ? (
+            <div className="space-y-4">
+              {displayEvents?.map?.((event, index) => (
+                <motion.div
+                  key={event?.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="bg-white/5 rounded-xl border border-white/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-champion-green/30 transition-all"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg flex items-center justify-center bg-blue-500/20">
+                      <Trophy className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-white">{event?.name || 'Untitled Event'}</h3>
+                      <div className="flex items-center gap-3 text-sm text-gray-400">
+                        <span className="flex items-center gap-1">
+                          <MapPin className="w-3 h-3" />
+                          {event?.location || 'TBA'}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          {formatDate(event?.startDate, event?.endDate)}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-4">
-                  {event?.registrationOpen ? (
-                    <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
-                      Open for Registration
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
-                      Registration Closed
-                    </Badge>
-                  )}
-                  <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
-                    <Button
-                      size="sm"
-                      className="bg-champion-green hover:bg-champion-green/90"
-                    >
-                      <ExternalLink className="w-3 h-3 mr-1" />
-                      {event?.registrationOpen ? "Register" : "View Details"}
-                    </Button>
-                  </a>
-                </div>
-              </motion.div>
-            )) || []}
-          </div>
-        ) : (
-          <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
-            <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-400 mb-2">
-              {selectedState 
-                ? `No tournaments found in ${US_STATES.find(s => s.abbr === selectedState)?.name}`
-                : 'No upcoming tournaments'}
-            </h3>
-            <p className="text-gray-500 mb-4">
-              {selectedState 
-                ? 'Try selecting a different state or view all tournaments'
-                : 'Check back soon for new events'}
-            </p>
-            {selectedState && (
+                  <div className="flex items-center gap-4">
+                    {event?.registrationOpen ? (
+                      <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                        Open for Registration
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-gray-500/20 text-gray-400 border-gray-500/30">
+                        Registration Closed
+                      </Badge>
+                    )}
+                    <a href={getRegistrationUrl(event?.location)} target="_blank" rel="noopener noreferrer">
+                      <Button
+                        size="sm"
+                        className="bg-champion-green hover:bg-champion-green/90"
+                      >
+                        <ExternalLink className="w-3 h-3 mr-1" />
+                        {event?.registrationOpen ? "Register" : "View Details"}
+                      </Button>
+                    </a>
+                  </div>
+                </motion.div>
+              )) || []}
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-white/5 rounded-xl border border-white/10">
+              <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-400 mb-2">
+                No tournaments found in {stateData?.find?.(s => s?.abbr === selectedState)?.name}
+              </h3>
+              <p className="text-gray-500 mb-4">
+                Try selecting a different state or view all tournaments
+              </p>
               <Button
-                onClick={() => {
-                  setSelectedState(null)
-                  fetchTournamentData(null)
-                }}
+                onClick={() => setSelectedState(null)}
                 className="bg-champion-green hover:bg-champion-green/90"
               >
                 View All Tournaments
               </Button>
-            )}
-          </div>
-        )}
+            </div>
+          )
+        })()}
       </section>
 
       {/* CTA Section */}
@@ -826,29 +789,19 @@ export function TournamentHub() {
         </div>
       </section>
 
-      {/* Quick Links to Tournament Finders */}
+      {/* Quick Links to Official Tour Sites */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 py-12">
         <div className="bg-white/5 rounded-xl border border-white/10 p-6">
-          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Sites</h3>
+          <h3 className="text-lg font-semibold text-white mb-4 text-center">Find Tournaments on Official Tour Sites</h3>
           <div className="flex flex-wrap gap-3 justify-center">
-            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-champion-green/50 text-champion-green hover:bg-champion-green/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PickleballTournaments.com
-              </Button>
-            </a>
-            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-blue-500/50 text-blue-400 hover:bg-blue-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PickleballBrackets.com
-              </Button>
-            </a>
             <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
+                <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour Schedule
               </Button>
             </a>
             <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
-                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
+                <ExternalLink className="w-4 h-4 mr-2" /> APP Tour Events
               </Button>
             </a>
             <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">

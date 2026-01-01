@@ -25,127 +25,127 @@ import { formatPrizeMoney } from "@/lib/utils/currency"
 
 const SKILL_LEVELS = ["2.5", "3.0", "3.5", "4.0", "4.5", "5.0"]
 
-// Sample amateur tournament data
+// Real APP Next Gen & PPA Amateur events
 const SAMPLE_TOURNAMENTS = [
   {
-    id: "1",
-    name: "Summer Classic Amateur Open",
-    location: "Phoenix, AZ",
-    startDate: "2025-01-15",
-    endDate: "2025-01-17",
-    prizePool: 5000,
-    entryFee: 75,
-    skillLevel: "3.0-4.0",
-    maxParticipants: 64,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "2",
-    name: "Coastal Amateur Championships",
-    location: "San Diego, CA",
-    startDate: "2025-01-22",
-    endDate: "2025-01-24",
-    prizePool: 8000,
-    entryFee: 85,
-    skillLevel: "3.5-4.5",
-    maxParticipants: 96,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "3",
-    name: "Midwest Amateur Invitational",
-    location: "Chicago, IL",
-    startDate: "2025-02-05",
-    endDate: "2025-02-07",
-    prizePool: 6500,
-    entryFee: 80,
-    skillLevel: "3.0-4.5",
-    maxParticipants: 80,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "4",
-    name: "Florida Sunshine Open",
-    location: "Tampa, FL",
-    startDate: "2025-02-12",
-    endDate: "2025-02-14",
+    id: "app-next-san-antonio-2025",
+    name: "APP Next San Antonio",
+    location: "San Antonio, TX",
+    startDate: "2025-02-13",
+    endDate: "2025-02-16",
     prizePool: 10000,
-    entryFee: 90,
-    skillLevel: "3.5-5.0",
-    maxParticipants: 128,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "5",
-    name: "Rocky Mountain Amateur Classic",
-    location: "Denver, CO",
-    startDate: "2025-02-19",
-    endDate: "2025-02-21",
-    prizePool: 7500,
-    entryFee: 85,
-    skillLevel: "3.0-4.5",
-    maxParticipants: 72,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "6",
-    name: "Texas Amateur Showdown",
-    location: "Austin, TX",
-    startDate: "2025-03-05",
-    endDate: "2025-03-07",
-    prizePool: 9000,
-    entryFee: 95,
-    skillLevel: "3.5-5.0",
-    maxParticipants: 100,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "7",
-    name: "Pacific Northwest Amateur Cup",
-    location: "Seattle, WA",
-    startDate: "2025-03-12",
-    endDate: "2025-03-14",
-    prizePool: 8500,
-    entryFee: 90,
-    skillLevel: "3.0-4.5",
-    maxParticipants: 88,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "8",
-    name: "Carolina Amateur Open",
-    location: "Charlotte, NC",
-    startDate: "2025-03-19",
-    endDate: "2025-03-21",
-    prizePool: 7000,
-    entryFee: 80,
-    skillLevel: "2.5-4.0",
-    maxParticipants: 64,
-    registrationUrl: "https://pickleballtournaments.com",
-  },
-  {
-    id: "9",
-    name: "Garden State Amateur Classic",
-    location: "Newark, NJ",
-    startDate: "2025-03-26",
-    endDate: "2025-03-28",
-    prizePool: 6000,
     entryFee: 75,
-    skillLevel: "3.0-4.5",
-    maxParticipants: 56,
-    registrationUrl: "https://pickleballtournaments.com",
+    skillLevel: "3.0-5.0",
+    maxParticipants: 100,
+    registrationUrl: "https://www.theapp.global/tour",
   },
   {
-    id: "10",
-    name: "Desert Amateur Championship",
-    location: "Las Vegas, NV",
-    startDate: "2025-04-02",
-    endDate: "2025-04-04",
-    prizePool: 12000,
+    id: "app-collegiate-2025",
+    name: "APP U.S. Collegiate Championships",
+    location: "Cape Coral, FL",
+    startDate: "2025-03-28",
+    endDate: "2025-03-30",
+    prizePool: 15000,
+    entryFee: 50,
+    skillLevel: "College",
+    maxParticipants: 128,
+    registrationUrl: "https://www.theapp.global/tour-schedule/2025-app-us-collegiate-championships",
+  },
+  {
+    id: "app-next-st-louis-2025",
+    name: "APP Next St. Louis",
+    location: "St. Louis, MO",
+    startDate: "2025-06-19",
+    endDate: "2025-06-22",
+    prizePool: 10000,
+    entryFee: 75,
+    skillLevel: "3.0-5.0",
+    maxParticipants: 100,
+    registrationUrl: "https://www.theapp.global/tour",
+  },
+  {
+    id: "app-next-kansas-city-2025",
+    name: "APP Next Kansas City",
+    location: "Overland Park, KS",
+    startDate: "2025-07-17",
+    endDate: "2025-07-20",
+    prizePool: 10000,
+    entryFee: 75,
+    skillLevel: "3.0-5.0",
+    maxParticipants: 100,
+    registrationUrl: "https://www.theapp.global/tour",
+  },
+  {
+    id: "ppa-wisconsin-2025",
+    name: "Wisconsin PPA Challenger",
+    location: "Eau Claire, WI",
+    startDate: "2025-07-24",
+    endDate: "2025-07-27",
+    prizePool: 25000,
+    entryFee: 85,
+    skillLevel: "3.0-5.0+",
+    maxParticipants: 200,
+    registrationUrl: "https://ppatour.com/tournament/2025/2025-eau-claire-wi/",
+  },
+  {
+    id: "app-next-dallas-2025",
+    name: "APP Next Dallas",
+    location: "Grapevine, TX",
+    startDate: "2025-10-30",
+    endDate: "2025-11-02",
+    prizePool: 10000,
+    entryFee: 75,
+    skillLevel: "3.0-5.0",
+    maxParticipants: 100,
+    registrationUrl: "https://www.theapp.global/tour",
+  },
+  {
+    id: "app-next-ft-lauderdale-2025",
+    name: "APP Next Fort Lauderdale",
+    location: "Fort Lauderdale, FL",
+    startDate: "2025-12-05",
+    endDate: "2025-12-07",
+    prizePool: 10000,
+    entryFee: 75,
+    skillLevel: "3.0-5.0",
+    maxParticipants: 100,
+    registrationUrl: "https://www.theapp.global/tour",
+  },
+  {
+    id: "ppa-citrus-classic-2025",
+    name: "Citrus Classic PPA Challenger",
+    location: "Kissimmee, FL",
+    startDate: "2025-09-05",
+    endDate: "2025-09-07",
+    prizePool: 25000,
+    entryFee: 85,
+    skillLevel: "3.0-5.0+",
+    maxParticipants: 200,
+    registrationUrl: "https://ppatour.com/tournament/2025/2025-orlando-fl/",
+  },
+  {
+    id: "ppa-flower-city-2025",
+    name: "PPA Flower City Challenger",
+    location: "Fairport, NY",
+    startDate: "2025-06-27",
+    endDate: "2025-06-29",
+    prizePool: 25000,
+    entryFee: 85,
+    skillLevel: "3.0-5.0+",
+    maxParticipants: 200,
+    registrationUrl: "https://ppatour.com/tournament/2025/2025-fairport-ny/",
+  },
+  {
+    id: "ppa-daytona-2025",
+    name: "Florida Dairy Farmers Daytona Beach Open",
+    location: "Daytona Beach, FL",
+    startDate: "2025-11-18",
+    endDate: "2025-11-23",
+    prizePool: 100000,
     entryFee: 100,
-    skillLevel: "3.5-5.0",
-    maxParticipants: 120,
-    registrationUrl: "https://pickleballtournaments.com",
+    skillLevel: "3.0-Pro",
+    maxParticipants: 500,
+    registrationUrl: "https://ppatour.com/schedule/",
   },
 ]
 
@@ -404,7 +404,7 @@ export function AmateurCompetitions() {
                     )}
                     
                     <a 
-                      href={event?.registrationUrl || "https://pickleballtournaments.com"} 
+                      href={event?.registrationUrl || "https://ppatour.com/schedule/"} 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className="block"
@@ -424,16 +424,16 @@ export function AmateurCompetitions() {
         {/* External Tournament Finders */}
         <div className="mt-12 bg-white/5 rounded-xl border border-white/10 p-6">
           <h3 className="text-lg font-semibold text-white mb-2">Find More Amateur Tournaments</h3>
-          <p className="text-gray-400 text-sm mb-4">Discover thousands of tournaments nationwide on these official platforms:</p>
+          <p className="text-gray-400 text-sm mb-4">Discover tournaments on official tour sites:</p>
           <div className="flex flex-wrap gap-3">
-            <a href="https://pickleballtournaments.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-blue-500/30 text-blue-400 hover:bg-blue-500/10">
-                PickleballTournaments.com
+            <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/10">
+                PPA Tour Schedule
               </Button>
             </a>
-            <a href="https://pickleballbrackets.com/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" className="border-cyan-500/30 text-cyan-400 hover:bg-cyan-500/10">
-                PickleballBrackets.com
+            <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
+              <Button variant="outline" className="border-orange-500/30 text-orange-400 hover:bg-orange-500/10">
+                APP Tour Events
               </Button>
             </a>
             <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">

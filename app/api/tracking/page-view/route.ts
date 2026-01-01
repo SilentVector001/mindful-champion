@@ -1,125 +1,173 @@
-
-import { NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
-import { User } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST(request: Request) {
+/**
+ * POST /api/tracking/page-view
+ * Track a new page view
+ */
+export async function POST(request: NextRequest) {
   try {
-    // Skip tracking in development to avoid connection pool exhaustion
-    if (process.env.NODE_ENV === 'development' && process.env.DISABLE_TRACKING === 'true') {
-      return NextResponse.json({ 
-        success: true,
-        pageViewId: 'dev-page-view',
-        tracking_disabled: true
-      });
-    }
-
     const body = await request.json();
-    const { sessionId, path, title, referrer, duration, leftAt } = body;
+    const { userId, sessionId, path, title, referrer } = body;
 
-    // Validate required fields
-    if (!path) {
+    if (!sessionId || !path) {
       return NextResponse.json(
-        { error: 'Path is required' },
+        { error: 'Missing required fields' },
         { status: 400 }
       );
     }
 
-    try {
-      const session = await getServerSession(authOptions);
-      
-      // Get user if authenticated, but allow tracking for unauthenticated users too
-      let user: User | null = null;
-      if (session?.user?.email) {
-        try {
-          user = await prisma.user.findUnique({
-            where: { email: session.user.email },
-          });
-        } catch (err) {
-          console.warn('Could not fetch user for page tracking:', err);
-        }
-      }
+    // Create or update user session
+    const userAgent = request.headers.get('user-agent') || undefined;
+    const ipAddress = request.headers.get('x-forwarded-for') || 
+                     request.headers.get('x-real-ip') || 
+                     undefined;
 
-      // Verify sessionId exists if provided, but don't fail if it doesn't
-      let validSessionId = null;
-      if (sessionId) {
-        try {
-          const sessionExists = await prisma.userSession.findUnique({
-            where: { id: sessionId },
-          });
-          validSessionId = sessionExists ? sessionId : null;
-        } catch (err) {
-          console.warn('Session lookup failed, continuing without session:', err);
-        }
-      }
+    // Parse device info from user agent
+    const ua = userAgent?.toLowerCase() || '';
+    let deviceType = 'desktop';
+    let browser = 'Unknown';
+    let os = 'Unknown';
 
-      const pageView = await prisma.pageView.create({
-        data: {
-          userId: user?.id,
-          sessionId: validSessionId,
-          path,
-          title: title || null,
-          referrer: referrer || null,
-          duration: duration || null,
-          leftAt: leftAt ? new Date(leftAt) : null,
-        },
-      });
-
-      return NextResponse.json({ 
-        success: true,
-        pageViewId: pageView.id 
-      });
-    } catch (dbError: any) {
-      // If database is unavailable, return success with mock ID
-      // This ensures the app continues to work even if tracking fails
-      console.warn('Page view tracking database error (non-critical):', dbError?.message || dbError);
-      return NextResponse.json({ 
-        success: true,
-        pageViewId: 'fallback-page-view',
-        tracking_failed: true
-      });
+    // Detect device type
+    if (ua.includes('mobile') || ua.includes('android') || ua.includes('iphone')) {
+      deviceType = 'mobile';
+    } else if (ua.includes('tablet') || ua.includes('ipad')) {
+      deviceType = 'tablet';
     }
-  } catch (error: any) {
-    // Return success even on error to prevent breaking the app
-    console.warn('Page view tracking error (non-critical):', error?.message || error);
-    return NextResponse.json({ 
-      success: true,
-      pageViewId: 'fallback-page-view',
-      tracking_failed: true
+
+    // Detect browser
+    if (ua.includes('chrome')) browser = 'Chrome';
+    else if (ua.includes('firefox')) browser = 'Firefox';
+    else if (ua.includes('safari')) browser = 'Safari';
+    else if (ua.includes('edge')) browser = 'Edge';
+
+    // Detect OS
+    if (ua.includes('windows')) os = 'Windows';
+    else if (ua.includes('mac')) os = 'macOS';
+    else if (ua.includes('linux')) os = 'Linux';
+    else if (ua.includes('android')) os = 'Android';
+    else if (ua.includes('ios') || ua.includes('iphone') || ua.includes('ipad')) os = 'iOS';
+
+    const userSession = await prisma.userSession.upsert({
+      where: { sessionId },
+      create: {
+        sessionId,
+        userId: userId || null,
+        startTime: new Date(),
+        ipAddress,
+        userAgent,
+        deviceType,
+        browser,
+        os,
+        isActive: true,
+      },
+      update: {
+        isActive: true,
+        endTime: null, // Session is active again
+        deviceType,
+        browser,
+        os,
+      },
     });
+
+    // Create page view - IMPORTANT: Use userSession.id, not the browser sessionId!
+    const pageView = await prisma.pageView.create({
+      data: {
+        userId: userId || null,
+        sessionId: userSession.id, // Use the database ID, not the browser sessionId
+        path,
+        title: title || null,
+        referrer: referrer || null,
+        timestamp: new Date(),
+      },
+    });
+
+    return NextResponse.json({ 
+      success: true, 
+      pageViewId: pageView.id 
+    });
+  } catch (error) {
+    console.error('Page view tracking error:', error);
+    return NextResponse.json(
+      { error: 'Failed to track page view' },
+      { status: 500 }
+    );
   }
 }
 
-// Update page view when user leaves
-export async function PATCH(request: Request) {
+/**
+ * PATCH /api/tracking/page-view
+ * Update page view duration
+ */
+export async function PATCH(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-    
-    // Allow updates for unauthenticated users too (they can still track page duration)
     const body = await request.json();
-    const { pageViewId, duration, leftAt } = body;
+    const { pageViewId, duration } = body;
 
-    if (!pageViewId) {
-      return NextResponse.json({ error: 'Page view ID required' }, { status: 400 });
+    if (!pageViewId || duration === undefined) {
+      return NextResponse.json(
+        { error: 'Missing required fields' },
+        { status: 400 }
+      );
     }
 
-    await prisma.pageView.update({
-      where: { id: pageViewId },
+    // Update page view with duration and left time
+    await prisma.pageView.updateMany({
+      where: {
+        id: pageViewId,
+      },
       data: {
         duration,
-        leftAt: leftAt ? new Date(leftAt) : new Date(),
+        leftAt: new Date(),
       },
     });
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error('Page view update error:', error);
+    console.error('Duration update error:', error);
     return NextResponse.json(
-      { error: 'Failed to update page view' },
+      { error: 'Failed to update duration' },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * GET /api/tracking/page-view?userId={userId}&sessionId={sessionId}
+ * Get page views for a user or session
+ */
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const userId = searchParams.get('userId');
+    const sessionId = searchParams.get('sessionId');
+    const limit = parseInt(searchParams.get('limit') || '100');
+
+    if (!userId && !sessionId) {
+      return NextResponse.json(
+        { error: 'userId or sessionId required' },
+        { status: 400 }
+      );
+    }
+
+    const where: any = {};
+    if (userId) where.userId = userId;
+    if (sessionId) where.sessionId = sessionId;
+
+    const pageViews = await prisma.pageView.findMany({
+      where,
+      orderBy: { timestamp: 'desc' },
+      take: limit,
+    });
+
+    return NextResponse.json({ pageViews });
+  } catch (error) {
+    console.error('Get page views error:', error);
+    return NextResponse.json(
+      { error: 'Failed to get page views' },
       { status: 500 }
     );
   }

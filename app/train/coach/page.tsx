@@ -3,8 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import SimpleCoachKai from "@/components/coach/simple-coach-kai"
-import MainNavigation from "@/components/navigation/main-navigation"
+import TextCoachKai from "@/components/coach/text-coach-kai"
 
 export default async function AICoachPage() {
   const session = await getServerSession(authOptions)
@@ -55,12 +54,5 @@ export default async function AICoachPage() {
     role: userData.role
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-teal-50">
-      <MainNavigation user={userData} />
-      <div className="pt-16">
-        <SimpleCoachKai userContext={userContext} />
-      </div>
-    </div>
-  )
+  return <TextCoachKai userContext={userContext} userData={userData} />
 }

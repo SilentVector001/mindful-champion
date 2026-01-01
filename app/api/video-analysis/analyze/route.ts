@@ -6,6 +6,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import { getFileUrl } from "@/lib/blob";
+import { resend } from "@/lib/email/resend-client";
+import { generateVideoAnalysisCompleteEmail } from "@/lib/email/templates/video-analysis-complete";
 
 /**
  * POST /api/video-analysis/analyze
@@ -195,6 +197,74 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       tier: userTier
     });
+
+    // Send email notification to user
+    try {
+      const userWithEmail = await prisma.user.findUnique({
+        where: { id: user.id },
+        select: { email: true, name: true }
+      });
+
+      if (userWithEmail?.email) {
+        const emailHtml = generateVideoAnalysisCompleteEmail({
+          recipientName: userWithEmail.name || 'Player',
+          analysisId: videoId,
+          overallScore: overallScore,
+          topStrengths: analysis.strengths.slice(0, 3),
+          topImprovements: analysis.areasForImprovement.slice(0, 3),
+          totalShots: analysis.shotTypes ? analysis.shotTypes.reduce((sum: number, shot: any) => sum + shot.count, 0) : undefined,
+          analyzedDate: new Date().toLocaleDateString('en-US', { 
+            weekday: 'long', 
+            year: 'numeric', 
+            month: 'long', 
+            day: 'numeric' 
+          }),
+          baseUrl: process.env.NEXTAUTH_URL || 'https://www.mindfulchampion.com',
+          technicalScores: analysis.technicalBreakdown ? {
+            paddleAngle: Math.round((analysis.technicalBreakdown.paddleAngle || 7) * 10),
+            followThrough: Math.round((analysis.technicalBreakdown.followThrough || 7) * 10),
+            bodyRotation: Math.round((analysis.technicalBreakdown.bodyRotation || 7) * 10),
+            footwork: Math.round((analysis.technicalBreakdown.footwork || 7) * 10),
+          } : undefined,
+          keyMoments: analysis.videoTimestamps?.slice(0, 5).map((ts: any) => ({
+            timestamp: ts.time,
+            quality: ts.impact?.toLowerCase().includes('error') || ts.event?.toLowerCase().includes('missed') 
+              ? 'needs-improvement' as const
+              : ts.impact?.toLowerCase().includes('win') || ts.event?.toLowerCase().includes('excellent') 
+                ? 'excellent' as const 
+                : 'good' as const,
+            description: ts.event,
+            type: ts.event?.split(' ')[0] || 'Shot'
+          })),
+          recommendations: analysis.recommendations?.slice(0, 4)
+        });
+
+        const emailResult = await resend.emails.send({
+          from: 'Coach Kai <noreply@mindfulchampion.com>',
+          to: userWithEmail.email,
+          subject: `🎾 Your Video Analysis is Ready! Score: ${overallScore}/100`,
+          html: emailHtml,
+        });
+
+        // Log the email notification
+        await prisma.emailNotification.create({
+          data: {
+            userId: user.id,
+            type: 'VIDEO_ANALYSIS_COMPLETE',
+            recipientEmail: userWithEmail.email,
+            subject: `Your Video Analysis is Ready! Score: ${overallScore}/100`,
+            htmlContent: emailHtml,
+            status: emailResult?.data?.id ? 'SENT' : 'FAILED',
+            sentAt: new Date(),
+          }
+        });
+
+        console.log("[Analyze] Email notification sent:", emailResult?.data?.id);
+      }
+    } catch (emailError) {
+      console.error("[Analyze] Email notification failed:", emailError);
+      // Don't fail the request if email fails
+    }
 
     return NextResponse.json({
       success: true,
