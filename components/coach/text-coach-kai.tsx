@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Sparkles, Calendar, Target, Dumbbell, Video, Check, X as XIcon, Mic, MicOff, MessageSquarePlus } from 'lucide-react';
+import { Send, Loader2, Sparkles, Calendar, Target, Dumbbell, Video, Check, X as XIcon, Mic, MicOff, MessageSquarePlus, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import MainNavigation from '@/components/navigation/main-navigation';
+import SimliAvatar from './simli-avatar';
 
 type ActionSuggestion = {
   type: 'calendar' | 'message' | 'resource' | 'analysis';
@@ -64,6 +65,11 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
   // Beta badge blinking animation state
   const [isBetaBlinking, setIsBetaBlinking] = useState(false);
   const [betaBlinkComplete, setBetaBlinkComplete] = useState(false);
+  
+  // Simli Avatar State
+  const [avatarEnabled, setAvatarEnabled] = useState(false);
+  const [avatarReady, setAvatarReady] = useState(false);
+  const [avatarAudioData, setAvatarAudioData] = useState<Uint8Array | undefined>();
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -445,9 +451,20 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
             animate={{ scale: 1, opacity: 1 }}
             className="relative inline-block"
           >
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg shadow-teal-500/30">
-              K
-            </div>
+            {/* Simli Avatar or Static K */}
+            {avatarEnabled ? (
+              <SimliAvatar
+                isActive={avatarEnabled}
+                audioData={avatarAudioData}
+                onReady={() => setAvatarReady(true)}
+                onError={() => setAvatarEnabled(false)}
+                className="w-24 h-24"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center text-white text-4xl font-bold shadow-lg shadow-teal-500/30">
+                K
+              </div>
+            )}
             <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 rounded-full border-2 border-slate-900 flex items-center justify-center">
               <Sparkles className="w-3 h-3 text-white" />
             </div>
@@ -461,6 +478,17 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
             >
               Beta
             </Badge>
+            {/* Avatar toggle button */}
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setAvatarEnabled(!avatarEnabled)}
+              className={`text-xs px-2 py-1 h-6 ${avatarEnabled ? 'text-teal-400 bg-teal-900/30' : 'text-slate-400 hover:text-teal-400'}`}
+              title={avatarEnabled ? 'Disable video avatar' : 'Enable video avatar'}
+            >
+              <User className="w-3 h-3 mr-1" />
+              {avatarEnabled ? 'Avatar On' : 'Avatar'}
+            </Button>
           </div>
           <p className="text-teal-400 text-sm">Your AI Pickleball Coach</p>
         </div>
