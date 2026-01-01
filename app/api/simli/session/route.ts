@@ -36,14 +36,17 @@ export async function POST(req: NextRequest) {
     const simliResponse = await fetch('https://api.simli.ai/startE2ESession', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': SIMLI_API_KEY
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
+        apiKey: SIMLI_API_KEY,
         faceId: selectedFaceId,
+        ttsProvider: "ElevenLabs",
+        language: "en",
         voiceId: process.env.ELEVENLABS_VOICE_ID || "EXAVITQu4vr4xnSDxMaL", // Default to Rachel
         maxSessionLength: 1800, // 30 minutes max
-        maxIdleTime: 300 // 5 minutes idle timeout
+        maxIdleTime: 300, // 5 minutes idle timeout
+        createTranscript: false
       })
     });
 
