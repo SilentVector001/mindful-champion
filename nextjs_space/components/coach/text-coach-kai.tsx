@@ -63,6 +63,7 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
   
   // Beta badge blinking animation state
   const [isBetaBlinking, setIsBetaBlinking] = useState(false);
+  const [betaBlinkComplete, setBetaBlinkComplete] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -79,32 +80,30 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
     }
   }, []);
 
-  // Beta badge blinking animation - blink every 5 seconds for 3 blinks
+  // Beta badge blinking animation - blink 4 times then stop
   useEffect(() => {
-    const startBlinking = () => {
-      setIsBetaBlinking(true);
-      
-      // Blink 3 times (on-off-on-off-on-off = 6 state changes)
-      let blinkCount = 0;
-      const blinkInterval = setInterval(() => {
-        blinkCount++;
-        setIsBetaBlinking(prev => !prev);
-        
-        if (blinkCount >= 6) { // 3 complete blinks (on-off cycles)
-          clearInterval(blinkInterval);
-          setIsBetaBlinking(false);
-        }
-      }, 250); // 250ms for each blink state change
-    };
+    if (betaBlinkComplete) return; // Don't blink if already completed
 
-    // Start blinking every 5 seconds
-    const mainInterval = setInterval(startBlinking, 5000);
+    setIsBetaBlinking(true);
+    
+    // Blink 4 times (on-off-on-off-on-off-on-off = 8 state changes)
+    let blinkCount = 0;
+    const blinkInterval = setInterval(() => {
+      blinkCount++;
+      setIsBetaBlinking(prev => !prev);
+      
+      if (blinkCount >= 8) { // 4 complete blinks (on-off cycles)
+        clearInterval(blinkInterval);
+        setIsBetaBlinking(false);
+        setBetaBlinkComplete(true); // Mark as complete, never blink again
+      }
+    }, 300); // 300ms for each blink state change
     
     // Cleanup
     return () => {
-      clearInterval(mainInterval);
+      clearInterval(blinkInterval);
     };
-  }, []);
+  }, [betaBlinkComplete]);
 
   // Improved auto-scroll to bottom on new messages - ensures latest message is always visible
   useEffect(() => {

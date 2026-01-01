@@ -51,6 +51,30 @@ export async function POST(
         where: { id: params.id },
         data: { likeCount: { increment: 1 } }
       })
+
+      // Send email notification to post owner (if not liking own post)
+      const post = await prisma.communityPost.findUnique({
+        where: { id: params.id },
+        include: { user: true }
+      })
+
+      if (post && post.userId !== user.id && post.user.email) {
+        try {
+          const { sendLikeNotificationEmail } = await import("@/lib/email/like-notification")
+          await sendLikeNotificationEmail({
+            postOwnerId: post.userId,
+            postOwnerEmail: post.user.email,
+            postOwnerName: post.user.name || "Player",
+            likerName: user.name || "A player",
+            postId: params.id,
+            postCaption: post.caption || post.title || "your video"
+          })
+        } catch (emailError) {
+          console.error("Failed to send like notification email:", emailError)
+          // Don't fail the like action if email fails
+        }
+      }
+
       return NextResponse.json({ liked: true })
     }
   } catch (error) {

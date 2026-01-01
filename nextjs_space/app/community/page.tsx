@@ -26,60 +26,67 @@ export default async function CommunityPage() {
     redirect("/auth/signin")
   }
 
-  // Get stats
-  const [totalPosts, totalUsers] = await Promise.all([
+  // Get stats - Get user's stats
+  const [totalPosts, userPosts, savedPosts] = await Promise.all([
     prisma.communityPost.count({ where: { isVideoPost: true, isPublished: true } }),
-    prisma.user.count()
+    prisma.communityPost.count({ where: { userId: user.id, isVideoPost: true, isPublished: true } }),
+    prisma.postBookmark.count({ where: { userId: user.id } })
   ])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={null} />
-      <main className="container mx-auto px-4 py-8 pt-24">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2 flex items-center gap-3">
-            <Users className="w-8 h-8 text-teal-400" />
-            Community Center
-          </h1>
-          <p className="text-slate-400">Share your training videos and learn from fellow players</p>
+      <main className="container mx-auto px-4 py-6 pt-20">
+        {/* Compact Modern Header */}
+        <div className="mb-6 flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 flex items-center gap-2">
+              <Users className="w-6 h-6 md:w-7 md:h-7 text-teal-400" />
+              Community Center
+            </h1>
+            <p className="text-sm text-slate-400">Share and discover training videos</p>
+          </div>
+          
+          {/* Trending Badge */}
+          <div className="flex items-center gap-2 bg-gradient-to-r from-pink-500/10 to-purple-500/10 border border-pink-500/20 rounded-full px-3 py-1.5">
+            <TrendingUp className="w-4 h-4 text-pink-400" />
+            <span className="text-sm font-medium text-pink-400">Live</span>
+          </div>
         </div>
 
-        {/* Quick Stats & Navigation */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4">
-            <div className="flex items-center gap-2 text-teal-400 mb-1">
-              <Video className="w-4 h-4" />
-              <span className="text-sm">Videos Shared</span>
+        {/* Compact Stats Bar - Instagram/TikTok Style */}
+        <div className="grid grid-cols-3 gap-3 mb-6">
+          {/* Videos Shared - Total */}
+          <div className="bg-gradient-to-br from-teal-500/10 to-cyan-500/10 border border-teal-500/20 rounded-2xl p-3 text-center hover:scale-105 transition-transform cursor-default">
+            <div className="flex items-center justify-center gap-1.5 text-teal-400 mb-1">
+              <Video className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Videos Shared</span>
             </div>
-            <p className="text-2xl font-bold text-white">{totalPosts}</p>
+            <p className="text-xl md:text-2xl font-bold text-white">{totalPosts}</p>
           </div>
-          <div className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4">
-            <div className="flex items-center gap-2 text-cyan-400 mb-1">
-              <Users className="w-4 h-4" />
-              <span className="text-sm">Members</span>
-            </div>
-            <p className="text-2xl font-bold text-white">{totalUsers}</p>
-          </div>
+          
+          {/* My Posts */}
           <Link
             href="/community/my-posts"
-            className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 hover:border-teal-500/30 transition-colors"
+            className="bg-gradient-to-br from-purple-500/10 to-pink-500/10 border border-purple-500/20 rounded-2xl p-3 text-center hover:scale-105 transition-all hover:border-purple-500/40"
           >
-            <div className="flex items-center gap-2 text-purple-400 mb-1">
-              <User className="w-4 h-4" />
-              <span className="text-sm">My Posts</span>
+            <div className="flex items-center justify-center gap-1.5 text-purple-400 mb-1">
+              <User className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">My Posts</span>
             </div>
-            <p className="text-sm text-slate-400">View your shared videos</p>
+            <p className="text-xl md:text-2xl font-bold text-white">{userPosts}</p>
           </Link>
+          
+          {/* Saved */}
           <Link
             href="/community/saved"
-            className="bg-slate-900/50 border border-slate-700/50 rounded-xl p-4 hover:border-teal-500/30 transition-colors"
+            className="bg-gradient-to-br from-amber-500/10 to-orange-500/10 border border-amber-500/20 rounded-2xl p-3 text-center hover:scale-105 transition-all hover:border-amber-500/40"
           >
-            <div className="flex items-center gap-2 text-amber-400 mb-1">
-              <Bookmark className="w-4 h-4" />
-              <span className="text-sm">Saved</span>
+            <div className="flex items-center justify-center gap-1.5 text-amber-400 mb-1">
+              <Bookmark className="w-3.5 h-3.5" />
+              <span className="text-xs font-medium">Saved</span>
             </div>
-            <p className="text-sm text-slate-400">Your bookmarked posts</p>
+            <p className="text-xl md:text-2xl font-bold text-white">{savedPosts}</p>
           </Link>
         </div>
 
