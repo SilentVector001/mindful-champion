@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import MainNavigation from "@/components/navigation/main-navigation"
-import { TournamentHub } from "@/components/tournaments/new-tournament-hub"
+import { TournamentHubRedesign } from "@/components/tournaments/tournament-hub-redesign"
 import { prisma } from "@/lib/db"
 
 export const metadata = {
@@ -40,7 +40,7 @@ export default async function TournamentsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
       <MainNavigation user={user} />
-      <TournamentHub />
+      <TournamentHubRedesign />
     </div>
   )
 }
