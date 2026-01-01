@@ -69,7 +69,8 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
   // Simli Avatar State
   const [avatarEnabled, setAvatarEnabled] = useState(false);
   const [avatarReady, setAvatarReady] = useState(false);
-  const [avatarAudioData, setAvatarAudioData] = useState<Uint8Array | undefined>();
+  const [avatarTextToSpeak, setAvatarTextToSpeak] = useState<string>('');
+  const [avatarSpeaking, setAvatarSpeaking] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -275,6 +276,11 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
             : m
         )
       );
+      
+      // Send response to avatar for speaking (if enabled)
+      if (avatarEnabled && assistantContent) {
+        setAvatarTextToSpeak(assistantContent);
+      }
     } catch (error) {
       console.error('Chat error:', error);
       setMessages(prev => [
@@ -456,9 +462,11 @@ export default function TextCoachKai({ userContext, userData }: TextCoachKaiProp
               <div className="relative">
                 <SimliAvatar
                   isActive={avatarEnabled}
-                  audioData={avatarAudioData}
+                  textToSpeak={avatarTextToSpeak}
                   onReady={() => setAvatarReady(true)}
                   onError={() => setAvatarEnabled(false)}
+                  onSpeakingStart={() => setAvatarSpeaking(true)}
+                  onSpeakingEnd={() => setAvatarSpeaking(false)}
                   className="w-48 h-48 md:w-64 md:h-64 rounded-2xl shadow-2xl shadow-teal-500/40 border-4 border-teal-500/50"
                 />
                 <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full border-4 border-slate-900 flex items-center justify-center animate-pulse">

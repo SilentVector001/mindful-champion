@@ -8,28 +8,109 @@ import { Button } from '@/components/ui/button';
 
 interface SimliAvatarProps {
   isActive: boolean;
-  audioData?: Uint8Array; // PCM audio data to send to Simli
+  textToSpeak?: string; // Text for the avatar to speak via TTS
   onError?: (error: string) => void;
   onReady?: () => void;
+  onSpeakingStart?: () => void;
+  onSpeakingEnd?: () => void;
   className?: string;
+}
+
+// Generate silent PCM16 audio (16-bit, 16kHz mono)
+function generateSilentAudio(durationMs: number = 100): Uint8Array {
+  const sampleRate = 16000;
+  const numSamples = Math.floor((sampleRate * durationMs) / 1000);
+  // PCM16 = 2 bytes per sample
+  return new Uint8Array(numSamples * 2);
 }
 
 export default function SimliAvatar({ 
   isActive, 
-  audioData, 
+  textToSpeak, 
   onError, 
   onReady,
+  onSpeakingStart,
+  onSpeakingEnd,
   className = '' 
 }: SimliAvatarProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const simliClientRef = useRef<SimliClient | null>(null);
+  const keepAliveRef = useRef<NodeJS.Timeout | null>(null);
+  const lastSpokenTextRef = useRef<string>('');
   
   const [isConnected, setIsConnected] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoHidden, setIsVideoHidden] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Start keep-alive interval (send silent audio every 2 seconds)
+  const startKeepAlive = useCallback(() => {
+    if (keepAliveRef.current) return;
+    
+    keepAliveRef.current = setInterval(() => {
+      if (simliClientRef.current && isConnected && !isSpeaking) {
+        const silentAudio = generateSilentAudio(100);
+        simliClientRef.current.sendAudioData(silentAudio);
+      }
+    }, 2000);
+  }, [isConnected, isSpeaking]);
+
+  // Stop keep-alive
+  const stopKeepAlive = useCallback(() => {
+    if (keepAliveRef.current) {
+      clearInterval(keepAliveRef.current);
+      keepAliveRef.current = null;
+    }
+  }, []);
+
+  // Convert text to speech and send to avatar
+  const speakText = useCallback(async (text: string) => {
+    if (!simliClientRef.current || !isConnected || !text.trim()) return;
+    if (text === lastSpokenTextRef.current) return; // Avoid repeating
+    
+    lastSpokenTextRef.current = text;
+    setIsSpeaking(true);
+    onSpeakingStart?.();
+    
+    try {
+      // Get TTS audio from our API
+      const response = await fetch('/api/simli/tts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text })
+      });
+
+      if (!response.ok) {
+        console.warn('[Simli] TTS failed, avatar will stay idle');
+        setIsSpeaking(false);
+        onSpeakingEnd?.();
+        return;
+      }
+
+      const audioBuffer = await response.arrayBuffer();
+      const audioData = new Uint8Array(audioBuffer);
+      
+      // Send audio to Simli
+      simliClientRef.current.sendAudioData(audioData);
+      
+      // Estimate speaking duration (roughly 150 words per minute)
+      const wordCount = text.split(/\s+/).length;
+      const durationMs = Math.max(1000, (wordCount / 150) * 60 * 1000);
+      
+      setTimeout(() => {
+        setIsSpeaking(false);
+        onSpeakingEnd?.();
+      }, durationMs);
+      
+    } catch (err) {
+      console.error('[Simli] TTS error:', err);
+      setIsSpeaking(false);
+      onSpeakingEnd?.();
+    }
+  }, [isConnected, onSpeakingStart, onSpeakingEnd]);
 
   // Initialize Simli client
   const initializeSimli = useCallback(async () => {
@@ -50,7 +131,6 @@ export default function SimliAvatar({
       const data = await response.json();
       
       if (data.fallback || !response.ok) {
-        // Simli not available, use fallback (text-only mode)
         setError('Avatar unavailable - using text mode');
         onError?.('Avatar service unavailable');
         setIsConnecting(false);
@@ -64,8 +144,8 @@ export default function SimliAvatar({
         apiKey: data.apiKey || '',
         faceID: data.faceId,
         handleSilence: true,
-        videoRef: videoRef.current,
-        audioRef: audioRef.current
+        videoRef: videoRef,
+        audioRef: audioRef
       });
 
       // Set up event handlers
@@ -74,17 +154,23 @@ export default function SimliAvatar({
         setIsConnected(true);
         setIsConnecting(false);
         onReady?.();
+        
+        // Send initial silent audio to keep connection alive
+        const silentAudio = generateSilentAudio(500);
+        simliClient.sendAudioData(silentAudio);
       });
 
       simliClient.on('disconnected', () => {
         console.log('[Simli] Disconnected');
         setIsConnected(false);
+        stopKeepAlive();
       });
 
       simliClient.on('failed', () => {
         console.error('[Simli] Connection failed');
         setError('Avatar connection failed');
         setIsConnecting(false);
+        stopKeepAlive();
         onError?.('Connection failed');
       });
 
@@ -98,7 +184,7 @@ export default function SimliAvatar({
       setIsConnecting(false);
       onError?.(err.message);
     }
-  }, [isConnecting, isConnected, onError, onReady]);
+  }, [isConnecting, isConnected, onError, onReady, stopKeepAlive]);
 
   // Connect when active
   useEffect(() => {
@@ -107,22 +193,31 @@ export default function SimliAvatar({
     }
   }, [isActive, isConnected, isConnecting, initializeSimli]);
 
-  // Send audio data to Simli
+  // Start keep-alive when connected
   useEffect(() => {
-    if (audioData && simliClientRef.current && isConnected) {
-      simliClientRef.current.sendAudioData(audioData);
+    if (isConnected) {
+      startKeepAlive();
     }
-  }, [audioData, isConnected]);
+    return () => stopKeepAlive();
+  }, [isConnected, startKeepAlive, stopKeepAlive]);
+
+  // Speak text when it changes
+  useEffect(() => {
+    if (textToSpeak && isConnected) {
+      speakText(textToSpeak);
+    }
+  }, [textToSpeak, isConnected, speakText]);
 
   // Cleanup on unmount
   useEffect(() => {
     return () => {
+      stopKeepAlive();
       if (simliClientRef.current) {
         simliClientRef.current.close();
         simliClientRef.current = null;
       }
     };
-  }, []);
+  }, [stopKeepAlive]);
 
   // Toggle mute
   const toggleMute = () => {
