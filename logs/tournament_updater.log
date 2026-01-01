@@ -1425,3 +1425,38 @@ DETAIL:  Failing row contains (cs9upye41ujjhe60imjmx7hhx, USA Pickleball Golden 
 2025-12-31 10:47:20,306 - INFO -   Errors: 1
 2025-12-31 10:47:20,306 - INFO - ============================================================
 2025-12-31 10:47:20,306 - INFO - Database connection closed
+2026-01-01 10:48:53,235 - INFO - ============================================================
+2026-01-01 10:48:53,235 - INFO - Starting Tournament Data Updater
+2026-01-01 10:48:53,235 - INFO - ============================================================
+2026-01-01 10:48:53,731 - INFO - Successfully connected to database
+2026-01-01 10:48:53,731 - INFO - Fetching PPA Tour tournaments...
+2026-01-01 10:48:53,828 - ERROR - Error fetching PPA tournaments: 403 Client Error: Forbidden for url: https://ppatour.com/schedule/
+2026-01-01 10:48:53,828 - INFO - Fetching MLP tournaments...
+2026-01-01 10:48:53,828 - INFO - Fetched 6 tournaments from MLP
+2026-01-01 10:48:53,828 - INFO - Fetching APP Tour tournaments...
+2026-01-01 10:48:53,828 - INFO - Fetched 4 tournaments from APP Tour
+2026-01-01 10:48:53,828 - INFO - Fetching USA Pickleball tournaments...
+2026-01-01 10:48:53,828 - INFO - Fetched 4 tournaments from USA Pickleball
+2026-01-01 10:48:53,828 - INFO - Total tournaments fetched: 14
+2026-01-01 10:48:54,043 - INFO - Updated tournament: MLP Orlando
+2026-01-01 10:48:54,301 - INFO - Updated tournament: MLP Columbus
+2026-01-01 10:48:54,558 - INFO - Updated tournament: MLP Austin
+2026-01-01 10:48:54,816 - INFO - Updated tournament: MLP Phoenix
+2026-01-01 10:48:55,073 - INFO - Updated tournament: MLP Daytona Beach
+2026-01-01 10:48:55,330 - INFO - Updated tournament: MLP Cup
+2026-01-01 10:48:55,588 - INFO - Updated tournament: 2025 GEICO APP Tour Championships
+2026-01-01 10:48:55,845 - INFO - Updated tournament: 2026 APP Daytona Beach Open
+2026-01-01 10:48:56,102 - INFO - Updated tournament: 2026 APP Fort Lauderdale Open
+2026-01-01 10:48:56,359 - INFO - Updated tournament: 2026 Humana APP Louisville Open
+2026-01-01 10:48:56,621 - INFO - Updated tournament: USA Pickleball National Championships
+2026-01-01 10:48:56,879 - INFO - Updated tournament: US Open Pickleball Championships
+2026-01-01 10:48:57,136 - INFO - Updated tournament: USA Pickleball Golden Ticket - Colorado Springs
+2026-01-01 10:48:57,393 - INFO - Updated tournament: USA Pickleball Golden Ticket - Seattle
+2026-01-01 10:48:57,458 - INFO - ============================================================
+2026-01-01 10:48:57,458 - INFO - Tournament Update Summary:
+2026-01-01 10:48:57,458 - INFO -   Fetched: 14
+2026-01-01 10:48:57,458 - INFO -   Created: 0
+2026-01-01 10:48:57,458 - INFO -   Updated: 14
+2026-01-01 10:48:57,458 - INFO -   Errors: 1
+2026-01-01 10:48:57,458 - INFO - ============================================================
+2026-01-01 10:48:57,458 - INFO - Database connection closed
