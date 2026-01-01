@@ -47,6 +47,16 @@ const CATEGORIES: any = {
   GENERAL: { label: "General", icon: MessageCircle, color: "text-slate-600" },
 }
 
+// Emoji reactions - pickleball themed with clear labels
+const EMOJI_REACTIONS = [
+  { emoji: "🔥", label: "Fire", tooltip: "This is fire!" },
+  { emoji: "🏓", label: "Great Shot", tooltip: "Great shot!" },
+  { emoji: "💪", label: "Strong", tooltip: "Strong play!" },
+  { emoji: "👏", label: "Clap", tooltip: "Well done!" },
+  { emoji: "🎯", label: "Precise", tooltip: "Right on target!" },
+  { emoji: "🏆", label: "Champion", tooltip: "Champion level!" },
+]
+
 interface PostDetailProps {
   post: any
   currentUser: any
@@ -60,9 +70,37 @@ export default function PostDetail({ post, currentUser }: PostDetailProps) {
   const [commentText, setCommentText] = useState("")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [replyTo, setReplyTo] = useState<string | null>(null)
+  const [selectedReactions, setSelectedReactions] = useState<Set<string>>(new Set())
 
   const categoryInfo = CATEGORIES[post.category] || CATEGORIES.GENERAL
   const Icon = categoryInfo.icon
+
+  const handleReaction = async (emoji: string) => {
+    try {
+      const isSelected = selectedReactions.has(emoji)
+      const newReactions = new Set(selectedReactions)
+      
+      if (isSelected) {
+        newReactions.delete(emoji)
+      } else {
+        newReactions.add(emoji)
+      }
+      setSelectedReactions(newReactions)
+      
+      // API call to save reaction
+      await fetch(`/api/community/posts/${post.id}/reactions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ emoji, action: isSelected ? 'remove' : 'add' })
+      })
+      
+      if (!isSelected) {
+        toast.success(`Reacted with ${emoji}`)
+      }
+    } catch (error) {
+      console.error('Error adding reaction:', error)
+    }
+  }
 
   const handleLike = async () => {
     try {
@@ -187,6 +225,39 @@ export default function PostDetail({ post, currentUser }: PostDetailProps) {
               <p className="whitespace-pre-wrap leading-relaxed">
                 {post.content}
               </p>
+            </div>
+
+            <Separator />
+
+            {/* Emoji Reactions */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">React to this post</p>
+              <div className="flex flex-wrap gap-2">
+                {EMOJI_REACTIONS.map(({ emoji, label, tooltip }) => (
+                  <button
+                    key={emoji}
+                    onClick={() => handleReaction(emoji)}
+                    className={cn(
+                      "flex items-center gap-2 px-4 py-2 rounded-full transition-all border",
+                      selectedReactions.has(emoji)
+                        ? "bg-cyan-100 dark:bg-cyan-500/30 border-cyan-500 scale-105"
+                        : "bg-slate-100 dark:bg-slate-800 border-transparent hover:bg-slate-200 dark:hover:bg-slate-700 hover:scale-105"
+                    )}
+                    title={tooltip}
+                  >
+                    <span className="text-xl">{emoji}</span>
+                    <span className={cn(
+                      "text-xs font-medium",
+                      selectedReactions.has(emoji) ? "text-cyan-600 dark:text-cyan-400" : "text-muted-foreground"
+                    )}>
+                      {label}
+                    </span>
+                    {selectedReactions.has(emoji) && (
+                      <span className="text-xs bg-cyan-500 text-white px-1.5 py-0.5 rounded-full ml-1">✓</span>
+                    )}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <Separator />

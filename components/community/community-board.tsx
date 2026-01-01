@@ -154,22 +154,54 @@ export default function CommunityBoard({ posts, user, stats }: CommunityBoardPro
         </div>
       </motion.div>
 
-      {/* Why You're Here Card */}
+      {/* Welcome & How to Interact */}
       <Card className="border-l-4 border-l-cyan-500">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-cyan-50 rounded-lg">
+            <div className="p-3 bg-cyan-50 dark:bg-cyan-500/20 rounded-lg">
               <Heart className="w-6 h-6 text-cyan-600" />
             </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Why This Matters</h3>
-              <p className="text-muted-foreground leading-relaxed mb-3">
-                Training alone is hard. Plateaus feel endless. Losses sting more. But here, you're part of something bigger—a community that understands your journey because they're on it too.
+            <div className="flex-1">
+              <h3 className="font-semibold text-lg mb-2">Welcome to the Community! 🏓</h3>
+              <p className="text-muted-foreground leading-relaxed mb-4">
+                This is your space to connect with fellow pickleball players. Share your training videos, get feedback on your technique, and support others on their journey.
               </p>
+              
+              {/* How to Interact Guide */}
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-4 mb-4">
+                <h4 className="text-sm font-semibold text-cyan-600 mb-3 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4" />
+                  How to Interact
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">📹</span>
+                    <div>
+                      <span className="font-medium">Share Videos</span>
+                      <p className="text-xs text-muted-foreground">Post your training clips for feedback</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">💬</span>
+                    <div>
+                      <span className="font-medium">Comment & Discuss</span>
+                      <p className="text-xs text-muted-foreground">Share tips and encouragement</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <span className="text-lg">🔥</span>
+                    <div>
+                      <span className="font-medium">React with Emojis</span>
+                      <p className="text-xs text-muted-foreground">Show appreciation with quick reactions</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div className="flex items-center gap-2">
                   <ArrowRight className="w-4 h-4 text-cyan-600" />
-                  <span>Get unstuck with real player advice</span>
+                  <span>Get real player advice on your technique</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <ArrowRight className="w-4 h-4 text-cyan-600" />
