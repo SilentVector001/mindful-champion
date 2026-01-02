@@ -629,7 +629,7 @@ export default function PremiumTrainingPrograms({
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   {/* Video Analysis */}
-                  <Link href="/train/video-analysis" className="group">
+                  <Link href="/train/video" className="group">
                     <motion.div 
                       className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/50 transition-all h-full"
                       whileHover={{ scale: 1.02, y: -4 }}
@@ -671,7 +671,7 @@ export default function PremiumTrainingPrograms({
                   </Link>
 
                   {/* Talk to Coach Kai */}
-                  <Link href="/coaches/kai" className="group">
+                  <Link href="/train/coach" className="group">
                     <motion.div 
                       className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-purple-500/50 transition-all h-full"
                       whileHover={{ scale: 1.02, y: -4 }}
