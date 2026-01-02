@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -20,18 +21,23 @@ import {
   Home, Library, HelpCircle, Bookmark, MessageCircle, RotateCcw, Globe,
   Shield, Wifi, Mic, ChevronDown, X, Menu, BookOpen, Settings, FolderOpen
 } from "lucide-react"
-import { useDropzone } from "react-dropzone"
 import { cn } from "@/lib/utils"
 import { generateAnalysisPDF } from "@/lib/pdf-generator"
 import type { VideoAnalysisData, VideoLibraryStats } from "@/lib/video-analysis-types"
 import MainNavigation from "@/components/navigation/main-navigation"
+import EnhancedVideoUpload from "./enhanced-video-upload"
+import AnalysisProgressIndicator from "./analysis-progress-indicator"
+import VideoHistoryComparison from "./video-history-comparison"
 
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
-  const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload')
+  const router = useRouter()
+  const [activeTab, setActiveTab] = useState<'upload' | 'library' | 'history'>('upload')
   const [uploading, setUploading] = useState(false)
   const [analyzing, setAnalyzing] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
+  const [analysisProgress, setAnalysisProgress] = useState(0)
+  const [analysisStatus, setAnalysisStatus] = useState<'idle' | 'uploading' | 'analyzing' | 'complete' | 'error'>('idle')
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [videoPreview, setVideoPreview] = useState<string | null>(null)
   const [currentAnalysis, setCurrentAnalysis] = useState<VideoAnalysisData | null>(null)
@@ -44,6 +50,7 @@ export default function VideoAnalysisHub() {
     recentlyAnalyzed: 0,
     avgImprovement: 0
   })
+  const [errorMessage, setErrorMessage] = useState<string>('')
 
   const [showCoachKaiChat, setShowCoachKaiChat] = useState(false)
   const [showTipsDropdown, setShowTipsDropdown] = useState(false)
@@ -112,25 +119,66 @@ export default function VideoAnalysisHub() {
     }
   }
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0]
-    if (file) {
-      setSelectedFile(file)
-      setVideoPreview(URL.createObjectURL(file))
+  // Enhanced upload handler
+  const handleUploadComplete = async (videos: { videoId: string; fileName: string }[]) => {
+    if (videos.length === 0) return
+    
+    setAnalysisStatus('analyzing')
+    setAnalysisProgress(0)
+    
+    // Analyze each video
+    for (const video of videos) {
+      await analyzeVideoWithProgress(video.videoId)
     }
-  }, [])
+    
+    setAnalysisStatus('complete')
+    await fetchVideoLibrary()
+    await fetchLibraryStats()
+    
+    // Navigate to library after completion
+    setTimeout(() => {
+      setActiveTab('library')
+      setAnalysisStatus('idle')
+    }, 2000)
+  }
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'video/*': ['.mp4', '.mov', '.avi'] },
-    maxSize: 500 * 1024 * 1024,
-    multiple: false
-  })
+  const analyzeVideoWithProgress = async (videoId: string) => {
+    try {
+      // Simulate progress updates while waiting for analysis
+      const progressInterval = setInterval(() => {
+        setAnalysisProgress(prev => Math.min(prev + Math.random() * 5, 90))
+      }, 500)
 
+      const res = await fetch('/api/video-analysis/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ videoId })
+      })
+
+      clearInterval(progressInterval)
+
+      if (res.ok) {
+        const data = await res.json()
+        setCurrentAnalysis(data)
+        setAnalysisProgress(100)
+        return data
+      } else {
+        const errorData = await res.json().catch(() => ({ error: 'Analysis failed' }))
+        throw new Error(errorData.error || 'Analysis failed')
+      }
+    } catch (error) {
+      setAnalysisStatus('error')
+      setErrorMessage(error instanceof Error ? error.message : 'Analysis failed')
+      throw error
+    }
+  }
+
+  // Legacy upload handler for backward compatibility
   const handleUploadAndAnalyze = async () => {
     if (!selectedFile) return
     setUploading(true)
     setUploadProgress(0)
+    setAnalysisStatus('uploading')
 
     try {
       const formData = new FormData()
@@ -165,14 +213,22 @@ export default function VideoAnalysisHub() {
       const data = await uploadPromise
       setUploadProgress(100)
       setUploading(false)
-      alert('✅ Upload complete! Starting AI analysis...')
+      setAnalysisStatus('analyzing')
       setAnalyzing(true)
-      await analyzeVideo(data.videoId, data.videoUrl)
+      await analyzeVideoWithProgress(data.videoId)
+      setAnalyzing(false)
+      setAnalysisStatus('complete')
+      await fetchVideoLibrary()
+      await fetchLibraryStats()
+      setActiveTab('library')
+      setSelectedFile(null)
+      setVideoPreview(null)
     } catch (error) {
       console.error('Upload error:', error)
       setUploading(false)
       setUploadProgress(0)
-      alert('❌ Upload failed. Please try again.')
+      setAnalysisStatus('error')
+      setErrorMessage(error instanceof Error ? error.message : 'Upload failed')
     }
   }
 
@@ -188,7 +244,6 @@ export default function VideoAnalysisHub() {
         const data = await res.json()
         setCurrentAnalysis(data)
         setAnalyzing(false)
-        alert(`✅ Analysis Complete!\n\n🎯 Your Overall Score: ${Math.round(data.overallScore)}/100\n\n📊 Check "My Analyzed Videos" tab to view detailed results!`)
         await fetchVideoLibrary()
         await fetchLibraryStats()
         setActiveTab('library')
@@ -298,32 +353,57 @@ export default function VideoAnalysisHub() {
 
             {/* PROMINENT TAB NAVIGATION */}
             <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="w-full">
-              <TabsList className="w-full max-w-lg grid grid-cols-2 h-14 bg-slate-800/80 border border-slate-700 p-1 rounded-xl">
+              <TabsList className="w-full max-w-2xl grid grid-cols-3 h-14 bg-slate-800/80 border border-slate-700 p-1 rounded-xl">
                 <TabsTrigger 
                   value="upload" 
                   className="h-full rounded-lg text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-blue-500 data-[state=active]:text-white data-[state=inactive]:text-slate-400 transition-all"
                 >
                   <Upload className="w-5 h-5 mr-2" />
-                  Upload & Analyze
+                  Upload
                 </TabsTrigger>
                 <TabsTrigger 
                   value="library" 
                   className="h-full rounded-lg text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=inactive]:text-slate-400 transition-all relative"
                 >
                   <FolderOpen className="w-5 h-5 mr-2" />
-                  My Analyzed Videos
+                  My Videos
                   {libraryStats.totalVideos > 0 && (
                     <Badge className="ml-2 bg-white/20 text-white border-0 text-xs">
                       {libraryStats.totalVideos}
                     </Badge>
                   )}
                 </TabsTrigger>
+                <TabsTrigger 
+                  value="history" 
+                  className="h-full rounded-lg text-base font-semibold data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500 data-[state=active]:to-teal-500 data-[state=active]:text-white data-[state=inactive]:text-slate-400 transition-all"
+                >
+                  <TrendingUp className="w-5 h-5 mr-2" />
+                  Progress
+                </TabsTrigger>
               </TabsList>
 
-              {/* UPLOAD TAB - Streamlined with upload at top */}
+              {/* UPLOAD TAB - Enhanced with new upload component */}
               <TabsContent value="upload" className="mt-6">
+                {/* Analysis Progress Indicator */}
+                {analysisStatus !== 'idle' && (
+                  <div className="mb-6">
+                    <AnalysisProgressIndicator
+                      status={analysisStatus}
+                      uploadProgress={uploadProgress}
+                      analysisProgress={analysisProgress}
+                      errorMessage={errorMessage}
+                      onComplete={() => {
+                        setTimeout(() => {
+                          setActiveTab('library')
+                          setAnalysisStatus('idle')
+                        }, 2000)
+                      }}
+                    />
+                  </div>
+                )}
+
                 <div className="grid lg:grid-cols-3 gap-6">
-                  {/* Upload Section - IMMEDIATELY VISIBLE */}
+                  {/* Enhanced Upload Section */}
                   <div className="lg:col-span-2">
                     <Card className="bg-slate-800/50 border-slate-700 overflow-hidden">
                       <CardHeader className="pb-4">
@@ -332,78 +412,15 @@ export default function VideoAnalysisHub() {
                           Upload Your Game Footage
                         </CardTitle>
                         <CardDescription className="text-slate-300">
-                          MP4, MOV, AVI • Up to 500MB • Best: 10-30 second clips
+                          MP4, MOV, AVI, WebM • Up to 500MB • Best: 10-30 second clips • Multi-file support
                         </CardDescription>
                       </CardHeader>
                       <CardContent>
-                        {!selectedFile ? (
-                          <div
-                            {...getRootProps()}
-                            className={cn(
-                              "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all",
-                              isDragActive 
-                                ? "border-cyan-400 bg-cyan-500/10" 
-                                : "border-slate-600 hover:border-cyan-500/50 hover:bg-slate-700/30"
-                            )}
-                          >
-                            <input {...getInputProps()} />
-                            <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gradient-to-br from-cyan-500 to-blue-500 flex items-center justify-center">
-                              <Upload className="w-10 h-10 text-white" />
-                            </div>
-                            <h3 className="text-xl font-semibold text-white mb-2">
-                              {isDragActive ? "Drop your video here!" : "Drag & drop your video"}
-                            </h3>
-                            <p className="text-slate-400 mb-4">or click to browse</p>
-                            <Button className="bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400">
-                              <VideoIcon className="w-4 h-4 mr-2" /> Select Video
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="space-y-4">
-                            {videoPreview && (
-                              <div className="aspect-video relative rounded-xl overflow-hidden bg-black">
-                                <video src={videoPreview} controls className="w-full h-full" />
-                              </div>
-                            )}
-                            <div className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
-                              <div className="flex items-center gap-3">
-                                <FileVideo className="w-8 h-8 text-cyan-400" />
-                                <div>
-                                  <p className="font-medium text-white">{selectedFile.name}</p>
-                                  <p className="text-sm text-slate-400">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                                </div>
-                              </div>
-                              <Button variant="ghost" size="sm" onClick={() => { setSelectedFile(null); setVideoPreview(null); }}>
-                                <X className="w-4 h-4" />
-                              </Button>
-                            </div>
-
-                            {uploading && (
-                              <div className="space-y-2">
-                                <div className="flex justify-between text-sm">
-                                  <span className="text-slate-300"><Loader2 className="w-4 h-4 animate-spin inline mr-2" />Uploading...</span>
-                                  <span className="text-white font-medium">{uploadProgress}%</span>
-                                </div>
-                                <Progress value={uploadProgress} className="h-2" />
-                              </div>
-                            )}
-
-                            {analyzing && (
-                              <Alert className="bg-cyan-500/10 border-cyan-500/50">
-                                <Brain className="w-4 h-4 text-cyan-400" />
-                                <AlertDescription className="text-cyan-100">
-                                  Coach Kai is analyzing your video... This may take a few minutes.
-                                </AlertDescription>
-                              </Alert>
-                            )}
-
-                            {!uploading && !analyzing && (
-                              <Button onClick={handleUploadAndAnalyze} className="w-full h-12 bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400 text-lg font-semibold">
-                                <Brain className="w-5 h-5 mr-2" /> Analyze with Coach Kai
-                              </Button>
-                            )}
-                          </div>
-                        )}
+                        <EnhancedVideoUpload
+                          onUploadComplete={handleUploadComplete}
+                          maxFiles={5}
+                          maxSizeMB={500}
+                        />
                       </CardContent>
                     </Card>
                   </div>
@@ -557,6 +574,28 @@ export default function VideoAnalysisHub() {
                     ))}
                   </div>
                 )}
+              </TabsContent>
+
+              {/* HISTORY/PROGRESS TAB */}
+              <TabsContent value="history" className="mt-6">
+                <VideoHistoryComparison
+                  videos={videoLibrary.map(v => ({
+                    id: v.id,
+                    title: v.title,
+                    thumbnailUrl: v.thumbnailUrl,
+                    duration: v.duration || 0,
+                    uploadedAt: (v.uploadedAt as any)?.toString?.() || new Date().toISOString(),
+                    analyzedAt: (v as any).analyzedAt?.toString?.() || (v.uploadedAt as any)?.toString?.() || new Date().toISOString(),
+                    analysisStatus: v.analysisStatus as 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED',
+                    overallScore: v.overallScore ?? null,
+                    shotTypes: Array.isArray(v.shotTypes) ? v.shotTypes.map((s: any) => ({ type: s.type || s, count: s.count || 1 })) : undefined,
+                    techniqueType: Array.isArray(v.shotTypes) && v.shotTypes.length > 0 ? (v.shotTypes[0] as any)?.type || 'general' : 'general'
+                  }))}
+                  onSelectVideo={(videoId) => router.push(`/train/analysis/${videoId}`)}
+                  onCompareVideos={(videoIds) => {
+                    console.log('Compare videos:', videoIds)
+                  }}
+                />
               </TabsContent>
             </Tabs>
           </motion.div>
