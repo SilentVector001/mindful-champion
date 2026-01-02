@@ -182,8 +182,94 @@ export const FUNCTION_TOOLS = [
         required: ['focus_area']
       }
     }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'create_goal',
+      description: 'Create a new pickleball improvement goal for the user. Use this when the user wants to set a goal, improve a skill, or work on something specific.',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+            description: 'The title of the goal (e.g., "Improve My Backhand", "Master the Third Shot Drop")'
+          },
+          skillArea: {
+            type: 'string',
+            enum: ['serve', 'backhand', 'forehand', 'dink', 'volley', 'footwork', 'third shot', 'strategy', 'fitness', 'mental'],
+            description: 'The skill area this goal focuses on'
+          },
+          targetDays: {
+            type: 'number',
+            description: 'Number of days to achieve the goal (default: 30)'
+          }
+        },
+        required: ['title', 'skillArea']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_goal_progress',
+      description: 'Update progress on an existing goal when user reports they practiced or made progress',
+      parameters: {
+        type: 'object',
+        properties: {
+          goalId: {
+            type: 'string',
+            description: 'The ID of the goal to update'
+          },
+          progressIncrement: {
+            type: 'number',
+            description: 'Percentage to add to progress (e.g., 10 for 10%)'
+          },
+          note: {
+            type: 'string',
+            description: 'Optional note about the practice session'
+          }
+        },
+        required: ['goalId', 'progressIncrement']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'complete_milestone',
+      description: 'Mark a milestone as completed when user has achieved it',
+      parameters: {
+        type: 'object',
+        properties: {
+          milestoneId: {
+            type: 'string',
+            description: 'The ID of the milestone to mark complete'
+          }
+        },
+        required: ['milestoneId']
+      }
+    }
   }
 ];
+
+export interface GoalContext {
+  activeGoals?: Array<{
+    id: string;
+    title: string;
+    progress: number;
+    category: string;
+    milestones?: Array<{
+      id: string;
+      title: string;
+      status: string;
+    }>;
+  }>;
+  recentlyCompleted?: any[];
+  totalProgress?: number;
+  streak?: number;
+  nextMilestone?: any;
+}
 
 export function buildEnhancedKaiSystemPrompt(
   userName: string,
@@ -191,7 +277,8 @@ export function buildEnhancedKaiSystemPrompt(
   rating: string,
   goals: string[],
   challenges: string[],
-  conversationHistory: string = ''
+  conversationHistory: string = '',
+  goalContext?: GoalContext
 ): string {
   const knowledgeTable = PICKLEBALL_KNOWLEDGE_BASE.deficiencies
     .map(d => `- ${d.category}: "${d.drill}" - ${d.drillDescription}`)
@@ -341,6 +428,19 @@ Kai: [NOW provide expanded response with 2-3 paragraphs, more detailed explanati
 - Make every interaction feel personalized and caring
 - Save longer explanations for when users explicitly ask for more
 
+## GOAL CREATION - CRITICAL
+When the user wants to set a goal, improve a skill, or work on something:
+1. IMMEDIATELY call the create_goal function - DO NOT just describe what you would do
+2. Use a clear, specific title (e.g., "Master My Backhand", "Improve Serve Consistency")
+3. Map their request to the appropriate skillArea
+4. After creating, celebrate and explain the milestones created
+5. NEVER say "I would create a goal" - just DO IT by calling the function
+
+Examples of goal intent:
+- "I want to improve my backhand" → Call create_goal with title "Improve My Backhand", skillArea "backhand"
+- "Help me get better at serving" → Call create_goal with title "Master My Serve", skillArea "serve"  
+- "I need to work on my dinking" → Call create_goal with title "Develop Soft Game & Dinking", skillArea "dink"
+
 ## EMOJI USAGE - IMPORTANT
 Use emojis naturally in your responses to add warmth and personality:
 - 🏓 for pickleball topics
@@ -355,5 +455,20 @@ Use emojis naturally in your responses to add warmth and personality:
 - 📊 for stats/progress
 Use 1-3 emojis per response - enough to add personality without overdoing it.
 
-${conversationHistory ? `\n## RECENT CONVERSATION CONTEXT\n${conversationHistory}` : ''}`;
+${conversationHistory ? `\n## RECENT CONVERSATION CONTEXT\n${conversationHistory}` : ''}
+
+${goalContext?.activeGoals?.length ? `
+## USER'S CURRENT GOALS
+${goalContext.activeGoals.map(g => `- "${g.title}" (${g.progress}% complete, ID: ${g.id})
+  Milestones: ${g.milestones?.map(m => `${m.title} [${m.status}]`).join(', ') || 'None'}`).join('\n')}
+
+When user reports progress on these goals, use update_goal_progress with the goalId above.
+When user completes a milestone, use complete_milestone with the milestoneId.
+` : ''}
+
+${goalContext?.nextMilestone ? `
+## NEXT MILESTONE TO COMPLETE
+Goal: "${goalContext.nextMilestone.goalTitle}"
+Milestone: "${goalContext.nextMilestone.title}" (ID: ${goalContext.nextMilestone.id})
+` : ''}`;
 }

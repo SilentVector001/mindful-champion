@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
       goals,
       challenges,
       recentHistory,
-      formattedGoalContext
+      formattedGoalContext as any
     );
 
     // Add context hints based on detected intent
@@ -308,20 +308,86 @@ export async function POST(req: NextRequest) {
             }
           }
           
-          // Process completed tool calls into action suggestions
+          // Process completed tool calls - EXECUTE goal functions directly
           const actionSuggestions: FunctionResult[] = [];
+          let goalCreatedDuringStream: any = null;
+          let progressUpdated: any = null;
+          let milestoneCompleted: any = null;
           
           for (const tc of toolCalls) {
             if (tc?.function?.name && tc?.function?.arguments) {
               try {
                 const args = JSON.parse(tc.function.arguments);
+                
+                // EXECUTE goal functions directly instead of just suggesting
+                if (tc.function.name === 'create_goal') {
+                  console.log('[Coach Kai] Executing create_goal:', args);
+                  const result = await createGoalFromChat(
+                    session.user.id,
+                    args.title || `Improve My ${args.skillArea}`,
+                    args.skillArea,
+                    args.targetDays || 30
+                  );
+                  if (result.success) {
+                    goalCreatedDuringStream = result.goal;
+                    console.log('[Coach Kai] Goal created:', result.goal?.title);
+                    // Send success event
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                      type: 'goal_created',
+                      goal: {
+                        id: result.goal.id,
+                        title: result.goal.title,
+                        milestones: result.goal.Milestone?.length || 0
+                      }
+                    })}\n\n`));
+                  }
+                  continue; // Don't add to action suggestions since we executed it
+                }
+                
+                if (tc.function.name === 'update_goal_progress' && args.goalId) {
+                  console.log('[Coach Kai] Executing update_goal_progress:', args);
+                  const result = await updateGoalProgress(
+                    session.user.id,
+                    args.goalId,
+                    args.progressIncrement || 10
+                  );
+                  if (result.success) {
+                    progressUpdated = result;
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                      type: 'progress_updated',
+                      goal: result.goal,
+                      celebration: result.celebration
+                    })}\n\n`));
+                  }
+                  continue;
+                }
+                
+                if (tc.function.name === 'complete_milestone' && args.milestoneId) {
+                  console.log('[Coach Kai] Executing complete_milestone:', args);
+                  const result = await completeMilestone(
+                    session.user.id,
+                    args.milestoneId
+                  );
+                  if (result.success) {
+                    milestoneCompleted = result;
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                      type: 'milestone_completed',
+                      milestone: result.milestone,
+                      goalProgress: result.goalProgress,
+                      celebration: result.celebration
+                    })}\n\n`));
+                  }
+                  continue;
+                }
+                
+                // For other functions, create action suggestions
                 const result = processFunctionCall({
                   name: tc.function.name,
                   arguments: args
                 });
                 actionSuggestions.push(result);
               } catch (e) {
-                console.error('[Coach Kai] Failed to parse tool call:', e);
+                console.error('[Coach Kai] Failed to parse/execute tool call:', e);
               }
             }
           }
@@ -364,15 +430,26 @@ export async function POST(req: NextRequest) {
             })}\n\n`));
           }
           
-          // Send completion with metadata (include createdGoal if applicable)
+          // Send completion with metadata (include any created/updated goal)
+          const finalGoal = goalCreatedDuringStream || createdGoal;
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
             type: 'complete',
             intent: detectedIntent,
             deficiency: matchedDeficiency?.category || null,
-            goalCreated: createdGoal ? {
-              id: createdGoal.id,
-              title: createdGoal.title,
-              milestones: createdGoal.Milestone?.length || 0
+            goalCreated: finalGoal ? {
+              id: finalGoal.id,
+              title: finalGoal.title,
+              milestones: finalGoal.Milestone?.length || 0
+            } : null,
+            progressUpdated: progressUpdated ? {
+              goalId: progressUpdated.goal?.id,
+              newProgress: progressUpdated.goal?.progress,
+              celebration: progressUpdated.celebration
+            } : null,
+            milestoneCompleted: milestoneCompleted ? {
+              milestoneId: milestoneCompleted.milestone?.id,
+              goalProgress: milestoneCompleted.goalProgress,
+              celebration: milestoneCompleted.celebration
             } : null
           })}\n\n`));
           
