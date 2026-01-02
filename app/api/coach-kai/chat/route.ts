@@ -21,6 +21,49 @@ import { getUserGoalContext, createGoalFromChat, updateGoalProgress, completeMil
  * - Streaming responses with action suggestions
  */
 
+/**
+ * Sanitize LLM response to remove technical syntax and raw code
+ * Ensures only natural language reaches the user
+ */
+function sanitizeResponse(content: string): string {
+  if (!content) return '';
+  
+  let sanitized = content;
+  
+  // Remove XML-style function call tags and their content
+  sanitized = sanitized.replace(/<function_call[^>]*>[\s\S]*?<\/function_call>/gi, '');
+  sanitized = sanitized.replace(/<tool_call[^>]*>[\s\S]*?<\/tool_call>/gi, '');
+  sanitized = sanitized.replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/gi, '');
+  
+  // Remove code blocks (markdown style)
+  sanitized = sanitized.replace(/```[\s\S]*?```/g, '');
+  sanitized = sanitized.replace(/`[^`]+`/g, '');
+  
+  // Remove JSON objects (standalone)
+  sanitized = sanitized.replace(/\{[\s\S]*?"(function|name|arguments|tool)"[\s\S]*?\}/gi, '');
+  
+  // Remove function call patterns like "function_name(...)"
+  sanitized = sanitized.replace(/\w+\([^)]*\)\s*(?:->|=>|:)/g, '');
+  
+  // Remove system/debug markers
+  sanitized = sanitized.replace(/\[SYSTEM[^\]]*\]/gi, '');
+  sanitized = sanitized.replace(/\[DEBUG[^\]]*\]/gi, '');
+  sanitized = sanitized.replace(/\[FUNCTION[^\]]*\]/gi, '');
+  sanitized = sanitized.replace(/\[TOOL[^\]]*\]/gi, '');
+  
+  // Remove parameter patterns like "param: value" if part of function syntax
+  sanitized = sanitized.replace(/\b(goalId|skillArea|targetDays|milestoneId|progressIncrement):\s*[^,\n}]+(,|\})?/gi, '');
+  
+  // Remove any remaining curly braces that look like JSON
+  sanitized = sanitized.replace(/^\s*\{[\s\S]*?\}\s*$/gm, '');
+  
+  // Clean up excessive whitespace
+  sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+  sanitized = sanitized.trim();
+  
+  return sanitized;
+}
+
 export async function POST(req: NextRequest) {
   try {
     if (!process.env.ABACUSAI_API_KEY) {
@@ -276,13 +319,18 @@ export async function POST(req: NextRequest) {
                   const parsed = JSON.parse(data);
                   const delta = parsed.choices?.[0]?.delta;
                   
-                  // Handle text content
+                  // Handle text content with sanitization
                   if (delta?.content) {
                     fullResponse += delta.content;
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                      type: 'text', 
-                      content: delta.content 
-                    })}\n\n`));
+                    // Sanitize content before sending to frontend
+                    const sanitizedContent = sanitizeResponse(delta.content);
+                    // Only send if there's actual content after sanitization
+                    if (sanitizedContent.trim()) {
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                        type: 'text', 
+                        content: sanitizedContent 
+                      })}\n\n`));
+                    }
                   }
                   
                   // Handle tool calls
@@ -453,8 +501,9 @@ export async function POST(req: NextRequest) {
             } : null
           })}\n\n`));
           
-          // Save to database (async, don't block response)
-          saveConversation(session.user.id, messageText, fullResponse).catch(console.error);
+          // Save to database (async, don't block response) with sanitized response
+          const sanitizedFullResponse = sanitizeResponse(fullResponse);
+          saveConversation(session.user.id, messageText, sanitizedFullResponse).catch(console.error);
           
         } catch (error) {
           console.error('[Coach Kai] Stream error:', error);
