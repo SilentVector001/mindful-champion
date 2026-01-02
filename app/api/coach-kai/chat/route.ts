@@ -24,16 +24,27 @@ import { getUserGoalContext, createGoalFromChat, updateGoalProgress, completeMil
 /**
  * Sanitize LLM response to remove technical syntax and raw code
  * Ensures only natural language reaches the user
+ * AGGRESSIVE sanitization - removes ALL XML-style tags
  */
 function sanitizeResponse(content: string): string {
   if (!content) return '';
   
   let sanitized = content;
   
-  // Remove XML-style function call tags and their content
+  // CRITICAL: Remove specific XML function call tags (exact patterns from screenshots)
+  sanitized = sanitized.replace(/<tool_call_id>[^<]*<\/tool_call_id>/gi, '');
+  sanitized = sanitized.replace(/<function_call_id>[^<]*<\/function_call_id>/gi, '');
+  sanitized = sanitized.replace(/<function_call_name>[^<]*<\/function_call_name>/gi, '');
+  sanitized = sanitized.replace(/<function_call_arguments>[^<]*<\/function_call_arguments>/gi, '');
+  
+  // Remove ANY XML-style tags (aggressive catch-all)
+  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>/g, '');
+  
+  // Remove XML-style function call blocks with content
   sanitized = sanitized.replace(/<function_call[^>]*>[\s\S]*?<\/function_call>/gi, '');
   sanitized = sanitized.replace(/<tool_call[^>]*>[\s\S]*?<\/tool_call>/gi, '');
   sanitized = sanitized.replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/gi, '');
+  sanitized = sanitized.replace(/<[^>]*>[\s\S]*?<\/antml:[^>]*>/gi, '');
   
   // Remove code blocks (markdown style)
   sanitized = sanitized.replace(/```[\s\S]*?```/g, '');
@@ -57,11 +68,32 @@ function sanitizeResponse(content: string): string {
   // Remove any remaining curly braces that look like JSON
   sanitized = sanitized.replace(/^\s*\{[\s\S]*?\}\s*$/gm, '');
   
+  // Remove call_ IDs that might leak
+  sanitized = sanitized.replace(/call_[a-zA-Z0-9]+/g, '');
+  
   // Clean up excessive whitespace
   sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
+  sanitized = sanitized.replace(/\s{3,}/g, ' ');
   sanitized = sanitized.trim();
   
   return sanitized;
+}
+
+/**
+ * Check if content contains XML/function call syntax that should be blocked
+ */
+function containsXMLSyntax(content: string): boolean {
+  if (!content) return false;
+  const xmlPatterns = [
+    /<tool_call_id>/i,
+    /<function_call/i,
+    /<\/function_call/i,
+    /<invoke/i,
+    /</i,
+    /call_[a-zA-Z0-9]{20,}/,
+    /<[a-z_]+>[^<]*<\/[a-z_]+>/i
+  ];
+  return xmlPatterns.some(p => p.test(content));
 }
 
 export async function POST(req: NextRequest) {
@@ -319,13 +351,20 @@ export async function POST(req: NextRequest) {
                   const parsed = JSON.parse(data);
                   const delta = parsed.choices?.[0]?.delta;
                   
-                  // Handle text content with sanitization
+                  // Handle text content with AGGRESSIVE sanitization
                   if (delta?.content) {
                     fullResponse += delta.content;
+                    
+                    // Check if content contains XML - if so, skip entirely (don't stream raw XML)
+                    if (containsXMLSyntax(delta.content)) {
+                      console.log('[Coach Kai] Blocked XML content from stream');
+                      continue; // Skip this chunk entirely
+                    }
+                    
                     // Sanitize content before sending to frontend
                     const sanitizedContent = sanitizeResponse(delta.content);
                     // Only send if there's actual content after sanitization
-                    if (sanitizedContent.trim()) {
+                    if (sanitizedContent.trim() && sanitizedContent.length > 0) {
                       controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
                         type: 'text', 
                         content: sanitizedContent 
