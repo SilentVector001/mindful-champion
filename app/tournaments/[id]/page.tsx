@@ -1,26 +1,23 @@
-import { notFound, redirect } from 'next/navigation';
-import { prisma } from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/auth';
-import { TournamentDetailClient } from './tournament-detail-client';
+import { Suspense } from "react"
+import { notFound } from "next/navigation"
+import { getServerSession } from "next-auth"
+import { authOptions } from "@/lib/auth"
+import { prisma } from "@/lib/db"
+import { TournamentDetailClient } from "@/components/tournaments/tournament-detail-client"
+import { Loader2 } from "lucide-react"
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 interface PageProps {
-  params: {
-    id: string;
-  };
+  params: { id: string }
 }
 
 export default async function TournamentDetailPage({ params }: PageProps) {
-  const session = await getServerSession(authOptions);
-  
-  if (!session?.user) {
-    redirect('/auth/signin');
-  }
+  const { id } = params
 
+  // Get tournament data
   const tournament = await prisma.tournament.findUnique({
-    where: { id: params?.id ?? '' },
+    where: { id },
     include: {
       registrations: {
         include: {
@@ -29,31 +26,49 @@ export default async function TournamentDetailPage({ params }: PageProps) {
               id: true,
               name: true,
               email: true,
+              skillLevel: true
             }
           }
+        },
+        orderBy: {
+          registeredAt: 'asc'
         }
       },
-      _count: {
-        select: { registrations: true }
+      matches: {
+        orderBy: [
+          { roundNumber: 'asc' },
+          { matchNumber: 'asc' }
+        ]
       }
     }
-  });
+  })
 
   if (!tournament) {
-    notFound();
+    notFound()
   }
 
-  // Check if user is already registered
-  const userRegistration = tournament?.registrations?.find(
-    (reg) => reg?.userId === session?.user?.id
-  );
+  // Get user session
+  const session = await getServerSession(authOptions)
+  const userEmail = session?.user?.email
+
+  // Check if user is registered
+  const userRegistration = userEmail
+    ? tournament.registrations?.find((reg) => reg.user?.email === userEmail)
+    : null
 
   return (
-    <TournamentDetailClient 
-      tournament={tournament} 
-      userId={session?.user?.id ?? ''}
-      isRegistered={!!userRegistration}
-      registrationStatus={userRegistration?.status}
-    />
-  );
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+        </div>
+      }
+    >
+      <TournamentDetailClient
+        tournament={tournament}
+        userRegistration={userRegistration ?? null}
+        isLoggedIn={!!userEmail}
+      />
+    </Suspense>
+  )
 }

@@ -1,242 +1,191 @@
+"use client"
 
-'use client'
-
-import Image from 'next/image'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
+import { motion } from "framer-motion"
+import Link from "next/link"
 import {
-  MapPin,
+  Trophy,
   Calendar,
+  MapPin,
   Users,
   DollarSign,
-  Trophy,
+  Clock,
   CheckCircle2,
-  Clock
-} from 'lucide-react'
-import { format } from 'date-fns'
-import { formatPrizeMoney } from '@/lib/format-prize'
+  Radio,
+  ArrowRight
+} from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface TournamentCardProps {
   tournament: {
     id: string
     name: string
-    description: string | null
+    description?: string
+    status: string
     venueName: string
     city: string
     state: string
-    startDate: string
-    endDate: string
-    status: string
-    skillLevels: string[]
-    format: string[]
-    entryFee: number | null
-    prizePool: number | null
-    maxParticipants: number | null
+    startDate: string | Date
+    endDate: string | Date
+    bracketFormat: string
     currentRegistrations: number
-    spotsAvailable: number | null
-    imageUrl: string | null
-    isRegistered: boolean
-    distance: number | null
+    maxParticipants?: number | null
+    prizePool?: number | null
+    entryFee?: number | null
+    bracketGenerated: boolean
   }
-  onClick: () => void
+  index?: number
 }
 
-export function TournamentCard({ tournament, onClick }: TournamentCardProps) {
+export function TournamentCard({ tournament, index = 0 }: TournamentCardProps) {
   const startDate = new Date(tournament.startDate)
   const endDate = new Date(tournament.endDate)
-  const isSameDay = format(startDate, 'yyyy-MM-dd') === format(endDate, 'yyyy-MM-dd')
+  const now = new Date()
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'REGISTRATION_OPEN':
-        return 'bg-green-500/10 text-green-700 border-green-200'
-      case 'REGISTRATION_CLOSED':
-        return 'bg-yellow-500/10 text-yellow-700 border-yellow-200'
-      case 'IN_PROGRESS':
-        return 'bg-blue-500/10 text-blue-700 border-blue-200'
-      case 'COMPLETED':
-        return 'bg-slate-500/10 text-slate-700 border-slate-200'
-      default:
-        return 'bg-slate-500/10 text-slate-700 border-slate-200'
-    }
+  const daysUntil = Math.ceil((startDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
+  const isUpcoming = tournament.status === 'UPCOMING' || tournament.status === 'REGISTRATION_OPEN'
+  const isInProgress = tournament.status === 'IN_PROGRESS'
+  const isCompleted = tournament.status === 'COMPLETED'
+
+  const statusConfig = {
+    UPCOMING: { color: 'from-blue-500 to-cyan-500', icon: Clock, text: 'Upcoming' },
+    REGISTRATION_OPEN: { color: 'from-emerald-500 to-teal-500', icon: Users, text: 'Open' },
+    REGISTRATION_CLOSED: { color: 'from-orange-500 to-amber-500', icon: Clock, text: 'Closed' },
+    IN_PROGRESS: { color: 'from-red-500 to-pink-500', icon: Radio, text: 'Live' },
+    COMPLETED: { color: 'from-purple-500 to-indigo-500', icon: CheckCircle2, text: 'Complete' },
   }
 
-  const getStatusLabel = (status: string) => {
-    switch (status) {
-      case 'REGISTRATION_OPEN':
-        return 'Open for Registration'
-      case 'REGISTRATION_CLOSED':
-        return 'Registration Closed'
-      case 'IN_PROGRESS':
-        return 'In Progress'
-      case 'COMPLETED':
-        return 'Completed'
-      case 'UPCOMING':
-        return 'Upcoming'
-      default:
-        return status
-    }
-  }
-
-  const formatSkillLevel = (level: string) => {
-    return level.charAt(0) + level.slice(1).toLowerCase()
-  }
-
-  const formatFormatType = (format: string) => {
-    return format.split('_').map(word => 
-      word.charAt(0) + word.slice(1).toLowerCase()
-    ).join(' ')
-  }
+  const config = statusConfig[tournament.status as keyof typeof statusConfig] ?? statusConfig.UPCOMING
+  const StatusIcon = config.icon
 
   return (
-    <Card 
-      className="group hover:shadow-xl transition-all duration-300 cursor-pointer border-slate-200 overflow-hidden"
-      onClick={onClick}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      whileHover={{ y: -4 }}
     >
-      {/* Image */}
-      <div className="relative aspect-video bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-        {tournament.imageUrl ? (
-          <Image
-            src={tournament.imageUrl}
-            alt={tournament.name}
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-500"
-          />
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Trophy className="w-16 h-16 text-slate-400" />
-          </div>
-        )}
-        
-        {/* Status Badge */}
-        <div className="absolute top-3 left-3">
-          <Badge className={`${getStatusColor(tournament.status)} border`}>
-            {getStatusLabel(tournament.status)}
-          </Badge>
-        </div>
+      <Link href={`/tournaments/${tournament.id}`}>
+        <Card className="group bg-slate-800/80 border-white/10 hover:border-cyan-500/50 transition-all duration-300 overflow-hidden shadow-lg hover:shadow-cyan-500/20">
+          {/* Status Banner */}
+          <div className={cn(
+            "h-2 bg-gradient-to-r",
+            config.color
+          )} />
 
-        {/* Registered Badge */}
-        {tournament.isRegistered && (
-          <div className="absolute top-3 right-3">
-            <Badge className="bg-teal-500/90 text-white border-0">
-              <CheckCircle2 className="w-3 h-3 mr-1" />
-              Registered
-            </Badge>
-          </div>
-        )}
-
-        {/* Distance Badge */}
-        {tournament.distance && (
-          <div className="absolute bottom-3 right-3">
-            <Badge className="bg-white/90 text-slate-900 border-0">
-              <MapPin className="w-3 h-3 mr-1" />
-              {tournament.distance.toFixed(1)} mi
-            </Badge>
-          </div>
-        )}
-      </div>
-
-      <CardContent className="p-5 space-y-4">
-        {/* Title and Prize Pool - At Top */}
-        <div className="space-y-2 border-b border-slate-200 pb-3">
-          <h3 className="font-bold text-xl text-slate-900 line-clamp-2 group-hover:text-teal-600 transition-colors">
-            {tournament.name}
-          </h3>
-          {tournament.prizePool && (
-            <div className="flex items-center gap-2">
-              <Trophy className="w-5 h-5 text-amber-500 flex-shrink-0" />
-              <span className="text-2xl font-bold text-amber-600">
-                {formatPrizeMoney(tournament.prizePool)}
-              </span>
-              <span className="text-sm text-slate-500">prize pool</span>
-            </div>
-          )}
-          {tournament.description && (
-            <p className="text-sm text-slate-600 line-clamp-2 mt-2">
-              {tournament.description}
-            </p>
-          )}
-        </div>
-
-        {/* Details */}
-        <div className="space-y-2">
-          {/* Date */}
-          <div className="flex items-start gap-2 text-sm">
-            <Calendar className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-            <div className="text-slate-700">
-              {isSameDay ? (
-                format(startDate, 'MMM d, yyyy')
-              ) : (
-                <>
-                  {format(startDate, 'MMM d')} - {format(endDate, 'MMM d, yyyy')}
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Location */}
-          <div className="flex items-start gap-2 text-sm">
-            <MapPin className="w-4 h-4 text-slate-500 mt-0.5 flex-shrink-0" />
-            <div className="text-slate-700">
-              {tournament.venueName}
-              <div className="text-xs text-slate-500">
-                {tournament.city}, {tournament.state}
+          <CardContent className="p-6 space-y-4">
+            {/* Header */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex-1 min-w-0">
+                <h3 className="text-xl font-bold text-white group-hover:text-cyan-400 transition-colors truncate">
+                  {tournament.name}
+                </h3>
+                {tournament.description && (
+                  <p className="text-sm text-slate-400 mt-1 line-clamp-2">
+                    {tournament.description}
+                  </p>
+                )}
               </div>
-            </div>
-          </div>
 
-          {/* Participants */}
-          <div className="flex items-center gap-2 text-sm">
-            <Users className="w-4 h-4 text-slate-500 flex-shrink-0" />
-            <div className="text-slate-700">
-              {tournament.currentRegistrations}
-              {tournament.maxParticipants && ` / ${tournament.maxParticipants}`} registered
-              {tournament.spotsAvailable !== null && tournament.spotsAvailable > 0 && (
-                <span className="text-xs text-teal-600 ml-2">
-                  ({tournament.spotsAvailable} spots left)
+              <Badge
+                className={cn(
+                  "flex items-center gap-1 bg-gradient-to-r text-white font-semibold shadow-lg",
+                  config.color,
+                  isInProgress && "animate-pulse"
+                )}
+              >
+                <StatusIcon className="h-3 w-3" />
+                {config.text}
+              </Badge>
+            </div>
+
+            {/* Info Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Calendar className="h-4 w-4 text-cyan-400" />
+                <span>
+                  {startDate.toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric'
+                  })}
+                  {startDate.getTime() !== endDate.getTime() && (
+                    <span className="text-slate-500"> - {endDate.toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric'
+                    })}</span>
+                  )}
                 </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <MapPin className="h-4 w-4 text-emerald-400" />
+                <span className="truncate">{tournament.city}, {tournament.state}</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm text-slate-300">
+                <Users className="h-4 w-4 text-blue-400" />
+                <span>
+                  {tournament.currentRegistrations}
+                  {tournament.maxParticipants && `/${tournament.maxParticipants}`} players
+                </span>
+              </div>
+
+              {tournament.prizePool && tournament.prizePool > 0 && (
+                <div className="flex items-center gap-2 text-sm text-slate-300">
+                  <DollarSign className="h-4 w-4 text-yellow-400" />
+                  <span>${tournament.prizePool.toLocaleString()} prize</span>
+                </div>
               )}
             </div>
-          </div>
 
-          {/* Entry Fee */}
-          {tournament.entryFee && (
-            <div className="flex items-center gap-2 text-sm">
-              <DollarSign className="w-4 h-4 text-slate-500 flex-shrink-0" />
-              <div className="text-slate-700">
-                <span className="font-medium">${tournament.entryFee.toLocaleString()}</span>
-                <span className="text-slate-500 ml-1">entry fee</span>
-              </div>
+            {/* Venue */}
+            <div className="pt-3 border-t border-slate-700/50">
+              <p className="text-sm text-slate-400">
+                <Trophy className="h-3 w-3 inline mr-1 text-cyan-400" />
+                {tournament.venueName}
+              </p>
             </div>
-          )}
-        </div>
 
-        {/* Skill Levels & Formats */}
-        <div className="flex flex-wrap gap-2">
-          {tournament.skillLevels.slice(0, 3).map((level) => (
-            <Badge key={level} variant="secondary" className="text-xs">
-              {formatSkillLevel(level)}
-            </Badge>
-          ))}
-          {tournament.format.slice(0, 2).map((format) => (
-            <Badge key={format} variant="outline" className="text-xs">
-              {formatFormatType(format)}
-            </Badge>
-          ))}
-        </div>
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="bg-slate-700/50 text-slate-300 border-slate-600">
+                  {tournament.bracketFormat.replace('_', ' ')}
+                </Badge>
+                {tournament.bracketGenerated && (
+                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30">
+                    <Trophy className="h-3 w-3 mr-1" />
+                    Bracket Ready
+                  </Badge>
+                )}
+              </div>
 
-        {/* Action Button */}
-        <Button 
-          className="w-full bg-gradient-to-r from-teal-500 to-teal-600 hover:from-teal-600 hover:to-teal-700"
-          onClick={(e) => {
-            e.stopPropagation()
-            onClick()
-          }}
-        >
-          View Details
-        </Button>
-      </CardContent>
-    </Card>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-cyan-400 hover:text-cyan-300 hover:bg-cyan-500/10"
+              >
+                View Details
+                <ArrowRight className="h-4 w-4 ml-1 group-hover:translate-x-1 transition-transform" />
+              </Button>
+            </div>
+
+            {/* Countdown for upcoming tournaments */}
+            {isUpcoming && daysUntil > 0 && daysUntil <= 30 && (
+              <div className="pt-2">
+                <div className="flex items-center justify-center gap-2 py-2 px-3 bg-gradient-to-r from-cyan-500/10 to-emerald-500/10 rounded-lg border border-cyan-500/20">
+                  <Clock className="h-4 w-4 text-cyan-400" />
+                  <span className="text-sm font-medium text-cyan-300">
+                    {daysUntil === 0 ? 'Today!' : daysUntil === 1 ? 'Tomorrow!' : `${daysUntil} days until start`}
+                  </span>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </Link>
+    </motion.div>
   )
 }

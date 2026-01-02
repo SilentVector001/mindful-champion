@@ -1,46 +1,31 @@
-import { getServerSession } from "next-auth"
-import { authOptions } from "@/lib/auth"
-import { redirect } from "next/navigation"
-import MainNavigation from "@/components/navigation/main-navigation"
-import { TournamentHubRedesign } from "@/components/tournaments/tournament-hub-redesign"
+import { Suspense } from "react"
 import { prisma } from "@/lib/db"
+import { TournamentsHubClient } from "@/components/tournaments/tournaments-hub-client"
+import { Loader2 } from "lucide-react"
 
-export const metadata = {
-  title: 'Tournament Hub | Mindful Champion',
-  description: 'Discover pickleball tournaments across the nation - Championship Events, Amateur Competitions, Rising Stars, and Community Leagues',
-}
+export const dynamic = 'force-dynamic'
 
 export default async function TournamentsPage() {
-  const session = await getServerSession(authOptions)
-  
-  if (!session?.user) {
-    redirect("/auth/signin?callbackUrl=/tournaments")
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      id: true,
-      name: true,
-      firstName: true,
-      lastName: true,
-      email: true,
-      image: true,
-      skillLevel: true,
-      rewardPoints: true,
-      subscriptionTier: true,
-      role: true,
-    }
+  // Fetch tournaments - no auth required to view
+  const tournaments = await prisma.tournament.findMany({
+    orderBy: {
+      startDate: 'asc'
+    },
+    take: 50
+  }).catch((error) => {
+    console.error('Error fetching tournaments:', error)
+    return [] // Return empty array on error
   })
 
-  if (!user) {
-    redirect("/auth/signin?callbackUrl=/tournaments")
-  }
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <MainNavigation user={user} />
-      <TournamentHubRedesign />
-    </div>
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950">
+          <Loader2 className="h-8 w-8 animate-spin text-cyan-400" />
+        </div>
+      }
+    >
+      <TournamentsHubClient tournaments={tournaments} />
+    </Suspense>
   )
 }

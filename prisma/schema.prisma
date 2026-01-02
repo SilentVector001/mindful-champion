@@ -925,6 +925,7 @@ model Tournament {
   registrationEnd      DateTime
   format               TournamentFormat[]
   skillLevels          SkillLevel[]
+  bracketFormat        BracketFormat            @default(SINGLE_ELIMINATION)
   maxParticipants      Int?
   currentRegistrations Int                      @default(0)
   entryFee             Float?
@@ -932,9 +933,13 @@ model Tournament {
   websiteUrl           String?
   registrationUrl      String?
   imageUrl             String?
+  bracketGenerated     Boolean                  @default(false)
+  winnerId             String?
+  runnerUpId           String?
   createdAt            DateTime                 @default(now())
   updatedAt            DateTime                 @updatedAt
   registrations        TournamentRegistration[]
+  matches              BracketMatch[]
 }
 
 model TournamentRegistration {
@@ -954,6 +959,40 @@ model TournamentRegistration {
   user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([tournamentId, userId])
+}
+
+model BracketMatch {
+  id              String                @id @default(cuid())
+  tournamentId    String
+  roundNumber     Int
+  matchNumber     Int
+  bracketPosition String
+  isWinnerBracket Boolean               @default(true)
+  player1Id       String?
+  player1Name     String?
+  player1Score    Int?
+  player2Id       String?
+  player2Name     String?
+  player2Score    Int?
+  winnerId        String?
+  winnerName      String?
+  status          TournamentMatchStatus @default(SCHEDULED)
+  courtNumber     String?
+  courtLocation   String?
+  scheduledTime   DateTime?
+  startTime       DateTime?
+  endTime         DateTime?
+  isLive          Boolean               @default(false)
+  notes           String?
+  metadata        Json?
+  createdAt       DateTime              @default(now())
+  updatedAt       DateTime              @updatedAt
+  tournament      Tournament            @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+
+  @@index([tournamentId])
+  @@index([roundNumber])
+  @@index([status])
+  @@index([isLive])
 }
 
 model ActivityEvent {
@@ -2791,6 +2830,11 @@ enum TournamentFormat {
   MIXED_DOUBLES
   ROUND_ROBIN
   ELIMINATION
+}
+
+enum BracketFormat {
+  SINGLE_ELIMINATION
+  DOUBLE_ELIMINATION
 }
 
 enum TournamentStatus {
