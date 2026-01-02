@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     // Create default settings if they don't exist
     if (!settings) {
       settings = await prisma.emailSettings.create({
-        data: {},
+        data: { id: crypto.randomUUID(), updatedAt: new Date() },
       })
     }
     
@@ -67,7 +67,7 @@ export async function PATCH(request: NextRequest) {
     
     if (!settings) {
       settings = await prisma.emailSettings.create({
-        data: {},
+        data: { id: crypto.randomUUID(), updatedAt: new Date() },
       })
     }
     

@@ -18,7 +18,7 @@ export async function GET(req: Request) {
       prisma.goal.findMany({
         include: {
           User: true,
-          milestones: true,
+          Milestone: true,
         },
         orderBy: { createdAt: 'desc' },
         take: 100,

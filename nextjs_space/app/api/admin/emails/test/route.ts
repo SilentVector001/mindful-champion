@@ -107,7 +107,8 @@ If you received this email, the email system is working correctly!
     // Log email
     const emailLog = await prisma.emailNotification.create({
       data: {
-        userId: session.user.id,
+        id: crypto.randomUUID(),
+        User: { connect: { id: session.user.id } },
         type: 'ADMIN_TEST',
         recipientEmail: to,
         subject: '🧪 Test Email from Mindful Champion',
@@ -115,6 +116,7 @@ If you received this email, the email system is working correctly!
         textContent: 'Test email sent from admin panel',
         status: 'SENT',
         sentAt: new Date(),
+        updatedAt: new Date(),
         metadata: {
           resendId: result.id || 'mock',
           sentBy: session.user.email,

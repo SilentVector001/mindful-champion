@@ -41,7 +41,8 @@ export async function POST(req: NextRequest) {
     // Log email to database
     const emailLog = await prisma.emailNotification.create({
       data: {
-        userId: session.user.id,
+        id: crypto.randomUUID(),
+        User: { connect: { id: session.user.id } },
         type: 'ADMIN_CUSTOM',
         recipientEmail: to,
         subject,
@@ -49,6 +50,7 @@ export async function POST(req: NextRequest) {
         textContent: !isHtml ? body : '',
         status: 'SENT',
         sentAt: new Date(),
+        updatedAt: new Date(),
         metadata: {
           template,
           isHtml,
