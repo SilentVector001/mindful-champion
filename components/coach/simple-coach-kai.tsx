@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, MessageCircle, Sparkles, Brain, Phone, X, Check } from 'lucide-react';
+import { Send, Loader2, Mic, MicOff, MessageCircle, Sparkles, Brain, Settings, Bell, Phone, Heart, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -330,6 +330,7 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [avatarState, setAvatarState] = useState<AvatarState>('idle');
+  const [isListening, setIsListening] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
   const [showSMSSettings, setShowSMSSettings] = useState(false);
@@ -340,12 +341,7 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   const isProcessingRef = useRef(false);
   const lastMessageRef = useRef('');
   const historyLoadedRef = useRef(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // Auto-scroll to bottom on new messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages, streamingContent]);
+  const conversationTopRef = useRef<HTMLDivElement>(null);
 
   // Get daily quote based on date
   useEffect(() => {
@@ -371,8 +367,8 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
             const msgs: Message[] = data.conversation.messages.slice(-10).map((m: any) => ({
               id: m.id, role: m.role, content: m.content, timestamp: new Date(m.createdAt)
             }));
-            // Keep messages in chronological order (oldest first)
-            setMessages(msgs);
+            // Reverse for newest-first display
+            setMessages(msgs.reverse());
           } else {
             setMessages([{ id: 'welcome', role: 'assistant', content: getWelcome(), timestamp: new Date() }]);
           }
@@ -405,9 +401,10 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   }, []);
 
   useEffect(() => {
-    if (isLoading) setAvatarState('processing');
+    if (isListening) setAvatarState('listening');
+    else if (isLoading) setAvatarState('processing');
     else setAvatarState('idle');
-  }, [isLoading]);
+  }, [isListening, isLoading]);
 
   // Send message with streaming
   const sendMessage = useCallback(async (text?: string) => {
@@ -422,13 +419,13 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
     setStreamingContent('');
     
     const userMsg: Message = { id: `user-${Date.now()}`, role: 'user', content: msg, timestamp: new Date() };
-    // Append new message at the end (newest last)
-    setMessages(prev => [...prev, userMsg]);
+    // Add new message at the beginning (newest first)
+    setMessages(prev => [userMsg, ...prev]);
     
     try {
-      // Build conversation from messages (already in correct order)
+      // Build conversation from reversed messages (API expects oldest first)
       const conversationMsgs = [
-        ...messages.slice(-9).map(m => ({ role: m.role, content: m.content })),
+        ...messages.slice(0, 9).reverse().map(m => ({ role: m.role, content: m.content })),
         { role: 'user', content: msg }
       ];
       
@@ -485,19 +482,19 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
         emotion
       };
       
-      // Append assistant message at the end
-      setMessages(prev => [...prev, assistantMsg]);
+      // Insert assistant message after user message (at position 1)
+      setMessages(prev => [prev[0], assistantMsg, ...prev.slice(1)]);
       setStreamingContent('');
       setTimeout(() => setAvatarState('idle'), 500);
       
     } catch (error) {
       console.error('Error:', error);
-      setMessages(prev => [...prev, {
+      setMessages(prev => [{
         id: `error-${Date.now()}`,
         role: 'assistant',
         content: '🤔 Sorry, I had trouble with that. Please try again!',
         timestamp: new Date()
-      }]);
+      }, ...prev]);
     } finally {
       setIsLoading(false);
       isProcessingRef.current = false;
@@ -514,14 +511,18 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
 
   const handleActionComplete = (card: ActionCard) => {
     if (card.action === 'create-goal') {
-      setMessages(prev => [...prev, {
+      setMessages(prev => [{
         id: `system-${Date.now()}`,
         role: 'assistant',
         content: `✅ **Goal Set!** I've added "${card.data?.goalText}" to your goals. Let's crush it! 💪`,
         timestamp: new Date()
-      }]);
+      }, ...prev]);
     }
   };
+
+  // Visible messages (limit to 4 for initial view, user can scroll for more)
+  const visibleMessages = messages.slice(0, 4);
+  const hasMoreMessages = messages.length > 4;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 flex flex-col">
@@ -552,13 +553,15 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
               </div>
             </div>
 
-            {/* Settings Button - Top Right */}
+            {/* PTT Button - Top Right */}
             <div className="flex items-center gap-2">
+              <PushToTalkButton onTranscript={sendMessage} disabled={isLoading} isListening={isListening} setIsListening={setIsListening} />
+              
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowSMSSettings(true)}
-                className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-950/50 relative"
+                className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-950/50"
                 title="SMS Reminders"
               >
                 <Phone className="w-5 h-5" />
@@ -591,19 +594,19 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
           </div>
         </Card>
 
-        {/* Conversation - Chronological Order (Oldest → Newest) */}
+        {/* Conversation - Newest First, Limited to 4 Visible */}
         <Card className="flex-1 shadow-lg border border-slate-700/50 bg-slate-900/80 backdrop-blur overflow-hidden flex flex-col">
           <div className="bg-slate-800/50 px-4 py-2 border-b border-slate-700/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <MessageCircle className="w-4 h-4 text-emerald-400" />
               <span className="font-semibold text-white text-sm">Conversation</span>
             </div>
-            <span className="text-xs text-slate-400">
-              {messages.length > 0 ? `${messages.length} messages` : 'Start chatting'}
-            </span>
+            {hasMoreMessages && (
+              <span className="text-xs text-slate-500">Scroll for older messages</span>
+            )}
           </div>
           
-          <div className="flex-1 p-4 space-y-3 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-slate-900" style={{ maxHeight: '500px' }}>
+          <div ref={conversationTopRef} className="flex-1 p-4 space-y-3 overflow-y-auto scrollbar-thin scrollbar-thumb-slate-700" style={{ maxHeight: '400px' }}>
             {isLoadingHistory ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-emerald-500 mr-2" />
@@ -616,37 +619,49 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
               </div>
             ) : (
               <>
-                {/* Messages - chronological order (oldest first) */}
+                {/* Streaming content at top */}
+                {streamingContent && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex flex-col items-start">
+                    <div className="max-w-[85%] rounded-2xl px-4 py-3 shadow-lg bg-slate-800 text-slate-100 border border-slate-700">
+                      <div className="prose prose-sm prose-invert max-w-none">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
+                      </div>
+                      <span className="inline-block w-2 h-4 bg-emerald-400 ml-1 animate-pulse" />
+                    </div>
+                  </motion.div>
+                )}
+                
+                {isLoading && !streamingContent && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex justify-start">
+                    <div className="bg-slate-800 rounded-2xl px-4 py-3 border border-slate-700">
+                      <div className="flex items-center gap-2">
+                        <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
+                        <span className="text-slate-300 text-sm">Coach Kai is thinking...</span>
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+
+                {/* Messages - newest first */}
                 {messages.map((message, index) => (
                   <motion.div
                     key={message.id}
-                    initial={{ opacity: 0, y: 10 }}
+                    initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ delay: index * 0.02 }}
                     className={`flex flex-col ${message.role === 'user' ? 'items-end' : 'items-start'}`}
                   >
-                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-xl ${
+                    <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-lg ${
                       message.role === 'user'
-                        ? 'bg-gradient-to-br from-teal-500/90 via-emerald-500/90 to-cyan-500/90 backdrop-blur-sm text-white shadow-emerald-500/20 border border-emerald-400/30'
-                        : 'bg-gradient-to-br from-slate-800/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm text-slate-100 border border-teal-500/20 shadow-teal-500/10'
-                    }`}
-                    style={message.role === 'user' ? {
-                      boxShadow: '0 0 20px rgba(20, 184, 166, 0.15), 0 4px 12px rgba(0, 0, 0, 0.3)'
-                    } : {
-                      boxShadow: '0 0 15px rgba(45, 212, 191, 0.08), 0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}>
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white'
+                        : 'bg-slate-800 text-slate-100 border border-slate-700'
+                    }`}>
                       {message.role === 'assistant' ? (
-                        <div className="prose prose-sm prose-invert max-w-none
-                          prose-p:leading-relaxed prose-p:my-2
-                          prose-strong:text-emerald-300 prose-strong:font-semibold
-                          prose-em:text-teal-300
-                          prose-code:text-cyan-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:rounded
-                          prose-headings:text-emerald-200
-                          prose-ul:my-2 prose-li:my-1">
+                        <div className="prose prose-sm prose-invert max-w-none">
                           <ReactMarkdown remarkPlugins={[remarkGfm]}>{message.content}</ReactMarkdown>
                         </div>
                       ) : (
-                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-sm">{message.content}</p>
                       )}
                     </div>
                     
@@ -661,49 +676,6 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
                     </span>
                   </motion.div>
                 ))}
-
-                {/* Streaming content at bottom (after all messages) */}
-                {streamingContent && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    className="flex flex-col items-start"
-                  >
-                    <div className="max-w-[85%] rounded-2xl px-4 py-3 shadow-xl bg-gradient-to-br from-slate-800/95 via-slate-800/90 to-slate-900/95 backdrop-blur-sm text-slate-100 border border-teal-500/20 shadow-teal-500/10"
-                    style={{
-                      boxShadow: '0 0 15px rgba(45, 212, 191, 0.08), 0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}>
-                      <div className="prose prose-sm prose-invert max-w-none
-                        prose-p:leading-relaxed prose-p:my-2
-                        prose-strong:text-emerald-300 prose-strong:font-semibold
-                        prose-em:text-teal-300
-                        prose-code:text-cyan-300 prose-code:bg-slate-900/50 prose-code:px-1 prose-code:rounded
-                        prose-headings:text-emerald-200
-                        prose-ul:my-2 prose-li:my-1">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{streamingContent}</ReactMarkdown>
-                      </div>
-                      <span className="inline-block w-2 h-4 bg-emerald-400 ml-1 animate-pulse rounded" />
-                    </div>
-                  </motion.div>
-                )}
-                
-                {isLoading && !streamingContent && (
-                  <motion.div 
-                    initial={{ opacity: 0, y: 10 }} 
-                    animate={{ opacity: 1, y: 0 }} 
-                    className="flex justify-start"
-                  >
-                    <div className="bg-slate-800/80 backdrop-blur rounded-2xl px-4 py-3 border border-slate-700/50">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="w-4 h-4 animate-spin text-emerald-500" />
-                        <span className="text-slate-300 text-sm">Coach Kai is thinking...</span>
-                      </div>
-                    </div>
-                  </motion.div>
-                )}
-
-                {/* Scroll anchor at the bottom */}
-                <div ref={messagesEndRef} />
               </>
             )}
           </div>

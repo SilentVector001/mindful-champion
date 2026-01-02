@@ -1,11 +1,13 @@
+// @ts-nocheck
 export const dynamic = "force-dynamic";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import { buildEnhancedKaiSystemPrompt, FUNCTION_TOOLS, PICKLEBALL_KNOWLEDGE_BASE } from "@/lib/coach-kai/enhanced-system-prompt";
+import { buildEnhancedKaiSystemPrompt, FUNCTION_TOOLS, PICKLEBALL_KNOWLEDGE_BASE, GoalContext } from "@/lib/coach-kai/enhanced-system-prompt";
 import { detectIntent, matchDeficiency, processFunctionCall, FunctionResult } from "@/lib/coach-kai/function-handler";
+import { getUserGoalContext, createGoalFromChat, updateGoalProgress, completeMilestone, getCelebrationMessage } from "@/lib/coach-kai/goal-functions";
 
 /**
  * Enhanced Coach Kai - Emotionally Intelligent AI Coach with Function Calling
@@ -13,6 +15,7 @@ import { detectIntent, matchDeficiency, processFunctionCall, FunctionResult } fr
  * Features:
  * - GPT-4o level intelligence with custom system prompt
  * - Function calling for calendar, messaging, drills, analysis
+ * - DEEP GOALS INTEGRATION - create, update, celebrate goals via chat
  * - Pickleball deficiency knowledge base
  * - Emotional intelligence and intent detection
  * - Streaming responses with action suggestions
@@ -30,7 +33,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { messages, hasMedia } = await req.json();
+    const { messages, hasMedia, goalContext: clientGoalContext } = await req.json();
     if (!messages || !Array.isArray(messages) || messages.length === 0) {
       return NextResponse.json({ error: "Messages required" }, { status: 400 });
     }
@@ -39,10 +42,10 @@ export async function POST(req: NextRequest) {
     const messageText = lastUserMessage?.content || '';
 
     // ============================================
-    // LOAD USER DATA AND CONTEXT
+    // LOAD USER DATA AND GOAL CONTEXT
     // ============================================
     
-    const [user, userGoals, conversation] = await Promise.all([
+    const [user, goalContext, conversation] = await Promise.all([
       prisma.user.findUnique({
         where: { id: session.user.id },
         select: {
@@ -55,11 +58,7 @@ export async function POST(req: NextRequest) {
           biggestChallenges: true
         }
       }),
-      prisma.goal.findMany({
-        where: { userId: session.user.id, status: 'ACTIVE' },
-        select: { title: true, progress: true },
-        take: 5
-      }),
+      getUserGoalContext(session.user.id),
       prisma.aIConversation.findFirst({
         where: { userId: session.user.id },
         include: {
@@ -85,6 +84,35 @@ export async function POST(req: NextRequest) {
     const detectedIntent = detectIntent(messageText);
     const matchedDeficiency = matchDeficiency(messageText);
     
+    // Check if user is confirming a previous suggestion (e.g., "yes", "sounds good", "let's do it")
+    const isConfirmation = /^(yes|yeah|yep|sure|ok|okay|sounds good|let's do it|do it|go ahead|please|absolutely|definitely|perfect|great)\b/i.test(messageText.trim());
+    
+    // If confirming, look for pending goal/drill suggestion in conversation
+    let pendingAction: { type: string; title: string; skillArea?: string } | null = null;
+    if (isConfirmation && messages.length >= 2) {
+      const prevAssistantMsg = messages.slice(0, -1).reverse().find((m: any) => m.role === 'assistant');
+      if (prevAssistantMsg?.content) {
+        const content = prevAssistantMsg.content.toLowerCase();
+        // Extract skill area from previous message
+        const skillMatch = content.match(/(?:improve|work on|practice|focus on|master)\s+(?:your\s+)?(\w+(?:\s+\w+)?)/i);
+        const goalMatch = content.match(/(?:goal|plan)[:\s]+["']?([^"'\n]+)["']?/i);
+        
+        if (content.includes('goal') || content.includes('plan') || content.includes('milestone')) {
+          pendingAction = {
+            type: 'goal',
+            title: goalMatch?.[1] || skillMatch?.[1] || 'Improve My Game',
+            skillArea: skillMatch?.[1]?.toLowerCase() || 'backhand'
+          };
+        } else if (content.includes('drill') || content.includes('exercise')) {
+          pendingAction = {
+            type: 'drill',
+            title: skillMatch?.[1] || 'Practice Drill',
+            skillArea: skillMatch?.[1]?.toLowerCase()
+          };
+        }
+      }
+    }
+    
     // Build conversation history context
     const recentHistory = conversation?.messages
       ?.slice(0, 3)
@@ -92,8 +120,27 @@ export async function POST(req: NextRequest) {
       ?.join('\n') || '';
 
     // ============================================
-    // BUILD ENHANCED SYSTEM PROMPT
+    // BUILD ENHANCED SYSTEM PROMPT WITH GOAL CONTEXT
     // ============================================
+    
+    // Transform goal context for system prompt
+    const formattedGoalContext: GoalContext = {
+      activeGoals: goalContext.activeGoals?.map(g => ({
+        id: g.id,
+        title: g.title,
+        progress: g.progress || 0,
+        category: g.category,
+        milestones: g.milestones?.map(m => ({
+          id: m.id,
+          title: m.title,
+          status: m.status || 'PENDING'
+        }))
+      })) || [],
+      recentlyCompleted: goalContext.recentlyCompleted || [],
+      totalProgress: goalContext.totalProgress || 0,
+      streak: goalContext.streak || 0,
+      nextMilestone: goalContext.nextMilestone
+    };
     
     const systemPrompt = buildEnhancedKaiSystemPrompt(
       userName,
@@ -101,12 +148,23 @@ export async function POST(req: NextRequest) {
       rating,
       goals,
       challenges,
-      recentHistory
+      recentHistory,
+      formattedGoalContext
     );
 
     // Add context hints based on detected intent
     let contextHint = '';
-    if (detectedIntent === 'scheduling') {
+    if (detectedIntent === 'goal_create') {
+      contextHint = '\n\n[SYSTEM HINT: User wants to set a goal. USE the create_goal function! Extract the skill area they want to improve and create an actionable goal title. Be enthusiastic!]';
+    } else if (detectedIntent === 'goal_progress') {
+      // Find relevant active goal to update
+      const relevantGoal = formattedGoalContext.activeGoals?.[0];
+      if (relevantGoal) {
+        contextHint = `\n\n[SYSTEM HINT: User is reporting progress. USE update_goal_progress function with goalId: "${relevantGoal.id}" for their "${relevantGoal.title}" goal. Celebrate their dedication!]`;
+      } else {
+        contextHint = '\n\n[SYSTEM HINT: User wants to log progress but has no active goals. Encourage them to create one first using create_goal function!]';
+      }
+    } else if (detectedIntent === 'scheduling') {
       contextHint = '\n\n[SYSTEM HINT: User appears to be discussing scheduling. Consider using add_to_calendar function.]';
     } else if (detectedIntent === 'social') {
       contextHint = '\n\n[SYSTEM HINT: User wants to connect with someone. Ask for confirmation before using send_message function.]';
@@ -117,11 +175,40 @@ export async function POST(req: NextRequest) {
     }
 
     // ============================================
+    // HANDLE CONFIRMATION - AUTO-EXECUTE GOAL CREATION
+    // ============================================
+    
+    let createdGoal: any = null;
+    if (isConfirmation && pendingAction?.type === 'goal') {
+      try {
+        // Directly create the goal when user confirms
+        const goalResult = await createGoalFromChat(
+          session.user.id,
+          `Improve My ${pendingAction.skillArea?.charAt(0).toUpperCase()}${pendingAction.skillArea?.slice(1) || 'Game'}`,
+          pendingAction.skillArea || 'backhand',
+          30
+        );
+        if (goalResult.success) {
+          createdGoal = goalResult.goal;
+          console.log('[Coach Kai] Goal created on confirmation:', createdGoal.title);
+        }
+      } catch (e) {
+        console.error('[Coach Kai] Failed to create goal on confirmation:', e);
+      }
+    }
+
+    // ============================================
     // BUILD CONVERSATION FOR LLM
     // ============================================
     
+    // Add context about created goal if applicable
+    let goalCreationContext = '';
+    if (createdGoal) {
+      goalCreationContext = `\n\n[IMPORTANT: You just created a goal for the user! Goal: "${createdGoal.title}" with ${createdGoal.Milestone?.length || 4} milestones. Celebrate this and explain what milestones were added. Be enthusiastic! DO NOT use function calls - the goal is already created.]`;
+    }
+    
     const conversationMessages = [
-      { role: "system", content: systemPrompt + contextHint },
+      { role: "system", content: systemPrompt + contextHint + goalCreationContext },
       ...messages.slice(-9).map((msg: any) => ({
         role: msg.role,
         content: msg.content
@@ -191,19 +278,11 @@ export async function POST(req: NextRequest) {
                   
                   // Handle text content
                   if (delta?.content) {
-                    // Strip any XML-like function call artifacts from the content
-                    let cleanContent = delta.content;
-                    // Remove XML tags that might leak through
-                    cleanContent = cleanContent.replace(/<\/?(?:tool_call_id|function_call_name|function_call_arguments)[^>]*>/g, '');
-                    cleanContent = cleanContent.replace(/<\/?[a-z_]+>/gi, '');
-                    // Skip empty chunks after cleanup
-                    if (cleanContent.trim()) {
-                      fullResponse += cleanContent;
-                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                        type: 'text', 
-                        content: cleanContent 
-                      })}\n\n`));
-                    }
+                    fullResponse += delta.content;
+                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                      type: 'text', 
+                      content: delta.content 
+                    })}\n\n`));
                   }
                   
                   // Handle tool calls
@@ -228,14 +307,6 @@ export async function POST(req: NextRequest) {
               }
             }
           }
-          
-          // Final cleanup: Remove any remaining XML/JSON artifacts from the full response
-          fullResponse = fullResponse.replace(/<\/?(?:tool_call_id|function_call_name|function_call_arguments|call_[a-zA-Z0-9]+)[^>]*>/g, '');
-          fullResponse = fullResponse.replace(/<\/?[a-z_]+>/gi, '');
-          // Remove raw JSON objects that leaked
-          fullResponse = fullResponse.replace(/\{"\s*"?\}?|\}"\s*"\{/g, '');
-          fullResponse = fullResponse.replace(/^\s*[{}\[\]"]+\s*/gm, '');
-          fullResponse = fullResponse.trim();
           
           // Process completed tool calls into action suggestions
           const actionSuggestions: FunctionResult[] = [];
@@ -272,19 +343,37 @@ export async function POST(req: NextRequest) {
             });
           }
           
-          // Send action suggestions
+          // Send action suggestions as cards (frontend expects 'cards')
           if (actionSuggestions.length > 0) {
+            // Convert FunctionResult format to ActionCard format
+            const actionCards = actionSuggestions.map((s, idx) => ({
+              id: `action-${Date.now()}-${idx}`,
+              type: s.type === 'goal_create' ? 'goal' : s.type === 'resource' && s.data?.type === 'drill' ? 'drill' : 'drill',
+              title: s.data?.title || s.action,
+              description: s.confirmationPrompt || s.data?.details || '',
+              icon: s.type === 'goal_create' ? 'target' : 'play',
+              priority: 'high' as const,
+              action: s.type === 'goal_create' ? 'create-goal' : s.type === 'resource' ? 'start-drill' : undefined,
+              data: s.data,
+              href: s.type === 'resource' && s.data?.type === 'drill' ? '/train/drills' : undefined
+            }));
+            
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
               type: 'actions', 
-              suggestions: actionSuggestions 
+              cards: actionCards 
             })}\n\n`));
           }
           
-          // Send completion with metadata
+          // Send completion with metadata (include createdGoal if applicable)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
             type: 'complete',
             intent: detectedIntent,
-            deficiency: matchedDeficiency?.category || null
+            deficiency: matchedDeficiency?.category || null,
+            goalCreated: createdGoal ? {
+              id: createdGoal.id,
+              title: createdGoal.title,
+              milestones: createdGoal.Milestone?.length || 0
+            } : null
           })}\n\n`));
           
           // Save to database (async, don't block response)
