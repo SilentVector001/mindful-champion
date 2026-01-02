@@ -72,9 +72,9 @@ export async function DELETE(
     // Using a transaction to ensure all data is deleted atomically
     await prisma.$transaction(async (tx) => {
       // Delete session-related data
-      await tx.pageView.deleteMany({ where: { session: { userId } } })
-      await tx.videoInteraction.deleteMany({ where: { session: { userId } } })
-      await tx.drillCompletion.deleteMany({ where: { session: { userId } } })
+      await tx.pageView.deleteMany({ where: { UserSession: { userId } } })
+      await tx.videoInteraction.deleteMany({ where: { UserSession: { userId } } })
+      await tx.drillCompletion.deleteMany({ where: { UserSession: { userId } } })
       await tx.userSession.deleteMany({ where: { userId } })
       
       // Delete user content and progress

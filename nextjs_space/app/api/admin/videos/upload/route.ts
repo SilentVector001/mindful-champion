@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         reviewStatus: 'PENDING',
       },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             name: true,

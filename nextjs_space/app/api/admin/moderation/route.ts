@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const suggestions = await prisma.videoSuggestion.findMany({
       include: {
-        user: true,
+        User: true,
       },
       orderBy: { createdAt: 'desc' },
       take: 100,

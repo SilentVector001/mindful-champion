@@ -17,9 +17,9 @@ export async function GET(req: Request) {
     // Get all achievements with their user achievements
     const achievements = await prisma.achievement.findMany({
       include: {
-        userAchievements: {
+        UserAchievement: {
           include: {
-            user: {
+            User: {
               select: {
                 id: true,
                 email: true,
@@ -86,10 +86,10 @@ export async function GET(req: Request) {
         firstName: true,
         lastName: true,
         skillLevel: true,
-        userAchievements: {
+        UserAchievement: {
           select: {
             id: true,
-            achievement: {
+            Achievement: {
               select: {
                 name: true,
                 tier: true
@@ -100,7 +100,7 @@ export async function GET(req: Request) {
         }
       },
       orderBy: {
-        userAchievements: {
+        UserAchievement: {
           _count: 'desc'
         }
       },

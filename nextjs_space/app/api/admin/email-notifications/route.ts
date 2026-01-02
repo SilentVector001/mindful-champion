@@ -74,14 +74,14 @@ export async function GET(request: NextRequest) {
           createdAt: true,
           error: true,
           retryCount: true,
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
               email: true,
             },
           },
-          videoAnalysis: {
+          VideoAnalysis: {
             select: {
               id: true,
               title: true,

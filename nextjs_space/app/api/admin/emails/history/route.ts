@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         prisma.emailNotification.findMany({
           where,
           include: {
-            user: {
+            User: {
               select: {
                 id: true,
                 email: true,
@@ -249,7 +249,7 @@ export async function POST(request: NextRequest) {
     const email = await prisma.emailNotification.findUnique({
       where: { id: emailId },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,
@@ -258,7 +258,7 @@ export async function POST(request: NextRequest) {
             name: true,
           },
         },
-        videoAnalysis: {
+        VideoAnalysis: {
           select: {
             id: true,
             videoUrl: true,

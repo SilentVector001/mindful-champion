@@ -32,7 +32,7 @@ export async function GET(req: Request) {
       }),
       prisma.userProgram.findMany({
         include: {
-          user: true,
+          User: true,
           program: true,
         },
         orderBy: { createdAt: 'desc' },

@@ -43,7 +43,7 @@ export async function GET(req: NextRequest) {
       whereClause.OR = [
         { title: { contains: search, mode: 'insensitive' } },
         {
-          user: {
+          User: {
             OR: [
               { name: { contains: search, mode: 'insensitive' } },
               { email: { contains: search, mode: 'insensitive' } },
@@ -58,11 +58,11 @@ export async function GET(req: NextRequest) {
       prisma.aIConversation.findMany({
         where: whereClause,
         include: {
-          messages: {
+          AIMessage: {
             orderBy: { createdAt: 'desc' },
             take: 3, // Get last 3 messages for preview
           },
-          user: {
+          User: {
             select: {
               id: true,
               name: true,

@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         orderBy: { uploadedAt: 'desc' },
         take: 20,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -59,7 +59,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -77,7 +77,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -95,7 +95,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -113,7 +113,7 @@ export async function GET(request: NextRequest) {
         orderBy: { createdAt: 'desc' },
         take: 20,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               name: true,
@@ -134,7 +134,7 @@ export async function GET(request: NextRequest) {
         orderBy: { timestamp: 'desc' },
         take: 100, // Take more since we'll filter later
         include: {
-          session: {
+          UserSession: {
             select: {
               sessionId: true,
               deviceType: true,

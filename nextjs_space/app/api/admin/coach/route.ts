@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const messages = await prisma.chatMessage.findMany({
       include: {
-        user: true,
+        User: true,
       },
       orderBy: { timestamp: 'desc' },
       take: 200,

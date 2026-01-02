@@ -19,21 +19,21 @@ export async function GET(
     const email = await prisma.emailNotification.findUnique({
       where: { id: emailId },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             name: true,
             email: true,
           },
         },
-        sponsorApplication: {
+        SponsorApplication: {
           select: {
             id: true,
             companyName: true,
             status: true,
           },
         },
-        videoAnalysis: {
+        VideoAnalysis: {
           select: {
             id: true,
             title: true,

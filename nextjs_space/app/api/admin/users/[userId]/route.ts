@@ -41,7 +41,7 @@ export async function GET(
             select: {
               matches: true,
               goals: true,
-              userAchievements: true,
+              UserAchievement: true,
               payments: true,
               securityLogs: true,
             }
@@ -54,7 +54,7 @@ export async function GET(
               unlockedAt: 'desc'
             }
           },
-          userAchievements: {
+          UserAchievement: {
             take: 10,
             orderBy: {
               unlockedAt: 'desc'
@@ -252,7 +252,7 @@ export async function GET(
       // Reward points and tier unlocks at root level for Points tab
       rewardPoints: user?.rewardPoints || 0,
       tierUnlocks: user?.tierUnlocks || [],
-      userAchievements: user?.userAchievements || [],
+      UserAchievement: user?.userAchievements || [],
       timeline,
     })
   } catch (error) {

@@ -45,7 +45,7 @@ export async function GET(req: Request) {
         payments: { orderBy: { createdAt: 'desc' }, take: 5 },
         matches: { orderBy: { createdAt: 'desc' }, take: 5 },
         goals: true,
-        userAchievements: { include: { achievement: true } },
+        UserAchievement: { include: { achievement: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 100,

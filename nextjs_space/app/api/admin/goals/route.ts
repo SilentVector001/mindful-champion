@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     const [goals, achievements, skillProgress] = await Promise.all([
       prisma.goal.findMany({
         include: {
-          user: true,
+          User: true,
           milestones: true,
         },
         orderBy: { createdAt: 'desc' },
@@ -25,14 +25,14 @@ export async function GET(req: Request) {
       }),
       prisma.achievement.findMany({
         include: {
-          userAchievements: {
-            include: { user: true }
+          UserAchievement: {
+            include: { User: true }
           }
         },
         orderBy: { createdAt: 'desc' },
       }),
       prisma.skillProgress.findMany({
-        include: { user: true },
+        include: { User: true },
         orderBy: { updatedAt: 'desc' },
         take: 100,
       })

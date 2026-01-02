@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
       take: limit,
       orderBy: { uploadedAt: 'desc' },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             name: true,

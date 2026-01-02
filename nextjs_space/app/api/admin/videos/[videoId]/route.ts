@@ -23,7 +23,7 @@ export async function GET(
     const video = await prisma.videoAnalysis.findUnique({
       where: { id: videoId },
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,
@@ -128,7 +128,7 @@ export async function PATCH(
       where: { id: videoId },
       data: updateData,
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,

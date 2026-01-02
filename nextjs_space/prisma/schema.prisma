@@ -586,19 +586,27 @@ model FlaggedMessage {
 }
 
 model Goal {
-  id          String       @id
-  userId      String
-  title       String
-  description String?
-  category    GoalCategory
-  status      GoalStatus   @default(ACTIVE)
-  targetDate  DateTime?
-  progress    Float        @default(0.0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime
-  completedAt DateTime?
-  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Milestone   Milestone[]
+  id            String       @id
+  userId        String
+  title         String
+  description   String?
+  category      GoalCategory
+  status        GoalStatus   @default(ACTIVE)
+  targetDate    DateTime?
+  progress      Float        @default(0.0)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime
+  completedAt   DateTime?
+  color         String?
+  sortOrder     Int          @default(0)
+  parentGoalId  String?
+  ParentGoal    Goal?        @relation("SubGoals", fields: [parentGoalId], references: [id], onDelete: Cascade)
+  SubGoals      Goal[]       @relation("SubGoals")
+  User          User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Milestone     Milestone[]
+
+  @@index([parentGoalId])
+  @@index([userId])
 }
 
 model HealthData {

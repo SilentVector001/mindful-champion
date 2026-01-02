@@ -16,7 +16,7 @@ export async function GET(req: Request) {
 
     const clips = await prisma.videoClip.findMany({
       include: {
-        user: true,
+        User: true,
       },
       orderBy: { createdAt: 'desc' },
       take: 100,

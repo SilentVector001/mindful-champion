@@ -84,7 +84,7 @@ export async function GET(request: NextRequest) {
             select: {
               matches: true,
               goals: true,
-              userAchievements: true,
+              UserAchievement: true,
               payments: true,
               securityLogs: true,
             }

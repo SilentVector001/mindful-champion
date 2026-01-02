@@ -60,9 +60,9 @@ export async function GET(request: NextRequest) {
           { description: { contains: search, mode: 'insensitive' } },
           { fileName: { contains: search, mode: 'insensitive' } },
           { adminNotes: { contains: search, mode: 'insensitive' } },
-          { user: { email: { contains: search, mode: 'insensitive' } } },
-          { user: { firstName: { contains: search, mode: 'insensitive' } } },
-          { user: { lastName: { contains: search, mode: 'insensitive' } } }
+          { User: { email: { contains: search, mode: 'insensitive' } } },
+          { User: { firstName: { contains: search, mode: 'insensitive' } } },
+          { User: { lastName: { contains: search, mode: 'insensitive' } } }
         ]
       });
     }
@@ -74,7 +74,7 @@ export async function GET(request: NextRequest) {
     const videos = await prisma.videoAnalysis.findMany({
       where,
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             email: true,

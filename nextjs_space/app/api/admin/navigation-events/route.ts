@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
       orderBy: { timestamp: 'desc' },
       take: limit,
       include: {
-        session: {
+        UserSession: {
           select: {
             sessionId: true,
             deviceType: true,

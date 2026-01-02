@@ -80,7 +80,7 @@ export async function GET() {
     // Recent payments (last 10)
     const recentPayments = await prisma.payment.findMany({
       where: { status: 'SUCCEEDED' },
-      include: { user: { select: { email: true, firstName: true, lastName: true } } },
+      include: { User: { select: { email: true, firstName: true, lastName: true } } },
       orderBy: { createdAt: 'desc' },
       take: 10,
     })
@@ -161,10 +161,10 @@ export async function GET() {
         id: p.id,
         amount: p.amount / 100,
         tier: p.subscriptionTier,
-        email: p.user?.email || 'Unknown',
-        name: p.user?.firstName && p.user?.lastName 
-          ? `${p.user.firstName} ${p.user.lastName}` 
-          : p.user?.email?.split('@')[0] || 'Unknown',
+        email: p.User?.email || 'Unknown',
+        name: p.User?.firstName && p.User?.lastName 
+          ? `${p.User.firstName} ${p.User.lastName}` 
+          : p.User?.email?.split('@')[0] || 'Unknown',
         createdAt: p.createdAt,
       })),
       trends: {

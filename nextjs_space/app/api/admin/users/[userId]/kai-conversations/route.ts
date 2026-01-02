@@ -55,7 +55,7 @@ export async function GET(
     const conversations = await prisma.aIConversation.findMany({
       where: { userId },
       include: {
-        messages: {
+        AIMessage: {
           orderBy: { createdAt: 'asc' }
         }
       },

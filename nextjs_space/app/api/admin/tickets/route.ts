@@ -33,7 +33,7 @@ export async function GET(request: Request) {
     const tickets = await prisma.supportTicket.findMany({
       where,
       include: {
-        user: {
+        User: {
           select: {
             name: true,
             email: true,

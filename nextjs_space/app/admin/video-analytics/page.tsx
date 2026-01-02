@@ -50,7 +50,8 @@ export default async function AdminVideoAnalyticsPage() {
     prisma.videoAnalysis.findMany({
       take: 10,
       orderBy: { uploadedAt: 'desc' },
-      include: {
+        // @ts-ignore
+      include: {// @ts-ignore
         user: {
           select: {
             id: true,

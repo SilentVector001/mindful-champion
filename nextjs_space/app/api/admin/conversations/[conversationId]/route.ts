@@ -43,10 +43,10 @@ export async function GET(
       conversation = await prisma.aIConversation.findUnique({
         where: { id: conversationId },
         include: {
-          messages: {
+          AIMessage: {
             orderBy: { createdAt: 'asc' }
           },
-          user: {
+          User: {
             select: {
               id: true,
               name: true,

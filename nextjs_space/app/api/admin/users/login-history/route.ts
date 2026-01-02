@@ -102,7 +102,7 @@ export async function GET(request: Request) {
     );
 
     return NextResponse.json({
-      user: {
+      User: {
         ...user,
         createdAt: user.createdAt.toISOString(),
         lastActiveDate: user.lastActiveDate?.toISOString() || null,

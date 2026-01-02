@@ -38,7 +38,7 @@ export async function GET(req: NextRequest) {
     const betaTesters = await prisma.betaTester.findMany({
       where,
       include: {
-        user: {
+        User: {
           select: {
             id: true,
             name: true,
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
             lastName: true
           }
         },
-        promoCode: {
+        PromoCode: {
           select: {
             code: true,
             rewardAmount: true,

@@ -14,14 +14,29 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
+    const { searchParams } = new URL(req.url)
+    const includeSubGoals = searchParams.get('includeSubGoals') === 'true'
+
     const goals = await prisma.goal.findMany({
       where: { userId: session.user.id },
       include: {
         milestones: {
           orderBy: { order: 'asc' }
-        }
+        },
+        ...(includeSubGoals && {
+          SubGoals: {
+            include: {
+              milestones: {
+                orderBy: { order: 'asc' }
+              }
+            }
+          }
+        })
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: [
+        { sortOrder: 'asc' },
+        { createdAt: 'desc' }
+      ]
     })
 
     return NextResponse.json(goals)
@@ -40,7 +55,7 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json()
-    const { title, description, category, targetDate, milestones, notificationPreferences } = body
+    const { title, description, category, targetDate, milestones, notificationPreferences, parentGoalId, color } = body
 
     const goal = await prisma.goal.create({
       data: {
@@ -49,6 +64,8 @@ export async function POST(req: NextRequest) {
         description,
         category,
         targetDate: targetDate ? new Date(targetDate) : null,
+        parentGoalId: parentGoalId || null,
+        color: color || null,
         milestones: {
           create: milestones?.map((m: any, index: number) => ({
             title: m.title,

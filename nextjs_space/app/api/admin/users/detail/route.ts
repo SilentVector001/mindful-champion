@@ -48,7 +48,7 @@ export async function GET(request: NextRequest) {
             orderBy: { createdAt: 'desc' },
             take: 10,
           },
-          userAchievements: {
+          UserAchievement: {
             include: {
               achievement: true,
             },

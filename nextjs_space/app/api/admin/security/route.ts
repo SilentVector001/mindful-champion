@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       const logs = await prisma.securityLog.findMany({
         where,
         include: {
-          user: {
+          User: {
             select: {
               id: true,
               email: true,
