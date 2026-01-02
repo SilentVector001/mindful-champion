@@ -49,6 +49,10 @@ import premiumDesign, {
   getSkillConfig 
 } from "@/lib/premium-design-system"
 import AIInsightsPanel from "@/components/ai/ai-insights-panel"
+import XPDisplay from "@/components/train/xp-display"
+import StreakDisplay from "@/components/train/streak-display"
+import BadgesDisplay from "@/components/train/badges-display"
+import ProgressRing from "@/components/train/progress-ring"
 
 interface TrainingProgram {
   id: string
@@ -252,37 +256,18 @@ export default function PremiumTrainingPrograms({
                 </p>
               </motion.div>
 
-              {/* Enhanced Stats with Glow Effects */}
+              {/* Enhanced Stats with XP and Streak */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
                 className="flex items-center gap-3 md:gap-4"
               >
-                <motion.div 
-                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
-                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(6, 182, 212, 0.3)" }}
-                >
-                  <BookOpen className="w-5 h-5 text-cyan-400" />
-                  <span className="text-2xl font-bold text-white">{programs.length}</span>
-                  <span className="text-sm text-gray-300">Programs</span>
-                </motion.div>
-                <motion.div 
-                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-orange-500/30 shadow-lg shadow-orange-500/10"
-                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)" }}
-                >
-                  <Flame className="w-5 h-5 text-orange-400" />
-                  <span className="text-2xl font-bold text-white">{userPrograms.length}</span>
-                  <span className="text-sm text-gray-300">Active</span>
-                </motion.div>
-                <motion.div 
-                  className="hidden md:flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-emerald-500/30 shadow-lg shadow-emerald-500/10"
-                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(16, 185, 129, 0.3)" }}
-                >
-                  <TrendingUp className="w-5 h-5 text-emerald-400" />
-                  <span className="text-2xl font-bold text-white">98%</span>
-                  <span className="text-sm text-gray-300">Success</span>
-                </motion.div>
+                <XPDisplay compact />
+                <StreakDisplay compact />
+                <div className="hidden md:block">
+                  <BadgesDisplay compact />
+                </div>
               </motion.div>
             </div>
 
@@ -569,7 +554,8 @@ export default function PremiumTrainingPrograms({
                           index={index}
                           onEnroll={handleEnrollProgram}
                           isEnrolling={isEnrolling === program.programId}
-                          isEnrolled={userPrograms.some(up => up.program.programId === program.programId)}
+                          isEnrolled={userPrograms.some(up => up?.program?.programId === program.programId)}
+                          userProgress={userPrograms.find(up => up?.program?.programId === program.programId)?.completionPercentage}
                         />
                       ))}
                     </AnimatePresence>
@@ -824,22 +810,29 @@ function FeaturedProgramCard({
   )
 }
 
-// Premium Program Card Component
+// Premium Program Card Component with Progress Ring
 function PremiumProgramCard({ 
   program, 
   index, 
   onEnroll, 
   isEnrolling, 
-  isEnrolled 
+  isEnrolled,
+  userProgress
 }: {
   program: TrainingProgram
   index: number
   onEnroll: (id: string) => void
   isEnrolling: boolean
   isEnrolled: boolean
+  userProgress?: number
 }) {
+  const [showDetails, setShowDetails] = useState(false)
   const skillConfig = getSkillConfig(program.skillLevel)
   const IconComponent = skillConfig.icon
+  const progress = userProgress ?? 0
+
+  // XP reward calculation
+  const xpReward = program.durationDays * 100 + (program.difficulty ?? 1) * 50
 
   return (
     <motion.div
@@ -848,87 +841,115 @@ function PremiumProgramCard({
       {...premiumAnimations.cardHover}
     >
       <Card className="bg-slate-800/60 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/80 hover:shadow-2xl transition-all duration-300 rounded-2xl h-full flex flex-col overflow-hidden group">
-        {/* Header with Icon and Badge */}
+        {/* Header with Progress Ring for enrolled programs */}
         <div className={cn(
-          "h-32 bg-gradient-to-br relative",
+          "h-36 bg-gradient-to-br relative overflow-hidden",
           skillConfig.gradient
         )}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <IconComponent className="w-20 h-20 text-white/90 group-hover:scale-110 transition-transform duration-300" />
-          </div>
-          <Badge className="absolute top-4 right-4 bg-white/20 text-white backdrop-blur-sm border-white/30">
+          {isEnrolled && progress > 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+              <ProgressRing 
+                progress={progress} 
+                size={80} 
+                strokeWidth={6}
+                color={progress >= 100 ? 'emerald' : 'cyan'}
+              >
+                <div className="text-center">
+                  <span className="text-lg font-bold text-white">{Math.round(progress)}%</span>
+                </div>
+              </ProgressRing>
+            </div>
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <IconComponent className="w-16 h-16 text-white/90 group-hover:scale-110 transition-transform duration-300" />
+            </div>
+          )}
+          
+          <Badge className="absolute top-3 right-3 bg-white/20 text-white backdrop-blur-sm border-white/30 text-xs">
             {skillConfig.name}
           </Badge>
+          
+          {/* XP Reward Badge */}
+          <div className="absolute bottom-3 left-3 flex items-center gap-1 px-2 py-1 bg-black/30 backdrop-blur-sm rounded-lg">
+            <Zap className="w-3 h-3 text-yellow-400" />
+            <span className="text-xs text-white font-medium">+{xpReward} XP</span>
+          </div>
+
           {program.rating && (
-            <div className="absolute bottom-4 left-4 flex items-center gap-1">
-              <Star className="w-4 h-4 text-yellow-400 fill-current" />
-              <span className="text-white font-medium">{program.rating}</span>
+            <div className="absolute bottom-3 right-3 flex items-center gap-1 px-2 py-1 bg-black/30 backdrop-blur-sm rounded-lg">
+              <Star className="w-3 h-3 text-yellow-400 fill-current" />
+              <span className="text-xs text-white font-medium">{program.rating}</span>
             </div>
           )}
         </div>
 
-        <CardContent className="p-6 flex-1 flex flex-col">
+        <CardContent className="p-5 flex-1 flex flex-col">
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+            <h3 className="text-lg font-bold text-white mb-1.5 group-hover:text-cyan-400 transition-colors line-clamp-1">
               {program.name}
             </h3>
             
             {program.tagline && (
-              <p className="text-cyan-400 font-medium text-sm mb-3">
+              <p className="text-cyan-400 font-medium text-xs mb-2 line-clamp-1">
                 {program.tagline}
               </p>
             )}
             
-            <p className="text-slate-300 text-sm mb-4 leading-relaxed line-clamp-3">
+            <p className="text-slate-300 text-sm mb-4 leading-relaxed line-clamp-2">
               {program.description}
             </p>
 
-            <div className="space-y-3 mb-6">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <Calendar className="w-4 h-4" />
-                  <span>Duration</span>
-                </div>
-                <span className="font-semibold text-white">{program.durationDays} days</span>
+            {/* Compact Stats Grid */}
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              <div className="text-center p-2 bg-slate-700/40 rounded-lg">
+                <Calendar className="w-4 h-4 text-slate-400 mx-auto mb-1" />
+                <span className="text-sm font-bold text-white">{program.durationDays}</span>
+                <span className="text-xs text-slate-500 block">days</span>
               </div>
-              
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2 text-slate-400">
-                  <Clock className="w-4 h-4" />
-                  <span>Daily Time</span>
-                </div>
-                <span className="font-semibold text-white">
-                  {program.estimatedTimePerDay || '30min'}
-                </span>
+              <div className="text-center p-2 bg-slate-700/40 rounded-lg">
+                <Clock className="w-4 h-4 text-slate-400 mx-auto mb-1" />
+                <span className="text-sm font-bold text-white">{(program.estimatedTimePerDay || '30').replace('min', '')}</span>
+                <span className="text-xs text-slate-500 block">min/day</span>
               </div>
-              
-              {program.enrollmentCount && (
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <Users className="w-4 h-4" />
-                    <span>Enrolled</span>
-                  </div>
-                  <span className="font-semibold text-white">
-                    {program.enrollmentCount.toLocaleString()}+
-                  </span>
-                </div>
-              )}
+              <div className="text-center p-2 bg-slate-700/40 rounded-lg">
+                <Users className="w-4 h-4 text-slate-400 mx-auto mb-1" />
+                <span className="text-sm font-bold text-white">{(program.enrollmentCount || 50).toLocaleString()}</span>
+                <span className="text-xs text-slate-500 block">users</span>
+              </div>
+            </div>
+
+            {/* Difficulty Stars */}
+            <div className="flex items-center gap-1 mb-4">
+              <span className="text-xs text-slate-400 mr-2">Difficulty:</span>
+              {[1, 2, 3, 4, 5].map(star => (
+                <Star 
+                  key={star}
+                  className={cn(
+                    "w-3 h-3",
+                    star <= (program.difficulty || 2) 
+                      ? "text-yellow-400 fill-current" 
+                      : "text-slate-600"
+                  )}
+                />
+              ))}
             </div>
           </div>
 
           <Button
             className={cn(
               "w-full bg-gradient-to-r transition-all duration-300",
-              skillConfig.gradient,
-              isEnrolled ? "opacity-50 cursor-not-allowed" : "hover:shadow-lg"
+              isEnrolled 
+                ? "from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700" 
+                : skillConfig.gradient,
+              isEnrolling && "opacity-70"
             )}
             onClick={() => onEnroll(program.programId || program.id)}
-            disabled={isEnrolling || isEnrolled}
+            disabled={isEnrolling}
           >
             {isEnrolled ? (
               <>
-                <Trophy className="w-4 h-4 mr-2" />
-                Enrolled
+                <Play className="w-4 h-4 mr-2" />
+                Continue Training
               </>
             ) : isEnrolling ? (
               <>

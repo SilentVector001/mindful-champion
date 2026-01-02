@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     const userSession = await prisma.userSession.upsert({
       where: { sessionId },
       create: {
+        id: `sess_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         sessionId,
         userId: userId || null,
         startTime: new Date(),
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
     // Create page view - IMPORTANT: Use userSession.id, not the browser sessionId!
     const pageView = await prisma.pageView.create({
       data: {
+        id: `pv_${Date.now()}_${Math.random().toString(36).substring(7)}`,
         userId: userId || null,
         sessionId: userSession.id, // Use the database ID, not the browser sessionId
         path,

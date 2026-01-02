@@ -2160,6 +2160,9 @@ model User {
   VideoPlaylist                                             VideoPlaylist[]
   VideoSuggestion                                           VideoSuggestion[]
   WearableDevice                                            WearableDevice[]
+  UserXP                                                    UserXP?
+  TrainingStreak                                            TrainingStreak?
+  UserBadge                                                 UserBadge[]
 }
 
 model UserAchievement {
@@ -3386,4 +3389,125 @@ enum WearableDeviceType {
   POLAR
   SUUNTO
   OTHER
+}
+
+// ========== TRAINING HUB INTERACTIVE FEATURES ==========
+
+model UserXP {
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  totalXP      Int      @default(0)
+  level        Int      @default(1)
+  weeklyXP     Int      @default(0)
+  monthlyXP    Int      @default(0)
+  lastXPEarned DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([totalXP])
+  @@index([level])
+}
+
+model XPTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Int
+  source      String   // drill_complete, program_day, achievement, streak_bonus
+  sourceId    String?  // related entity id
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([source])
+  @@index([createdAt])
+}
+
+model TrainingStreak {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastTrainedAt    DateTime?
+  streakStarted    DateTime?
+  totalDaysTrained Int      @default(0)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  User             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([currentStreak])
+}
+
+model ProgramRating {
+  id          String   @id @default(cuid())
+  userId      String
+  programId   String
+  rating      Int      // 1-5 stars
+  review      String?
+  helpfulCount Int     @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@unique([userId, programId])
+  @@index([programId])
+  @@index([rating])
+}
+
+model DrillProgress {
+  id               String   @id @default(cuid())
+  userId           String
+  drillId          String
+  programId        String?
+  dayNumber        Int?
+  completedCount   Int      @default(0)
+  totalTimeSpent   Int      @default(0) // seconds
+  lastRating       Int?     // 1-5 difficulty rating
+  personalNotes    String?
+  bestPerformance  Float?
+  lastCompletedAt  DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, drillId, programId])
+  @@index([userId])
+  @@index([programId])
+}
+
+model ProgramDayProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  programId       String
+  dayNumber       Int
+  status          String   @default("locked") // locked, available, in_progress, completed
+  drillsCompleted Int      @default(0)
+  totalDrills     Int      @default(0)
+  timeSpent       Int      @default(0)
+  xpEarned        Int      @default(0)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, programId, dayNumber])
+  @@index([userId])
+  @@index([programId])
+  @@index([status])
+}
+
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  badgeId    String
+  badgeName  String
+  badgeIcon  String
+  badgeColor String
+  category   String
+  earnedAt   DateTime @default(now())
+  metadata   Json?
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([userId])
+  @@index([category])
 }
