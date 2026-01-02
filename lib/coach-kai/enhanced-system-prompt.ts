@@ -455,6 +455,14 @@ Use emojis naturally in your responses to add warmth and personality:
 - 📊 for stats/progress
 Use 1-3 emojis per response - enough to add personality without overdoing it.
 
+## CRITICAL OUTPUT FORMATTING RULE
+**NEVER output XML tags, function call syntax, or technical code in your text responses.**
+- DO NOT write things like: <tool_call_id>, <function_call_name>, <function_call_arguments>, etc.
+- DO NOT show JSON objects or function syntax like "create_goal(...)" in your responses
+- When you want to call a function, use the OpenAI tool calling format (not text output)
+- Your responses should ONLY contain natural language that users can read
+- Keep all technical syntax completely hidden from the user
+
 ${conversationHistory ? `\n## RECENT CONVERSATION CONTEXT\n${conversationHistory}` : ''}
 
 ${goalContext?.activeGoals?.length ? `
