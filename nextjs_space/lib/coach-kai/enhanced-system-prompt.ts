@@ -74,6 +74,74 @@ export const FUNCTION_TOOLS = [
   {
     type: 'function',
     function: {
+      name: 'create_goal',
+      description: 'Create a new goal for the user when they express wanting to improve or achieve something',
+      parameters: {
+        type: 'object',
+        properties: {
+          title: {
+            type: 'string',
+            description: 'Clear, actionable goal title (e.g., "Improve My Serve", "Master the Third Shot Drop")'
+          },
+          skillArea: {
+            type: 'string',
+            enum: ['serve', 'backhand', 'forehand', 'dink', 'volley', 'footwork', 'third shot', 'tournament', 'fitness', 'mental'],
+            description: 'Primary skill area this goal focuses on'
+          },
+          targetDays: {
+            type: 'number',
+            description: 'Number of days to achieve goal (default 30)'
+          }
+        },
+        required: ['title', 'skillArea']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'update_goal_progress',
+      description: 'Update progress on a user\'s goal when they report completing practice or making progress',
+      parameters: {
+        type: 'object',
+        properties: {
+          goalId: {
+            type: 'string',
+            description: 'ID of the goal to update'
+          },
+          progressIncrement: {
+            type: 'number',
+            description: 'Percentage to add to progress (e.g., 10 for 10%)'
+          },
+          note: {
+            type: 'string',
+            description: 'Optional note about what was accomplished'
+          }
+        },
+        required: ['goalId', 'progressIncrement']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'complete_milestone',
+      description: 'Mark a milestone as complete when user reports finishing a specific milestone',
+      parameters: {
+        type: 'object',
+        properties: {
+          milestoneId: {
+            type: 'string',
+            description: 'ID of the milestone to complete'
+          }
+        },
+        required: ['milestoneId']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
       name: 'add_to_calendar',
       description: 'Add a tournament, practice session, or event to the user\'s calendar when they mention dates/times',
       parameters: {
@@ -185,13 +253,28 @@ export const FUNCTION_TOOLS = [
   }
 ];
 
+export type GoalContext = {
+  activeGoals: Array<{
+    id: string;
+    title: string;
+    progress: number;
+    category: string;
+    milestones?: Array<{ id: string; title: string; status: string }>;
+  }>;
+  recentlyCompleted: Array<{ id: string; title: string; completedAt?: Date }>;
+  totalProgress: number;
+  streak: number;
+  nextMilestone: { id: string; title: string; goalTitle: string } | null;
+};
+
 export function buildEnhancedKaiSystemPrompt(
   userName: string,
   skillLevel: string,
   rating: string,
   goals: string[],
   challenges: string[],
-  conversationHistory: string = ''
+  conversationHistory: string = '',
+  goalContext?: GoalContext
 ): string {
   const knowledgeTable = PICKLEBALL_KNOWLEDGE_BASE.deficiencies
     .map(d => `- ${d.category}: "${d.drill}" - ${d.drillDescription}`)
@@ -200,8 +283,51 @@ export function buildEnhancedKaiSystemPrompt(
   const proList = PICKLEBALL_KNOWLEDGE_BASE.proReferences
     .map(p => `- ${p.name}: ${p.specialty}`)
     .join('\n');
+  
+  // Build goal context section
+  let goalContextSection = '';
+  if (goalContext) {
+    const activeGoalsList = goalContext.activeGoals?.length > 0
+      ? goalContext.activeGoals.map(g => 
+          `  - "${g.title}" (${g.progress}% complete, ID: ${g.id})${g.milestones?.length ? ` - Milestones: ${g.milestones.map(m => `${m.title} [${m.status}]`).join(', ')}` : ''}`
+        ).join('\n')
+      : '  None - suggest creating one!';
+    
+    const recentCompletedList = goalContext.recentlyCompleted?.length > 0
+      ? goalContext.recentlyCompleted.map(g => `  - "${g.title}" \u2705`).join('\n')
+      : '  None yet';
+    
+    const nextMilestoneText = goalContext.nextMilestone 
+      ? `"${goalContext.nextMilestone.title}" for goal "${goalContext.nextMilestone.goalTitle}"`
+      : 'None pending';
+    
+    goalContextSection = `
 
-  return `You are Coach Kai, an empathetic, positive virtual pickleball coach within the Mindful Champion ecosystem. You combine deep technical expertise with emotional intelligence to help players improve their game.
+## CURRENT GOALS CONTEXT - CRITICAL
+You have access to ${userName}'s goals and can help manage them:
+
+### Active Goals:
+${activeGoalsList}
+
+### Recently Completed:
+${recentCompletedList}
+
+### Progress Stats:
+- Overall Progress: ${goalContext.totalProgress}%
+- Achievement Streak: ${goalContext.streak} goals
+- Next Milestone: ${nextMilestoneText}
+
+### GOAL MANAGEMENT RULES:
+1. When user wants to improve something, USE create_goal function
+2. When user reports practice/progress, USE update_goal_progress function with the correct goalId
+3. When user completes a milestone, USE complete_milestone function
+4. CELEBRATE completions enthusiastically! Use emojis and excitement!
+5. Proactively check in on goal progress and encourage next steps
+6. Reference specific goals by name to show you're tracking their journey
+`;
+  }
+
+  return `You are Coach Kai, an empathetic, positive virtual pickleball coach within the Mindful Champion ecosystem. You combine deep technical expertise with emotional intelligence to help players improve their game.${goalContextSection}
 
 ## YOUR CORE IDENTITY
 - You are warm, supportive, and genuinely invested in ${userName}'s success

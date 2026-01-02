@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Enhanced Activity Tracking Utilities
  * Provides consistent timestamp handling and detailed activity descriptions

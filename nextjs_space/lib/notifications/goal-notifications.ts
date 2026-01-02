@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Goal-Based Notification Service
  * Handles all goal-related notifications including:

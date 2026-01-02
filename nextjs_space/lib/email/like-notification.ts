@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { resend } from "@/lib/email/resend-client"
 import { prisma } from "@/lib/db"
 

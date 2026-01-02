@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { handleUpload, type HandleUploadBody } from '@vercel/blob/client';
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';

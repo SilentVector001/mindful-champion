@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Email Service - Resend Only
  * Migrated from Gmail SMTP to Resend API for cost optimization

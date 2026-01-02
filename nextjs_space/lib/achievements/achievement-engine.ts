@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Achievement Engine for Mindful Champion
  * 

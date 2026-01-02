@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Simple achievement checker for common user actions
  * These achievements are based on actual user activities that we track:

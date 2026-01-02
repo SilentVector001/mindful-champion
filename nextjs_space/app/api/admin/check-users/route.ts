@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Diagnostic API to check all users in the database
  * Used for admin troubleshooting

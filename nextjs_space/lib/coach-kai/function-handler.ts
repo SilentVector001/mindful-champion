@@ -8,7 +8,7 @@ export type FunctionCall = {
 };
 
 export type FunctionResult = {
-  type: 'calendar' | 'message' | 'resource' | 'analysis';
+  type: 'calendar' | 'message' | 'resource' | 'analysis' | 'goal_create' | 'goal_progress' | 'milestone_complete';
   action: string;
   data: Record<string, any>;
   requiresConfirmation: boolean;
@@ -46,6 +46,43 @@ export function parseFunctionCalls(response: string): FunctionCall[] {
 // Process a function call and return result
 export function processFunctionCall(call: FunctionCall): FunctionResult {
   switch (call.name) {
+    case 'create_goal':
+      return {
+        type: 'goal_create',
+        action: 'Create Goal',
+        data: {
+          title: call.arguments.title,
+          skillArea: call.arguments.skillArea,
+          targetDays: call.arguments.targetDays || 30
+        },
+        requiresConfirmation: true,
+        confirmationPrompt: `Create goal: "${call.arguments.title}"? I'll add milestones to help track your progress!`
+      };
+      
+    case 'update_goal_progress':
+      return {
+        type: 'goal_progress',
+        action: 'Update Progress',
+        data: {
+          goalId: call.arguments.goalId,
+          progressIncrement: call.arguments.progressIncrement,
+          note: call.arguments.note
+        },
+        requiresConfirmation: true,
+        confirmationPrompt: `Log ${call.arguments.progressIncrement}% progress on your goal?`
+      };
+      
+    case 'complete_milestone':
+      return {
+        type: 'milestone_complete',
+        action: 'Complete Milestone',
+        data: {
+          milestoneId: call.arguments.milestoneId
+        },
+        requiresConfirmation: true,
+        confirmationPrompt: 'Mark this milestone as complete?'
+      };
+    
     case 'add_to_calendar':
       return {
         type: 'calendar',
@@ -151,8 +188,18 @@ export function matchDeficiency(text: string): typeof PICKLEBALL_KNOWLEDGE_BASE.
 }
 
 // Detect intent from user message
-export function detectIntent(text: string): 'scheduling' | 'social' | 'technique' | 'analysis' | 'general' {
+export function detectIntent(text: string): 'scheduling' | 'social' | 'technique' | 'analysis' | 'goal_create' | 'goal_progress' | 'general' {
   const lowerText = text.toLowerCase();
+  
+  // Goal creation patterns - check these first
+  if (/\b(help me (set|create|make)|i want to (improve|get better|work on)|set.*(goal|target)|create.*(goal|plan)|my goal is|i('d| would) like to (achieve|accomplish))\b/.test(lowerText)) {
+    return 'goal_create';
+  }
+  
+  // Progress update patterns
+  if (/\b(i (did|completed|finished|practiced)|just (finished|completed|did)|update.*progress|log.*(practice|session)|mark.*(done|complete)|i('ve| have) been (working|practicing))\b/.test(lowerText)) {
+    return 'goal_progress';
+  }
   
   // Scheduling patterns
   if (/\b(tournament|practice|lesson|match|game)\b.*\b(tomorrow|today|monday|tuesday|wednesday|thursday|friday|saturday|sunday|next|this|at \d)/.test(lowerText) ||

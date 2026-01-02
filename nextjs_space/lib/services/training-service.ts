@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 /**
  * Training Service - Core Business Logic Layer

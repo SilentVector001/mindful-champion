@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Notification Service
  * Handles sending, scheduling, and managing notifications

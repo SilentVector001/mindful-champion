@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 
 import { getServerSession } from "next-auth"

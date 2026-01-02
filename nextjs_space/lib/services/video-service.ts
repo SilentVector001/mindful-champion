@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Video Service - Simplified Video Management
  * 

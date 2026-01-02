@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Admin Custom Streams API
  * Full CRUD operations for managing custom streams

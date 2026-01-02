@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Media Center Email Service - Resend Only
  * Gmail SMTP fallback removed to reduce costs

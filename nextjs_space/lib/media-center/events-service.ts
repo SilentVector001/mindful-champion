@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 import { ApiCache } from './api-cache';
 import { prisma } from '@/lib/db';

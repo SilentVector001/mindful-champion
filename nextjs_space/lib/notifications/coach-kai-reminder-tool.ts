@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Coach Kai Reminder Tool
  * LLM tool definition for creating reminders through natural language

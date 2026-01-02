@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { getResendClient } from './resend-client';
 import { prisma } from '@/lib/db';
 

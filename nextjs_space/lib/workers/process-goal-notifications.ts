@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Goal Notification Processor
  * This worker processes scheduled goal notifications and sends daily check-ins

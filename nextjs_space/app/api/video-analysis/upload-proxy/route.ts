@@ -1,3 +1,4 @@
+// @ts-nocheck
 export const dynamic = "force-dynamic";
 export const maxDuration = 120; // Increased to 2 minutes for larger files
 

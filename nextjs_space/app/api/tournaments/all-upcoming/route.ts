@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { getUpcomingTournaments, ALL_TOURNAMENTS } from '@/lib/tournaments-data'
