@@ -3313,3 +3313,52 @@ model MediaPhoto {
   @@index([featured])
   @@index([tournamentId])
 }
+
+model UserXP {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  totalXP           Int      @default(0)
+  weeklyXP          Int      @default(0)
+  monthlyXP         Int      @default(0)
+  level             Int      @default(1)
+  lastXPEarned      DateTime?
+  weeklyResetAt     DateTime @default(now())
+  monthlyResetAt    DateTime @default(now())
+  lastActiveDate    DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  @@index([totalXP(sort: Desc)])
+  @@index([weeklyXP(sort: Desc)])
+  @@index([monthlyXP(sort: Desc)])
+  @@index([level(sort: Desc)])
+}
+
+model XPTransaction {
+  id          String   @id @default(cuid())
+  userId      String
+  amount      Int
+  source      String
+  sourceId    String?
+  description String?
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([source])
+}
+
+model UserBadge {
+  id         String   @id @default(cuid())
+  userId     String
+  badgeId    String
+  badgeName  String
+  badgeIcon  String?
+  badgeColor String   @default("cyan")
+  category   String   @default("milestone")
+  earnedAt   DateTime @default(now())
+
+  @@unique([userId, badgeId], name: "userId_badgeId")
+  @@index([userId])
+  @@index([category])
+}

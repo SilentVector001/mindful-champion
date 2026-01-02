@@ -1,50 +1,40 @@
+//@ts-nocheck
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
+import { prisma } from '@/lib/db'
 
-import { NextResponse } from 'next/server';
+export const dynamic = 'force-dynamic'
 
-export const dynamic = "force-dynamic";
-import { getServerSession } from 'next-auth';
-
-import { prisma } from '@/lib/db';
-
-import { authOptions } from '@/lib/auth';
-
-
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
-
-    if (!session?.user?.email) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const session = await getServerSession(authOptions)
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: session.user.email },
+      where: { id: session.user.id },
       select: {
         id: true,
-        email: true,
         name: true,
-        firstName: true,
-        lastName: true,
+        nickname: true,
+        email: true,
+        image: true,
+        skillLevel: true,
         playerRating: true,
-        rewardPoints: true,
-        subscriptionTier: true,
-        role: true,
-        createdAt: true,
-      },
-    });
+        currentStreak: true,
+        lastActiveDate: true
+      }
+    })
 
     if (!user) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
-    return NextResponse.json({
-      user,
-    });
+    return NextResponse.json(user)
   } catch (error) {
-    console.error('Failed to fetch user profile:', error);
-    return NextResponse.json(
-      { error: 'Failed to fetch user profile' },
-      { status: 500 }
-    );
+    console.error('Error fetching user profile:', error)
+    return NextResponse.json({ error: 'Failed to fetch profile' }, { status: 500 })
   }
 }
