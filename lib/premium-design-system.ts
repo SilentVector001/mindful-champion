@@ -201,17 +201,6 @@ export const skillLevelConfigs = {
     description: "For competitive players looking to master advanced techniques"
   },
 
-  pro: {
-    icon: Crown,
-    gradient: "from-purple-600 to-violet-600",
-    bg: "bg-purple-600",
-    text: "text-purple-600",
-    border: "border-purple-600",
-    badge: "bg-purple-600 text-white",
-    name: "Elite",
-    description: "Tournament-ready training for serious competitors"
-  },
-
   elite: {
     icon: Crown,
     gradient: "from-purple-600 to-violet-600",
