@@ -7,10 +7,12 @@ export const advancedDinkingProgram = {
   programId: 'intermediate-dinking-strategy',
   name: 'Advanced Dinking & Kitchen Play',
   tagline: 'Control the kitchen and win more rallies',
-  description: 'Elevate your dinking game to an advanced level with sophisticated techniques and patience strategies.',
+  description: 'Elevate your dinking game to an advanced level with sophisticated techniques and patience strategies. The kitchen line is where points are won and lost in pickleball. This 12-day program transforms your soft game from "just getting it over" to strategic weapon that frustrates opponents and creates winning opportunities.',
   durationDays: 12,
   skillLevel: 'INTERMEDIATE',
   estimatedTimePerDay: '35-45 minutes',
+  whyThisMatters: 'At higher levels, 80% of points are won or lost at the kitchen line. Players who can out-dink their opponents control the pace, create attackable balls, and force errors. Patience and precision at the net is the hallmark of skilled players.',
+  nextProgram: 'Spin & Power Mechanics',
   keyOutcomes: [
     'Master cross-court and straight dinks with precision',
     'Develop patience in long dink rallies (50+ shots)',

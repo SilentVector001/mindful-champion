@@ -198,18 +198,29 @@ export const skillLevelConfigs = {
     border: "border-[#D4AF37]",
     badge: "bg-[#D4AF37] text-white",
     name: "Advanced",
-    description: "For experienced players seeking competitive excellence"
+    description: "For competitive players looking to master advanced techniques"
+  },
+
+  pro: {
+    icon: Crown,
+    gradient: "from-purple-600 to-violet-600",
+    bg: "bg-purple-600",
+    text: "text-purple-600",
+    border: "border-purple-600",
+    badge: "bg-purple-600 text-white",
+    name: "Elite",
+    description: "Tournament-ready training for serious competitors"
   },
 
   elite: {
     icon: Crown,
-    gradient: premiumColors.gradients.elite,
-    bg: "bg-[#7C3AED]",
-    text: "text-[#7C3AED]",
-    border: "border-[#7C3AED]", 
-    badge: "bg-[#7C3AED] text-white",
+    gradient: "from-purple-600 to-violet-600",
+    bg: "bg-purple-600",
+    text: "text-purple-600",
+    border: "border-purple-600",
+    badge: "bg-purple-600 text-white",
     name: "Elite",
-    description: "Master-level training for tournament champions"
+    description: "Tournament-ready training for serious competitors"
   }
 }
 

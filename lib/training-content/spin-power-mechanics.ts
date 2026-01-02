@@ -7,10 +7,12 @@ export const spinPowerProgram = {
   programId: 'advanced-spin-control',
   name: 'Spin & Power Mechanics',
   tagline: 'Add professional-level spin to every shot',
-  description: 'Master the art of spin and power like professional players. Generate topspin on drives, backspin drops, and sidespin for deception.',
+  description: 'Master the art of spin and power like professional players. This 14-day advanced program teaches you to generate topspin on drives, backspin drops, and sidespin for deception. You\'ll learn the physics of spin, paddle mechanics, and how to read and counter opponent spin — skills that separate advanced players from intermediates.',
   durationDays: 14,
   skillLevel: 'ADVANCED',
   estimatedTimePerDay: '50-60 minutes',
+  whyThisMatters: 'Spin changes everything. It makes your drops stay low, your drives dip at opponents\' feet, and your serves unpredictable. Pros use spin on nearly every shot — this program unlocks that same advantage for you.',
+  nextProgram: 'Tournament Preparation',
   keyOutcomes: [
     'Generate heavy topspin on drives and speedups',
     'Execute backspin drops and dinks with control',

@@ -7,10 +7,12 @@ export const serveReturnMasteryProgram = {
   programId: 'beginner-serve-return',
   name: 'Serve & Return Mastery',
   tagline: 'Dominate the most important shots in pickleball',
-  description: 'This intensive 7-day program focuses exclusively on mastering serves and returns.',
+  description: 'This intensive 7-day program focuses exclusively on mastering serves and returns. Every point starts with a serve — and your return determines whether you\'re on offense or defense. In just one week, you\'ll transform these two critical shots from weaknesses into weapons.',
   durationDays: 7,
   skillLevel: 'BEGINNER',
   estimatedTimePerDay: '25-35 minutes',
+  whyThisMatters: 'The serve and return are the only shots you have complete control over. Master these, and you start every point with an advantage. This is the fastest path to immediate game improvement.',
+  nextProgram: 'Third Shot Excellence',
   keyOutcomes: [
     'Develop 3 different serve types: deep, short, and spin serves',
     'Place serves strategically to opponent weaknesses',

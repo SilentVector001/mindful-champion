@@ -7,10 +7,12 @@ export const pickleballFundamentalsProgram = {
   programId: 'beginner-fundamentals',
   name: 'Pickleball Fundamentals',
   tagline: 'Master the basics and build a solid foundation',
-  description: 'Perfect for complete beginners! This 14-day comprehensive program covers everything you need to start playing pickleball with confidence.',
+  description: 'Perfect for complete beginners! This 14-day comprehensive program covers everything you need to start playing pickleball with confidence. From your first grip to your first game, we\'ll guide you through each fundamental skill with video demonstrations, structured drills, and daily practice sessions.',
   durationDays: 14,
   skillLevel: 'BEGINNER',
   estimatedTimePerDay: '30-40 minutes',
+  whyThisMatters: 'Every champion started as a beginner. The players who excel fastest are those who build proper technique from day one. Bad habits are hard to unlearn — this program ensures you develop the right foundations that will scale as you improve.',
+  nextProgram: 'Serve & Return Mastery',
   keyOutcomes: [
     'Master proper continental grip and ready position',
     'Execute consistent serves with 80%+ success rate',

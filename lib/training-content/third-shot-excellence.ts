@@ -7,10 +7,12 @@ export const thirdShotExcellenceProgram = {
   programId: 'intermediate-third-shot',
   name: 'Third Shot Excellence',
   tagline: 'Master the game-changing third shot drop',
-  description: 'The third shot is what separates intermediate from advanced players. This comprehensive 10-day program teaches you consistent third shot drops and drives.',
+  description: 'The third shot is what separates intermediate from advanced players. This comprehensive 10-day program teaches you consistent third shot drops and drives — the shots that get you safely to the net and put you in control of every rally. You\'ll learn when to drop, when to drive, and how to read your opponent\'s position.',
   durationDays: 10,
   skillLevel: 'INTERMEDIATE',
   estimatedTimePerDay: '40-50 minutes',
+  whyThisMatters: 'The third shot is widely considered the most difficult shot in pickleball. Players who master it can neutralize any serve and transition to offense. Without it, you\'re stuck at the baseline watching your opponents dominate the net.',
+  nextProgram: 'Advanced Dinking & Kitchen Play',
   keyOutcomes: [
     'Execute consistent third shot drops landing in opponent kitchen',
     'Master third shot drives with controlled power',

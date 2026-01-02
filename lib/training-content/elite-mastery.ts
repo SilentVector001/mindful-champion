@@ -114,17 +114,19 @@ function generateEliteDay(day: number): any {
 export const eliteMasteryProgram = {
   programId: 'pro-elite-mastery',
   name: 'Elite Mastery Program',
-  tagline: 'Train like the pros',
-  description: 'The most comprehensive program for elite players. Professional-level training covering advanced tactics, physical conditioning, mental performance, and competitive excellence.',
+  tagline: 'Train like the pros — Transform into a tournament-ready competitor',
+  description: 'The ultimate 30-day program for serious players ready to compete at the highest levels. This intensive pro-level training combines advanced shot-making, tournament strategy, physical conditioning, and championship mental performance. You\'ll master the same techniques used by top-ranked professionals.',
   durationDays: 30,
-  skillLevel: 'PRO',
+  skillLevel: 'PRO',  // CRITICAL: Must be PRO, not BEGINNER
   estimatedTimePerDay: '90 minutes',
+  whyThisMatters: 'Elite players aren\'t born — they\'re built through deliberate practice. This program gives you the exact framework pros use to reach the top. After 30 days, you\'ll have the complete skillset to compete in sanctioned tournaments.',
+  nextProgram: null, // This is the pinnacle program
   keyOutcomes: [
-    'Master professional-level shot making',
-    'Develop elite match strategies and tactics',
-    'Build peak physical conditioning and stamina',
-    'Execute under extreme competitive pressure',
-    'Compete at the highest levels with confidence'
+    'Execute professional-level shots including Erne, ATP, and spin variations',
+    'Develop tournament-winning strategies and adaptive game plans',
+    'Build elite conditioning for multi-match tournament days',
+    'Master pressure situations with clutch performance techniques',
+    'Compete confidently in 4.0+ and open-level tournaments'
   ],
   dailyStructure: {
     days: Array.from({ length: 30 }, (_, i) => generateEliteDay(i + 1))

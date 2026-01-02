@@ -409,11 +409,146 @@ const trainingVideos = [
   },
 ]
 
-// Training Programs Data
+// Training Programs Data - Enhanced with Why This Matters and Progression
 const trainingProgramsData = [
+  // ===== BEGINNER PROGRAMS =====
+  {
+    programId: 'prog_serve_return',
+    name: 'Serve & Return Mastery',
+    tagline: 'Dominate the most important shots in pickleball',
+    description: 'This intensive 7-day program focuses exclusively on mastering serves and returns. Every point starts with a serve — and your return determines whether you\'re on offense or defense. In just one week, you\'ll transform these two critical shots from weaknesses into weapons.',
+    durationDays: 7,
+    skillLevel: 'BEGINNER' as SkillLevel,
+    estimatedTimePerDay: '25-35 minutes',
+    keyOutcomes: [
+      'Develop 3 different serve types: deep, short, and spin serves',
+      'Place serves strategically to opponent weaknesses',
+      'Return serves consistently deep with 75%+ success',
+      'Add topspin and backspin to serves and returns',
+      'Build mental toughness and pre-serve routines',
+    ],
+    whyThisMatters: 'The serve and return are the only shots you have complete control over. Master these, and you start every point with an advantage.',
+    nextProgram: 'Pickleball Fundamentals',
+  },
+  {
+    programId: 'prog_fundamentals',
+    name: 'Pickleball Fundamentals',
+    tagline: 'Master the basics and build a solid foundation',
+    description: 'Perfect for complete beginners! This 14-day comprehensive program covers everything you need to start playing pickleball with confidence. From your first grip to your first game, we\'ll guide you through each fundamental skill with video demonstrations, structured drills, and daily practice sessions.',
+    durationDays: 14,
+    skillLevel: 'BEGINNER' as SkillLevel,
+    estimatedTimePerDay: '30-40 minutes',
+    keyOutcomes: [
+      'Master proper continental grip and ready position',
+      'Execute consistent serves with 80%+ success rate',
+      'Return serves deep into the court consistently',
+      'Develop foundational dinking skills at the kitchen line',
+      'Understand basic court positioning and strategy',
+    ],
+    whyThisMatters: 'Every champion started as a beginner. Build proper technique from day one — bad habits are hard to unlearn.',
+    nextProgram: 'Third Shot Excellence',
+  },
+
+  // ===== INTERMEDIATE PROGRAMS =====
+  {
+    programId: 'prog_third_shot',
+    name: 'Third Shot Excellence',
+    tagline: 'Master the game-changing third shot drop',
+    description: 'The third shot is what separates intermediate from advanced players. This comprehensive 10-day program teaches you consistent third shot drops and drives — the shots that get you safely to the net and put you in control of every rally.',
+    durationDays: 10,
+    skillLevel: 'INTERMEDIATE' as SkillLevel,
+    estimatedTimePerDay: '40-50 minutes',
+    keyOutcomes: [
+      'Execute consistent third shot drops landing in opponent kitchen',
+      'Master third shot drives with controlled power',
+      'Develop strategic shot selection based on court position',
+      'Perfect transition footwork from baseline to kitchen line',
+      'Improve soft touch and feel for touch shots',
+    ],
+    whyThisMatters: 'The third shot is widely considered the most difficult shot in pickleball. Master it, and you can neutralize any serve.',
+    nextProgram: 'Advanced Dinking & Kitchen Play',
+  },
+  {
+    programId: 'prog_dinking',
+    name: 'Advanced Dinking & Kitchen Play',
+    tagline: 'Control the kitchen and win more rallies',
+    description: 'Elevate your dinking game to an advanced level with sophisticated techniques and patience strategies. The kitchen line is where points are won and lost in pickleball. This 12-day program transforms your soft game into a strategic weapon.',
+    durationDays: 12,
+    skillLevel: 'INTERMEDIATE' as SkillLevel,
+    estimatedTimePerDay: '35-45 minutes',
+    keyOutcomes: [
+      'Master cross-court and straight dinks with precision',
+      'Develop patience in long dink rallies (50+ shots)',
+      'Create and recognize attackable balls consistently',
+      'Improve kitchen line positioning and footwork',
+      'Execute the erne shot in match situations',
+    ],
+    whyThisMatters: 'At higher levels, 80% of points are won or lost at the kitchen line. Out-dink your opponents, control the pace.',
+    nextProgram: 'Spin & Power Mechanics',
+  },
+
+  // ===== ADVANCED PROGRAMS =====
+  {
+    programId: 'prog_spin_power',
+    name: 'Spin & Power Mechanics',
+    tagline: 'Add professional-level spin to every shot',
+    description: 'Master the art of spin and power like professional players. This 14-day advanced program teaches you to generate topspin on drives, backspin drops, and sidespin for deception. Skills that separate advanced players from intermediates.',
+    durationDays: 14,
+    skillLevel: 'ADVANCED' as SkillLevel,
+    estimatedTimePerDay: '50-60 minutes',
+    keyOutcomes: [
+      'Generate heavy topspin on drives and speedups',
+      'Execute backspin drops and dinks with control',
+      'Add sidespin for deception and difficult bounces',
+      'Counter opponent spin effectively with adjustments',
+      'Combine spin with power for elite-level shots',
+    ],
+    whyThisMatters: 'Spin changes everything. Makes your drops stay low, drives dip at opponents\' feet, and serves unpredictable.',
+    nextProgram: 'Tournament Preparation',
+  },
+  {
+    programId: 'prog_tournament',
+    name: 'Tournament Preparation',
+    tagline: 'Get tournament-ready with mental and physical training',
+    description: 'Complete tournament preparation covering match strategy, mental game, physical conditioning, and competitive scenarios. This 21-day advanced program simulates tournament conditions and teaches you to peak on game day.',
+    durationDays: 21,
+    skillLevel: 'ADVANCED' as SkillLevel,
+    estimatedTimePerDay: '60 minutes',
+    keyOutcomes: [
+      'Develop tournament-ready mental toughness',
+      'Master match strategy and game planning',
+      'Build physical endurance for long matches',
+      'Handle pressure situations with confidence',
+      'Execute all skills consistently in competition',
+    ],
+    whyThisMatters: 'Tournament pickleball is completely different from recreational play. Ensure you show up tournament-ready.',
+    nextProgram: 'Elite Mastery Program',
+  },
+
+  // ===== PRO/ELITE PROGRAM =====
+  {
+    programId: 'prog_elite',
+    name: 'Elite Mastery Program',
+    tagline: 'Train like the pros — Transform into a tournament-ready competitor',
+    description: 'The ultimate 30-day program for serious players ready to compete at the highest levels. This intensive pro-level training combines advanced shot-making, tournament strategy, physical conditioning, and championship mental performance.',
+    durationDays: 30,
+    skillLevel: 'PRO' as SkillLevel,  // CRITICAL: Must be PRO, not BEGINNER
+    estimatedTimePerDay: '90 minutes',
+    keyOutcomes: [
+      'Execute professional-level shots including Erne, ATP, and spin variations',
+      'Develop tournament-winning strategies and adaptive game plans',
+      'Build elite conditioning for multi-match tournament days',
+      'Master pressure situations with clutch performance techniques',
+      'Compete confidently in 4.0+ and open-level tournaments',
+    ],
+    whyThisMatters: 'Elite players aren\'t born — they\'re built through deliberate practice. The exact framework pros use to reach the top.',
+    nextProgram: null, // This is the pinnacle program
+  },
+
+  // Legacy program kept for compatibility
   {
     programId: 'prog_bgn_fundamentals',
-    name: 'Beginner Fundamentals',
+    name: 'Beginner Fundamentals (Legacy)',
     tagline: 'Master the basics and build a solid foundation',
     description: 'A comprehensive 30-day program designed for complete beginners. Learn proper technique, rules, and fundamental strategies to start your pickleball journey with confidence.',
     durationDays: 30,

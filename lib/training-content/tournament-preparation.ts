@@ -7,10 +7,12 @@ export const tournamentPrepProgram = {
   programId: 'advanced-tournament-prep',
   name: 'Tournament Preparation',
   tagline: 'Get tournament-ready with mental and physical training',
-  description: 'Complete tournament preparation covering match strategy, mental game, physical conditioning, and competitive scenarios.',
+  description: 'Complete tournament preparation covering match strategy, mental game, physical conditioning, and competitive scenarios. This 21-day advanced program simulates tournament conditions, teaches you to peak on game day, manage bracket play across multiple matches, and perform under pressure when it matters most.',
   durationDays: 21,
   skillLevel: 'ADVANCED',
   estimatedTimePerDay: '60 minutes',
+  whyThisMatters: 'Tournament pickleball is completely different from recreational play. The pressure, fatigue, and strategic depth require specific preparation. This program ensures you show up tournament-ready, not just hoping your skills translate under pressure.',
+  nextProgram: 'Elite Mastery Program',
   keyOutcomes: [
     'Develop tournament-ready mental toughness',
     'Master match strategy and game planning',
