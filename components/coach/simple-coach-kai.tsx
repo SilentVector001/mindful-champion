@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Send, Loader2, Mic, MicOff, MessageCircle, Sparkles, Brain, Settings, Bell, Phone, Heart, X, Check } from 'lucide-react';
+import { Send, Loader2, MessageCircle, Sparkles, Brain, Phone, X, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card } from '@/components/ui/card';
@@ -330,7 +330,6 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [avatarState, setAvatarState] = useState<AvatarState>('idle');
-  const [isListening, setIsListening] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [streamingContent, setStreamingContent] = useState('');
   const [showSMSSettings, setShowSMSSettings] = useState(false);
@@ -406,10 +405,9 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
   }, []);
 
   useEffect(() => {
-    if (isListening) setAvatarState('listening');
-    else if (isLoading) setAvatarState('processing');
+    if (isLoading) setAvatarState('processing');
     else setAvatarState('idle');
-  }, [isListening, isLoading]);
+  }, [isLoading]);
 
   // Send message with streaming
   const sendMessage = useCallback(async (text?: string) => {
@@ -554,15 +552,13 @@ export default function SimpleCoachKai({ userContext }: SimpleCoachKaiProps) {
               </div>
             </div>
 
-            {/* PTT Button - Top Right */}
+            {/* Settings Button - Top Right */}
             <div className="flex items-center gap-2">
-              <PushToTalkButton onTranscript={sendMessage} disabled={isLoading} isListening={isListening} setIsListening={setIsListening} />
-              
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={() => setShowSMSSettings(true)}
-                className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-950/50"
+                className="text-slate-400 hover:text-emerald-400 hover:bg-emerald-950/50 relative"
                 title="SMS Reminders"
               >
                 <Phone className="w-5 h-5" />

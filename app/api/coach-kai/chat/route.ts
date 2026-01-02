@@ -191,11 +191,19 @@ export async function POST(req: NextRequest) {
                   
                   // Handle text content
                   if (delta?.content) {
-                    fullResponse += delta.content;
-                    controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                      type: 'text', 
-                      content: delta.content 
-                    })}\n\n`));
+                    // Strip any XML-like function call artifacts from the content
+                    let cleanContent = delta.content;
+                    // Remove XML tags that might leak through
+                    cleanContent = cleanContent.replace(/<\/?(?:tool_call_id|function_call_name|function_call_arguments)[^>]*>/g, '');
+                    cleanContent = cleanContent.replace(/<\/?[a-z_]+>/gi, '');
+                    // Skip empty chunks after cleanup
+                    if (cleanContent.trim()) {
+                      fullResponse += cleanContent;
+                      controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+                        type: 'text', 
+                        content: cleanContent 
+                      })}\n\n`));
+                    }
                   }
                   
                   // Handle tool calls
@@ -220,6 +228,14 @@ export async function POST(req: NextRequest) {
               }
             }
           }
+          
+          // Final cleanup: Remove any remaining XML/JSON artifacts from the full response
+          fullResponse = fullResponse.replace(/<\/?(?:tool_call_id|function_call_name|function_call_arguments|call_[a-zA-Z0-9]+)[^>]*>/g, '');
+          fullResponse = fullResponse.replace(/<\/?[a-z_]+>/gi, '');
+          // Remove raw JSON objects that leaked
+          fullResponse = fullResponse.replace(/\{"\s*"?\}?|\}"\s*"\{/g, '');
+          fullResponse = fullResponse.replace(/^\s*[{}\[\]"]+\s*/gm, '');
+          fullResponse = fullResponse.trim();
           
           // Process completed tool calls into action suggestions
           const actionSuggestions: FunctionResult[] = [];
