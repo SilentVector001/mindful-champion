@@ -31,51 +31,45 @@ function sanitizeResponse(content: string): string {
   
   let sanitized = content;
   
-  // STEP 1: Remove entire XML blocks first (most aggressive)
-  // Remove any <tag>content</tag> patterns
-  sanitized = sanitized.replace(/<[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>[\s\S]*?<\/[a-zA-Z_][a-zA-Z0-9_-]*>/gi, ' ');
+  // STEP 1: Check if this looks like pure XML garbage - return fallback
+  if (sanitized.trim().startsWith('<tool_call') || sanitized.trim().startsWith('<function_call')) {
+    return "I'd love to help you with that! What specific aspect of your pickleball game would you like to work on? 🎾";
+  }
   
-  // STEP 2: Remove specific function call tags
-  sanitized = sanitized.replace(/<\/?tool_call[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?function_call[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?function_call_name[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?function_call_arguments[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?function_call_id[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?tool_call_id[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?invoke[^>]*>/gi, ' ');
-  sanitized = sanitized.replace(/<\/?antml:[^>]*>/gi, ' ');
+  // STEP 2: Remove entire XML blocks (greedy match)
+  sanitized = sanitized.replace(/<tool_call_id>[^<]*<\/tool_call_id>/gi, '');
+  sanitized = sanitized.replace(/<function_call_name>[^<]*<\/function_call_name>/gi, '');
+  sanitized = sanitized.replace(/<function_call_arguments>[^<]*<\/function_call_arguments>/gi, '');
+  sanitized = sanitized.replace(/<[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>[\s\S]*?<\/[a-zA-Z_][a-zA-Z0-9_-]*>/gi, '');
   
-  // STEP 3: Remove any remaining XML-style tags
-  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_:-]*[^>]*>/g, ' ');
+  // STEP 3: Remove any remaining tags
+  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_:-]*[^>]*>/g, '');
   
-  // STEP 4: Remove code blocks
+  // STEP 4: Remove code blocks and JSON
   sanitized = sanitized.replace(/```[\s\S]*?```/g, '');
   sanitized = sanitized.replace(/`[^`]+`/g, '');
-  
-  // STEP 5: Remove JSON objects
   sanitized = sanitized.replace(/\{[^{}]*"(function|name|arguments|tool|call_id)"[^{}]*\}/gi, '');
   
-  // STEP 6: Remove call_IDs and other technical identifiers
+  // STEP 5: Remove technical identifiers
   sanitized = sanitized.replace(/call_[a-zA-Z0-9]+/g, '');
   sanitized = sanitized.replace(/\b(goalId|skillArea|targetDays|milestoneId|progressIncrement):\s*["']?[^,\n}]+["']?/gi, '');
-  
-  // STEP 7: Remove system markers
   sanitized = sanitized.replace(/\[(SYSTEM|DEBUG|FUNCTION|TOOL|HINT)[^\]]*\]/gi, '');
   
-  // STEP 8: Clean up whitespace WITHOUT destroying word boundaries
-  // First, ensure there's at least one space between letters/numbers
-  sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2'); // camelCase fix
-  sanitized = sanitized.replace(/([a-zA-Z])(\d)/g, '$1 $2'); // letter+number
-  sanitized = sanitized.replace(/(\d)([a-zA-Z])/g, '$1 $2'); // number+letter
+  // STEP 6: Fix word boundaries - add spaces before capitals in middle of words
+  sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
+  sanitized = sanitized.replace(/([a-zA-Z]),([a-zA-Z])/g, '$1, $2'); // comma spacing
+  sanitized = sanitized.replace(/([a-zA-Z])—([a-zA-Z])/g, '$1 — $2'); // em-dash spacing
   
-  // Collapse excessive spaces but preserve single spaces
+  // STEP 7: Clean whitespace
   sanitized = sanitized.replace(/[ \t]{2,}/g, ' ');
   sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
-  sanitized = sanitized.replace(/\s*\n\s*/g, '\n');
   
-  sanitized = sanitized.trim();
+  // If result is empty or just whitespace, return fallback
+  if (!sanitized.trim() || sanitized.trim().length < 10) {
+    return "I'd love to help you with that! What would you like to work on? 🎾";
+  }
   
-  return sanitized;
+  return sanitized.trim();
 }
 
 /**
