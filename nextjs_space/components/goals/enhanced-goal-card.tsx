@@ -149,8 +149,12 @@ export default function EnhancedGoalCard({ goal, allGoals, onUpdate, onDelete, o
                   </Badge>
                 )}
               </div>
-              <h3 className="text-xl font-bold text-white mb-1">{goal?.title ?? 'Untitled Goal'}</h3>
-              {goal?.description && <p className="text-sm text-slate-400">{goal.description}</p>}
+              <h3 className="text-xl font-bold text-white mb-2">{goal?.title ?? 'Untitled Goal'}</h3>
+              {goal?.description && (
+                <div className="bg-slate-700/30 border border-slate-600/50 rounded-lg p-3 mb-2">
+                  <p className="text-sm text-slate-300 leading-relaxed">{goal.description}</p>
+                </div>
+              )}
             </div>
             <div className="flex gap-2">
               <Button
@@ -249,19 +253,42 @@ export default function EnhancedGoalCard({ goal, allGoals, onUpdate, onDelete, o
                 {/* Milestones */}
                 {(goal?.milestones?.length ?? 0) > 0 && (
                   <div className="pt-4 border-t border-slate-700">
-                    <div className="flex items-center gap-2 mb-3">
-                      <Target className="h-4 w-4 text-teal-400" />
-                      <span className="text-sm font-semibold text-white">Milestones</span>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <Target className="h-4 w-4 text-teal-400" />
+                        <span className="text-sm font-semibold text-white">Milestones</span>
+                      </div>
+                      <Badge variant="outline" className="border-slate-600 text-slate-400 text-xs">
+                        {goal?.milestones?.filter(m => m?.status === 'COMPLETED')?.length ?? 0} / {goal?.milestones?.length ?? 0} complete
+                      </Badge>
                     </div>
+                    
+                    {/* Milestone Progress Bar */}
+                    <div className="mb-4">
+                      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+                        <motion.div
+                          className="h-full bg-gradient-to-r from-teal-500 to-emerald-500"
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: `${((goal?.milestones?.filter(m => m?.status === 'COMPLETED')?.length ?? 0) / (goal?.milestones?.length ?? 1)) * 100}%` 
+                          }}
+                          transition={{ duration: 0.5, ease: "easeOut" }}
+                        />
+                      </div>
+                    </div>
+
                     <div className="space-y-2">
-                      {goal?.milestones?.map((milestone) => (
+                      {goal?.milestones?.map((milestone, idx) => (
                         <motion.div
                           key={milestone.id}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: idx * 0.05 }}
                           whileHover={{ x: 4 }}
                           className={`flex items-start gap-3 p-3 rounded-lg transition-all ${
                             milestone.status === 'COMPLETED'
                               ? 'bg-emerald-500/10 border border-emerald-500/20'
-                              : 'bg-slate-700/50 border border-slate-600/50'
+                              : 'bg-slate-700/50 border border-slate-600/50 hover:border-slate-500'
                           }`}
                         >
                           <button
@@ -272,19 +299,27 @@ export default function EnhancedGoalCard({ goal, allGoals, onUpdate, onDelete, o
                             {milestone.status === 'COMPLETED' ? (
                               <CheckCircle2 className="h-5 w-5 text-emerald-400" />
                             ) : (
-                              <Circle className="h-5 w-5 text-slate-500" />
+                              <Circle className="h-5 w-5 text-slate-500 hover:text-teal-400 transition-colors" />
                             )}
                           </button>
                           <div className="flex-1">
-                            <div className={`font-medium ${milestone.status === 'COMPLETED' ? 'text-emerald-400 line-through' : 'text-white'}`}>
+                            <div className={`font-medium flex items-center gap-2 ${
+                              milestone.status === 'COMPLETED' ? 'text-emerald-400 line-through' : 'text-white'
+                            }`}>
                               {milestone.title}
+                              {milestone.status === 'COMPLETED' && (
+                                <Badge className="bg-emerald-500/20 text-emerald-300 border-0 text-xs">
+                                  Done
+                                </Badge>
+                              )}
                             </div>
                             {milestone.description && (
                               <p className="text-xs text-slate-400 mt-1">{milestone.description}</p>
                             )}
                             {milestone.completedAt && (
-                              <div className="text-xs text-emerald-400 mt-1">
-                                ✓ Completed {format(new Date(milestone.completedAt), 'MMM d')}
+                              <div className="text-xs text-emerald-400 mt-1 flex items-center gap-1">
+                                <Sparkles className="h-3 w-3" />
+                                Completed {format(new Date(milestone.completedAt), 'MMM d, yyyy')}
                               </div>
                             )}
                           </div>

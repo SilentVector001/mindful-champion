@@ -57,26 +57,54 @@ export default function MilestoneCalendar({ goals }: { goals: Goal[] }) {
     const map: Record<string, { type: string; items: any[] }[]> = {}
     
     goals?.forEach(goal => {
-      // Add goal target dates
-      if (goal?.targetDate) {
-        const dateKey = format(new Date(goal.targetDate), 'yyyy-MM-dd')
-        if (!map[dateKey]) map[dateKey] = []
-        map[dateKey].push({ type: 'deadline', items: [{ ...goal, eventType: 'Goal Deadline' }] })
+      // Add goal target dates (show all active goals with target dates)
+      if (goal?.targetDate && goal?.status !== 'COMPLETED') {
+        try {
+          const dateKey = format(new Date(goal.targetDate), 'yyyy-MM-dd')
+          if (!map[dateKey]) map[dateKey] = []
+          // Check if already exists to avoid duplicates
+          const exists = map[dateKey].some(e => 
+            e.type === 'deadline' && e.items.some((i: any) => i.id === goal.id)
+          )
+          if (!exists) {
+            map[dateKey].push({ type: 'deadline', items: [{ ...goal, eventType: 'Goal Deadline' }] })
+          }
+        } catch (error) {
+          console.error('Error formatting target date:', error)
+        }
       }
       
       // Add completed goals
       if (goal?.completedAt) {
-        const dateKey = format(new Date(goal.completedAt), 'yyyy-MM-dd')
-        if (!map[dateKey]) map[dateKey] = []
-        map[dateKey].push({ type: 'completed', items: [{ ...goal, eventType: 'Goal Completed' }] })
+        try {
+          const dateKey = format(new Date(goal.completedAt), 'yyyy-MM-dd')
+          if (!map[dateKey]) map[dateKey] = []
+          const exists = map[dateKey].some(e => 
+            e.type === 'completed' && e.items.some((i: any) => i.id === goal.id)
+          )
+          if (!exists) {
+            map[dateKey].push({ type: 'completed', items: [{ ...goal, eventType: 'Goal Completed' }] })
+          }
+        } catch (error) {
+          console.error('Error formatting completion date:', error)
+        }
       }
       
       // Add milestone completions
       goal?.milestones?.forEach(milestone => {
         if (milestone?.completedAt) {
-          const dateKey = format(new Date(milestone.completedAt), 'yyyy-MM-dd')
-          if (!map[dateKey]) map[dateKey] = []
-          map[dateKey].push({ type: 'milestone', items: [{ ...milestone, goalTitle: goal?.title, eventType: 'Milestone Achieved' }] })
+          try {
+            const dateKey = format(new Date(milestone.completedAt), 'yyyy-MM-dd')
+            if (!map[dateKey]) map[dateKey] = []
+            const exists = map[dateKey].some(e => 
+              e.type === 'milestone' && e.items.some((i: any) => i.id === milestone.id)
+            )
+            if (!exists) {
+              map[dateKey].push({ type: 'milestone', items: [{ ...milestone, goalTitle: goal?.title, eventType: 'Milestone Achieved' }] })
+            }
+          } catch (error) {
+            console.error('Error formatting milestone date:', error)
+          }
         }
       })
     })

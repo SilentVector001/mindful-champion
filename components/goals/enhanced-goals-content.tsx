@@ -69,7 +69,7 @@ export default function EnhancedGoalsContent({ user }: GoalsContentProps) {
   const [goals, setGoals] = useState<Goal[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'active' | 'completed' | 'all'>('active')
-  const [showCalendar, setShowCalendar] = useState(false)
+  const [showCalendar, setShowCalendar] = useState(true) // Open by default
   const [showNotifPrefs, setShowNotifPrefs] = useState(false)
 
   useEffect(() => {
