@@ -31,49 +31,50 @@ function sanitizeResponse(content: string): string {
   
   let sanitized = content;
   
-  // CRITICAL: Remove specific XML function call tags (exact patterns from screenshots)
-  sanitized = sanitized.replace(/<tool_call_id>[^<]*<\/tool_call_id>/gi, '');
-  sanitized = sanitized.replace(/<function_call_id>[^<]*<\/function_call_id>/gi, '');
-  sanitized = sanitized.replace(/<function_call_name>[^<]*<\/function_call_name>/gi, '');
-  sanitized = sanitized.replace(/<function_call_arguments>[^<]*<\/function_call_arguments>/gi, '');
+  // CRITICAL: Remove specific XML function call tags - replace with SPACE to preserve word boundaries
+  sanitized = sanitized.replace(/<tool_call_id>[^<]*<\/tool_call_id>/gi, ' ');
+  sanitized = sanitized.replace(/<function_call_id>[^<]*<\/function_call_id>/gi, ' ');
+  sanitized = sanitized.replace(/<function_call_name>[^<]*<\/function_call_name>/gi, ' ');
+  sanitized = sanitized.replace(/<function_call_arguments>[^<]*<\/function_call_arguments>/gi, ' ');
   
-  // Remove ANY XML-style tags (aggressive catch-all)
-  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>/g, '');
+  // Remove ANY XML-style tags - replace with SPACE to preserve word separation
+  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>/g, ' ');
   
   // Remove XML-style function call blocks with content
-  sanitized = sanitized.replace(/<function_call[^>]*>[\s\S]*?<\/function_call>/gi, '');
-  sanitized = sanitized.replace(/<tool_call[^>]*>[\s\S]*?<\/tool_call>/gi, '');
-  sanitized = sanitized.replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/gi, '');
-  sanitized = sanitized.replace(/<[^>]*>[\s\S]*?<\/antml:[^>]*>/gi, '');
+  sanitized = sanitized.replace(/<function_call[^>]*>[\s\S]*?<\/function_call>/gi, ' ');
+  sanitized = sanitized.replace(/<tool_call[^>]*>[\s\S]*?<\/tool_call>/gi, ' ');
+  sanitized = sanitized.replace(/<invoke[^>]*>[\s\S]*?<\/invoke>/gi, ' ');
+  sanitized = sanitized.replace(/<[^>]*>[\s\S]*?<\/antml:[^>]*>/gi, ' ');
   
   // Remove code blocks (markdown style)
-  sanitized = sanitized.replace(/```[\s\S]*?```/g, '');
-  sanitized = sanitized.replace(/`[^`]+`/g, '');
+  sanitized = sanitized.replace(/```[\s\S]*?```/g, ' ');
+  sanitized = sanitized.replace(/`[^`]+`/g, ' ');
   
   // Remove JSON objects (standalone)
-  sanitized = sanitized.replace(/\{[\s\S]*?"(function|name|arguments|tool)"[\s\S]*?\}/gi, '');
+  sanitized = sanitized.replace(/\{[\s\S]*?"(function|name|arguments|tool)"[\s\S]*?\}/gi, ' ');
   
   // Remove function call patterns like "function_name(...)"
-  sanitized = sanitized.replace(/\w+\([^)]*\)\s*(?:->|=>|:)/g, '');
+  sanitized = sanitized.replace(/\w+\([^)]*\)\s*(?:->|=>|:)/g, ' ');
   
   // Remove system/debug markers
-  sanitized = sanitized.replace(/\[SYSTEM[^\]]*\]/gi, '');
-  sanitized = sanitized.replace(/\[DEBUG[^\]]*\]/gi, '');
-  sanitized = sanitized.replace(/\[FUNCTION[^\]]*\]/gi, '');
-  sanitized = sanitized.replace(/\[TOOL[^\]]*\]/gi, '');
+  sanitized = sanitized.replace(/\[SYSTEM[^\]]*\]/gi, ' ');
+  sanitized = sanitized.replace(/\[DEBUG[^\]]*\]/gi, ' ');
+  sanitized = sanitized.replace(/\[FUNCTION[^\]]*\]/gi, ' ');
+  sanitized = sanitized.replace(/\[TOOL[^\]]*\]/gi, ' ');
   
   // Remove parameter patterns like "param: value" if part of function syntax
-  sanitized = sanitized.replace(/\b(goalId|skillArea|targetDays|milestoneId|progressIncrement):\s*[^,\n}]+(,|\})?/gi, '');
+  sanitized = sanitized.replace(/\b(goalId|skillArea|targetDays|milestoneId|progressIncrement):\s*[^,\n}]+(,|\})?/gi, ' ');
   
   // Remove any remaining curly braces that look like JSON
-  sanitized = sanitized.replace(/^\s*\{[\s\S]*?\}\s*$/gm, '');
+  sanitized = sanitized.replace(/^\s*\{[\s\S]*?\}\s*$/gm, ' ');
   
   // Remove call_ IDs that might leak
-  sanitized = sanitized.replace(/call_[a-zA-Z0-9]+/g, '');
+  sanitized = sanitized.replace(/call_[a-zA-Z0-9]+/g, ' ');
   
-  // Clean up excessive whitespace
+  // Clean up excessive whitespace - collapse multiple spaces to single space
   sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
-  sanitized = sanitized.replace(/\s{3,}/g, ' ');
+  sanitized = sanitized.replace(/[ \t]{2,}/g, ' ');  // Multiple spaces/tabs -> single space
+  sanitized = sanitized.replace(/\s*\n\s*/g, '\n');   // Clean up newlines
   sanitized = sanitized.trim();
   
   return sanitized;
