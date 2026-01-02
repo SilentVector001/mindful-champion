@@ -22,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Plus, Target, X, Bell, Clock, Lightbulb, Sparkles } from "lucide-react"
+import { Plus, Target, X, Bell, Clock, Lightbulb, Sparkles, Calendar } from "lucide-react"
 import { Switch } from "@/components/ui/switch"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
