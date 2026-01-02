@@ -84,6 +84,35 @@ export async function POST(req: NextRequest) {
     const detectedIntent = detectIntent(messageText);
     const matchedDeficiency = matchDeficiency(messageText);
     
+    // Check if user is confirming a previous suggestion (e.g., "yes", "sounds good", "let's do it")
+    const isConfirmation = /^(yes|yeah|yep|sure|ok|okay|sounds good|let's do it|do it|go ahead|please|absolutely|definitely|perfect|great)\b/i.test(messageText.trim());
+    
+    // If confirming, look for pending goal/drill suggestion in conversation
+    let pendingAction: { type: string; title: string; skillArea?: string } | null = null;
+    if (isConfirmation && messages.length >= 2) {
+      const prevAssistantMsg = messages.slice(0, -1).reverse().find((m: any) => m.role === 'assistant');
+      if (prevAssistantMsg?.content) {
+        const content = prevAssistantMsg.content.toLowerCase();
+        // Extract skill area from previous message
+        const skillMatch = content.match(/(?:improve|work on|practice|focus on|master)\s+(?:your\s+)?(\w+(?:\s+\w+)?)/i);
+        const goalMatch = content.match(/(?:goal|plan)[:\s]+["']?([^"'\n]+)["']?/i);
+        
+        if (content.includes('goal') || content.includes('plan') || content.includes('milestone')) {
+          pendingAction = {
+            type: 'goal',
+            title: goalMatch?.[1] || skillMatch?.[1] || 'Improve My Game',
+            skillArea: skillMatch?.[1]?.toLowerCase() || 'backhand'
+          };
+        } else if (content.includes('drill') || content.includes('exercise')) {
+          pendingAction = {
+            type: 'drill',
+            title: skillMatch?.[1] || 'Practice Drill',
+            skillArea: skillMatch?.[1]?.toLowerCase()
+          };
+        }
+      }
+    }
+    
     // Build conversation history context
     const recentHistory = conversation?.messages
       ?.slice(0, 3)
@@ -146,11 +175,40 @@ export async function POST(req: NextRequest) {
     }
 
     // ============================================
+    // HANDLE CONFIRMATION - AUTO-EXECUTE GOAL CREATION
+    // ============================================
+    
+    let createdGoal: any = null;
+    if (isConfirmation && pendingAction?.type === 'goal') {
+      try {
+        // Directly create the goal when user confirms
+        const goalResult = await createGoalFromChat(
+          session.user.id,
+          `Improve My ${pendingAction.skillArea?.charAt(0).toUpperCase()}${pendingAction.skillArea?.slice(1) || 'Game'}`,
+          pendingAction.skillArea || 'backhand',
+          30
+        );
+        if (goalResult.success) {
+          createdGoal = goalResult.goal;
+          console.log('[Coach Kai] Goal created on confirmation:', createdGoal.title);
+        }
+      } catch (e) {
+        console.error('[Coach Kai] Failed to create goal on confirmation:', e);
+      }
+    }
+
+    // ============================================
     // BUILD CONVERSATION FOR LLM
     // ============================================
     
+    // Add context about created goal if applicable
+    let goalCreationContext = '';
+    if (createdGoal) {
+      goalCreationContext = `\n\n[IMPORTANT: You just created a goal for the user! Goal: "${createdGoal.title}" with ${createdGoal.Milestone?.length || 4} milestones. Celebrate this and explain what milestones were added. Be enthusiastic! DO NOT use function calls - the goal is already created.]`;
+    }
+    
     const conversationMessages = [
-      { role: "system", content: systemPrompt + contextHint },
+      { role: "system", content: systemPrompt + contextHint + goalCreationContext },
       ...messages.slice(-9).map((msg: any) => ({
         role: msg.role,
         content: msg.content
@@ -285,19 +343,37 @@ export async function POST(req: NextRequest) {
             });
           }
           
-          // Send action suggestions
+          // Send action suggestions as cards (frontend expects 'cards')
           if (actionSuggestions.length > 0) {
+            // Convert FunctionResult format to ActionCard format
+            const actionCards = actionSuggestions.map((s, idx) => ({
+              id: `action-${Date.now()}-${idx}`,
+              type: s.type === 'goal_create' ? 'goal' : s.type === 'resource' && s.data?.type === 'drill' ? 'drill' : 'drill',
+              title: s.data?.title || s.action,
+              description: s.confirmationPrompt || s.data?.details || '',
+              icon: s.type === 'goal_create' ? 'target' : 'play',
+              priority: 'high' as const,
+              action: s.type === 'goal_create' ? 'create-goal' : s.type === 'resource' ? 'start-drill' : undefined,
+              data: s.data,
+              href: s.type === 'resource' && s.data?.type === 'drill' ? '/train/drills' : undefined
+            }));
+            
             controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
               type: 'actions', 
-              suggestions: actionSuggestions 
+              cards: actionCards 
             })}\n\n`));
           }
           
-          // Send completion with metadata
+          // Send completion with metadata (include createdGoal if applicable)
           controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
             type: 'complete',
             intent: detectedIntent,
-            deficiency: matchedDeficiency?.category || null
+            deficiency: matchedDeficiency?.category || null,
+            goalCreated: createdGoal ? {
+              id: createdGoal.id,
+              title: createdGoal.title,
+              milestones: createdGoal.Milestone?.length || 0
+            } : null
           })}\n\n`));
           
           // Save to database (async, don't block response)
