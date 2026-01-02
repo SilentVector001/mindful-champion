@@ -11,6 +11,7 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import Image from "next/image"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -32,7 +33,11 @@ import {
   Star,
   Trophy,
   Flame,
-  BookOpen
+  BookOpen,
+  Video,
+  Gamepad2,
+  MessageCircle,
+  ArrowRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useRouter } from "next/navigation"
@@ -173,7 +178,7 @@ export default function PremiumTrainingPrograms({
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
-      {/* Compact Premium Hero Section */}
+      {/* Compact Premium Hero Section - Reduced top padding */}
       <motion.div 
         className="relative overflow-hidden"
         initial={{ opacity: 0 }}
@@ -198,54 +203,86 @@ export default function PremiumTrainingPrograms({
         <div className="absolute bottom-0 left-1/4 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl" />
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="py-10 md:py-14 lg:py-16">
-            {/* Header Row with Stats */}
+          <div className="py-6 md:py-8 lg:py-10">
+            {/* Welcome Banner with Intro */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1, duration: 0.5 }}
+              className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-cyan-500/10 via-emerald-500/10 to-blue-500/10 border border-cyan-500/20 backdrop-blur-sm"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-600 flex items-center justify-center flex-shrink-0 shadow-lg animate-pulse">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-white mb-1">
+                    Welcome to Your Training Hub, <span className="text-cyan-400">{firstName}</span>! 🎯
+                  </h2>
+                  <p className="text-slate-300 text-sm leading-relaxed">
+                    This is your command center for pickleball mastery. Browse structured programs designed by world-class coaches, 
+                    track your progress, and get AI-powered recommendations from Coach Kai. Start a program below or continue your active journey!
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Header Row with Badges */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6 mb-6">
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                <div className="flex items-center gap-3 mb-2">
-                  <Badge className="bg-cyan-500/20 text-cyan-400 border-cyan-500/30 backdrop-blur-sm">
-                    <Sparkles className="w-3 h-3 mr-1" />
+                <div className="flex items-center gap-3 mb-3">
+                  <Badge className="bg-cyan-500/30 text-cyan-300 border-cyan-400/50 backdrop-blur-sm px-3 py-1 text-sm font-semibold shadow-lg shadow-cyan-500/20 animate-pulse">
+                    <Sparkles className="w-4 h-4 mr-1" />
                     AI-Powered
                   </Badge>
-                  <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 backdrop-blur-sm">
-                    <Crown className="w-3 h-3 mr-1" />
+                  <Badge className="bg-emerald-500/30 text-emerald-300 border-emerald-400/50 backdrop-blur-sm px-3 py-1 text-sm font-semibold shadow-lg shadow-emerald-500/20">
+                    <Crown className="w-4 h-4 mr-1" />
                     Premium
                   </Badge>
                 </div>
                 <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight">
                   Master Your Game
                 </h1>
-                <p className="text-gray-400 mt-1 text-sm md:text-base">
-                  Welcome back, <span className="text-cyan-400 font-medium">{firstName}</span> — Let&apos;s train
+                <p className="text-gray-300 mt-1 text-base">
+                  Let&apos;s train and level up your skills
                 </p>
               </motion.div>
 
-              {/* Inline Stats */}
+              {/* Enhanced Stats with Glow Effects */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: 0.3, duration: 0.5 }}
-                className="flex items-center gap-4 md:gap-6"
+                className="flex items-center gap-3 md:gap-4"
               >
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
-                  <BookOpen className="w-4 h-4 text-cyan-400" />
-                  <span className="text-xl font-bold text-white">{programs.length}</span>
-                  <span className="text-xs text-gray-400">Programs</span>
-                </div>
-                <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
-                  <Flame className="w-4 h-4 text-orange-400" />
-                  <span className="text-xl font-bold text-white">{userPrograms.length}</span>
-                  <span className="text-xs text-gray-400">Active</span>
-                </div>
-                <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-800/60 backdrop-blur-sm border border-slate-700/50">
-                  <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <span className="text-xl font-bold text-white">98%</span>
-                  <span className="text-xs text-gray-400">Success</span>
-                </div>
+                <motion.div 
+                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-cyan-500/30 shadow-lg shadow-cyan-500/10"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(6, 182, 212, 0.3)" }}
+                >
+                  <BookOpen className="w-5 h-5 text-cyan-400" />
+                  <span className="text-2xl font-bold text-white">{programs.length}</span>
+                  <span className="text-sm text-gray-300">Programs</span>
+                </motion.div>
+                <motion.div 
+                  className="flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-orange-500/30 shadow-lg shadow-orange-500/10"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(249, 115, 22, 0.3)" }}
+                >
+                  <Flame className="w-5 h-5 text-orange-400" />
+                  <span className="text-2xl font-bold text-white">{userPrograms.length}</span>
+                  <span className="text-sm text-gray-300">Active</span>
+                </motion.div>
+                <motion.div 
+                  className="hidden md:flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-800/80 backdrop-blur-sm border border-emerald-500/30 shadow-lg shadow-emerald-500/10"
+                  whileHover={{ scale: 1.05, boxShadow: "0 0 20px rgba(16, 185, 129, 0.3)" }}
+                >
+                  <TrendingUp className="w-5 h-5 text-emerald-400" />
+                  <span className="text-2xl font-bold text-white">98%</span>
+                  <span className="text-sm text-gray-300">Success</span>
+                </motion.div>
               </motion.div>
             </div>
 
@@ -302,14 +339,23 @@ export default function PremiumTrainingPrograms({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg">
-                  <Flame className="w-5 h-5 text-white" />
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <motion.div 
+                    className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center shadow-lg"
+                    animate={{ scale: [1, 1.05, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <Flame className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <div>
+                    <h2 className="text-2xl font-bold text-white">🔥 Your Active Journey</h2>
+                    <p className="text-sm text-slate-300">You&apos;re currently enrolled! Pick up where you left off to maintain your streak.</p>
+                  </div>
                 </div>
-                <div>
-                  <h2 className="text-xl font-bold text-white">Your Active Journey</h2>
-                  <p className="text-sm text-slate-300">Continue building your championship skills</p>
-                </div>
+                <Badge className="bg-orange-500/20 text-orange-400 border-orange-500/30 px-3 py-1">
+                  {activePrograms.length} Active
+                </Badge>
               </div>
 
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -544,11 +590,14 @@ export default function PremiumTrainingPrograms({
                   <CardContent className="p-4">
                     <div className="flex items-center gap-2 mb-2">
                       <Brain className="w-5 h-5 text-emerald-400" />
-                      <h3 className="font-bold text-sm text-white">Coach Kai's Tips</h3>
+                      <h3 className="font-bold text-sm text-white">Coach Kai&apos;s Tips</h3>
                     </div>
-                    <p className="text-xs text-slate-300">
-                      AI-powered recommendations based on your progress
+                    <p className="text-xs text-slate-300 mb-2">
+                      AI-powered recommendations based on your progress. Click any tip to take action!
                     </p>
+                    <div className="text-xs text-slate-400 bg-slate-800/50 rounded-lg p-2">
+                      💡 <span className="text-emerald-400 font-medium">&quot;Take Action&quot;</span> buttons will navigate you directly to the recommended feature or drill.
+                    </div>
                   </CardContent>
                 </Card>
                 
@@ -561,6 +610,98 @@ export default function PremiumTrainingPrograms({
               </div>
             </motion.div>
           </div>
+
+          {/* Footer Section: What's Next? */}
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="mt-16 mb-8"
+          >
+            <Card className="bg-gradient-to-br from-slate-800/80 via-slate-800/60 to-slate-900/80 border-slate-700/50 backdrop-blur-sm overflow-hidden">
+              <CardContent className="p-8">
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-white mb-2">🚀 What&apos;s Next?</h2>
+                  <p className="text-slate-300 max-w-2xl mx-auto">
+                    Continue your pickleball journey with these additional training tools and features.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {/* Video Analysis */}
+                  <Link href="/train/video-analysis" className="group">
+                    <motion.div 
+                      className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-cyan-500/50 transition-all h-full"
+                      whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-cyan-500/30 transition-shadow">
+                        <Video className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">
+                        Video Analysis
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-4">
+                        Upload your gameplay videos for AI-powered technique feedback and pro comparisons.
+                      </p>
+                      <div className="flex items-center text-cyan-400 text-sm font-medium">
+                        Analyze Now <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+                  </Link>
+
+                  {/* Quick Drills */}
+                  <Link href="/train/drills" className="group">
+                    <motion.div 
+                      className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-emerald-500/50 transition-all h-full"
+                      whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-600 flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-emerald-500/30 transition-shadow">
+                        <Target className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
+                        Quick Drills
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-4">
+                        Short, focused drills for specific skills. Perfect for 10-15 minute practice sessions.
+                      </p>
+                      <div className="flex items-center text-emerald-400 text-sm font-medium">
+                        Browse Drills <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+                  </Link>
+
+                  {/* Talk to Coach Kai */}
+                  <Link href="/coaches/kai" className="group">
+                    <motion.div 
+                      className="p-6 rounded-xl bg-slate-900/50 border border-slate-700/50 hover:border-purple-500/50 transition-all h-full"
+                      whileHover={{ scale: 1.02, y: -4 }}
+                    >
+                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center mb-4 group-hover:shadow-lg group-hover:shadow-purple-500/30 transition-shadow">
+                        <MessageCircle className="w-6 h-6 text-white" />
+                      </div>
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-purple-400 transition-colors">
+                        Talk to Coach Kai
+                      </h3>
+                      <p className="text-sm text-slate-400 mb-4">
+                        Get personalized advice, set goals, and ask questions about strategy and technique.
+                      </p>
+                      <div className="flex items-center text-purple-400 text-sm font-medium">
+                        Start Chat <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
+                  </Link>
+                </div>
+
+                {/* Motivational Footer */}
+                <div className="mt-8 pt-6 border-t border-slate-700/50 text-center">
+                  <p className="text-slate-400 text-sm">
+                    <span className="text-emerald-400 font-medium">💪 Remember:</span> Consistency beats intensity. 
+                    Even 15 minutes of focused practice daily will transform your game!
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.section>
         </div>
       </div>
     </div>
