@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
     // Create stream
     const stream = await prisma.customStream.create({
       data: {
+        id: crypto.randomUUID(),
         title,
         streamUrl,
         thumbnail: thumbnail || null,
@@ -88,6 +89,7 @@ export async function POST(request: NextRequest) {
         isActive: isActive !== undefined ? isActive : true,
         priority: priority || 0,
         createdBy: session.user.id,
+        updatedAt: new Date(),
       },
     });
 

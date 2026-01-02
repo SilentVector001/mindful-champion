@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         orderBy: { uploadedAt: 'desc' },
         take: 20,
         include: {
-          User: {
+          User_VideoAnalysis_userIdToUser: {
             select: {
               id: true,
               name: true,
@@ -163,10 +163,11 @@ export async function GET(request: NextRequest) {
 
     // Add video uploads
     recentVideos.forEach((video: any) => {
+      const user = video.User_VideoAnalysis_userIdToUser
       activities.push({
         id: `video-${video.id}`,
         type: 'video_upload',
-        userName: video.user?.name || `${video.user?.firstName || ''} ${video.user?.lastName || ''}`.trim() || video.user?.email || 'User',
+        userName: user?.name || `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || user?.email || 'User',
         description: `Uploaded video: ${video.title}`,
         details: `${Math.round(video.duration / 60)} min • ${video.analysisStatus}`,
         createdAt: video.uploadedAt,
@@ -180,7 +181,7 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `match-${match.id}`,
         type: 'match',
-        userName: match.user?.name || `${match.user?.firstName || ''} ${match.user?.lastName || ''}`.trim() || match.user?.email || 'User',
+        userName: match.User?.name || `${match.User?.firstName || ''} ${match.User?.lastName || ''}`.trim() || match.User?.email || 'User',
         description: `Recorded a match • ${result}`,
         details: `${match.playerScore}-${match.opponentScore} • ${match.matchType || 'Singles'}`,
         createdAt: match.createdAt,
@@ -193,7 +194,7 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `goal-${goal.id}`,
         type: 'goal_created',
-        userName: goal.user?.name || `${goal.user?.firstName || ''} ${goal.user?.lastName || ''}`.trim() || goal.user?.email || 'User',
+        userName: goal.User?.name || `${goal.User?.firstName || ''} ${goal.User?.lastName || ''}`.trim() || goal.User?.email || 'User',
         description: `Set a new goal: ${goal.title}`,
         details: `Target: ${new Date(goal.targetDate).toLocaleDateString()}`,
         createdAt: goal.createdAt,
@@ -206,7 +207,7 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `chat-${chat.id}`,
         type: 'chat',
-        userName: chat.user?.name || `${chat.user?.firstName || ''} ${chat.user?.lastName || ''}`.trim() || chat.user?.email || 'User',
+        userName: chat.User?.name || `${chat.User?.firstName || ''} ${chat.User?.lastName || ''}`.trim() || chat.User?.email || 'User',
         description: `Started a conversation with Coach Kai`,
         details: `${(chat.messages as any[])?.length || 0} messages`,
         createdAt: chat.createdAt,
@@ -219,7 +220,7 @@ export async function GET(request: NextRequest) {
       activities.push({
         id: `payment-${payment.id}`,
         type: 'subscription',
-        userName: payment.user?.name || `${payment.user?.firstName || ''} ${payment.user?.lastName || ''}`.trim() || payment.user?.email || 'User',
+        userName: payment.User?.name || `${payment.User?.firstName || ''} ${payment.User?.lastName || ''}`.trim() || payment.User?.email || 'User',
         description: `Subscribed to ${payment.subscriptionTier}`,
         details: `$${((payment.amount || 0) / 100).toFixed(2)} • ${payment.billingCycle || 'One-time'}`,
         createdAt: payment.createdAt,

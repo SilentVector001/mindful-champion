@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
     // Create new log entry for resent email
     const emailLog = await prisma.emailNotification.create({
       data: {
+        id: crypto.randomUUID(),
         userId: originalEmail.userId,
         type: originalEmail.type,
         recipientEmail: originalEmail.recipientEmail,
@@ -53,6 +54,7 @@ export async function POST(req: NextRequest) {
         textContent: originalEmail.textContent,
         status: 'SENT',
         sentAt: new Date(),
+        updatedAt: new Date(),
         metadata: {
           ...(originalEmail.metadata as object),
           resendId: result.id || 'mock',
