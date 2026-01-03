@@ -1,36 +1,9 @@
-
 import { NextAuthOptions } from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
 import CredentialsProvider from "next-auth/providers/credentials"
 import GoogleProvider from "next-auth/providers/google"
 import bcrypt from "bcryptjs"
 import { prisma } from "./db"
-import {
-  isAccountLocked,
-  resetFailedAttempts,
-  // logSecurityEvent, // Temporarily removed - causing Prisma issues
-} from "./security"
-// import { SecurityEventType, SecurityEventSeverity } from "@prisma/client"
-
-// Temporary type definitions
-const SecurityEventType = {
-  IP_BLOCKED: 'IP_BLOCKED',
-  IP_UNBLOCKED: 'IP_UNBLOCKED',
-  FAILED_LOGIN: 'FAILED_LOGIN',
-  ACCOUNT_LOCKED: 'ACCOUNT_LOCKED',
-  ACCOUNT_UNLOCKED: 'ACCOUNT_UNLOCKED',
-  SUCCESSFUL_LOGIN: 'SUCCESSFUL_LOGIN',
-  PASSWORD_RESET_REQUEST: 'PASSWORD_RESET_REQUEST',
-  PASSWORD_RESET_COMPLETE: 'PASSWORD_RESET_COMPLETE',
-  SUSPICIOUS_ACTIVITY: 'SUSPICIOUS_ACTIVITY',
-} as const;
-
-const SecurityEventSeverity = {
-  LOW: 'LOW',
-  MEDIUM: 'MEDIUM',
-  HIGH: 'HIGH',
-  CRITICAL: 'CRITICAL',
-} as const;
 
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma),
@@ -43,10 +16,10 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        console.log('[AUTH] Authorize called with email:', credentials?.email);
+        console.log('[AUTH-MINIMAL] Authorize called with email:', credentials?.email);
         
         if (!credentials?.email || !credentials?.password) {
-          console.log('[AUTH] Missing credentials');
+          console.log('[AUTH-MINIMAL] Missing credentials');
           return null;
         }
 
@@ -60,24 +33,11 @@ export const authOptions: NextAuthOptions = {
           }
         })
 
-        console.log('[AUTH] User found:', !!user, 'Has password:', !!user?.password);
+        console.log('[AUTH-MINIMAL] User found:', !!user, 'Has password:', !!user?.password);
         
         if (!user || !user.password) {
-          console.log('[AUTH] User not found or no password');
+          console.log('[AUTH-MINIMAL] User not found or no password');
           return null;
-        }
-
-        // Check if account is locked
-        const locked = await isAccountLocked(user.id)
-        if (locked) {
-          // Security logging temporarily disabled due to Prisma issue
-          // await logSecurityEvent({
-          //   userId: user.id,
-          //   eventType: SecurityEventType.FAILED_LOGIN,
-          //   severity: SecurityEventSeverity.HIGH,
-          //   description: `Login attempt blocked - account is locked`,
-          // })
-          throw new Error("Account is locked. Please contact support at security@mindfulchampion.com or info@mindfulchampion.com")
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -85,32 +45,23 @@ export const authOptions: NextAuthOptions = {
           user.password
         )
 
-        console.log('[AUTH] Password valid:', isPasswordValid);
+        console.log('[AUTH-MINIMAL] Password valid:', isPasswordValid);
         
         if (!isPasswordValid) {
-          console.log('[AUTH] Password mismatch for user:', user.email);
-          // Failed login will be tracked in the signin callback
+          console.log('[AUTH-MINIMAL] Password mismatch for user:', user.email);
           return null
         }
-
-        // Reset failed attempts on successful login
-        await resetFailedAttempts(user.id)
 
         // Update lastActiveDate to current time
         await prisma.user.update({
           where: { id: user.id },
-          data: { lastActiveDate: new Date() }
+          data: { 
+            lastActiveDate: new Date(),
+            loginCount: { increment: 1 }
+          }
         })
 
-        // Log successful login - temporarily disabled due to Prisma issue
-        // await logSecurityEvent({
-        //   userId: user.id,
-        //   eventType: SecurityEventType.SUCCESSFUL_LOGIN,
-        //   severity: SecurityEventSeverity.LOW,
-        //   description: `User logged in successfully`,
-        // })
-
-        console.log('[AUTH] Login successful for user:', user.email);
+        console.log('[AUTH-MINIMAL] Login successful for user:', user.email);
 
         return {
           id: user.id,
@@ -154,12 +105,11 @@ export const authOptions: NextAuthOptions = {
         token.rewardPoints = user.rewardPoints || 0
       }
       
-      // CRITICAL FIX: Always refresh onboarding status to prevent redirect loops
-      // Refresh user data on session update, or periodically (reduced to 5 seconds for onboarding)
+      // Refresh user data periodically
       const shouldRefresh = trigger === 'update' || 
                            !token.lastRefresh || 
-                           Date.now() - (token.lastRefresh as number) > 5000 || // 5 seconds instead of 60
-                           !token.onboardingCompleted // Always refresh if onboarding not completed
+                           Date.now() - (token.lastRefresh as number) > 5000 || 
+                           !token.onboardingCompleted
       
       if (shouldRefresh && token.sub) {
         const freshUser = await prisma.user.findUnique({
@@ -182,7 +132,6 @@ export const authOptions: NextAuthOptions = {
           token.rewardPoints = freshUser.rewardPoints || 0
           token.lastRefresh = Date.now()
           
-          // Check if trial has expired
           if (freshUser.trialEndDate) {
             const now = new Date()
             const trialEnd = new Date(freshUser.trialEndDate)
@@ -195,13 +144,13 @@ export const authOptions: NextAuthOptions = {
     },
     async session({ session, token }) {
       if (token && session?.user) {
-        session.user.id = token.sub as string
+        session.user.id = token.sub!
         session.user.role = token.role as string
         session.user.subscriptionTier = token.subscriptionTier as string
         session.user.isTrialActive = token.isTrialActive as boolean
         session.user.onboardingCompleted = token.onboardingCompleted as boolean
-        session.user.trialEndDate = token.trialEndDate as string
-        session.user.trialExpired = token.trialExpired as boolean
+        session.user.trialEndDate = token.trialEndDate as string | undefined
+        session.user.trialExpired = token.trialExpired as boolean | undefined
         session.user.rewardPoints = (token.rewardPoints as number) || 0
       }
       return session
@@ -209,6 +158,8 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: "/auth/signin",
-    signOut: "/"  // Redirect to landing page (features) after sign out
-  }
+    signOut: "/auth/signout",
+    error: "/auth/error",
+  },
+  debug: process.env.NODE_ENV === "development",
 }
