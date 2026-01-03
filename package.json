@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true npx next build",
+    "build": "prisma generate && SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true npx next build",
     "postinstall": "prisma generate",
     "start": "next start",
     "lint": "next lint",
@@ -55,6 +55,7 @@
     "@aws-sdk/s3-request-presigner": "^3.913.0",
     "@hookform/resolvers": "3.9.0",
     "@next-auth/prisma-adapter": "1.0.7",
+    "@paralleldrive/cuid2": "^3.0.6",
     "@prisma/client": "5.20.0",
     "@radix-ui/react-accordion": "1.2.0",
     "@radix-ui/react-alert-dialog": "1.1.1",
