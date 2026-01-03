@@ -870,6 +870,394 @@ export const achievementDefinitions: AchievementDefinition[] = [
     rarity: 'legendary',
     order: 45,
   },
+
+  // ============================================================================
+  // MILESTONE ACHIEVEMENTS (First Time Actions)
+  // ============================================================================
+  {
+    achievementId: 'first_steps',
+    name: 'First Steps',
+    description: 'Complete your very first drill - your journey begins!',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '🎯',
+    requirement: {
+      type: 'milestone',
+      criteria: { milestoneType: 'first_drill' },
+    },
+    points: 25,
+    rarity: 'common',
+    order: 50,
+  },
+  {
+    achievementId: 'goal_getter',
+    name: 'Goal Getter',
+    description: 'Set your first training goal with Coach Kai',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '🎯',
+    requirement: {
+      type: 'milestone',
+      criteria: { milestoneType: 'first_goal' },
+    },
+    points: 25,
+    rarity: 'common',
+    order: 51,
+  },
+  {
+    achievementId: 'video_debut',
+    name: 'Video Debut',
+    description: 'Upload your first video for AI analysis',
+    tier: 'BRONZE',
+    category: 'VIDEO',
+    icon: '🎬',
+    requirement: {
+      type: 'milestone',
+      criteria: { milestoneType: 'first_video' },
+    },
+    points: 30,
+    rarity: 'common',
+    order: 52,
+  },
+  {
+    achievementId: 'community_member',
+    name: 'Community Member',
+    description: 'Make your first post in the Community Center',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '💬',
+    requirement: {
+      type: 'milestone',
+      criteria: { milestoneType: 'first_post' },
+    },
+    points: 20,
+    rarity: 'common',
+    order: 53,
+  },
+  {
+    achievementId: 'tournament_player',
+    name: 'Tournament Player',
+    description: 'Register for your first tournament',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '🏆',
+    requirement: {
+      type: 'milestone',
+      criteria: { milestoneType: 'first_tournament' },
+    },
+    points: 30,
+    rarity: 'common',
+    order: 54,
+  },
+
+  // ============================================================================
+  // GOAL ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'goal_achiever_bronze',
+    name: 'Goal Achiever',
+    description: 'Complete your first goal',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '✅',
+    requirement: {
+      type: 'goal_completion',
+      criteria: { goalsCompleted: 1 },
+    },
+    points: 50,
+    rarity: 'common',
+    order: 60,
+  },
+  {
+    achievementId: 'goal_achiever_silver',
+    name: 'Dedicated Achiever',
+    description: 'Complete 5 training goals',
+    tier: 'SILVER',
+    category: 'GENERAL',
+    icon: '🌟',
+    requirement: {
+      type: 'goal_completion',
+      criteria: { goalsCompleted: 5 },
+    },
+    points: 100,
+    rarity: 'rare',
+    order: 61,
+  },
+  {
+    achievementId: 'goal_achiever_gold',
+    name: 'Master Achiever',
+    description: 'Complete 15 training goals',
+    tier: 'GOLD',
+    category: 'GENERAL',
+    icon: '🏅',
+    requirement: {
+      type: 'goal_completion',
+      criteria: { goalsCompleted: 15 },
+    },
+    points: 200,
+    rarity: 'epic',
+    order: 62,
+  },
+
+  // ============================================================================
+  // STREAK ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'streak_starter',
+    name: 'Streak Starter',
+    description: 'Maintain a 3-day training streak',
+    tier: 'BRONZE',
+    category: 'PRACTICE',
+    icon: '🔥',
+    requirement: {
+      type: 'streak',
+      criteria: { streakDays: 3 },
+    },
+    points: 30,
+    rarity: 'common',
+    order: 70,
+  },
+  {
+    achievementId: 'week_warrior',
+    name: 'Week Warrior',
+    description: 'Maintain a 7-day training streak',
+    tier: 'SILVER',
+    category: 'PRACTICE',
+    icon: '💪',
+    requirement: {
+      type: 'streak',
+      criteria: { streakDays: 7 },
+    },
+    points: 75,
+    rarity: 'rare',
+    order: 71,
+  },
+  {
+    achievementId: 'consistency_king',
+    name: 'Consistency Champion',
+    description: 'Maintain a 30-day training streak',
+    tier: 'GOLD',
+    category: 'PRACTICE',
+    icon: '👑',
+    requirement: {
+      type: 'streak',
+      criteria: { streakDays: 30 },
+    },
+    points: 300,
+    rarity: 'legendary',
+    order: 72,
+  },
+
+  // ============================================================================
+  // VIDEO ANALYSIS ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'video_analyst_bronze',
+    name: 'Video Analyst',
+    description: 'Analyze 3 videos to improve your technique',
+    tier: 'BRONZE',
+    category: 'VIDEO',
+    icon: '📹',
+    requirement: {
+      type: 'video_analysis',
+      criteria: { videosAnalyzed: 3 },
+    },
+    points: 40,
+    rarity: 'common',
+    order: 80,
+  },
+  {
+    achievementId: 'video_analyst_silver',
+    name: 'Technique Reviewer',
+    description: 'Analyze 10 videos to refine your game',
+    tier: 'SILVER',
+    category: 'VIDEO',
+    icon: '🎥',
+    requirement: {
+      type: 'video_analysis',
+      criteria: { videosAnalyzed: 10 },
+    },
+    points: 100,
+    rarity: 'rare',
+    order: 81,
+  },
+  {
+    achievementId: 'video_analyst_gold',
+    name: 'Film Study Pro',
+    description: 'Analyze 25 videos - you take your game seriously!',
+    tier: 'GOLD',
+    category: 'VIDEO',
+    icon: '🎬',
+    requirement: {
+      type: 'video_analysis',
+      criteria: { videosAnalyzed: 25 },
+    },
+    points: 250,
+    rarity: 'epic',
+    order: 82,
+  },
+
+  // ============================================================================
+  // COMMUNITY ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'social_butterfly',
+    name: 'Social Butterfly',
+    description: 'Make 5 posts in the Community Center',
+    tier: 'BRONZE',
+    category: 'GENERAL',
+    icon: '🦋',
+    requirement: {
+      type: 'community_posts',
+      criteria: { postsCount: 5 },
+    },
+    points: 40,
+    rarity: 'common',
+    order: 90,
+  },
+  {
+    achievementId: 'community_voice',
+    name: 'Community Voice',
+    description: 'Make 20 posts in the Community Center',
+    tier: 'SILVER',
+    category: 'GENERAL',
+    icon: '📢',
+    requirement: {
+      type: 'community_posts',
+      criteria: { postsCount: 20 },
+    },
+    points: 100,
+    rarity: 'rare',
+    order: 91,
+  },
+  {
+    achievementId: 'popular_player',
+    name: 'Popular Player',
+    description: 'Receive 25 reactions on your posts',
+    tier: 'SILVER',
+    category: 'GENERAL',
+    icon: '⭐',
+    requirement: {
+      type: 'community_reactions',
+      criteria: { reactionsReceived: 25 },
+    },
+    points: 75,
+    rarity: 'rare',
+    order: 92,
+  },
+  {
+    achievementId: 'community_legend',
+    name: 'Community Legend',
+    description: 'Receive 100 reactions on your posts',
+    tier: 'GOLD',
+    category: 'GENERAL',
+    icon: '🌟',
+    requirement: {
+      type: 'community_reactions',
+      criteria: { reactionsReceived: 100 },
+    },
+    points: 200,
+    rarity: 'epic',
+    order: 93,
+  },
+
+  // ============================================================================
+  // TRAINING PROGRAM ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'program_starter',
+    name: 'Program Starter',
+    description: 'Start your first training program',
+    tier: 'BRONZE',
+    category: 'PRACTICE',
+    icon: '📚',
+    requirement: {
+      type: 'program_started',
+      criteria: { programsStarted: 1 },
+    },
+    points: 20,
+    rarity: 'common',
+    order: 100,
+  },
+  {
+    achievementId: 'program_graduate',
+    name: 'Program Graduate',
+    description: 'Complete your first training program',
+    tier: 'SILVER',
+    category: 'PRACTICE',
+    icon: '🎓',
+    requirement: {
+      type: 'program_completion',
+      criteria: { programsCompleted: 1 },
+    },
+    points: 100,
+    rarity: 'rare',
+    order: 101,
+  },
+  {
+    achievementId: 'program_master',
+    name: 'Program Master',
+    description: 'Complete 5 training programs',
+    tier: 'GOLD',
+    category: 'PRACTICE',
+    icon: '🏆',
+    requirement: {
+      type: 'program_completion',
+      criteria: { programsCompleted: 5 },
+    },
+    points: 300,
+    rarity: 'epic',
+    order: 102,
+  },
+
+  // ============================================================================
+  // DAILY LOGIN ACHIEVEMENTS
+  // ============================================================================
+  {
+    achievementId: 'daily_dedication',
+    name: 'Daily Dedication',
+    description: 'Log in for 7 consecutive days',
+    tier: 'BRONZE',
+    category: 'PRACTICE',
+    icon: '📅',
+    requirement: {
+      type: 'login_streak',
+      criteria: { loginDays: 7 },
+    },
+    points: 50,
+    rarity: 'common',
+    order: 110,
+  },
+  {
+    achievementId: 'monthly_member',
+    name: 'Monthly Member',
+    description: 'Log in for 30 days total',
+    tier: 'SILVER',
+    category: 'PRACTICE',
+    icon: '🗓️',
+    requirement: {
+      type: 'total_logins',
+      criteria: { totalLogins: 30 },
+    },
+    points: 100,
+    rarity: 'rare',
+    order: 111,
+  },
+  {
+    achievementId: 'yearly_champion',
+    name: 'Yearly Champion',
+    description: 'Log in for 100 days total - true dedication!',
+    tier: 'GOLD',
+    category: 'PRACTICE',
+    icon: '🏅',
+    requirement: {
+      type: 'total_logins',
+      criteria: { totalLogins: 100 },
+    },
+    points: 300,
+    rarity: 'legendary',
+    order: 112,
+  },
 ];
 
 /**

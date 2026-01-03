@@ -145,6 +145,36 @@ async function checkAchievementCriteria(
     case 'ultimate':
       return await checkUltimateCriteria(userId);
 
+    case 'milestone':
+      return await checkMilestoneCriteria(userId, criteria, eventType, eventData);
+
+    case 'goal_completion':
+      return await checkGoalCompletionCriteria(userId, criteria);
+
+    case 'streak':
+      return await checkStreakCriteria(userId, criteria);
+
+    case 'video_analysis':
+      return await checkVideoAnalysisCriteria(userId, criteria);
+
+    case 'community_posts':
+      return await checkCommunityPostsCriteria(userId, criteria);
+
+    case 'community_reactions':
+      return await checkCommunityReactionsCriteria(userId, criteria);
+
+    case 'program_started':
+      return await checkProgramStartedCriteria(userId, criteria);
+
+    case 'program_completion':
+      return await checkProgramCompletionCriteria(userId, criteria);
+
+    case 'login_streak':
+      return await checkLoginStreakCriteria(userId, criteria);
+
+    case 'total_logins':
+      return await checkTotalLoginsCriteria(userId, criteria);
+
     default:
       return false;
   }
@@ -712,6 +742,171 @@ export async function getAchievementLeaderboard(
     console.error('Error getting achievement leaderboard:', error);
     throw error;
   }
+}
+
+// =============================================================================
+// NEW ACHIEVEMENT TYPE CHECKERS
+// =============================================================================
+
+/**
+ * Check milestone achievements (first drill, first goal, etc.)
+ */
+async function checkMilestoneCriteria(
+  userId: string,
+  criteria: any,
+  eventType: string,
+  eventData: EventData
+): Promise<boolean> {
+  const { milestoneType } = criteria;
+
+  switch (milestoneType) {
+    case 'first_drill':
+      const drillCount = await prisma.drillCompletion.count({ where: { userId } });
+      return drillCount === 1;
+    case 'first_goal':
+      const goalCount = await prisma.goal.count({ where: { userId } });
+      return goalCount === 1;
+    case 'first_video':
+      const videoCount = await prisma.videoAnalysis.count({ where: { userId } });
+      return videoCount === 1;
+    case 'first_post':
+      const postCount = await prisma.communityPost.count({ where: { authorId: userId } });
+      return postCount === 1;
+    case 'first_tournament':
+      const tournamentCount = await prisma.tournamentRegistration.count({ where: { userId } });
+      return tournamentCount === 1;
+    default:
+      return false;
+  }
+}
+
+/**
+ * Check goal completion criteria
+ */
+async function checkGoalCompletionCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { goalsCompleted } = criteria;
+  const count = await prisma.goal.count({
+    where: { userId, status: 'COMPLETED' },
+  });
+  return count >= goalsCompleted;
+}
+
+/**
+ * Check streak criteria
+ */
+async function checkStreakCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { streakDays } = criteria;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { currentStreak: true },
+  });
+  return (user?.currentStreak || 0) >= streakDays;
+}
+
+/**
+ * Check video analysis criteria
+ */
+async function checkVideoAnalysisCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { videosAnalyzed } = criteria;
+  const count = await prisma.videoAnalysis.count({
+    where: { userId, status: 'COMPLETED' },
+  });
+  return count >= videosAnalyzed;
+}
+
+/**
+ * Check community posts criteria
+ */
+async function checkCommunityPostsCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { postsCount } = criteria;
+  const count = await prisma.communityPost.count({
+    where: { authorId: userId },
+  });
+  return count >= postsCount;
+}
+
+/**
+ * Check community reactions criteria
+ */
+async function checkCommunityReactionsCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { reactionsReceived } = criteria;
+  const count = await prisma.postLike.count({
+    where: { post: { authorId: userId } },
+  });
+  return count >= reactionsReceived;
+}
+
+/**
+ * Check program started criteria
+ */
+async function checkProgramStartedCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { programsStarted } = criteria;
+  const count = await prisma.userProgram.count({
+    where: { userId },
+  });
+  return count >= programsStarted;
+}
+
+/**
+ * Check program completion criteria
+ */
+async function checkProgramCompletionCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { programsCompleted } = criteria;
+  const count = await prisma.userProgram.count({
+    where: { userId, status: 'COMPLETED' },
+  });
+  return count >= programsCompleted;
+}
+
+/**
+ * Check login streak criteria
+ */
+async function checkLoginStreakCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { loginDays } = criteria;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { currentStreak: true },
+  });
+  return (user?.currentStreak || 0) >= loginDays;
+}
+
+/**
+ * Check total logins criteria
+ */
+async function checkTotalLoginsCriteria(
+  userId: string,
+  criteria: any
+): Promise<boolean> {
+  const { totalLogins } = criteria;
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { loginCount: true },
+  });
+  return (user?.loginCount || 0) >= totalLogins;
 }
 
 export default {
