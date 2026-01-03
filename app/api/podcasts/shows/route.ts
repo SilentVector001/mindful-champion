@@ -8,7 +8,7 @@ export async function GET() {
     const shows = await prisma.podcastShow.findMany({
       where: { isActive: true },
       include: {
-        episodes: {
+        PodcastEpisode: {
           take: 3,
           orderBy: { publishDate: 'desc' },
         },
