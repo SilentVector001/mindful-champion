@@ -188,14 +188,19 @@ export function TournamentHubRedesign() {
     }
   }, [minEvents, maxEvents])
 
+  // Helper to extract state from location
+  const extractStateFromLocation = (location?: string) => {
+    if (!location) return null
+    const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/)
+    return match ? match[1] : null
+  }
+
   // Filter tournaments
   const filteredTournaments = tournaments.filter(t => {
-    // State filter
+    // State filter - use state field or extract from location (same as API)
     if (selectedState) {
-      const stateMatch = t.state === selectedState || 
-        t.location?.includes(selectedState) ||
-        t.location?.includes(stateData.find(s => s.abbr === selectedState)?.name || '')
-      if (!stateMatch) return false
+      const tournamentState = (t.state || extractStateFromLocation(t.location))?.toUpperCase()
+      if (tournamentState !== selectedState) return false
     }
     // Type filter
     if (selectedType !== 'all') {

@@ -19,6 +19,13 @@ const US_STATES_MAP: Record<string, string> = {
   'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 }
 
+// Helper to extract state abbreviation from location string
+function extractState(location?: string | null): string | null {
+  if (!location) return null
+  const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/)
+  return match ? match[1] : null
+}
+
 export async function GET() {
   try {
     const session = await getServerSession(authOptions)
@@ -26,33 +33,40 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Group UPCOMING tournaments by state and count them
-    const stateGrouping = await prisma.tournament.groupBy({
-      by: ['state'],
+    // Fetch ALL upcoming tournaments to properly extract states
+    const upcomingTournaments = await prisma.tournament.findMany({
       where: {
         startDate: {
           gte: new Date()
         }
       },
-      _count: {
-        id: true
-      },
-      orderBy: {
-        _count: {
-          id: 'desc'
-        }
+      select: {
+        id: true,
+        state: true,
+        location: true,
+      }
+    })
+
+    // Count tournaments by state (using extracted state from location if state field is null)
+    const stateCounts: Record<string, number> = {}
+    
+    upcomingTournaments.forEach(tournament => {
+      // Use state field if available, otherwise extract from location
+      const state = (tournament.state || extractState(tournament.location))?.toUpperCase()
+      if (state) {
+        stateCounts[state] = (stateCounts[state] || 0) + 1
       }
     })
 
     // Build the states array with real counts
-    const statesWithEvents = stateGrouping?.map(group => {
-      const abbr = group?.state?.toUpperCase?.() || ''
-      return {
+    const statesWithEvents = Object.entries(stateCounts)
+      .map(([abbr, count]) => ({
         abbr,
-        name: US_STATES_MAP[abbr] || group?.state || 'Unknown',
-        events: group?._count?.id ?? 0
-      }
-    })?.filter(s => s?.events > 0) || []
+        name: US_STATES_MAP[abbr] || abbr,
+        events: count
+      }))
+      .filter(s => s.events > 0)
+      .sort((a, b) => b.events - a.events)
 
     // Add states with 0 events (that have no tournaments)
     const statesWithEventsAbbrs = new Set(statesWithEvents?.map(s => s?.abbr))

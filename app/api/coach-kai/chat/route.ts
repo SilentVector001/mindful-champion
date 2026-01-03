@@ -148,30 +148,45 @@ export async function POST(req: NextRequest) {
     const matchedDeficiency = matchDeficiency(messageText);
     
     // Check if user is confirming a previous suggestion (e.g., "yes", "sounds good", "let's do it")
-    const isConfirmation = /^(yes|yeah|yep|sure|ok|okay|sounds good|let's do it|do it|go ahead|please|absolutely|definitely|perfect|great)\b/i.test(messageText.trim());
+    // IMPORTANT: Only match SHORT confirmations to avoid false positives
+    const trimmedMessage = messageText.trim();
+    const isShortConfirmation = trimmedMessage.length < 50 && /^(yes|yeah|yep|sure|ok|okay|sounds good|let's do it|do it|go ahead|please|absolutely|definitely|perfect|great)(!|\.|,)?$/i.test(trimmedMessage);
     
     // If confirming, look for pending goal/drill suggestion in conversation
     let pendingAction: { type: string; title: string; skillArea?: string } | null = null;
-    if (isConfirmation && messages.length >= 2) {
+    if (isShortConfirmation && messages.length >= 2) {
       const prevAssistantMsg = messages.slice(0, -1).reverse().find((m: any) => m.role === 'assistant');
       if (prevAssistantMsg?.content) {
         const content = prevAssistantMsg.content.toLowerCase();
-        // Extract skill area from previous message
-        const skillMatch = content.match(/(?:improve|work on|practice|focus on|master)\s+(?:your\s+)?(\w+(?:\s+\w+)?)/i);
-        const goalMatch = content.match(/(?:goal|plan)[:\s]+["']?([^"'\n]+)["']?/i);
         
-        if (content.includes('goal') || content.includes('plan') || content.includes('milestone')) {
-          pendingAction = {
-            type: 'goal',
-            title: goalMatch?.[1] || skillMatch?.[1] || 'Improve My Game',
-            skillArea: skillMatch?.[1]?.toLowerCase() || 'backhand'
-          };
-        } else if (content.includes('drill') || content.includes('exercise')) {
-          pendingAction = {
-            type: 'drill',
-            title: skillMatch?.[1] || 'Practice Drill',
-            skillArea: skillMatch?.[1]?.toLowerCase()
-          };
+        // ONLY process if previous message had a clear suggestion
+        const hasClearSuggestion = content.includes('would you like') || 
+                                   content.includes('shall we') || 
+                                   content.includes('want me to') ||
+                                   content.includes('should i') ||
+                                   content.includes('can i help');
+        
+        if (!hasClearSuggestion) {
+          // No clear pending action, don't treat as confirmation
+          pendingAction = null;
+        } else {
+          // Extract skill area from previous message
+          const skillMatch = content.match(/(?:improve|work on|practice|focus on|master)\s+(?:your\s+)?(\w+(?:\s+\w+)?)/i);
+          const goalMatch = content.match(/(?:goal|plan)[:\s]+["']?([^"'\n]+)["']?/i);
+          
+          if (content.includes('goal') || content.includes('plan') || content.includes('milestone')) {
+            pendingAction = {
+              type: 'goal',
+              title: goalMatch?.[1] || skillMatch?.[1] || 'Improve My Game',
+              skillArea: skillMatch?.[1]?.toLowerCase() || 'backhand'
+            };
+          } else if (content.includes('drill') || content.includes('exercise')) {
+            pendingAction = {
+              type: 'drill',
+              title: skillMatch?.[1] || 'Practice Drill',
+              skillArea: skillMatch?.[1]?.toLowerCase()
+            };
+          }
         }
       }
     }
@@ -242,7 +257,7 @@ export async function POST(req: NextRequest) {
     // ============================================
     
     let createdGoal: any = null;
-    if (isConfirmation && pendingAction?.type === 'goal') {
+    if (isShortConfirmation && pendingAction?.type === 'goal') {
       try {
         // Directly create the goal when user confirms
         const goalResult = await createGoalFromChat(
