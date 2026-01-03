@@ -1,5 +1,5 @@
 import { prisma } from './db';
-import { createId } from '@paralleldrive/cuid2';
+import { randomUUID } from 'crypto';
 // import { SecurityEventType, SecurityEventSeverity } from '@prisma/client';
 
 // Temporary type definitions
@@ -295,7 +295,7 @@ export async function logSecurityEvent(data: {
   try {
     await prisma.securityLog.create({
       data: {
-        id: createId(),
+        id: randomUUID(),
         userId: data.userId,
         eventType: data.eventType,
         severity: data.severity,
