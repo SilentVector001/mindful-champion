@@ -1,5 +1,5 @@
-// @ts-nocheck
 import { prisma } from './db';
+import { createId } from '@paralleldrive/cuid2';
 // import { SecurityEventType, SecurityEventSeverity } from '@prisma/client';
 
 // Temporary type definitions
@@ -292,17 +292,23 @@ export async function logSecurityEvent(data: {
   userAgent?: string;
   metadata?: any;
 }): Promise<void> {
-  await prisma.securityLog.create({
-    data: {
-      userId: data.userId,
-      eventType: data.eventType,
-      severity: data.severity,
-      description: data.description,
-      ipAddress: data.ipAddress,
-      userAgent: data.userAgent,
-      metadata: data.metadata || {}
-    }
-  });
+  try {
+    await prisma.securityLog.create({
+      data: {
+        id: createId(),
+        userId: data.userId,
+        eventType: data.eventType,
+        severity: data.severity,
+        description: data.description,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        metadata: data.metadata || {}
+      }
+    });
+  } catch (error) {
+    // Log error but don't fail the operation
+    console.error('[SecurityLog] Failed to create security log:', error);
+  }
 }
 
 /**
@@ -462,3 +468,4 @@ export async function completePasswordReset(
   
   return true;
 }
+// Force rebuild Sat Jan  3 17:06:46 UTC 2026
