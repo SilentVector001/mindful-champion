@@ -6,7 +6,9 @@ import bcrypt from "bcryptjs"
 import { prisma } from "./db"
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // Note: PrismaAdapter is commented out because it conflicts with CredentialsProvider
+  // The adapter tries to enforce OAuth account linking which breaks credentials-based login
+  // adapter: PrismaAdapter(prisma),
   secret: process.env.NEXTAUTH_SECRET,
   providers: [
     CredentialsProvider({
