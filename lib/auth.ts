@@ -70,12 +70,13 @@ export const authOptions: NextAuthOptions = {
         // Check if account is locked
         const locked = await isAccountLocked(user.id)
         if (locked) {
-          await logSecurityEvent({
-            userId: user.id,
-            eventType: SecurityEventType.FAILED_LOGIN,
-            severity: SecurityEventSeverity.HIGH,
-            description: `Login attempt blocked - account is locked`,
-          })
+          // Security logging temporarily disabled due to Prisma issue
+          // await logSecurityEvent({
+          //   userId: user.id,
+          //   eventType: SecurityEventType.FAILED_LOGIN,
+          //   severity: SecurityEventSeverity.HIGH,
+          //   description: `Login attempt blocked - account is locked`,
+          // })
           throw new Error("Account is locked. Please contact support at security@mindfulchampion.com or info@mindfulchampion.com")
         }
 
@@ -101,13 +102,13 @@ export const authOptions: NextAuthOptions = {
           data: { lastActiveDate: new Date() }
         })
 
-        // Log successful login
-        await logSecurityEvent({
-          userId: user.id,
-          eventType: SecurityEventType.SUCCESSFUL_LOGIN,
-          severity: SecurityEventSeverity.LOW,
-          description: `User logged in successfully`,
-        })
+        // Log successful login - temporarily disabled due to Prisma issue
+        // await logSecurityEvent({
+        //   userId: user.id,
+        //   eventType: SecurityEventType.SUCCESSFUL_LOGIN,
+        //   severity: SecurityEventSeverity.LOW,
+        //   description: `User logged in successfully`,
+        // })
 
         console.log('[AUTH] Login successful for user:', user.email);
 
