@@ -22,51 +22,44 @@ import { getUserGoalContext, createGoalFromChat, updateGoalProgress, completeMil
  */
 
 /**
- * ULTRA-AGGRESSIVE sanitization to remove ALL technical syntax
- * Ensures ONLY natural language reaches users
- * Preserves word boundaries to prevent "wordsmashing"
+ * NUCLEAR sanitization - completely blocks ALL XML/function call syntax
  */
 function sanitizeResponse(content: string): string {
   if (!content) return '';
   
   let sanitized = content;
   
-  // STEP 1: Check if this looks like pure XML garbage - return fallback
-  if (sanitized.trim().startsWith('<tool_call') || sanitized.trim().startsWith('<function_call')) {
-    return "I'd love to help you with that! What specific aspect of your pickleball game would you like to work on? 🎾";
+  // NUCLEAR CHECK: If ANY XML-like content exists, strip it entirely
+  if (/<[a-zA-Z_]/.test(sanitized)) {
+    // Remove ALL XML tags and their contents
+    sanitized = sanitized.replace(/<tool_call_id>[\s\S]*?<\/tool_call_id>/gi, '');
+    sanitized = sanitized.replace(/<function_call_name>[\s\S]*?<\/function_call_name>/gi, '');
+    sanitized = sanitized.replace(/<function_call_arguments>[\s\S]*?<\/function_call_arguments>/gi, '');
+    sanitized = sanitized.replace(/<[^>]+>[\s\S]*?<\/[^>]+>/gi, '');
+    sanitized = sanitized.replace(/<[^>]+>/gi, '');
+    sanitized = sanitized.replace(/<\/[^>]+>/gi, '');
   }
   
-  // STEP 2: Remove entire XML blocks (greedy match)
-  sanitized = sanitized.replace(/<tool_call_id>[^<]*<\/tool_call_id>/gi, '');
-  sanitized = sanitized.replace(/<function_call_name>[^<]*<\/function_call_name>/gi, '');
-  sanitized = sanitized.replace(/<function_call_arguments>[^<]*<\/function_call_arguments>/gi, '');
-  sanitized = sanitized.replace(/<[a-zA-Z_][a-zA-Z0-9_-]*[^>]*>[\s\S]*?<\/[a-zA-Z_][a-zA-Z0-9_-]*>/gi, '');
-  
-  // STEP 3: Remove any remaining tags
-  sanitized = sanitized.replace(/<\/?[a-zA-Z_][a-zA-Z0-9_:-]*[^>]*>/g, '');
-  
-  // STEP 4: Remove code blocks and JSON
+  // Remove code blocks, JSON, and technical identifiers
   sanitized = sanitized.replace(/```[\s\S]*?```/g, '');
   sanitized = sanitized.replace(/`[^`]+`/g, '');
-  sanitized = sanitized.replace(/\{[^{}]*"(function|name|arguments|tool|call_id)"[^{}]*\}/gi, '');
-  
-  // STEP 5: Remove technical identifiers
+  sanitized = sanitized.replace(/\{[^{}]*\}/g, '');
   sanitized = sanitized.replace(/call_[a-zA-Z0-9]+/g, '');
-  sanitized = sanitized.replace(/\b(goalId|skillArea|targetDays|milestoneId|progressIncrement):\s*["']?[^,\n}]+["']?/gi, '');
   sanitized = sanitized.replace(/\[(SYSTEM|DEBUG|FUNCTION|TOOL|HINT)[^\]]*\]/gi, '');
   
-  // STEP 6: Fix word boundaries - add spaces before capitals in middle of words
+  // Fix word spacing issues
   sanitized = sanitized.replace(/([a-z])([A-Z])/g, '$1 $2');
-  sanitized = sanitized.replace(/([a-zA-Z]),([a-zA-Z])/g, '$1, $2'); // comma spacing
-  sanitized = sanitized.replace(/([a-zA-Z])—([a-zA-Z])/g, '$1 — $2'); // em-dash spacing
+  sanitized = sanitized.replace(/([a-zA-Z]),([a-zA-Z])/g, '$1, $2');
+  sanitized = sanitized.replace(/([a-zA-Z])—([a-zA-Z])/g, '$1 — $2');
+  sanitized = sanitized.replace(/([.!?])([A-Z])/g, '$1 $2');
   
-  // STEP 7: Clean whitespace
+  // Clean whitespace
   sanitized = sanitized.replace(/[ \t]{2,}/g, ' ');
   sanitized = sanitized.replace(/\n{3,}/g, '\n\n');
   
-  // If result is empty or just whitespace, return fallback
-  if (!sanitized.trim() || sanitized.trim().length < 10) {
-    return "I'd love to help you with that! What would you like to work on? 🎾";
+  // Final check - if still contains XML markers, return fallback
+  if (/<|>|tool_call|function_call/i.test(sanitized)) {
+    return '';
   }
   
   return sanitized.trim();
@@ -296,15 +289,16 @@ export async function POST(req: NextRequest) {
         'Authorization': `Bearer ${process.env.ABACUSAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: 'gpt-4o',  // Fixed: was 'gpt-4.1-mini' (invalid model)
+        model: 'gpt-4o',
         messages: conversationMessages,
         stream: true,
         max_tokens: 1000,
         temperature: 0.85,
         presence_penalty: 0.5,
-        frequency_penalty: 0.4,
-        tools: FUNCTION_TOOLS,
-        tool_choice: 'auto'
+        frequency_penalty: 0.4
+        // DISABLED: tools causing XML output in responses
+        // tools: FUNCTION_TOOLS,
+        // tool_choice: 'auto'
       })
     });
 
