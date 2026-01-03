@@ -13,7 +13,6 @@ import { SessionProvider } from "@/components/providers/session-provider"
 import { PageTracker } from "@/components/tracking/PageTracker"
 // CoachKaiWrapper is now used in specific pages that have user context
 import WarningNotificationPopup from "@/components/notifications/warning-notification-popup"
-import { LiveNowBanner } from "@/components/media/live-now-banner"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -134,7 +133,6 @@ export default function RootLayout({
               <PageTracker />
             </Suspense>
             <WarningNotificationPopup />
-            <LiveNowBanner />
             {children}
             {/* Sonner toaster for forms and simple notifications */}
             <SonnerToaster 

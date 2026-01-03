@@ -307,14 +307,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "AI service unavailable" }, { status: 503 });
     }
 
-    // Create streaming response with BUFFERED SANITIZATION
+    // Create streaming response - SIMPLIFIED: collect full response then send
     const encoder = new TextEncoder();
     const decoder = new TextDecoder();
     
     let fullResponse = '';
     let toolCalls: any[] = [];
-    let contentBuffer = ''; // Buffer to catch XML spans across chunks
-    const BUFFER_SIZE = 100; // Keep last 100 chars to detect split XML
     
     const stream = new ReadableStream({
       async start(controller) {
@@ -325,6 +323,7 @@ export async function POST(req: NextRequest) {
         }
         
         try {
+          // Collect entire response first
           while (true) {
             const { done, value } = await reader.read();
             if (done) break;
@@ -341,43 +340,12 @@ export async function POST(req: NextRequest) {
                   const parsed = JSON.parse(data);
                   const delta = parsed.choices?.[0]?.delta;
                   
-                  // Handle text content with BUFFERED AGGRESSIVE sanitization
                   if (delta?.content) {
                     fullResponse += delta.content;
-                    contentBuffer += delta.content;
-                    
-                    // Check buffered content for XML patterns
-                    if (containsXMLSyntax(contentBuffer)) {
-                      console.log('[Coach Kai] Detected XML in buffer, skipping chunk');
-                      // Don't send this chunk - it contains XML
-                      // Keep buffering to catch the complete XML block
-                      continue;
-                    }
-                    
-                    // If buffer is clean and large enough, send it
-                    if (contentBuffer.length >= 15) { // Min 15 chars before sending
-                      const sanitizedContent = sanitizeResponse(contentBuffer);
-                      
-                      // Double-check sanitized output doesn't contain XML residue
-                      if (!containsXMLSyntax(sanitizedContent) && sanitizedContent.trim().length > 0) {
-                        // Only send words, not fragments
-                        const words = sanitizedContent.trim().split(/\s+/);
-                        if (words.length > 0 && words[0].length > 1) {
-                          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                            type: 'text', 
-                            content: sanitizedContent + ' '
-                          })}\n\n`));
-                        }
-                      }
-                      
-                      // Reset buffer but keep last BUFFER_SIZE chars for continuity
-                      contentBuffer = contentBuffer.slice(-BUFFER_SIZE);
-                    }
                   }
                   
-                  // Handle tool calls (proper function calling from LLM)
+                  // Handle tool calls
                   if (delta?.tool_calls) {
-                    console.log('[Coach Kai] Tool call detected:', delta.tool_calls);
                     for (const tc of delta.tool_calls) {
                       if (tc.index !== undefined) {
                         if (!toolCalls[tc.index]) {
@@ -399,15 +367,13 @@ export async function POST(req: NextRequest) {
             }
           }
           
-          // Flush remaining buffer at the end
-          if (contentBuffer.trim().length > 0) {
-            const sanitizedContent = sanitizeResponse(contentBuffer);
-            if (!containsXMLSyntax(sanitizedContent) && sanitizedContent.trim().length > 0) {
-              controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
-                type: 'text', 
-                content: sanitizedContent 
-              })}\n\n`));
-            }
+          // AFTER collecting full response, sanitize and send it once
+          const sanitizedResponse = sanitizeResponse(fullResponse);
+          if (sanitizedResponse.trim().length > 0) {
+            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ 
+              type: 'text', 
+              content: sanitizedResponse 
+            })}\n\n`));
           }
           
           // Process completed tool calls - EXECUTE goal functions directly

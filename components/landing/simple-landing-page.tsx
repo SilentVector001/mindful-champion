@@ -169,8 +169,8 @@ export default function SimpleLandingPage() {
                   ✨ Coach Kai Ready
                 </motion.div>
                 <Image
-                  src="https://images.unsplash.com/photo-1693142517898-2f986215e412?w=600&q=80"
-                  alt="Professional pickleball players in action on court"
+                  src="https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=600&q=80"
+                  alt="Pickleball paddles and balls on court"
                   width={500}
                   height={350}
                   className="rounded-xl w-full"
