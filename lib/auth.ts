@@ -8,7 +8,7 @@ import { prisma } from "./db"
 import {
   isAccountLocked,
   resetFailedAttempts,
-  logSecurityEvent,
+  // logSecurityEvent, // Temporarily removed - causing Prisma issues
 } from "./security"
 // import { SecurityEventType, SecurityEventSeverity } from "@prisma/client"
 
