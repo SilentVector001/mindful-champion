@@ -292,18 +292,23 @@ export async function logSecurityEvent(data: {
   userAgent?: string;
   metadata?: any;
 }): Promise<void> {
-  await prisma.securityLog.create({
-    data: {
-      id: createId(),
-      userId: data.userId,
-      eventType: data.eventType,
-      severity: data.severity,
-      description: data.description,
-      ipAddress: data.ipAddress,
-      userAgent: data.userAgent,
-      metadata: data.metadata || {}
-    }
-  });
+  try {
+    await prisma.securityLog.create({
+      data: {
+        id: createId(),
+        userId: data.userId,
+        eventType: data.eventType,
+        severity: data.severity,
+        description: data.description,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+        metadata: data.metadata || {}
+      }
+    });
+  } catch (error) {
+    // Log error but don't fail the operation
+    console.error('[SecurityLog] Failed to create security log:', error);
+  }
 }
 
 /**
