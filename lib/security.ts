@@ -463,3 +463,4 @@ export async function completePasswordReset(
   
   return true;
 }
+// Force rebuild Sat Jan  3 17:06:46 UTC 2026
