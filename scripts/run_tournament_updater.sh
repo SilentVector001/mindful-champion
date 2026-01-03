@@ -8,11 +8,11 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Load environment variables
-# Try multiple .env file locations
+# Try multiple .env file locations (prioritize root .env for DATABASE_URL)
 ENV_FILES=(
+    "$PROJECT_DIR/.env"
     "$PROJECT_DIR/nextjs_space/.env.local"
     "$PROJECT_DIR/nextjs_space/.env"
-    "$PROJECT_DIR/.env"
 )
 
 ENV_LOADED=false
