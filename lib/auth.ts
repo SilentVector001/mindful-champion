@@ -31,7 +31,7 @@ export const authOptions: NextAuthOptions = {
             credentials?.password === 'MindfulChampion2025!') {
           console.log('[AUTH-DEBUG] HARDCODED BYPASS - Returning test user');
           return {
-            id: 'cmjxvkbv90000zyp2dgtduh97',
+            id: 'cm8q738Kh9A2UOjg',
             email: 'deansnow59@gmail.com',
             name: 'Dean Snow',
             role: 'USER',
