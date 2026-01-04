@@ -2,100 +2,109 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
 
-export const dynamic = 'force-dynamic';
-
-export async function GET(request: Request) {
+export async function POST(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const email = searchParams.get('email') || 'deansnow59@gmail.com';
-    const testPassword = searchParams.get('password') || 'MindfulChampion2025!';
-
-    console.log('[AUTH-TEST] Testing authentication for:', email);
-
-    // Test 1: Database connection
-    let dbConnected = false;
-    try {
-      await prisma.$queryRaw`SELECT 1`;
-      dbConnected = true;
-      console.log('[AUTH-TEST] ✅ Database connected');
-    } catch (error: any) {
-      console.log('[AUTH-TEST] ❌ Database connection failed:', error.message);
+    const { email, password } = await request.json();
+    
+    console.log('[AUTH-TEST] ====== START ======');
+    console.log('[AUTH-TEST] Timestamp:', new Date().toISOString());
+    console.log('[AUTH-TEST] Email:', email);
+    console.log('[AUTH-TEST] Password length:', password?.length || 0);
+    
+    if (!email || !password) {
+      return NextResponse.json({
+        success: false,
+        error: 'Missing email or password'
+      }, { status: 400 });
     }
-
-    // Test 2: Find user
-    let user = null;
-    let userFound = false;
-    try {
-      user = await prisma.user.findFirst({
-        where: {
-          email: {
-            equals: email,
-            mode: 'insensitive'
-          }
-        },
-        select: {
-          id: true,
-          email: true,
-          password: true,
-          role: true,
-          subscriptionTier: true,
-          firstName: true,
-          lastName: true
+    
+    const normalizedEmail = email.toLowerCase().trim();
+    console.log('[AUTH-TEST] Normalized email:', normalizedEmail);
+    
+    // Find user
+    const user = await prisma.user.findFirst({
+      where: {
+        email: {
+          equals: normalizedEmail,
+          mode: 'insensitive'
         }
-      });
-      userFound = !!user;
-      console.log('[AUTH-TEST] User found:', userFound);
-    } catch (error: any) {
-      console.log('[AUTH-TEST] ❌ User lookup failed:', error.message);
-    }
-
-    // Test 3: Password comparison
-    let passwordValid = false;
-    let passwordHash = null;
-    if (user && user.password) {
-      passwordHash = user.password.substring(0, 20) + '...';
-      try {
-        passwordValid = await bcrypt.compare(testPassword, user.password);
-        console.log('[AUTH-TEST] Password valid:', passwordValid);
-      } catch (error: any) {
-        console.log('[AUTH-TEST] ❌ Password comparison failed:', error.message);
-      }
-    }
-
-    // Test 4: Prisma client version
-    const prismaVersion = require('@prisma/client/package.json').version;
-
-    return NextResponse.json({
-      success: true,
-      timestamp: new Date().toISOString(),
-      tests: {
-        databaseConnection: dbConnected,
-        userFound: userFound,
-        passwordValid: passwordValid
       },
-      userInfo: user ? {
-        id: user.id,
-        email: user.email,
-        role: user.role,
-        subscriptionTier: user.subscriptionTier,
-        hasPassword: !!user.password,
-        passwordHashPreview: passwordHash
-      } : null,
-      environment: {
-        nodeEnv: process.env.NODE_ENV,
-        hasNextAuthSecret: !!process.env.NEXTAUTH_SECRET,
-        hasNextAuthUrl: !!process.env.NEXTAUTH_URL,
-        nextAuthUrl: process.env.NEXTAUTH_URL,
-        hasDatabaseUrl: !!process.env.DATABASE_URL,
-        prismaVersion: prismaVersion
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        password: true,
+        role: true,
+        onboardingCompleted: true
       }
     });
-  } catch (error: any) {
-    console.error('[AUTH-TEST] ❌ Fatal error:', error);
+    
+    console.log('[AUTH-TEST] User found:', !!user);
+    console.log('[AUTH-TEST] User ID:', user?.id || 'N/A');
+    console.log('[AUTH-TEST] Has password:', !!user?.password);
+    
+    if (!user) {
+      return NextResponse.json({
+        success: false,
+        error: 'User not found',
+        details: {
+          searchedEmail: normalizedEmail,
+          userExists: false
+        }
+      });
+    }
+    
+    if (!user.password) {
+      return NextResponse.json({
+        success: false,
+        error: 'User has no password (OAuth only?)',
+        details: {
+          userId: user.id,
+          email: user.email,
+          hasPassword: false
+        }
+      });
+    }
+    
+    // Test password
+    console.log('[AUTH-TEST] Testing password...');
+    const isValid = await bcrypt.compare(password, user.password);
+    console.log('[AUTH-TEST] Password valid:', isValid);
+    
+    if (!isValid) {
+      return NextResponse.json({
+        success: false,
+        error: 'Invalid password',
+        details: {
+          userId: user.id,
+          email: user.email,
+          passwordMatches: false,
+          passwordHashPrefix: user.password.substring(0, 10) + '...'
+        }
+      });
+    }
+    
+    console.log('[AUTH-TEST] ====== SUCCESS ======');
+    
+    return NextResponse.json({
+      success: true,
+      message: 'Authentication successful',
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        onboardingCompleted: user.onboardingCompleted
+      }
+    });
+    
+  } catch (error) {
+    console.error('[AUTH-TEST] Exception:', error);
     return NextResponse.json({
       success: false,
-      error: error.message,
-      stack: error.stack
+      error: 'Exception occurred',
+      message: (error as Error).message,
+      stack: (error as Error).stack
     }, { status: 500 });
   }
 }
