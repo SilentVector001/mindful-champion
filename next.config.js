@@ -9,8 +9,11 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: { unoptimized: true },
+  // Force serverless functions to use Node.js runtime for bcrypt compatibility
+  experimental: {
+    serverComponentsExternalPackages: ['bcryptjs'],
+  },
 };
 
 module.exports = nextConfig;
-// Deployment trigger Fri Dec 26 06:47:30 UTC 2025
-// Force rebuild 1767521583
+// Force bcrypt fix rebuild: 1704370700
