@@ -3,8 +3,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true next build",
-    "postinstall": "prisma generate",
+    "build": "npx prisma@5.20.0 generate && SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true next build",
+    "postinstall": "npx prisma@5.20.0 generate",
     "start": "next start",
     "lint": "next lint",
     "test:cron": "tsx scripts/test-cron.ts all",
