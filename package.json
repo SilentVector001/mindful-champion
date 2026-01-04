@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && SKIP_TYPE_CHECK=true TSC_COMPILE_ON_ERROR=true npx next build",
-    "postinstall": "prisma generate",
+    "postinstall": "npx prisma generate",
     "start": "next start",
     "lint": "next lint",
     "test:cron": "tsx scripts/test-cron.ts all",
