@@ -17,3 +17,4 @@ const nextConfig = {
 
 module.exports = nextConfig;
 // Force bcrypt fix rebuild: 1704370700
+// Force redeploy Sun Jan  4 13:46:29 UTC 2026

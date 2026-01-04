@@ -1,41 +1,27 @@
 const { PrismaClient } = require('@prisma/client');
 const bcrypt = require('bcryptjs');
-const prisma = new PrismaClient();
 
-async function resetPassword(email, newPassword) {
+async function resetPassword() {
+  const prisma = new PrismaClient();
+  
   try {
-    // Hash the new password
-    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    const hashedPassword = await bcrypt.hash('MindfulChampion2025!', 12);
     
-    // Update the user's password
     const user = await prisma.user.update({
-      where: { email },
+      where: { email: 'deansnow59@gmail.com' },
       data: { 
         password: hashedPassword,
-        failedLoginAttempts: 0,
-        accountLocked: false,
+        onboardingCompleted: true
       }
     });
     
-    console.log('✅ Password reset successful!');
-    console.log('----------------------------');
-    console.log('Email:', user.email);
-    console.log('New password:', newPassword);
-    console.log('----------------------------');
-    console.log('\nYou can now sign in with:');
-    console.log('Email: ' + user.email);
-    console.log('Password: ' + newPassword);
-    
+    console.log('✅ Password reset successfully for:', user.email);
+    console.log('New password: MindfulChampion2025!');
   } catch (error) {
-    console.error('❌ Error resetting password:', error.message);
+    console.error('Error:', error.message);
   } finally {
     await prisma.$disconnect();
   }
 }
 
-// Reset password for jay@aol.com
-const email = 'jay@aol.com';
-const newPassword = 'MindfulChampion2025!';
-
-console.log('Resetting password for', email, '...');
-resetPassword(email, newPassword);
+resetPassword();
