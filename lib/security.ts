@@ -1,3 +1,4 @@
+// REBUILD FORCED: 2026-01-04T14:29:43Z - Security log fix with randomUUID
 import { prisma } from './db';
 import { randomUUID } from 'crypto';
 // import { SecurityEventType, SecurityEventSeverity } from '@prisma/client';
