@@ -1,5 +1,0 @@
-.vercel
-.env*.local
-.env.production
-*.sql
-.env
