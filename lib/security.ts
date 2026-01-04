@@ -470,3 +470,4 @@ export async function completePasswordReset(
   return true;
 }
 // Force rebuild Sat Jan  3 17:06:46 UTC 2026
+// FORCE CLEAN REBUILD: 2026-01-04T15:20:09Z - Fix securityLog id
