@@ -23,10 +23,27 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         console.log('[AUTH-DEBUG] ====== AUTHORIZE START ======');
         console.log('[AUTH-DEBUG] Timestamp:', new Date().toISOString());
-        console.log('[AUTH-DEBUG] NEXTAUTH_URL:', process.env.NEXTAUTH_URL || 'NOT SET');
-        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
         console.log('[AUTH-DEBUG] NODE_ENV:', process.env.NODE_ENV);
         console.log('[AUTH-DEBUG] Email received:', credentials?.email);
+        
+        // TEMPORARY TEST: Hardcoded bypass to isolate DB vs session issues
+        if (credentials?.email?.toLowerCase().trim() === 'deansnow59@gmail.com' && 
+            credentials?.password === 'MindfulChampion2025!') {
+          console.log('[AUTH-DEBUG] HARDCODED BYPASS - Returning test user');
+          return {
+            id: 'cmjxvkbv90000zyp2dgtduh97',
+            email: 'deansnow59@gmail.com',
+            name: 'Dean Snow',
+            role: 'USER',
+            subscriptionTier: 'FREE',
+            isTrialActive: true,
+            onboardingCompleted: true,
+            rewardPoints: 0,
+          };
+        }
+        
+        console.log('[AUTH-DEBUG] NEXTAUTH_URL:', process.env.NEXTAUTH_URL || 'NOT SET');
+        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
         console.log('[AUTH-DEBUG] Password provided:', !!credentials?.password);
         console.log('[AUTH-DEBUG] Password length:', credentials?.password?.length || 0);
         console.log('[AUTH-DEBUG] NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET);
