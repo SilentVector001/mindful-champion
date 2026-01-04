@@ -427,7 +427,6 @@ export default function SignUpForm() {
             </Button>
           </form>
 
-          {/* Google Sign-In temporarily disabled - requires OAuth credentials
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t" />
@@ -463,7 +462,6 @@ export default function SignUpForm() {
             </svg>
             Google
           </Button>
-          */}
         </CardContent>
 
         <CardFooter className="flex flex-col space-y-2 text-center">
