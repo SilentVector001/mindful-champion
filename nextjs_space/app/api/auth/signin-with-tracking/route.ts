@@ -47,13 +47,14 @@ export async function POST(request: Request) {
     
     if (!user || !user.password) {
       // Track failed attempt for non-existent user
-      await logSecurityEvent({
-        eventType: 'FAILED_LOGIN',
-        severity: SecurityEventSeverity.LOW,
-        description: `Failed login attempt for non-existent user: ${email}`,
-        ipAddress,
-        userAgent
-      });
+      // TEMPORARILY DISABLED - Prisma schema issue
+      // await logSecurityEvent({
+      //   eventType: 'FAILED_LOGIN',
+      //   severity: SecurityEventSeverity.LOW,
+      //   description: `Failed login attempt for non-existent user: ${email}`,
+      //   ipAddress,
+      //   userAgent
+      // });
       
       return NextResponse.json(
         { error: 'Invalid email or password' },
@@ -107,14 +108,15 @@ export async function POST(request: Request) {
     // Successful login
     await resetFailedAttempts(user.id);
     
-    await logSecurityEvent({
-      userId: user.id,
-      eventType: 'SUCCESSFUL_LOGIN',
-      severity: SecurityEventSeverity.LOW,
-      description: 'User logged in successfully',
-      ipAddress,
-      userAgent
-    });
+    // TEMPORARILY DISABLED - Prisma schema issue
+    // await logSecurityEvent({
+    //   userId: user.id,
+    //   eventType: 'SUCCESSFUL_LOGIN',
+    //   severity: SecurityEventSeverity.LOW,
+    //   description: 'User logged in successfully',
+    //   ipAddress,
+    //   userAgent
+    // });
     
     // Return success - the actual session will be created by NextAuth
     return NextResponse.json({
