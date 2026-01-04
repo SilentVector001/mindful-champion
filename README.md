@@ -8,3 +8,4 @@ Mental wellness and pickleball tournament app built with Next.js.
 - Sponsor application system
 - User authentication
 
+
