@@ -21,44 +21,19 @@ export const authOptions: NextAuthOptions = {
         password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        console.log('[AUTH-DEBUG] ====== AUTHORIZE START ======');
-        console.log('[AUTH-DEBUG] Timestamp:', new Date().toISOString());
-        console.log('[AUTH-DEBUG] NODE_ENV:', process.env.NODE_ENV);
-        console.log('[AUTH-DEBUG] Email received:', credentials?.email);
-        
-        // TEMPORARY TEST: Hardcoded bypass to isolate DB vs session issues
-        if (credentials?.email?.toLowerCase().trim() === 'deansnow59@gmail.com' && 
-            credentials?.password === 'MindfulChampion2025!') {
-          console.log('[AUTH-DEBUG] HARDCODED BYPASS - Returning test user');
-          return {
-            id: 'cm8q738Kh9A2UOjg',
-            email: 'deansnow59@gmail.com',
-            name: 'Dean Snow',
-            role: 'USER',
-            subscriptionTier: 'FREE',
-            isTrialActive: true,
-            onboardingCompleted: true,
-            rewardPoints: 0,
-          };
-        }
-        
-        console.log('[AUTH-DEBUG] NEXTAUTH_URL:', process.env.NEXTAUTH_URL || 'NOT SET');
-        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
-        console.log('[AUTH-DEBUG] Password provided:', !!credentials?.password);
-        console.log('[AUTH-DEBUG] Password length:', credentials?.password?.length || 0);
-        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET);
-        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
-        console.log('[AUTH-DEBUG] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+        console.log('[AUTH] ====== AUTHORIZE START ======');
+        console.log('[AUTH] Timestamp:', new Date().toISOString());
+        console.log('[AUTH] Email received:', credentials?.email);
         
         try {
           if (!credentials?.email || !credentials?.password) {
-            console.log('[AUTH-DEBUG] FAIL: Missing email or password');
+            console.log('[AUTH] FAIL: Missing email or password');
             return null;
           }
 
-          console.log('[AUTH-DEBUG] Step 1: Looking up user in database...');
+          console.log('[AUTH] Step 1: Looking up user in database...');
           const normalizedEmail = credentials.email.toLowerCase().trim();
-          console.log('[AUTH-DEBUG] Normalized email:', normalizedEmail);
+          console.log('[AUTH] Normalized email:', normalizedEmail);
           
           const user = await prisma.user.findFirst({
             where: { 
@@ -66,48 +41,50 @@ export const authOptions: NextAuthOptions = {
                 equals: normalizedEmail,
                 mode: 'insensitive'
               }
+            },
+            select: {
+              id: true,
+              email: true,
+              name: true,
+              firstName: true,
+              lastName: true,
+              password: true,
+              role: true,
+              subscriptionTier: true,
+              isTrialActive: true,
+              onboardingCompleted: true,
+              rewardPoints: true
             }
           });
 
-          console.log('[AUTH-DEBUG] Step 2: User lookup result');
-          console.log('[AUTH-DEBUG] User found:', !!user);
-          console.log('[AUTH-DEBUG] User ID:', user?.id || 'N/A');
-          console.log('[AUTH-DEBUG] User email:', user?.email || 'N/A');
-          console.log('[AUTH-DEBUG] Has password field:', !!user?.password);
-          console.log('[AUTH-DEBUG] Password hash length:', user?.password?.length || 0);
-          console.log('[AUTH-DEBUG] Password hash prefix:', user?.password?.substring(0, 10) || 'N/A');
+          console.log('[AUTH] User found:', !!user);
+          console.log('[AUTH] User ID:', user?.id || 'N/A');
           
           if (!user) {
-            console.log('[AUTH-DEBUG] FAIL: No user found with email:', credentials.email);
+            console.log('[AUTH] FAIL: No user found with email:', credentials.email);
             return null;
           }
           
           if (!user.password) {
-            console.log('[AUTH-DEBUG] FAIL: User exists but has no password (OAuth only?)');
+            console.log('[AUTH] FAIL: User exists but has no password (OAuth only?)');
             return null;
           }
 
-          console.log('[AUTH-DEBUG] Step 3: Comparing passwords with bcrypt...');
-          console.log('[AUTH-DEBUG] Input password first char:', credentials.password.charAt(0));
-          console.log('[AUTH-DEBUG] Stored hash algorithm:', user.password.substring(0, 7));
+          console.log('[AUTH] Step 2: Validating password with bcrypt...');
           
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
             user.password
           );
 
-          console.log('[AUTH-DEBUG] Step 4: bcrypt.compare result:', isPasswordValid);
+          console.log('[AUTH] Password validation result:', isPasswordValid);
           
           if (!isPasswordValid) {
-            console.log('[AUTH-DEBUG] FAIL: Password does not match');
-            console.log('[AUTH-DEBUG] This could mean:');
-            console.log('[AUTH-DEBUG] - Wrong password entered');
-            console.log('[AUTH-DEBUG] - Hash was created with different bcrypt version');
-            console.log('[AUTH-DEBUG] - Hash corruption in database');
+            console.log('[AUTH] FAIL: Invalid password');
             return null;
           }
 
-          console.log('[AUTH-DEBUG] Step 5: Updating lastActiveDate...');
+          console.log('[AUTH] Step 3: Updating user activity...');
           await prisma.user.update({
             where: { id: user.id },
             data: { 
@@ -116,13 +93,13 @@ export const authOptions: NextAuthOptions = {
             }
           });
 
-          console.log('[AUTH-DEBUG] SUCCESS: Login completed for:', user.email);
-          console.log('[AUTH-DEBUG] ====== AUTHORIZE END ======');
+          console.log('[AUTH] SUCCESS: Login completed for:', user.email);
+          console.log('[AUTH] ====== AUTHORIZE END ======');
 
           return {
             id: user.id,
             email: user.email,
-            name: user.name || `${user.firstName} ${user.lastName}`,
+            name: user.name || `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.email,
             role: user.role,
             subscriptionTier: user.subscriptionTier,
             isTrialActive: user.isTrialActive,
@@ -130,10 +107,9 @@ export const authOptions: NextAuthOptions = {
             rewardPoints: user.rewardPoints || 0,
           };
         } catch (error) {
-          console.log('[AUTH-DEBUG] EXCEPTION CAUGHT:');
-          console.log('[AUTH-DEBUG] Error name:', (error as Error).name);
-          console.log('[AUTH-DEBUG] Error message:', (error as Error).message);
-          console.log('[AUTH-DEBUG] Error stack:', (error as Error).stack);
+          console.log('[AUTH] EXCEPTION:');
+          console.log('[AUTH] Error:', (error as Error).message);
+          console.log('[AUTH] Stack:', (error as Error).stack);
           return null;
         }
       }
