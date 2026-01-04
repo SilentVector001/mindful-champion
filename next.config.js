@@ -13,3 +13,4 @@ const nextConfig = {
 
 module.exports = nextConfig;
 // Deployment trigger Fri Dec 26 06:47:30 UTC 2025
+// Force rebuild 1767521583
