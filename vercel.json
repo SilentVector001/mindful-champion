@@ -1,6 +1,4 @@
 {
-  "buildCommand": "rm -rf node_modules/.cache .next && npm ci && npx prisma@5.20.0 generate && npm run build",
-  "outputDirectory": ".next",
   "functions": {
     "app/api/**/*.ts": {
       "maxDuration": 60
