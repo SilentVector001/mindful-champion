@@ -1,3 +1,4 @@
+console.log('[NEXTAUTH-ROUTE] File loaded at:', new Date().toISOString());
 // Force Node.js runtime for bcryptjs compatibility (not Edge)
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
