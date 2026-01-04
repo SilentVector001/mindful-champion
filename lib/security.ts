@@ -294,20 +294,23 @@ export async function logSecurityEvent(data: {
   metadata?: any;
 }): Promise<void> {
   try {
+    const logId = randomUUID();
+    console.log('[SecurityLog] Creating log with id:', logId);
     await prisma.securityLog.create({
       data: {
-        id: randomUUID(),
-        userId: data.userId,
+        id: logId,
+        userId: data.userId || null,
         eventType: data.eventType,
         severity: data.severity,
         description: data.description,
-        ipAddress: data.ipAddress,
-        userAgent: data.userAgent,
+        ipAddress: data.ipAddress || null,
+        userAgent: data.userAgent || null,
         metadata: data.metadata || {}
       }
     });
+    console.log('[SecurityLog] Successfully created security log');
   } catch (error) {
-    // Log error but don't fail the operation
+    // Log error but don't fail the operation - NEVER throw
     console.error('[SecurityLog] Failed to create security log:', error);
   }
 }
