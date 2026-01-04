@@ -23,6 +23,9 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         console.log('[AUTH-DEBUG] ====== AUTHORIZE START ======');
         console.log('[AUTH-DEBUG] Timestamp:', new Date().toISOString());
+        console.log('[AUTH-DEBUG] NEXTAUTH_URL:', process.env.NEXTAUTH_URL || 'NOT SET');
+        console.log('[AUTH-DEBUG] NEXTAUTH_SECRET length:', process.env.NEXTAUTH_SECRET?.length || 0);
+        console.log('[AUTH-DEBUG] NODE_ENV:', process.env.NODE_ENV);
         console.log('[AUTH-DEBUG] Email received:', credentials?.email);
         console.log('[AUTH-DEBUG] Password provided:', !!credentials?.password);
         console.log('[AUTH-DEBUG] Password length:', credentials?.password?.length || 0);
@@ -37,10 +40,13 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[AUTH-DEBUG] Step 1: Looking up user in database...');
+          const normalizedEmail = credentials.email.toLowerCase().trim();
+          console.log('[AUTH-DEBUG] Normalized email:', normalizedEmail);
+          
           const user = await prisma.user.findFirst({
             where: { 
               email: {
-                equals: credentials.email,
+                equals: normalizedEmail,
                 mode: 'insensitive'
               }
             }
@@ -127,14 +133,16 @@ export const authOptions: NextAuthOptions = {
   },
   cookies: {
     sessionToken: {
-      name: `next-auth.session-token`,
+      name: process.env.NODE_ENV === 'production' 
+        ? `__Secure-next-auth.session-token` 
+        : `next-auth.session-token`,
       options: {
         httpOnly: true,
-        sameSite: 'lax',
+        sameSite: 'lax' as const,
         path: '/',
-        secure: process.env.NODE_ENV === 'production'
-      }
-    }
+        secure: process.env.NODE_ENV === 'production',
+      },
+    },
   },
   callbacks: {
     async jwt({ token, user, trigger }) {
@@ -202,6 +210,6 @@ export const authOptions: NextAuthOptions = {
     signOut: "/auth/signout",
     error: "/auth/error",
   },
-  debug: process.env.NODE_ENV === "development",
+  debug: true, // Enable debug for production troubleshooting
 }
-// Force rebuild 1767461701
+// Force rebuild - cookie fix 1767529200
