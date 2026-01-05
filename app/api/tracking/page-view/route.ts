@@ -54,6 +54,7 @@ export async function POST(request: NextRequest) {
     const userSession = await prisma.userSession.upsert({
       where: { sessionId },
       create: {
+        id: `us_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
         sessionId,
         userId: userId || null,
         startTime: new Date(),
