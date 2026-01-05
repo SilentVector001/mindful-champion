@@ -13,6 +13,7 @@ export const authOptions: NextAuthOptions = {
   // Allow email account linking to prevent OAuthAccountNotLinked errors
   // This is safe because we're only using CredentialsProvider currently
   allowDangerousEmailAccountLinking: true,
+  trustHost: true, // Required for custom domains in production
   providers: [
     CredentialsProvider({
       name: "credentials",

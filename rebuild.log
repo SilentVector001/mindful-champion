@@ -1,0 +1,460 @@
+
+> build
+> next build
+
+Attention: Next.js now collects completely anonymous telemetry regarding usage.
+This information is used to shape Next.js' roadmap and prioritize features.
+You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+https://nextjs.org/telemetry
+
+  ▲ Next.js 14.2.28
+  - Environments: .env
+  - Experiments (use with caution):
+    · outputFileTracingRoot
+
+   Creating an optimized production build ...
+<w> [webpack.cache.PackFileCacheStrategy] Serializing big strings (240kiB) impacts deserialization performance (consider using Buffer instead and decode when needed)
+ ⚠ Compiled with warnings
+
+./node_modules/.prisma/client/runtime/wasm-engine-edge.js
+A Node.js API is used (setImmediate at line: 15) which is not supported in the Edge Runtime.
+Learn more: https://nextjs.org/docs/api-reference/edge-runtime
+
+Import trace for requested module:
+./node_modules/.prisma/client/runtime/wasm-engine-edge.js
+./node_modules/.prisma/client/wasm.js
+./node_modules/.prisma/client/default.js
+./node_modules/@prisma/client/default.js
+
+   Skipping linting
+   Checking validity of types ...
+   Collecting page data ...
+✅ Email server is ready to send messages
+✅ Email server is ready to send messages
+   Generating static pages (0/137) ...
+Get SMS stats error: n [Error]: Dynamic server usage: Route /api/admin/sms/stats couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/admin/sms/stats/route.js:1:1305)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/admin/sms/stats couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Failed to fetch applications: n [Error]: Dynamic server usage: Route /api/admin/sponsors/applications couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/admin/sponsors/applications/route.js:1:1309)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/admin/sponsors/applications couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching community stats: n [Error]: Dynamic server usage: Route /api/community/stats couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/community/stats/route.js:1:1309)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/community/stats couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (34/137) 
+Error fetching media overview: n [Error]: Dynamic server usage: Route /api/media/overview couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at u (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/media/overview/route.js:1:1310)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/media/overview couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching podcasts: n [Error]: Dynamic server usage: Route /api/media/podcasts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at d (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/media/podcasts/route.js:1:12359)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/media/podcasts couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching podcast episodes: B [Error]: Dynamic server usage: Route /api/podcasts/episodes couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at V (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:21778)
+    at Object.get (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:29465)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/podcasts/episodes/route.js:1:1304)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:122:103 {
+  description: "Route /api/podcasts/episodes couldn't be rendered statically because it used `request.url`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+✅ Email server is ready to send messages
+Error fetching subscription: n [Error]: Dynamic server usage: Route /api/user/subscription couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/user/subscription/route.js:1:1308)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/user/subscription couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+[TRIAL_STATUS_ERROR] n [Error]: Dynamic server usage: Route /api/user/trial-status couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/user/trial-status/route.js:1:1304)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/user/trial-status couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (68/137) 
+Error fetching videos: n [Error]: Dynamic server usage: Route /api/video-library/videos couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/video-library/videos/route.js:1:1308)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/video-library/videos couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching health insights: n [Error]: Dynamic server usage: Route /api/wearables/insights couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/wearables/insights/route.js:1:1306)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/wearables/insights couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+Error fetching wearable data: n [Error]: Dynamic server usage: Route /api/wearables/data couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/9276.js:1:37220)
+    at c (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/1615.js:1:1441)
+    at s (/home/ubuntu/mindful_champion/nextjs_space/.build/server/chunks/724.js:25:19236)
+    at l (/home/ubuntu/mindful_champion/nextjs_space/.build/server/app/api/wearables/data/route.js:1:1306)
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/next-server/app-route.runtime.prod.js:6:38417
+    at /home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/server/lib/trace/tracer.js:140:36
+    at NoopContextManager.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/home/ubuntu/mindful_champion/nextjs_space/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854) {
+  description: "Route /api/wearables/data couldn't be rendered statically because it used `headers`. See more info here: https://nextjs.org/docs/messages/dynamic-server-error",
+  digest: 'DYNAMIC_SERVER_USAGE'
+}
+   Generating static pages (102/137) 
+ ✓ Generating static pages (137/137)
+   Finalizing page optimization ...
+   Collecting build traces ...
+
+Route (app)                                        Size     First Load JS
+┌ ƒ /                                              19.8 kB         204 kB
+├ ○ /_not-found                                    880 B          88.3 kB
+├ ƒ /admin                                         24.6 kB         310 kB
+├ ○ /admin/email-notifications                     4.55 kB          92 kB
+├ ƒ /admin/users/[userId]                          8.15 kB         118 kB
+├ ƒ /admin/video-analytics                         8.94 kB         143 kB
+├ ƒ /api/achievements                              0 B                0 B
+├ ƒ /api/achievements/check                        0 B                0 B
+├ ƒ /api/achievements/leaderboard                  0 B                0 B
+├ ƒ /api/achievements/notification                 0 B                0 B
+├ ƒ /api/achievements/user                         0 B                0 B
+├ ƒ /api/admin/analytics/overview                  0 B                0 B
+├ ƒ /api/admin/coach                               0 B                0 B
+├ ƒ /api/admin/conversations                       0 B                0 B
+├ ƒ /api/admin/conversations/[conversationId]      0 B                0 B
+├ ƒ /api/admin/email-notifications                 0 B                0 B
+├ ƒ /api/admin/email-notifications/resend          0 B                0 B
+├ ƒ /api/admin/email-notifications/settings        0 B                0 B
+├ ƒ /api/admin/email-notifications/stats           0 B                0 B
+├ ƒ /api/admin/goals                               0 B                0 B
+├ ƒ /api/admin/matches                             0 B                0 B
+├ ƒ /api/admin/messages/flag                       0 B                0 B
+├ ƒ /api/admin/moderation                          0 B                0 B
+├ ƒ /api/admin/partners                            0 B                0 B
+├ ƒ /api/admin/security                            0 B                0 B
+├ ƒ /api/admin/security/account                    0 B                0 B
+├ ƒ /api/admin/security/unblock-ip                 0 B                0 B
+├ ƒ /api/admin/sms/send-password-reset             0 B                0 B
+├ ƒ /api/admin/sms/sms-logs                        0 B                0 B
+├ ƒ /api/admin/sms/stats                           0 B                0 B
+├ ƒ /api/admin/sms/verify-user-phone               0 B                0 B
+├ ƒ /api/admin/sponsors/applications               0 B                0 B
+├ ƒ /api/admin/sponsors/applications/[id]/approve  0 B                0 B
+├ ƒ /api/admin/subscriptions/manage                0 B                0 B
+├ ƒ /api/admin/tickets                             0 B                0 B
+├ ƒ /api/admin/tickets/[ticketId]                  0 B                0 B
+├ ƒ /api/admin/tickets/[ticketId]/responses        0 B                0 B
+├ ƒ /api/admin/training                            0 B                0 B
+├ ƒ /api/admin/users                               0 B                0 B
+├ ƒ /api/admin/users/[userId]                      0 B                0 B
+├ ƒ /api/admin/users/[userId]/kai-conversations    0 B                0 B
+├ ƒ /api/admin/users/[userId]/notes                0 B                0 B
+├ ƒ /api/admin/users/[userId]/subscription         0 B                0 B
+├ ƒ /api/admin/users/[userId]/warnings             0 B                0 B
+├ ƒ /api/admin/users/activity-tracking             0 B                0 B
+├ ƒ /api/admin/users/analytics                     0 B                0 B
+├ ƒ /api/admin/users/bulk                          0 B                0 B
+├ ƒ /api/admin/users/detail                        0 B                0 B
+├ ƒ /api/admin/users/list                          0 B                0 B
+├ ƒ /api/admin/users/login-history                 0 B                0 B
+├ ƒ /api/admin/users/manage                        0 B                0 B
+├ ƒ /api/admin/users/update                        0 B                0 B
+├ ƒ /api/admin/video-analytics                     0 B                0 B
+├ ƒ /api/admin/videos                              0 B                0 B
+├ ƒ /api/ai-coach                                  0 B                0 B
+├ ƒ /api/ai-coach/chat                             0 B                0 B
+├ ƒ /api/ai-coach/conversation-history             0 B                0 B
+├ ƒ /api/ai-coach/daily-coaching                   0 B                0 B
+├ ƒ /api/ai-coach/insights                         0 B                0 B
+├ ƒ /api/ai-coach/recommendations                  0 B                0 B
+├ ƒ /api/analyze-video                             0 B                0 B
+├ ƒ /api/auth/[...nextauth]                        0 B                0 B
+├ ƒ /api/auth/2fa/disable                          0 B                0 B
+├ ƒ /api/auth/2fa/enable                           0 B                0 B
+├ ƒ /api/auth/2fa/send-code                        0 B                0 B
+├ ƒ /api/auth/2fa/verify                           0 B                0 B
+├ ƒ /api/auth/2fa/verify-and-enable                0 B                0 B
+├ ƒ /api/auth/complete-reset                       0 B                0 B
+├ ƒ /api/auth/force-complete-onboarding            0 B                0 B
+├ ƒ /api/auth/forgot-password                      0 B                0 B
+├ ƒ /api/auth/refresh                              0 B                0 B
+├ ƒ /api/auth/request-reset                        0 B                0 B
+├ ƒ /api/auth/reset-password                       0 B                0 B
+├ ƒ /api/auth/signin-with-tracking                 0 B                0 B
+├ ƒ /api/auth/skip-onboarding                      0 B                0 B
+├ ƒ /api/auth/sms/request-password-reset           0 B                0 B
+├ ƒ /api/auth/sms/send-phone-verification          0 B                0 B
+├ ƒ /api/auth/sms/verify-and-reset                 0 B                0 B
+├ ƒ /api/auth/sms/verify-phone                     0 B                0 B
+├ ƒ /api/auth/verify-reset-token                   0 B                0 B
+├ ƒ /api/avatar                                    0 B                0 B
+├ ƒ /api/avatar/download                           0 B                0 B
+├ ƒ /api/avatar/upload                             0 B                0 B
+├ ƒ /api/billing/create-checkout                   0 B                0 B
+├ ƒ /api/bookings                                  0 B                0 B
+├ ƒ /api/chat/coach                                0 B                0 B
+├ ƒ /api/community/posts                           0 B                0 B
+├ ƒ /api/community/posts/[postId]                  0 B                0 B
+├ ƒ /api/community/posts/[postId]/comments         0 B                0 B
+├ ƒ /api/community/posts/[postId]/like             0 B                0 B
+├ ƒ /api/community/stats                           0 B                0 B
+├ ƒ /api/debug/user-status                         0 B                0 B
+├ ƒ /api/dupr/connect                              0 B                0 B
+├ ƒ /api/dupr/disconnect                           0 B                0 B
+├ ƒ /api/dupr/sync                                 0 B                0 B
+├ ƒ /api/dupr/sync-matches                         0 B                0 B
+├ ƒ /api/goals                                     0 B                0 B
+├ ƒ /api/goals/[goalId]                            0 B                0 B
+├ ƒ /api/matches                                   0 B                0 B
+├ ƒ /api/media-center/bookmarks                    0 B                0 B
+├ ƒ /api/media-center/events                       0 B                0 B
+├ ƒ /api/media-center/live-scores                  0 B                0 B
+├ ƒ /api/media-center/live-streams                 0 B                0 B
+├ ƒ /api/media-center/podcasts                     0 B                0 B
+├ ƒ /api/media-center/recommendations              0 B                0 B
+├ ƒ /api/media-center/sync                         0 B                0 B
+├ ƒ /api/media-center/training-library             0 B                0 B
+├ ƒ /api/media-center/trial                        0 B                0 B
+├ ƒ /api/media-center/watch-history                0 B                0 B
+├ ƒ /api/media/events                              0 B                0 B
+├ ƒ /api/media/overview                            0 B                0 B
+├ ƒ /api/media/podcasts                            0 B                0 B
+├ ƒ /api/media/streaming                           0 B                0 B
+├ ƒ /api/mental-sessions                           0 B                0 B
+├ ƒ /api/milestones/[milestoneId]                  0 B                0 B
+├ ƒ /api/news/feed                                 0 B                0 B
+├ ƒ /api/onboarding                                0 B                0 B
+├ ƒ /api/onboarding/goals                          0 B                0 B
+├ ƒ /api/partners/booking/create                   0 B                0 B
+├ ƒ /api/partners/booking/list                     0 B                0 B
+├ ƒ /api/partners/find                             0 B                0 B
+├ ƒ /api/partners/request                          0 B                0 B
+├ ƒ /api/partners/requests                         0 B                0 B
+├ ƒ /api/partners/requests/[id]                    0 B                0 B
+├ ƒ /api/podcasts/episodes                         0 B                0 B
+├ ƒ /api/podcasts/progress                         0 B                0 B
+├ ○ /api/podcasts/shows                            0 B                0 B
+├ ƒ /api/rewards/my-redemptions                    0 B                0 B
+├ ƒ /api/rewards/products                          0 B                0 B
+├ ƒ /api/rewards/redeem                            0 B                0 B
+├ ƒ /api/rewards/user-stats                        0 B                0 B
+├ ƒ /api/signup                                    0 B                0 B
+├ ƒ /api/skills                                    0 B                0 B
+├ ƒ /api/sponsors/apply                            0 B                0 B
+├ ƒ /api/sponsors/billing-portal                   0 B                0 B
+├ ƒ /api/sponsors/create-checkout                  0 B                0 B
+├ ƒ /api/sponsors/webhook                          0 B                0 B
+├ ƒ /api/stripe/create-checkout-session            0 B                0 B
+├ ƒ /api/stripe/create-portal-session              0 B                0 B
+├ ƒ /api/stripe/webhooks                           0 B                0 B
+├ ƒ /api/support/tickets                           0 B                0 B
+├ ƒ /api/support/tickets/[ticketId]                0 B                0 B
+├ ƒ /api/support/tickets/[ticketId]/responses      0 B                0 B
+├ ƒ /api/tournaments                               0 B                0 B
+├ ƒ /api/tournaments/[id]                          0 B                0 B
+├ ƒ /api/tournaments/live-scores                   0 B                0 B
+├ ƒ /api/tournaments/register                      0 B                0 B
+├ ƒ /api/tracking/batch                            0 B                0 B
+├ ƒ /api/tracking/drill-completion                 0 B                0 B
+├ ƒ /api/tracking/navigation                       0 B                0 B
+├ ƒ /api/tracking/page-view                        0 B                0 B
+├ ƒ /api/tracking/session                          0 B                0 B
+├ ƒ /api/tracking/training-session                 0 B                0 B
+├ ƒ /api/tracking/video-interaction                0 B                0 B
+├ ƒ /api/training/check-reminders                  0 B                0 B
+├ ƒ /api/training/download-video                   0 B                0 B
+├ ƒ /api/training/generate-program                 0 B                0 B
+├ ƒ /api/training/goals                            0 B                0 B
+├ ƒ /api/training/mark-day-complete                0 B                0 B
+├ ƒ /api/training/practice-log                     0 B                0 B
+├ ƒ /api/training/program/[programId]              0 B                0 B
+├ ƒ /api/training/programs                         0 B                0 B
+├ ƒ /api/training/programs/custom                  0 B                0 B
+├ ƒ /api/training/programs/enroll                  0 B                0 B
+├ ƒ /api/training/stages/complete                  0 B                0 B
+├ ƒ /api/training/start-program                    0 B                0 B
+├ ƒ /api/training/video-progress                   0 B                0 B
+├ ƒ /api/training/videos                           0 B                0 B
+├ ƒ /api/training/videos/progress                  0 B                0 B
+├ ƒ /api/user/subscription                         0 B                0 B
+├ ƒ /api/user/trial-status                         0 B                0 B
+├ ƒ /api/user/update                               0 B                0 B
+├ ƒ /api/user/voice-preferences                    0 B                0 B
+├ ƒ /api/user/warnings                             0 B                0 B
+├ ƒ /api/user/warnings/[warningId]                 0 B                0 B
+├ ƒ /api/video-analysis/[videoId]                  0 B                0 B
+├ ƒ /api/video-analysis/analyze                    0 B                0 B
+├ ƒ /api/video-analysis/analyze-enhanced           0 B                0 B
+├ ƒ /api/video-analysis/library                    0 B                0 B
+├ ƒ /api/video-analysis/stats                      0 B                0 B
+├ ƒ /api/video-analysis/upload                     0 B                0 B
+├ ƒ /api/video-library/bookmarks                   0 B                0 B
+├ ƒ /api/video-library/playlists                   0 B                0 B
+├ ƒ /api/video-library/playlists/add-video         0 B                0 B
+├ ƒ /api/video-library/ratings                     0 B                0 B
+├ ƒ /api/video-library/videos                      0 B                0 B
+├ ƒ /api/wearables/connect                         0 B                0 B
+├ ƒ /api/wearables/data                            0 B                0 B
+├ ƒ /api/wearables/demo-connect                    0 B                0 B
+├ ƒ /api/wearables/disconnect                      0 B                0 B
+├ ƒ /api/wearables/insights                        0 B                0 B
+├ ƒ /api/wearables/sync                            0 B                0 B
+├ ○ /auth/complete-reset                           4.79 kB          99 kB
+├ ○ /auth/forgot-password                          2.16 kB        98.3 kB
+├ ○ /auth/request-reset                            4.54 kB         107 kB
+├ ○ /auth/reset-password                           2.73 kB        98.9 kB
+├ ƒ /auth/signin                                   8.4 kB          157 kB
+├ ƒ /auth/signup                                   6.77 kB         183 kB
+├ ƒ /avatar-studio                                 205 B           154 kB
+├ ƒ /coaches                                       20.3 kB         233 kB
+├ ƒ /connect                                       10.1 kB         208 kB
+├ ƒ /connect/community                             6.45 kB         221 kB
+├ ƒ /connect/community/[postId]                    3.49 kB         212 kB
+├ ƒ /connect/matches                               6.83 kB         201 kB
+├ ƒ /connect/my-requests                           5.59 kB         212 kB
+├ ƒ /connect/partners                              5.5 kB          212 kB
+├ ƒ /connect/tournaments                           14 kB           164 kB
+├ ƒ /dashboard                                     7.1 kB          198 kB
+├ ƒ /debug/onboarding-status                       180 B          96.4 kB
+├ ƒ /debug/status                                  159 B          87.6 kB
+├ ○ /help                                          7.61 kB         198 kB
+├ ƒ /help/submit-ticket                            4.12 kB         169 kB
+├ ƒ /help/tickets                                  2.21 kB         156 kB
+├ ○ /help/training-tips                            6.18 kB         197 kB
+├ ○ /help/tutorials                                4.73 kB         195 kB
+├ ○ /help/user-guide                               4.22 kB         195 kB
+├ ƒ /help/video-analysis                           1.41 kB         104 kB
+├ ○ /library                                       159 B          87.6 kB
+├ ƒ /media                                         6.64 kB         146 kB
+├ ƒ /media-center                                  18.4 kB         198 kB
+├ ƒ /media/events                                  6.99 kB         165 kB
+├ ƒ /media/podcasts                                5.93 kB         164 kB
+├ ƒ /media/streaming                               10 kB           168 kB
+├ ƒ /onboarding                                    15 kB           150 kB
+├ ○ /partners/become-sponsor                       12.5 kB         170 kB
+├ ƒ /pricing                                       6.48 kB         197 kB
+├ ƒ /profile                                       223 B           154 kB
+├ ƒ /progress                                      12.8 kB         310 kB
+├ ○ /progress/achievements                         3.48 kB         194 kB
+├ ƒ /progress/goals                                10.5 kB         221 kB
+├ ƒ /progress/matches                              159 B          87.6 kB
+├ ○ /rewards                                       6.96 kB         180 kB
+├ ○ /rewards/my-redemptions                        2.85 kB         107 kB
+├ ƒ /settings                                      13.1 kB         214 kB
+├ ƒ /settings/avatar                               11.6 kB         155 kB
+├ ƒ /settings/devices                              7.92 kB         106 kB
+├ ○ /sponsor-welcome                               5.18 kB         136 kB
+├ ○ /test-ptt                                      6.78 kB         143 kB
+├ ƒ /train                                         1.2 kB          208 kB
+├ ƒ /train/analysis-library                        6.49 kB         152 kB
+├ ƒ /train/coach                                   53.6 kB         271 kB
+├ ƒ /train/custom-program/[id]                     7.14 kB         142 kB
+├ ƒ /train/drills                                  10.9 kB         134 kB
+├ ƒ /train/library                                 4.65 kB         135 kB
+├ ○ /train/plans                                   159 B          87.6 kB
+├ ƒ /train/program/[id]                            6.88 kB         222 kB
+├ ○ /train/programs                                159 B          87.6 kB
+├ ƒ /train/progress                                564 B           215 kB
+├ ƒ /train/quick                                   7.04 kB         216 kB
+├ ƒ /train/video                                   27.4 kB         181 kB
+├ ƒ /train/video/[videoId]                         4.6 kB          202 kB
+└ ○ /upgrade                                       4.75 kB         102 kB
++ First Load JS shared by all                      87.5 kB
+  ├ chunks/2117-ec17ffb53022385c.js                31.8 kB
+  ├ chunks/fd9d1056-4c7c47cd4dd0ca36.js            53.6 kB
+  └ other shared chunks (total)                    2.02 kB
+
+
+ƒ Middleware                                       127 kB
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

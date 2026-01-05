@@ -1,0 +1,18 @@
+➤ YN0000: · Yarn 4.10.3
+➤ YN0000: ┌ Resolution step
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Post-resolution validation
+➤ YN0060: │ date-fns is listed by your project with version 4.1.0 (pf625bd), which doesn't satisfy what react-day-picker requests (^2.28.0 || ^3.0.0).
+➤ YN0060: │ nodemailer is listed by your project with version 7.0.10 (p4594f3), which doesn't satisfy what next-auth requests (^6.6.5).
+➤ YN0002: │ app@workspace:. doesn't provide @tensorflow/tfjs-backend-wasm (pe5d45a), requested by @tensorflow-models/pose-detection.
+➤ YN0002: │ app@workspace:. doesn't provide @tensorflow/tfjs-backend-webgl (p27e209), requested by @tensorflow-models/pose-detection.
+➤ YN0002: │ app@workspace:. doesn't provide @tensorflow/tfjs-backend-webgpu (p635ee5), requested by @tensorflow-models/pose-detection.
+➤ YN0002: │ app@workspace:. doesn't provide @tensorflow/tfjs-converter (p56e30d), requested by @tensorflow-models/pose-detection.
+➤ YN0002: │ app@workspace:. doesn't provide @tensorflow/tfjs-core (p3ae542), requested by @tensorflow-models/pose-detection.
+➤ YN0002: │ app@workspace:. doesn't provide prettier (pd88b5f), requested by eslint-plugin-prettier.
+➤ YN0086: │ Some peer dependencies are incorrectly met by your project; run yarn explain peer-requirements <hash> for details, where <hash> is the six-letter p-prefixed code.
+➤ YN0086: │ Some peer dependencies are incorrectly met by dependencies; run yarn explain peer-requirements for details.
+➤ YN0000: └ Completed
+➤ YN0000: ┌ Fetch step
+➤ YN0000: └ Completed in 1s 986ms
+➤ YN0000: ┌ Link step
