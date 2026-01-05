@@ -2317,7 +2317,7 @@ model UserProgram {
   completedAt          DateTime?
   createdAt            DateTime        @default(now())
   updatedAt            DateTime
-  completedDays        DateTime[]      @default([])
+  completedDays        DateTime[]      @default(dbgenerated("(ARRAY[]::timestamp without time zone[])::timestamp(3) without time zone[]"))
   lastTrainedAt        DateTime?
   TrainingProgram      TrainingProgram @relation(fields: [programId], references: [id], onDelete: Cascade)
   User                 User            @relation(fields: [userId], references: [id], onDelete: Cascade)
