@@ -7,6 +7,7 @@ import { prisma } from '@/lib/db';
 export const dynamic = 'force-dynamic';
 import nodemailer from 'nodemailer';
 import bcrypt from 'bcryptjs';
+import { createId } from '@paralleldrive/cuid2';
 
 const webhookSecret = process.env.STRIPE_SPONSOR_WEBHOOK_SECRET!;
 
@@ -112,10 +113,12 @@ async function handleCheckoutCompleted(session: any) {
 
     user = await prisma.user.create({
       data: {
+        id: createId(), // Required field
         email: application.email,
         name: application.contactPerson,
         password: hashedPassword,
         role: 'SPONSOR',
+        updatedAt: new Date(), // Required field
         sponsorProfile: {
           create: {
             companyName: application.companyName,

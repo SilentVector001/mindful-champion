@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/db';
 import bcrypt from 'bcryptjs';
+import { createId } from '@paralleldrive/cuid2';
 
 // This endpoint creates the admin user if it doesn't exist
 // Protected by ADMIN_SECRET environment variable
@@ -39,6 +40,7 @@ export async function POST(request: NextRequest) {
     
     const adminUser = await prisma.user.create({
       data: {
+        id: createId(), // Required field
         email: 'admin@mindfulchampion.com',
         password: hashedPassword,
         firstName: 'Admin',
@@ -52,6 +54,7 @@ export async function POST(request: NextRequest) {
         skillLevel: "5.0" as any,
         playerRating: 'ADVANCED',
         emailVerified: new Date(),
+        updatedAt: new Date(), // Required field
       }
     });
 

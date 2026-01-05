@@ -6,6 +6,7 @@ import { authOptions } from '@/lib/auth';
 import { createSponsorCheckoutSession } from '@/lib/sponsor-stripe';
 import { sendSponsorApprovalEmail } from '@/lib/email/sponsor-approval-email';
 import bcrypt from 'bcryptjs';
+import { createId } from '@paralleldrive/cuid2';
 
 // Force dynamic rendering (no static optimization at build time)
 export const dynamic = 'force-dynamic';
@@ -89,11 +90,13 @@ export async function POST(
 
       existingUser = await prisma.user.create({
         data: {
+          id: createId(), // Required field
           email: application.email,
           name: application.contactPerson,
           password: hashedPassword,
           role: 'SPONSOR',
           emailVerified: new Date(), // Auto-verify sponsor accounts
+          updatedAt: new Date(), // Required field
         },
       });
 

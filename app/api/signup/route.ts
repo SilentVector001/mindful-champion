@@ -5,6 +5,7 @@
 
 import { NextRequest, NextResponse } from "next/server"
 import bcrypt from "bcryptjs"
+import { createId } from "@paralleldrive/cuid2"
 import { prisma } from "@/lib/db"
 import { MediaCenterEmailService } from "@/lib/media-center/email-service"
 import { SubscriptionTier, PromoCodeStatus } from "@prisma/client"
@@ -45,6 +46,7 @@ export async function POST(req: NextRequest) {
     // Create user - default to TRIAL tier if no promo code
     const user = await prisma.user.create({
       data: {
+        id: createId(), // CRITICAL FIX: Required field without default
         email,
         password: hashedPassword,
         firstName,
@@ -57,6 +59,7 @@ export async function POST(req: NextRequest) {
         trialEndDate,
         isTrialActive: true,
         lastActiveDate: new Date(),
+        updatedAt: new Date(), // CRITICAL FIX: Required field without default
       }
     })
 
@@ -199,9 +202,21 @@ export async function POST(req: NextRequest) {
     })
 
   } catch (error) {
-    console.error("Signup error:", error)
+    console.error("======= SIGNUP ERROR =======")
+    console.error("Error type:", error?.constructor?.name)
+    console.error("Error message:", error instanceof Error ? error.message : String(error))
+    console.error("Error stack:", error instanceof Error ? error.stack : 'No stack trace')
+    console.error("Full error object:", JSON.stringify(error, Object.getOwnPropertyNames(error), 2))
+    console.error("============================")
+    
+    // Return more detailed error for debugging (remove in production)
     return NextResponse.json(
-      { error: "Internal server error" },
+      { 
+        error: "Internal server error",
+        details: process.env.NODE_ENV === 'development' 
+          ? error instanceof Error ? error.message : String(error)
+          : undefined
+      },
       { status: 500 }
     )
   }

@@ -5,6 +5,7 @@ import { prisma } from '@/lib/db';
 import { SponsorApplicationStatus, SponsorTier } from '@/lib/prisma-types';
 import { sendSponsorApprovalEmail } from '@/lib/email/sponsor-approval-email';
 import { sendSponsorRejectionEmail } from '@/lib/email/sponsor-rejection-email';
+import { createId } from '@paralleldrive/cuid2';
 
 // Approve/reject application
 export async function PATCH(
@@ -62,6 +63,7 @@ export async function PATCH(
 
         user = await prisma.user.create({
           data: {
+            id: createId(), // Required field
             email: application.email,
             password: hashedPassword,
             name: application.contactPerson,
@@ -69,6 +71,7 @@ export async function PATCH(
             lastName: application.contactPerson.split(' ').slice(1).join(' '),
             role: 'USER',
             onboardingCompleted: true,
+            updatedAt: new Date(), // Required field
           }
         });
         isNewUser = true;
