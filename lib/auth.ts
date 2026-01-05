@@ -23,6 +23,9 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         console.log('[AUTH] ====== AUTHORIZE START ======');
         console.log('[AUTH] Timestamp:', new Date().toISOString());
+        console.log('[AUTH] DATABASE_URL exists:', !!process.env.DATABASE_URL);
+        console.log('[AUTH] DATABASE_URL prefix:', process.env.DATABASE_URL?.substring(0, 30) + '...');
+        console.log('[AUTH] NEXTAUTH_SECRET exists:', !!process.env.NEXTAUTH_SECRET);
         console.log('[AUTH] Email received:', credentials?.email);
         
         try {
@@ -59,6 +62,8 @@ export const authOptions: NextAuthOptions = {
 
           console.log('[AUTH] User found:', !!user);
           console.log('[AUTH] User ID:', user?.id || 'N/A');
+          console.log('[AUTH] User has password hash:', !!user?.password);
+          console.log('[AUTH] Password hash length:', user?.password?.length || 0);
           
           if (!user) {
             console.log('[AUTH] FAIL: No user found with email:', credentials.email);
@@ -71,6 +76,8 @@ export const authOptions: NextAuthOptions = {
           }
 
           console.log('[AUTH] Step 2: Validating password with bcrypt...');
+          console.log('[AUTH] Provided password length:', credentials.password.length);
+          console.log('[AUTH] Hash starts with $2:', user.password.startsWith('$2'));
           
           const isPasswordValid = await bcrypt.compare(
             credentials.password,
@@ -78,6 +85,7 @@ export const authOptions: NextAuthOptions = {
           );
 
           console.log('[AUTH] Password validation result:', isPasswordValid);
+          console.log('[AUTH] bcrypt.compare completed without error');
           
           if (!isPasswordValid) {
             console.log('[AUTH] FAIL: Invalid password');
