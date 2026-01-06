@@ -1258,6 +1258,130 @@ export default function SimpleLandingPage() {
         </div>
       </section>
 
+      {/* BEFORE/AFTER TRANSFORMATION */}
+      <section className="py-20 bg-gradient-to-b from-slate-900 via-slate-950 to-slate-900 relative overflow-hidden">
+        {/* Background glow effects */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-0 w-96 h-96 bg-red-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-1/4 right-0 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl" />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <div className="inline-flex items-center gap-2 bg-gradient-to-r from-red-500/20 to-emerald-500/20 border border-white/20 px-4 py-2 rounded-full mb-4">
+              <Zap className="w-4 h-4 text-yellow-400" />
+              <span className="text-white text-sm font-semibold">VISIBLE IMPROVEMENT</span>
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
+              See the <span className="bg-gradient-to-r from-red-400 via-yellow-400 to-emerald-400 bg-clip-text text-transparent">Transformation</span>
+            </h2>
+            <p className="text-gray-400 text-lg max-w-2xl mx-auto">
+              Our AI analysis identifies technique issues and guides you to proper form. Watch how players improve their stance, grip, and overall performance.
+            </p>
+          </motion.div>
+
+          {/* Before/After Comparison */}
+          <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
+            {/* Before */}
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-red-500 to-orange-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative bg-slate-800/90 border border-red-500/30 rounded-2xl overflow-hidden">
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-red-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                    BEFORE
+                  </span>
+                </div>
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src="https://cdn.abacus.ai/images/2852a913-6784-41b2-9abf-85a2d94c8d18.png"
+                    alt="Player demonstrating common technique mistakes - poor posture and incorrect paddle position"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent">
+                  <h3 className="text-red-400 font-bold mb-2 flex items-center gap-2">
+                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />
+                    Common Issues Detected
+                  </h3>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li>• Poor posture and bent back</li>
+                    <li>• Incorrect paddle grip angle</li>
+                    <li>• Unbalanced stance</li>
+                    <li>• Tension in shoulders</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* After */}
+            <motion.div
+              initial={{ opacity: 0, x: 30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="relative group"
+            >
+              <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-cyan-500 rounded-2xl blur opacity-30 group-hover:opacity-50 transition-opacity" />
+              <div className="relative bg-slate-800/90 border border-emerald-500/30 rounded-2xl overflow-hidden">
+                <div className="absolute top-4 left-4 z-10">
+                  <span className="bg-emerald-500 text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
+                    AFTER
+                  </span>
+                </div>
+                <div className="relative aspect-[4/3]">
+                  <Image
+                    src="https://cdn.abacus.ai/images/567b4691-30cb-4ef6-94b9-3af2089849cf.png"
+                    alt="Player demonstrating excellent technique - proper athletic stance and correct paddle position"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <div className="p-4 bg-gradient-to-t from-slate-900 via-slate-900/90 to-transparent">
+                  <h3 className="text-emerald-400 font-bold mb-2 flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4" />
+                    Technique Corrected
+                  </h3>
+                  <ul className="text-gray-400 text-sm space-y-1">
+                    <li>✓ Athletic stance with proper balance</li>
+                    <li>✓ Correct continental paddle grip</li>
+                    <li>✓ Weight on balls of feet</li>
+                    <li>✓ Relaxed, ready position</li>
+                  </ul>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+
+          {/* CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.4 }}
+            className="text-center mt-10"
+          >
+            <Link href="/auth/signup">
+              <Button className="bg-gradient-to-r from-emerald-500 to-cyan-500 hover:from-emerald-600 hover:to-cyan-600 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-xl shadow-emerald-500/30 hover:shadow-emerald-500/50 hover:scale-105 transition-all">
+                Start Your Transformation
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </motion.div>
+        </div>
+      </section>
+
       {/* TESTIMONIALS */}
       <section className="py-16 bg-gradient-to-b from-slate-900 to-slate-950">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
