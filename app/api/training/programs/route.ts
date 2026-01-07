@@ -18,12 +18,12 @@ export async function GET() {
     const programs = await prisma.trainingProgram.findMany({
       where: { isActive: true },
       include: {
-        programVideos: {
+        ProgramVideo: {
           include: {
             video: true
           }
         },
-        userPrograms: {
+        UserProgram: {
           where: {
             userId: session.user.id
           }
@@ -37,7 +37,7 @@ export async function GET() {
 
     // Format programs with enrollment status and progress
     const formattedPrograms = programs.map(program => {
-      const userProgram = program.userPrograms[0]
+      const userProgram = program.UserProgram[0]
       
       return {
         id: program.id,
@@ -49,7 +49,7 @@ export async function GET() {
         skillLevel: program.skillLevel,
         estimatedTimePerDay: program.estimatedTimePerDay || '30-45 minutes',
         keyOutcomes: Array.isArray(program.keyOutcomes) ? program.keyOutcomes : [],
-        videosCount: program.programVideos.length,
+        videosCount: program.ProgramVideo.length,
         isEnrolled: !!userProgram,
         progress: userProgram?.completionPercentage || 0
       }

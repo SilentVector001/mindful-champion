@@ -17,14 +17,20 @@ export async function GET(req: NextRequest) {
     const goals = await prisma.goal.findMany({
       where: { userId: session.user.id },
       include: {
-        milestones: {
+        Milestone: {
           orderBy: { order: 'asc' }
         }
       },
       orderBy: { createdAt: 'desc' }
     })
+    
+    // Transform to expected format
+    const formattedGoals = goals.map(g => ({
+      ...g,
+      milestones: g.Milestone
+    }))
 
-    return NextResponse.json(goals)
+    return NextResponse.json(formattedGoals)
   } catch (error) {
     console.error("Error fetching goals:", error)
     return NextResponse.json({ error: "Failed to fetch goals" }, { status: 500 })
@@ -49,7 +55,7 @@ export async function POST(req: NextRequest) {
         description,
         category,
         targetDate: targetDate ? new Date(targetDate) : null,
-        milestones: {
+        Milestone: {
           create: milestones?.map((m: any, index: number) => ({
             title: m.title,
             description: m.description,
@@ -60,9 +66,15 @@ export async function POST(req: NextRequest) {
         }
       },
       include: {
-        milestones: true
+        Milestone: true
       }
     })
+    
+    // Transform to expected format
+    const formattedGoal = {
+      ...goal,
+      milestones: goal.Milestone
+    }
 
     // Send immediate goal confirmation email
     const confirmationResult = await sendGoalConfirmation(session.user.id, {
@@ -104,7 +116,7 @@ export async function POST(req: NextRequest) {
       percentage: 0
     }).catch(err => console.error('Failed to log goal activity:', err))
 
-    return NextResponse.json(goal)
+    return NextResponse.json(formattedGoal)
   } catch (error) {
     console.error("Error creating goal:", error)
     return NextResponse.json({ error: "Failed to create goal" }, { status: 500 })

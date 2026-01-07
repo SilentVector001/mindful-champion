@@ -22,7 +22,7 @@ export async function GET(
         userId: session.user.id 
       },
       include: {
-        milestones: {
+        Milestone: {
           orderBy: { order: 'asc' }
         }
       }
@@ -32,7 +32,7 @@ export async function GET(
       return NextResponse.json({ error: "Goal not found" }, { status: 404 })
     }
 
-    return NextResponse.json(goal)
+    return NextResponse.json({ ...goal, milestones: goal.Milestone })
   } catch (error) {
     console.error("Error fetching goal:", error)
     return NextResponse.json({ error: "Failed to fetch goal" }, { status: 500 })
@@ -69,11 +69,11 @@ export async function PUT(
         completedAt: status === 'COMPLETED' ? new Date() : null
       },
       include: {
-        milestones: true
+        Milestone: true
       }
     })
 
-    return NextResponse.json(goal)
+    return NextResponse.json({ ...goal, milestones: goal.Milestone })
   } catch (error) {
     console.error("Error updating goal:", error)
     return NextResponse.json({ error: "Failed to update goal" }, { status: 500 })
