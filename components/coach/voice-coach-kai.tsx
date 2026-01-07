@@ -252,7 +252,12 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
         // Extract the message properly - ALWAYS extract from response
         let displayContent = '';
         if (typeof data === 'object' && data.message) {
-          displayContent = data.message;
+          // Check if message itself is JSON string
+          if (typeof data.message === 'string' && data.message.startsWith('{')) {
+            displayContent = extractMessage(data.message);
+          } else {
+            displayContent = data.message;
+          }
         } else if (typeof data === 'string') {
           displayContent = extractMessage(data);
         } else if (typeof data === 'object') {
@@ -260,6 +265,11 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
           displayContent = data.message || data.content || extractMessage(JSON.stringify(data));
         } else {
           displayContent = String(data);
+        }
+        
+        // Final cleanup - remove any remaining JSON artifacts
+        if (displayContent.includes('"message"') || displayContent.includes('"metadata"')) {
+          displayContent = extractMessage(displayContent);
         }
         
         const assistantMessage: Message = {
