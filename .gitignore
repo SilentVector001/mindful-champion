@@ -20,4 +20,3 @@ out
 *.tsbuildinfo
 .vercel
 .env*.local
-nextjs_space/

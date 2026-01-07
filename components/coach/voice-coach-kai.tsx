@@ -69,7 +69,17 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
       const response = await fetch('/api/tts/elevenlabs', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text, voiceId: 'pNInz6obpgDQGcFmaJgB' }) // Adam voice
+        body: JSON.stringify({ 
+          text, 
+          voiceId: 'UgBBYS2sOqTuMpoF3BR0', // Mark - Natural Conversations voice
+          modelId: 'eleven_multilingual_v2',
+          voiceSettings: {
+            stability: 0.30,
+            similarity_boost: 0.70,
+            style: 0.70,
+            use_speaker_boost: true
+          }
+        })
       });
       
       if (response.ok) {
@@ -184,21 +194,10 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
 
   // Helper function to extract message from various response formats
   const extractMessage = (content: string): string => {
-    if (!content || typeof content !== 'string') return content || '';
-    
-    // If it doesn't look like JSON at all, return as-is
-    if (!content.includes('{') && !content.includes('"message"')) {
-      return content;
-    }
-    
     // Try to parse as JSON first
     try {
       const parsed = JSON.parse(content);
       if (parsed.message) {
-        // Recursively extract if message itself is JSON
-        if (typeof parsed.message === 'string' && parsed.message.includes('{')) {
-          return extractMessage(parsed.message);
-        }
         return parsed.message;
       }
       if (parsed.content) {
@@ -211,25 +210,21 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
       // Not JSON
     }
     
-    // Try regex extraction for partial JSON - multiple patterns
-    const patterns = [
-      /"message"\s*:\s*"((?:[^"\\]|\\.)*)"/,
-      /{"message":"((?:[^"\\]|\\.)*)"/,
-      /"message"\s*:\s*"([\s\S]*?)"\s*,\s*"metadata"/
-    ];
+    // Try regex extraction for partial JSON
+    const messageMatch = content.match(/"message"\s*:\s*"([^"]+(?:\\.[^"]*)*?)"/);
+    if (messageMatch) {
+      return messageMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+    }
     
-    for (const pattern of patterns) {
-      const match = content.match(pattern);
-      if (match && match[1]) {
-        return match[1]
-          .replace(/\\"/g, '"')
-          .replace(/\\n/g, '\n')
-          .replace(/\\r/g, '')
-          .replace(/\\\\/g, '\\');
+    // If content looks like raw JSON, try to extract just the message part
+    if (content.includes('"message"') && content.includes('"metadata"')) {
+      const match = content.match(/"message"\s*:\s*"([\s\S]*?)"\s*,\s*"metadata"/);
+      if (match) {
+        return match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
       }
     }
     
-    // Return as-is if nothing works
+    // Return as-is if no JSON structure found
     return content;
   };
 
@@ -267,12 +262,7 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
         // Extract the message properly - ALWAYS extract from response
         let displayContent = '';
         if (typeof data === 'object' && data.message) {
-          // Check if message itself is JSON string
-          if (typeof data.message === 'string' && data.message.startsWith('{')) {
-            displayContent = extractMessage(data.message);
-          } else {
-            displayContent = data.message;
-          }
+          displayContent = data.message;
         } else if (typeof data === 'string') {
           displayContent = extractMessage(data);
         } else if (typeof data === 'object') {
@@ -280,11 +270,6 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
           displayContent = data.message || data.content || extractMessage(JSON.stringify(data));
         } else {
           displayContent = String(data);
-        }
-        
-        // Final cleanup - remove any remaining JSON artifacts
-        if (displayContent.includes('"message"') || displayContent.includes('"metadata"')) {
-          displayContent = extractMessage(displayContent);
         }
         
         const assistantMessage: Message = {
