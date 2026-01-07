@@ -483,7 +483,6 @@ model EmailNotification {
   id                   String                @id
   userId               String?
   videoAnalysisId      String?
-  sponsorApplicationId String?
   type                 EmailNotificationType @default(VIDEO_ANALYSIS_COMPLETE)
   recipientEmail       String
   recipientName        String?
@@ -503,6 +502,7 @@ model EmailNotification {
   lastRetryAt          DateTime?
   createdAt            DateTime              @default(now())
   updatedAt            DateTime
+  sponsorApplicationId String?
   SponsorApplication   SponsorApplication?   @relation(fields: [sponsorApplicationId], references: [id], onDelete: Cascade)
   User                 User?                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   VideoAnalysis        VideoAnalysis?        @relation(fields: [videoAnalysisId], references: [id], onDelete: Cascade)
@@ -586,19 +586,27 @@ model FlaggedMessage {
 }
 
 model Goal {
-  id          String       @id
-  userId      String
-  title       String
-  description String?
-  category    GoalCategory
-  status      GoalStatus   @default(ACTIVE)
-  targetDate  DateTime?
-  progress    Float        @default(0.0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime
-  completedAt DateTime?
-  User        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  Milestone   Milestone[]
+  id           String       @id
+  userId       String
+  title        String
+  description  String?
+  category     GoalCategory
+  status       GoalStatus   @default(ACTIVE)
+  targetDate   DateTime?
+  progress     Float        @default(0.0)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime
+  completedAt  DateTime?
+  color        String?
+  parentGoalId String?
+  sortOrder    Int          @default(0)
+  Goal         Goal?        @relation("GoalToGoal", fields: [parentGoalId], references: [id], onDelete: Cascade)
+  other_Goal   Goal[]       @relation("GoalToGoal")
+  User         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Milestone    Milestone[]
+
+  @@index([parentGoalId])
+  @@index([userId])
 }
 
 model HealthData {
@@ -1455,7 +1463,7 @@ model ScheduledNotification {
 }
 
 model SecurityLog {
-  id          String                @id @default(dbgenerated("(gen_random_uuid())::text"))
+  id          String                @id
   userId      String?
   eventType   SecurityEventType
   severity    SecurityEventSeverity @default(LOW)
@@ -2077,6 +2085,7 @@ model User {
   twoFactorExpiry                                           DateTime?
   twoFactorSecret                                           String?
   billingAddress                                            String?
+  smsRemindersEnabled                                       Boolean                         @default(false)
   AIConversation                                            AIConversation[]
   Account                                                   Account[]
   AchievementProgress                                       AchievementProgress[]
@@ -2128,9 +2137,11 @@ model User {
   TierUnlock                                                TierUnlock[]
   TournamentRegistration                                    TournamentRegistration[]
   TrainingPlan                                              TrainingPlan[]
+  TrainingStreak                                            TrainingStreak?
   TrialExpirationReminder                                   TrialExpirationReminder[]
   UserAchievement                                           UserAchievement[]
   UserAchievementStats                                      UserAchievementStats?
+  UserBadge                                                 UserBadge[]
   UserChallenge                                             UserChallenge[]
   UserContentRecommendation                                 UserContentRecommendation[]
   UserFavoriteStreamingPlatform                             UserFavoriteStreamingPlatform[]
@@ -2142,6 +2153,7 @@ model User {
   UserVideoProgress                                         UserVideoProgress[]
   UserVideoRating                                           UserVideoRating[]
   UserWatchHistory                                          UserWatchHistory[]
+  UserXP                                                    UserXP?
   VideoAnalysis_VideoAnalysis_uploadedByAdminIdToUser       VideoAnalysis[]                 @relation("VideoAnalysis_uploadedByAdminIdToUser")
   VideoAnalysis_VideoAnalysis_userIdToUser                  VideoAnalysis[]                 @relation("VideoAnalysis_userIdToUser")
   VideoAnalysisProgress                                     VideoAnalysisProgress[]
@@ -2722,6 +2734,125 @@ model YouTubeVideo {
   @@index([videoId])
 }
 
+model DrillProgress {
+  id              String    @id
+  userId          String
+  drillId         String
+  programId       String?
+  dayNumber       Int?
+  completedCount  Int       @default(0)
+  totalTimeSpent  Int       @default(0)
+  lastRating      Int?
+  personalNotes   String?
+  bestPerformance Float?
+  lastCompletedAt DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+
+  @@unique([userId, drillId, programId])
+  @@index([programId])
+  @@index([userId])
+}
+
+model ProgramDayProgress {
+  id              String    @id
+  userId          String
+  programId       String
+  dayNumber       Int
+  status          String    @default("locked")
+  drillsCompleted Int       @default(0)
+  totalDrills     Int       @default(0)
+  timeSpent       Int       @default(0)
+  xpEarned        Int       @default(0)
+  startedAt       DateTime?
+  completedAt     DateTime?
+  notes           String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime
+
+  @@unique([userId, programId, dayNumber])
+  @@index([programId])
+  @@index([status])
+  @@index([userId])
+}
+
+model ProgramRating {
+  id           String   @id
+  userId       String
+  programId    String
+  rating       Int
+  review       String?
+  helpfulCount Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime
+
+  @@unique([userId, programId])
+  @@index([programId])
+  @@index([rating])
+}
+
+model TrainingStreak {
+  id               String    @id
+  userId           String    @unique
+  currentStreak    Int       @default(0)
+  longestStreak    Int       @default(0)
+  lastTrainedAt    DateTime?
+  streakStarted    DateTime?
+  totalDaysTrained Int       @default(0)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime
+  User             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([currentStreak])
+}
+
+model UserBadge {
+  id         String   @id
+  userId     String
+  badgeId    String
+  badgeName  String
+  badgeIcon  String
+  badgeColor String
+  category   String
+  earnedAt   DateTime @default(now())
+  metadata   Json?
+  User       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeId])
+  @@index([category])
+  @@index([userId])
+}
+
+model UserXP {
+  id           String    @id
+  userId       String    @unique
+  totalXP      Int       @default(0)
+  level        Int       @default(1)
+  weeklyXP     Int       @default(0)
+  monthlyXP    Int       @default(0)
+  lastXPEarned DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime
+  User         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([level])
+  @@index([totalXP])
+}
+
+model XPTransaction {
+  id          String   @id
+  userId      String
+  amount      Int
+  source      String
+  sourceId    String?
+  description String
+  createdAt   DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([source])
+  @@index([userId])
+}
+
 enum AchievementCategory {
   SERVING
   RETURN_OF_SERVE
@@ -2839,22 +2970,33 @@ enum DrillStatus {
 }
 
 enum EmailNotificationType {
+  VIDEO_ANALYSIS_COMPLETE
   WELCOME
-  PASSWORD_RESET
-  EMAIL_VERIFICATION
-  SUBSCRIPTION_CONFIRMATION
   SUBSCRIPTION_RENEWAL
-  SUBSCRIPTION_EXPIRING
-  SUBSCRIPTION_CANCELLED
-  PAYMENT_RECEIPT
+  ACHIEVEMENT_UNLOCKED
+  MATCH_REMINDER
+  TRAINING_REMINDER
+  SYSTEM_UPDATE
+  CUSTOM
   TRIAL_EXPIRATION
   TRIAL_WARNING_7_DAYS
   TRIAL_WARNING_3_DAYS
   TRIAL_WARNING_1_DAY
   UPGRADE_REMINDER
-  VIDEO_ANALYSIS_COMPLETE
+  EVENT_REMINDER
+  PODCAST_NEW_EPISODE
+  LIVE_STREAM_STARTING
+  ADMIN_CUSTOM
+  ADMIN_TEST
+  SPONSOR_APPLICATION
+  SPONSOR_APPROVAL
+  PASSWORD_RESET
+  EMAIL_VERIFICATION
+  SUBSCRIPTION_CONFIRMATION
+  SUBSCRIPTION_EXPIRING
+  SUBSCRIPTION_CANCELLED
+  PAYMENT_RECEIPT
   VIDEO_ANALYSIS_FAILED
-  ACHIEVEMENT_UNLOCKED
   REDEMPTION_REQUEST
   REDEMPTION_APPROVED
   REDEMPTION_SHIPPED
@@ -2862,13 +3004,6 @@ enum EmailNotificationType {
   TOURNAMENT_REGISTRATION
   TOURNAMENT_REMINDER
   TOURNAMENT_RESULTS
-  MATCH_REMINDER
-  TRAINING_REMINDER
-  EVENT_REMINDER
-  PODCAST_NEW_EPISODE
-  LIVE_STREAM_STARTING
-  SPONSOR_APPLICATION
-  SPONSOR_APPROVAL
   SPONSOR_REJECTION
   SPONSOR_ADMIN_NOTIFICATION
   SPONSOR_OFFER_CREATED
@@ -2876,10 +3011,6 @@ enum EmailNotificationType {
   ADMIN_NEW_USER
   ADMIN_PAYMENT
   ADMIN_ERROR
-  ADMIN_CUSTOM
-  ADMIN_TEST
-  SYSTEM_UPDATE
-  CUSTOM
 }
 
 enum EmailStatus {
