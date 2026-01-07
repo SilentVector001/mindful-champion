@@ -184,10 +184,21 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
 
   // Helper function to extract message from various response formats
   const extractMessage = (content: string): string => {
+    if (!content || typeof content !== 'string') return content || '';
+    
+    // If it doesn't look like JSON at all, return as-is
+    if (!content.includes('{') && !content.includes('"message"')) {
+      return content;
+    }
+    
     // Try to parse as JSON first
     try {
       const parsed = JSON.parse(content);
       if (parsed.message) {
+        // Recursively extract if message itself is JSON
+        if (typeof parsed.message === 'string' && parsed.message.includes('{')) {
+          return extractMessage(parsed.message);
+        }
         return parsed.message;
       }
       if (parsed.content) {
@@ -200,21 +211,25 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
       // Not JSON
     }
     
-    // Try regex extraction for partial JSON
-    const messageMatch = content.match(/"message"\s*:\s*"([^"]+(?:\\.[^"]*)*?)"/);
-    if (messageMatch) {
-      return messageMatch[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
-    }
+    // Try regex extraction for partial JSON - multiple patterns
+    const patterns = [
+      /"message"\s*:\s*"((?:[^"\\]|\\.)*)"/,
+      /{"message":"((?:[^"\\]|\\.)*)"/,
+      /"message"\s*:\s*"([\s\S]*?)"\s*,\s*"metadata"/
+    ];
     
-    // If content looks like raw JSON, try to extract just the message part
-    if (content.includes('"message"') && content.includes('"metadata"')) {
-      const match = content.match(/"message"\s*:\s*"([\s\S]*?)"\s*,\s*"metadata"/);
-      if (match) {
-        return match[1].replace(/\\"/g, '"').replace(/\\n/g, '\n');
+    for (const pattern of patterns) {
+      const match = content.match(pattern);
+      if (match && match[1]) {
+        return match[1]
+          .replace(/\\"/g, '"')
+          .replace(/\\n/g, '\n')
+          .replace(/\\r/g, '')
+          .replace(/\\\\/g, '\\');
       }
     }
     
-    // Return as-is if no JSON structure found
+    // Return as-is if nothing works
     return content;
   };
 
