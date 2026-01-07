@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import TextCoachKai from "@/components/coach/text-coach-kai"
+import VoiceCoachKai from "@/components/coach/voice-coach-kai"
 
 export default async function AICoachPage() {
   const session = await getServerSession(authOptions)
@@ -54,5 +54,5 @@ export default async function AICoachPage() {
     role: userData.role
   };
 
-  return <TextCoachKai userContext={userContext} userData={userData} />
+  return <VoiceCoachKai userContext={userContext} userData={userData} />
 }
