@@ -249,14 +249,17 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
       if (response.ok) {
         const data = await response.json();
         
-        // Extract the message properly
+        // Extract the message properly - ALWAYS extract from response
         let displayContent = '';
-        if (data.message) {
+        if (typeof data === 'object' && data.message) {
           displayContent = data.message;
         } else if (typeof data === 'string') {
           displayContent = extractMessage(data);
+        } else if (typeof data === 'object') {
+          // For any object, try to extract message field
+          displayContent = data.message || data.content || extractMessage(JSON.stringify(data));
         } else {
-          displayContent = extractMessage(JSON.stringify(data));
+          displayContent = String(data);
         }
         
         const assistantMessage: Message = {
