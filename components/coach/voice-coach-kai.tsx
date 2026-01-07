@@ -315,18 +315,11 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
     }
   };
 
-  // Toggle speaker - replay last assistant message or stop current
+  // Toggle speaker
   const toggleSpeaker = () => {
-    unlockAudio();
     if (isSpeaking && audioRef.current) {
       audioRef.current.pause();
       setIsSpeaking(false);
-    } else {
-      // Find last assistant message and speak it
-      const lastAssistantMessage = [...messages].reverse().find(m => m.role === 'assistant');
-      if (lastAssistantMessage) {
-        speakText(lastAssistantMessage.content);
-      }
     }
   };
 
