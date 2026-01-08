@@ -169,11 +169,11 @@ export default function SimpleLandingPage() {
                   ✨ Coach Kai Ready
                 </motion.div>
                 <Image
-                  src="https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=600&q=80"
-                  alt="Pickleball paddles and balls on court"
+                  src="https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=600&q=80"
+                  alt="Female pickleball player in action hitting a shot"
                   width={500}
                   height={350}
-                  className="rounded-xl w-full"
+                  className="rounded-xl w-full object-cover"
                 />
               </div>
             </motion.div>
@@ -311,29 +311,52 @@ export default function SimpleLandingPage() {
                     Shot Detected: Serve
                   </motion.div>
 
-                  {/* Body tracking points */}
-                  <motion.div 
-                    className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
-                    animate={{
-                      boxShadow: [
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                        '0 0 20px rgba(34, 211, 238, 0.8)',
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                      ]
-                    }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                  <motion.div 
-                    className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
-                    animate={{
-                      boxShadow: [
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                        '0 0 20px rgba(34, 211, 238, 0.8)',
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                      ]
-                    }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                  />
+                  {/* Stick Figure Skeleton Overlay */}
+                  <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 600 400">
+                    {/* Skeleton joints with animated glow */}
+                    {/* Head */}
+                    <motion.circle cx="300" cy="80" r="18" fill="none" stroke="cyan" strokeWidth="3"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity }}
+                    />
+                    {/* Torso line */}
+                    <motion.line x1="300" y1="98" x2="300" y2="180" stroke="cyan" strokeWidth="3"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
+                    />
+                    {/* Left arm */}
+                    <motion.polyline points="300,110 250,140 200,120" fill="none" stroke="cyan" strokeWidth="3"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                    />
+                    {/* Right arm (paddle arm raised) */}
+                    <motion.polyline points="300,110 360,100 400,60" fill="none" stroke="lime" strokeWidth="4"
+                      animate={{ opacity: [0.8, 1, 0.8] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                    />
+                    {/* Paddle indicator */}
+                    <motion.ellipse cx="420" cy="50" rx="25" ry="15" fill="none" stroke="lime" strokeWidth="2"
+                      animate={{ scale: [1, 1.1, 1], opacity: [0.6, 1, 0.6] }}
+                      transition={{ duration: 1, repeat: Infinity }}
+                    />
+                    {/* Left leg */}
+                    <motion.polyline points="300,180 270,250 250,320" fill="none" stroke="cyan" strokeWidth="3"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                    />
+                    {/* Right leg */}
+                    <motion.polyline points="300,180 340,250 370,320" fill="none" stroke="cyan" strokeWidth="3"
+                      animate={{ opacity: [0.7, 1, 0.7] }}
+                      transition={{ duration: 1.5, repeat: Infinity, delay: 0.5 }}
+                    />
+                    {/* Joint dots */}
+                    {[[300,80],[300,110],[300,180],[250,140],[200,120],[360,100],[400,60],[270,250],[250,320],[340,250],[370,320]].map(([cx, cy], i) => (
+                      <motion.circle key={i} cx={cx} cy={cy} r="6" fill="cyan"
+                        animate={{ boxShadow: ['0 0 10px cyan', '0 0 20px cyan', '0 0 10px cyan'] }}
+                        style={{ filter: 'drop-shadow(0 0 8px cyan)' }}
+                      />
+                    ))}
+                  </svg>
                 </div>
 
                 {/* Analysis results cards */}

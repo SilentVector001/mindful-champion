@@ -64,12 +64,12 @@ export async function PATCH(req: NextRequest, { params }: RouteContext) {
       // Update goal progress
       const goal = await prisma.goal.findUnique({
         where: { id: goalId },
-        include: { milestones: true }
+        include: { Milestone: true }
       })
 
       if (goal) {
-        const completedCount = goal.milestones.filter(m => m.status === 'COMPLETED').length
-        const totalCount = goal.milestones.length
+        const completedCount = goal.Milestone.filter(m => m.status === 'COMPLETED').length
+        const totalCount = goal.Milestone.length
         const newProgress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0
 
         await prisma.goal.update({

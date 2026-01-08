@@ -153,7 +153,7 @@ export async function sendDailyGoalProgressEmail(
     // Get goal and user data
     const goal = await prisma.goal.findUnique({
       where: { id: goalId },
-      include: { milestones: true }
+      include: { Milestone: true }
     })
 
     const user = await prisma.user.findUnique({
