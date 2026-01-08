@@ -171,8 +171,8 @@ export default function SimpleLandingPage() {
                 </motion.div>
                 <div className="relative aspect-video">
                   <Image
-                    src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&q=80"
-                    alt="Female athlete playing racket sport"
+                    src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=600&q=80"
+                    alt="Pickleball players in action on court"
                     fill
                     className="rounded-xl object-cover"
                   />
@@ -660,37 +660,60 @@ export default function SimpleLandingPage() {
                 <span className="text-blue-400 text-sm font-semibold">AI VOICE COACH</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                Meet Coach Kai
+                Your Pro Coach
                 <br />
-                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">Your Personal AI Coach</span>
+                <span className="bg-gradient-to-r from-blue-400 via-cyan-400 to-teal-400 bg-clip-text text-transparent">In Your Pocket. 24/7.</span>
               </h2>
-              <p className="text-gray-300 text-lg mb-6">
-                Talk to Coach Kai anytime, anywhere. Get instant answers about technique, strategy, rules, and training. It's like having a pro coach in your pocket.
+              <p className="text-gray-300 text-lg mb-5">
+                Stuck between points? <span className="text-blue-400 font-semibold">Ask Coach Kai.</span> Whether you need a mid-game strategy adjustment or want to drill at 6am—Kai&apos;s there. Voice-activated, instant answers.
               </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  'Voice-activated coaching on any device',
-                  'Real-time strategy and technique tips',
-                  'Personalized training recommendations',
-                  'Available 24/7 - on court or off',
-                ].map((item, idx) => (
-                  <motion.li 
-                    key={idx} 
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex items-center gap-3 text-gray-300"
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-blue-500 flex-shrink-0" />
-                    {item}
-                  </motion.li>
-                ))}
-              </ul>
+
+              {/* Ask Kai Anything */}
+              <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-blue-500/20">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <Brain className="w-5 h-5 text-blue-400" />
+                  Ask Kai Anything
+                </h4>
+                <div className="grid grid-cols-1 gap-2 text-sm">
+                  {[
+                    { q: '"My serve keeps going long—what am I doing wrong?"', type: 'Technique' },
+                    { q: '"How do I beat a banger who hits everything hard?"', type: 'Strategy' },
+                    { q: '"Give me a 15-min warm-up drill for dinks"', type: 'Drills' },
+                    { q: '"Is it a fault if the ball hits my paddle twice?"', type: 'Rules' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-lg">
+                      <span className="text-xs font-bold text-blue-400 w-16">{item.type}</span>
+                      <span className="text-gray-300 italic">{item.q}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Kai's Superpowers */}
+              <div className="mb-6">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <Zap className="w-5 h-5 text-cyan-400" />
+                  Kai&apos;s Superpowers
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {[
+                    { power: 'Remembers your skill level', icon: '🧠' },
+                    { power: 'Speaks in plain English', icon: '💬' },
+                    { power: 'Court-side voice mode', icon: '🎙️' },
+                    { power: 'Never judges, always helps', icon: '💪' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-gray-300">
+                      <span>{item.icon}</span>
+                      <span>{item.power}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all">
+                <Button className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white px-6 py-3 rounded-xl font-bold shadow-xl shadow-blue-500/30 hover:shadow-blue-500/50 hover:scale-105 transition-all">
                   <Mic className="w-5 h-5 mr-2" />
-                  Talk to Coach Kai
+                  Start Talking to Kai
                 </Button>
               </Link>
             </motion.div>
