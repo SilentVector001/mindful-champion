@@ -17,11 +17,11 @@ export default async function AICoachPage() {
   const userData = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      matches: {
+      Match: {
         orderBy: { date: 'desc' },
         take: 5
       },
-      mentalSessions: {
+      MentalSession: {
         orderBy: { createdAt: 'desc' },
         take: 3
       }
@@ -49,8 +49,8 @@ export default async function AICoachPage() {
       : typeof userData.biggestChallenges === 'string' 
         ? userData.biggestChallenges.split(',').map(c => c.trim())
         : ['Developing consistency'],
-    recentMatches: userData.matches?.length || 0,
-    sessionCount: userData.mentalSessions?.length || 0,
+    recentMatches: userData.Match?.length || 0,
+    sessionCount: userData.MentalSession?.length || 0,
     subscriptionTier: userData.subscriptionTier || 'FREE',
     role: userData.role
   };

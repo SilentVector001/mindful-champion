@@ -331,9 +331,29 @@ export default function VoiceCoachKai({ userContext, userData }: VoiceCoachKaiPr
       
       <div className="max-w-2xl mx-auto px-4 py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white tracking-wide">COACH KAI</h1>
-          <p className="text-slate-400 text-sm">Your AI Pickleball Coach</p>
+        <div className="text-center mb-6">
+          <div className="inline-flex items-center gap-2 bg-blue-500/20 border border-blue-500/40 px-3 py-1.5 rounded-full mb-3">
+            <Mic className="w-4 h-4 text-blue-400 animate-pulse" />
+            <span className="text-blue-400 text-xs font-semibold">AI VOICE COACH • LIVE</span>
+          </div>
+          <h1 className="text-3xl font-black text-white mb-2">Hey {firstName}! 👋</h1>
+          <p className="text-slate-300 text-lg">I&apos;m Coach Kai—your personal pickleball mentor.</p>
+        </div>
+
+        {/* Quick Tips Box */}
+        <div className="mb-6 p-4 bg-slate-800/60 rounded-xl border border-blue-500/20">
+          <h4 className="text-white font-bold mb-2 text-sm flex items-center gap-2">
+            💡 Try asking me:
+          </h4>
+          <div className="grid grid-cols-1 gap-1.5 text-xs">
+            {[
+              '"My backhand keeps sailing out—help!"',
+              '"What\'s a good warm-up for doubles?"',
+              '"How do I handle a lobber?"',
+            ].map((q, i) => (
+              <div key={i} className="text-slate-400 italic">{q}</div>
+            ))}
+          </div>
         </div>
         
         {/* Avatar */}
