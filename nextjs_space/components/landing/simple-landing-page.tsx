@@ -171,8 +171,8 @@ export default function SimpleLandingPage() {
                 </motion.div>
                 <div className="relative aspect-video">
                   <Image
-                    src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&q=80"
-                    alt="Female athlete in powerful tennis swing motion"
+                    src="https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=600&q=80"
+                    alt="Female athlete playing racket sport"
                     fill
                     className="rounded-xl object-cover"
                   />
@@ -219,29 +219,62 @@ export default function SimpleLandingPage() {
                 <span className="text-emerald-400 text-sm font-semibold">STRUCTURED TRAINING</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                Professional Training
+                Go From Zero to 
                 <br />
-                <span className="text-emerald-400">Programs</span>
+                <span className="text-emerald-400">Tournament-Ready</span>
               </h2>
-              <p className="text-gray-300 text-lg mb-6">
-                Follow expertly crafted training programs designed for every skill level. From beginner fundamentals to advanced tournament prep, our programs guide you step-by-step.
+              <p className="text-gray-300 text-lg mb-5">
+                Stop watching random YouTube videos. Our <span className="text-emerald-400 font-semibold">7 progressive programs</span> build your skills systematically—each day builds on the last until you&apos;re unstoppable on the court.
               </p>
-              <ul className="space-y-3 mb-8">
-                {[
-                  '7 professional training programs (Beginner to Pro)',
-                  'Day-by-day structured curriculum',
-                  'Video tutorials and practice drills',
-                  'Progress tracking with completion rewards',
-                ].map((item, idx) => (
-                  <li key={idx} className="flex items-center gap-3 text-gray-300">
-                    <CheckCircle2 className="w-5 h-5 text-emerald-500 flex-shrink-0" />
-                    {item}
-                  </li>
-                ))}
-              </ul>
+
+              {/* What You'll Master */}
+              <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-emerald-500/20">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <Trophy className="w-5 h-5 text-emerald-400" />
+                  What You&apos;ll Master
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {[
+                    { skill: 'Consistent third-shot drops', icon: '🎯' },
+                    { skill: 'Unbreakable dink rallies', icon: '🏓' },
+                    { skill: 'Power serves that spin', icon: '⚡' },
+                    { skill: 'Net dominance tactics', icon: '👑' },
+                    { skill: 'Doubles positioning', icon: '🤝' },
+                    { skill: 'Mental game under pressure', icon: '🧠' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-gray-300">
+                      <span>{item.icon}</span>
+                      <span>{item.skill}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Program Journey */}
+              <div className="mb-6">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <Dumbbell className="w-5 h-5 text-teal-400" />
+                  Your Journey
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    { day: 'Days 1-7', focus: 'Grip, stance & basic strokes', level: 'Foundation' },
+                    { day: 'Days 8-14', focus: 'Serve mechanics & return game', level: 'Building' },
+                    { day: 'Days 15-21', focus: 'Dink mastery & soft game', level: 'Refining' },
+                    { day: 'Days 22-30', focus: 'Strategy, patterns & match play', level: 'Competing' },
+                  ].map((phase, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-lg">
+                      <div className="w-16 text-xs font-bold text-emerald-400">{phase.day}</div>
+                      <div className="flex-1 text-sm text-gray-300">{phase.focus}</div>
+                      <div className="text-xs text-teal-400 font-medium">{phase.level}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold">
-                  Start Training Today
+                <Button className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-bold shadow-lg shadow-emerald-500/30">
+                  Start Your 7-Day Free Trial
                   <ArrowRight className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
