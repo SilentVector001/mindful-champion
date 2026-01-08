@@ -594,9 +594,9 @@ export default function SimpleLandingPage() {
             {[
               { name: 'Serve', image: 'https://images.unsplash.com/photo-1761644789725-98e84ef4b8c8?w=300&q=80', count: '25+' },
               { name: 'Dink', image: 'https://images.unsplash.com/photo-1761644658016-324918bc373c?w=300&q=80', count: '30+' },
-              { name: 'Volley', image: 'https://images.unsplash.com/photo-1693142517898-2f986215e412?w=300&q=80', count: '20+' },
-              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1761644518970-2ed0ab543e1b?w=300&q=80', count: '15+' },
-              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=300&q=80', count: '20+' },
+              { name: 'Volley', image: 'https://images.unsplash.com/photo-1761644518970-2ed0ab543e1b?w=300&q=80', count: '20+' },
+              { name: 'Footwork', image: 'https://images.unsplash.com/photo-1761644789725-98e84ef4b8c8?w=300&q=80', count: '15+' },
+              { name: 'Strategy', image: 'https://images.unsplash.com/photo-1761644658016-324918bc373c?w=300&q=80', count: '20+' },
             ].map((drill, idx) => (
               <motion.div
                 key={idx}
@@ -1045,38 +1045,60 @@ export default function SimpleLandingPage() {
                 <span className="text-cyan-400 text-sm font-semibold">PROGRESS TRACKING</span>
               </div>
               <h2 className="text-3xl sm:text-4xl font-black text-white mb-4">
-                See Your Progress
+                Watch Yourself
                 <br />
-                <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">In Real-Time</span>
+                <span className="bg-gradient-to-r from-cyan-400 via-teal-400 to-emerald-400 bg-clip-text text-transparent">Get Better Every Week</span>
               </h2>
-              <p className="text-gray-300 text-lg mb-6">
-                Set personalized goals and track your journey with detailed analytics. Watch your skills improve through data-driven insights and visual progress charts.
+              <p className="text-gray-300 text-lg mb-5">
+                No more guessing if you&apos;re improving. <span className="text-cyan-400 font-semibold">See the data.</span> Track your serve accuracy, dink consistency, and win rate over time—then watch those numbers climb.
               </p>
-              <div className="space-y-4 mb-8">
-                {[
-                  { text: 'Customizable skill improvement goals', icon: Target },
-                  { text: 'Detailed performance analytics & charts', icon: BarChart3 },
-                  { text: 'Achievement system with rewards', icon: Award },
-                  { text: 'Historical data comparison', icon: Calendar },
-                ].map((item, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, x: -20 }}
-                    whileInView={{ opacity: 1, x: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: idx * 0.1 }}
-                    className="flex items-center gap-3 p-3 bg-slate-800/30 border border-cyan-500/10 rounded-lg hover:border-cyan-500/30 hover:bg-slate-800/50 transition-all group"
-                  >
-                    <div className="w-10 h-10 bg-gradient-to-br from-cyan-500 to-teal-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                      <item.icon className="w-5 h-5 text-white" />
+
+              {/* What Gets Tracked */}
+              <div className="mb-6 p-4 bg-slate-800/50 rounded-xl border border-cyan-500/20">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-cyan-400" />
+                  What We Track For You
+                </h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  {[
+                    { metric: 'Serve accuracy %', icon: '🎯' },
+                    { metric: 'Win/loss ratio', icon: '📊' },
+                    { metric: 'Drills completed', icon: '✅' },
+                    { metric: 'Skill rating (DUPR-style)', icon: '⭐' },
+                    { metric: 'Streak days', icon: '🔥' },
+                    { metric: 'Hours practiced', icon: '⏱️' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2 text-gray-300">
+                      <span>{item.icon}</span>
+                      <span>{item.metric}</span>
                     </div>
-                    <span className="text-gray-300 group-hover:text-white transition-colors">{item.text}</span>
-                  </motion.div>
-                ))}
+                  ))}
+                </div>
               </div>
+
+              {/* Goal Setting */}
+              <div className="mb-6">
+                <h4 className="text-white font-bold mb-3 flex items-center gap-2">
+                  <Target className="w-5 h-5 text-teal-400" />
+                  Set Goals That Stick
+                </h4>
+                <div className="space-y-2">
+                  {[
+                    { goal: '"Win 3 games this week"', type: 'Competition' },
+                    { goal: '"Practice dinks 15 min daily"', type: 'Consistency' },
+                    { goal: '"Reach 4.0 rating by March"', type: 'Long-term' },
+                  ].map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-3 p-2 bg-slate-900/50 rounded-lg">
+                      <span className="text-xs font-bold text-cyan-400 w-20">{item.type}</span>
+                      <span className="text-gray-300 text-sm italic">{item.goal}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <Link href="/auth/signup">
-                <Button className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all">
-                  Track Your Progress
+                <Button className="bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-bold shadow-xl shadow-cyan-500/30 hover:shadow-cyan-500/50 hover:scale-105 transition-all">
+                  Start Tracking Your Game
                   <TrendingUp className="w-5 h-5 ml-2" />
                 </Button>
               </Link>
