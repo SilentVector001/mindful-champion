@@ -20,7 +20,7 @@ export default async function AdminPage() {
       id: true,
       subscriptionTier: true,
       isTrialActive: true,
-      subscriptions: {
+      Subscription: {
         where: { status: 'ACTIVE' },
         select: { id: true }
       }
