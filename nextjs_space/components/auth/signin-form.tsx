@@ -66,9 +66,8 @@ export default function SignInForm() {
           title: "Welcome back, Champion! 🏆",
           description: "Successfully signed in to your account.",
         })
-        // Redirect to signin page which will check onboarding and redirect appropriately
-        // This prevents login loops by using the proper server-side redirect logic
-        window.location.href = "/auth/signin"
+        // Redirect to dashboard - server will handle onboarding redirect if needed
+        window.location.href = "/dashboard"
       }
     } catch (error) {
       setError("Something went wrong. Please try again.")

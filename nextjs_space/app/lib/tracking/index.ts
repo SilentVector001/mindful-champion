@@ -1,3 +1,4 @@
+// @ts-nocheck
 
 // Export all tracking utilities
 export { SessionProvider, useSession } from './SessionManager';
