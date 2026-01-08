@@ -169,13 +169,14 @@ export default function SimpleLandingPage() {
                 >
                   ✨ Coach Kai Ready
                 </motion.div>
-                <Image
-                  src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&q=80"
-                  alt="Female athlete swinging racket in action"
-                  width={500}
-                  height={350}
-                  className="rounded-xl w-full object-cover"
-                />
+                <div className="relative aspect-video">
+                  <Image
+                    src="https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=600&q=80"
+                    alt="Female athlete in powerful tennis swing motion"
+                    fill
+                    className="rounded-xl object-cover"
+                  />
+                </div>
               </div>
             </motion.div>
           </div>
@@ -312,103 +313,67 @@ export default function SimpleLandingPage() {
                     Shot Detected: Serve
                   </motion.div>
 
-                  {/* Animated Stick Figure Pose Estimation */}
-                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
-                    {/* Stick Figure - Full Body Skeleton */}
-                    <g className="stick-figure">
-                      {/* Head */}
-                      <motion.circle 
-                        cx="320" cy="120" r="18" 
-                        fill="none" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
+                  {/* Professional Pose Detection Overlay */}
+                  <div className="absolute inset-0 pointer-events-none">
+                    {/* Motion tracking lines - subtle */}
+                    <svg className="absolute inset-0 w-full h-full opacity-60" viewBox="0 0 100 100" preserveAspectRatio="none">
+                      <motion.path
+                        d="M 30 70 Q 35 50 45 40 T 60 30"
+                        stroke="url(#trackGradient)"
+                        strokeWidth="0.5"
+                        fill="none"
+                        strokeDasharray="2 2"
+                        animate={{ pathLength: [0, 1], opacity: [0.3, 0.8, 0.3] }}
+                        transition={{ duration: 2, repeat: Infinity }}
                       />
-                      {/* Neck to Torso */}
-                      <motion.line x1="320" y1="138" x2="320" y2="200" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                      {/* Shoulders */}
-                      <motion.line x1="270" y1="160" x2="370" y2="160" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
-                      />
-                      {/* Left Arm */}
-                      <motion.line x1="270" y1="160" x2="240" y2="220" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
-                      />
-                      {/* Right Arm (Paddle Arm) - Highlighted Green */}
-                      <motion.line x1="370" y1="160" x2="420" y2="130" stroke="#10b981" strokeWidth="4"
-                        animate={{ 
-                          x2: [420, 430, 420],
-                          y2: [130, 110, 130],
-                          opacity: [0.8, 1, 0.8] 
-                        }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
-                      {/* Paddle */}
-                      <motion.rect x="415" y="100" width="30" height="45" rx="4"
-                        fill="none" stroke="#10b981" strokeWidth="2"
-                        animate={{ 
-                          x: [415, 425, 415],
-                          y: [100, 80, 100],
-                          rotate: [0, -15, 0]
-                        }}
-                        style={{ transformOrigin: '430px 122px' }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
-                      {/* Torso to Hips */}
-                      <motion.line x1="320" y1="200" x2="320" y2="250" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                      />
-                      {/* Left Leg */}
-                      <motion.line x1="320" y1="250" x2="280" y2="330" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                      />
-                      {/* Right Leg */}
-                      <motion.line x1="320" y1="250" x2="360" y2="330" stroke="#22d3ee" strokeWidth="3"
-                        animate={{ opacity: [0.7, 1, 0.7] }}
-                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
-                      />
-                      {/* Joint Dots */}
-                      {[
-                        { cx: 320, cy: 120, delay: 0 },    // Head
-                        { cx: 270, cy: 160, delay: 0.1 },  // Left shoulder
-                        { cx: 370, cy: 160, delay: 0.1 },  // Right shoulder
-                        { cx: 240, cy: 220, delay: 0.2 },  // Left hand
-                        { cx: 320, cy: 250, delay: 0.3 },  // Hip
-                        { cx: 280, cy: 330, delay: 0.4 },  // Left foot
-                        { cx: 360, cy: 330, delay: 0.4 },  // Right foot
-                      ].map((joint, i) => (
-                        <motion.circle
-                          key={i}
-                          cx={joint.cx} cy={joint.cy} r="6"
-                          fill="#22d3ee"
-                          animate={{
-                            scale: [1, 1.3, 1],
-                            opacity: [0.7, 1, 0.7],
-                            filter: ['drop-shadow(0 0 4px #22d3ee)', 'drop-shadow(0 0 12px #22d3ee)', 'drop-shadow(0 0 4px #22d3ee)']
-                          }}
-                          transition={{ duration: 1.5, repeat: Infinity, delay: joint.delay }}
-                        />
-                      ))}
-                      {/* Paddle arm joint - Green */}
-                      <motion.circle
-                        cx="420" cy="130" r="6"
-                        fill="#10b981"
-                        animate={{
-                          cx: [420, 430, 420],
-                          cy: [130, 110, 130],
-                          scale: [1, 1.4, 1],
-                          filter: ['drop-shadow(0 0 4px #10b981)', 'drop-shadow(0 0 15px #10b981)', 'drop-shadow(0 0 4px #10b981)']
-                        }}
-                        transition={{ duration: 1, repeat: Infinity }}
-                      />
-                    </g>
-                  </svg>
+                      <defs>
+                        <linearGradient id="trackGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#22d3ee" />
+                          <stop offset="100%" stopColor="#10b981" />
+                        </linearGradient>
+                      </defs>
+                    </svg>
+
+                    {/* Analysis callout boxes */}
+                    <motion.div 
+                      className="absolute top-1/4 left-4 bg-slate-900/90 backdrop-blur-sm border border-cyan-500/50 rounded-lg p-2 text-xs max-w-[140px]"
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.5, duration: 0.5 }}
+                    >
+                      <div className="text-cyan-400 font-bold mb-1">⚡ Swing Arc</div>
+                      <div className="text-white">Elbow angle: <span className="text-emerald-400">142°</span></div>
+                      <div className="text-slate-400 text-[10px]">Optimal: 135-150°</div>
+                    </motion.div>
+
+                    <motion.div 
+                      className="absolute bottom-1/4 right-4 bg-slate-900/90 backdrop-blur-sm border border-emerald-500/50 rounded-lg p-2 text-xs max-w-[140px]"
+                      initial={{ opacity: 0, x: 20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.8, duration: 0.5 }}
+                    >
+                      <div className="text-emerald-400 font-bold mb-1">🦶 Footwork</div>
+                      <div className="text-white">Stance width: <span className="text-cyan-400">Good</span></div>
+                      <div className="text-slate-400 text-[10px]">Weight transfer detected</div>
+                    </motion.div>
+
+                    {/* Joint tracking points - small, professional */}
+                    {[
+                      { top: '35%', left: '45%', label: 'Shoulder' },
+                      { top: '28%', left: '55%', label: 'Elbow' },
+                      { top: '55%', left: '42%', label: 'Hip' },
+                    ].map((point, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute"
+                        style={{ top: point.top, left: point.left }}
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.2 }}
+                      >
+                        <div className="w-2.5 h-2.5 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50" />
+                      </motion.div>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Analysis results cards */}
@@ -495,23 +460,23 @@ export default function SimpleLandingPage() {
                 <span className="bg-gradient-to-r from-purple-400 via-indigo-400 to-blue-400 bg-clip-text text-transparent">With AI-Powered Video Analysis</span>
               </h2>
               <p className="text-gray-300 text-lg mb-6">
-                Upload your pickleball game footage and get instant, AI-powered insights. Our advanced analysis technology breaks down your technique frame-by-frame, identifies areas for improvement, and provides personalized recommendations to elevate your game.
+                Upload your game footage and our AI instantly detects <span className="text-purple-400 font-semibold">17 body keypoints</span> to analyze your swing mechanics, footwork, and court positioning. Get frame-by-frame breakdowns showing exactly where your technique needs work.
               </p>
 
-              {/* Key Features */}
+              {/* What We Analyze */}
               <div className="mb-6">
                 <h3 className="text-white font-bold text-lg mb-3 flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-purple-400" />
-                  Key Features
+                  What Our AI Detects
                 </h3>
                 <ul className="space-y-2.5">
                   {[
-                    'Upload and analyze pickleball game footage',
-                    'AI-powered technique analysis with pose detection',
-                    'Performance insights and personalized recommendations',
-                    'Shot tracking and comprehensive statistics',
-                    'Form and movement analysis with visual overlays',
-                    'Comparison with professional players',
+                    { text: 'Elbow & wrist angles during serve (optimal: 135-150°)', detail: true },
+                    { text: 'Paddle face angle at contact point', detail: true },
+                    { text: 'Hip rotation speed and timing', detail: true },
+                    { text: 'Stance width and weight distribution', detail: true },
+                    { text: 'Shot type detection: serves, dinks, drives, volleys', detail: false },
+                    { text: 'Ball trajectory and spin analysis', detail: false },
                   ].map((item, idx) => (
                     <motion.li
                       key={idx}
@@ -521,8 +486,8 @@ export default function SimpleLandingPage() {
                       transition={{ delay: idx * 0.1 }}
                       className="flex items-start gap-3 text-gray-300"
                     >
-                      <CheckCircle2 className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
-                      <span>{item}</span>
+                      <CheckCircle2 className={`w-5 h-5 flex-shrink-0 mt-0.5 ${item.detail ? 'text-emerald-500' : 'text-purple-500'}`} />
+                      <span>{item.text}</span>
                     </motion.li>
                   ))}
                 </ul>
