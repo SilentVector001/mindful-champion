@@ -848,12 +848,20 @@ function PremiumProgramCard({
       transition={{ delay: index * 0.1 }}
       {...premiumAnimations.cardHover}
     >
-      <Card className="bg-slate-800/60 border-slate-700/50 backdrop-blur-sm hover:bg-slate-800/80 hover:shadow-2xl transition-all duration-300 rounded-2xl h-full flex flex-col overflow-hidden group">
-        {/* Header with Icon and Badge */}
+      <Card className="bg-slate-900/40 border-slate-700/30 backdrop-blur-md hover:bg-slate-800/50 hover:shadow-2xl hover:shadow-cyan-500/10 transition-all duration-300 rounded-2xl h-full flex flex-col overflow-hidden group">
+        {/* Header with Program Image */}
         <div className={cn(
-          "h-32 bg-gradient-to-br relative",
+          "h-40 relative overflow-hidden",
           skillConfig.gradient
         )}>
+          {/* Background Image */}
+          <Image
+            src={`https://images.unsplash.com/photo-1761644658016-324918bc373c?w=400&q=80`}
+            alt={program.name}
+            fill
+            className="object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-500"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/40 to-transparent" />
           <div className="absolute inset-0 flex items-center justify-center">
             <IconComponent className="w-20 h-20 text-white/90 group-hover:scale-110 transition-transform duration-300" />
           </div>

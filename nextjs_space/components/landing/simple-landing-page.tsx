@@ -170,11 +170,11 @@ export default function SimpleLandingPage() {
                   ✨ Coach Kai Ready
                 </motion.div>
                 <Image
-                  src="https://images.unsplash.com/photo-1693142518820-78d7a05f1546?w=600&q=80"
-                  alt="Pickleball paddles and balls on court"
+                  src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=600&q=80"
+                  alt="Female athlete swinging racket in action"
                   width={500}
                   height={350}
-                  className="rounded-xl w-full"
+                  className="rounded-xl w-full object-cover"
                 />
               </div>
             </motion.div>
@@ -312,29 +312,103 @@ export default function SimpleLandingPage() {
                     Shot Detected: Serve
                   </motion.div>
 
-                  {/* Body tracking points */}
-                  <motion.div 
-                    className="absolute bottom-1/3 left-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
-                    animate={{
-                      boxShadow: [
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                        '0 0 20px rgba(34, 211, 238, 0.8)',
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                      ]
-                    }}
-                    transition={{ duration: 1.5, repeat: Infinity }}
-                  />
-                  <motion.div 
-                    className="absolute bottom-1/4 right-1/3 w-3 h-3 bg-cyan-400 rounded-full shadow-lg shadow-cyan-400/50"
-                    animate={{
-                      boxShadow: [
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                        '0 0 20px rgba(34, 211, 238, 0.8)',
-                        '0 0 10px rgba(34, 211, 238, 0.5)',
-                      ]
-                    }}
-                    transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
-                  />
+                  {/* Animated Stick Figure Pose Estimation */}
+                  <svg className="absolute inset-0 w-full h-full" viewBox="0 0 600 400" preserveAspectRatio="xMidYMid slice">
+                    {/* Stick Figure - Full Body Skeleton */}
+                    <g className="stick-figure">
+                      {/* Head */}
+                      <motion.circle 
+                        cx="320" cy="120" r="18" 
+                        fill="none" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ scale: [1, 1.1, 1], opacity: [0.8, 1, 0.8] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      {/* Neck to Torso */}
+                      <motion.line x1="320" y1="138" x2="320" y2="200" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      {/* Shoulders */}
+                      <motion.line x1="270" y1="160" x2="370" y2="160" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.1 }}
+                      />
+                      {/* Left Arm */}
+                      <motion.line x1="270" y1="160" x2="240" y2="220" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.2 }}
+                      />
+                      {/* Right Arm (Paddle Arm) - Highlighted Green */}
+                      <motion.line x1="370" y1="160" x2="420" y2="130" stroke="#10b981" strokeWidth="4"
+                        animate={{ 
+                          x2: [420, 430, 420],
+                          y2: [130, 110, 130],
+                          opacity: [0.8, 1, 0.8] 
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                      {/* Paddle */}
+                      <motion.rect x="415" y="100" width="30" height="45" rx="4"
+                        fill="none" stroke="#10b981" strokeWidth="2"
+                        animate={{ 
+                          x: [415, 425, 415],
+                          y: [100, 80, 100],
+                          rotate: [0, -15, 0]
+                        }}
+                        style={{ transformOrigin: '430px 122px' }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                      {/* Torso to Hips */}
+                      <motion.line x1="320" y1="200" x2="320" y2="250" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      {/* Left Leg */}
+                      <motion.line x1="320" y1="250" x2="280" y2="330" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.3 }}
+                      />
+                      {/* Right Leg */}
+                      <motion.line x1="320" y1="250" x2="360" y2="330" stroke="#22d3ee" strokeWidth="3"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 1.5, repeat: Infinity, delay: 0.4 }}
+                      />
+                      {/* Joint Dots */}
+                      {[
+                        { cx: 320, cy: 120, delay: 0 },    // Head
+                        { cx: 270, cy: 160, delay: 0.1 },  // Left shoulder
+                        { cx: 370, cy: 160, delay: 0.1 },  // Right shoulder
+                        { cx: 240, cy: 220, delay: 0.2 },  // Left hand
+                        { cx: 320, cy: 250, delay: 0.3 },  // Hip
+                        { cx: 280, cy: 330, delay: 0.4 },  // Left foot
+                        { cx: 360, cy: 330, delay: 0.4 },  // Right foot
+                      ].map((joint, i) => (
+                        <motion.circle
+                          key={i}
+                          cx={joint.cx} cy={joint.cy} r="6"
+                          fill="#22d3ee"
+                          animate={{
+                            scale: [1, 1.3, 1],
+                            opacity: [0.7, 1, 0.7],
+                            filter: ['drop-shadow(0 0 4px #22d3ee)', 'drop-shadow(0 0 12px #22d3ee)', 'drop-shadow(0 0 4px #22d3ee)']
+                          }}
+                          transition={{ duration: 1.5, repeat: Infinity, delay: joint.delay }}
+                        />
+                      ))}
+                      {/* Paddle arm joint - Green */}
+                      <motion.circle
+                        cx="420" cy="130" r="6"
+                        fill="#10b981"
+                        animate={{
+                          cx: [420, 430, 420],
+                          cy: [130, 110, 130],
+                          scale: [1, 1.4, 1],
+                          filter: ['drop-shadow(0 0 4px #10b981)', 'drop-shadow(0 0 15px #10b981)', 'drop-shadow(0 0 4px #10b981)']
+                        }}
+                        transition={{ duration: 1, repeat: Infinity }}
+                      />
+                    </g>
+                  </svg>
                 </div>
 
                 {/* Analysis results cards */}
