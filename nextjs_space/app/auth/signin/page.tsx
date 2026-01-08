@@ -5,74 +5,60 @@ import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma as db } from "@/lib/db"
 import SignInForm from "@/components/auth/signin-form"
-import PremiumIntroVideo from "@/components/intro/premium-intro-video"
+import Link from "next/link"
 
 export default async function SignInPage() {
   const session = await getServerSession(authOptions)
   
   if (session?.user) {
-    console.log('[SignIn] User already logged in, checking onboarding status:', session.user.id)
-    
-    // Check if user has completed onboarding
     const user = await db.user.findUnique({
       where: { id: session.user.id },
-      select: { 
-        onboardingCompleted: true,
-        onboardingCompletedAt: true,
-        email: true 
-      }
+      select: { onboardingCompleted: true }
     })
     
-    console.log('[SignIn] User onboarding check:', {
-      id: session.user.id,
-      email: user?.email,
-      onboardingCompleted: user?.onboardingCompleted,
-      onboardingCompletedAt: user?.onboardingCompletedAt
-    })
-    
-    // Redirect to appropriate page based on onboarding status
     if (user?.onboardingCompleted) {
-      console.log('[SignIn] Redirecting to /dashboard')
       redirect("/dashboard")
     } else {
-      console.log('[SignIn] Redirecting to /onboarding')
       redirect("/onboarding")
     }
   }
-  
-  console.log('[SignIn] No session, showing signin form')
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-      {/* Premium Intro Video Section */}
-      <div className="relative w-full">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <PremiumIntroVideo 
-            variant="compact"
-            autoPlay={true}
-            className="rounded-2xl shadow-2xl ring-1 ring-white/10"
-          />
-        </div>
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex flex-col">
+      {/* Header */}
+      <header className="p-4">
+        <Link href="/" className="flex items-center gap-2">
+          <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-cyan-500 rounded-xl flex items-center justify-center">
+            <span className="text-white font-bold text-lg">🏓</span>
+          </div>
+          <span className="text-xl font-bold text-white">Mindful Champion</span>
+        </Link>
+      </header>
 
-      {/* Welcome Back Message */}
-      <div className="max-w-7xl mx-auto px-4 py-3">
-        <div className="text-center mb-4">
-          <h1 className="text-2xl lg:text-3xl font-bold text-white mb-2">
-            Welcome Back, Champion! 🏓
-          </h1>
-          <p className="text-base text-white/80">
-            Continue your AI-powered pickleball journey
-          </p>
-        </div>
-      </div>
-
-      {/* Sign In Form Section */}
-      <div className="max-w-7xl mx-auto px-4 pb-8">
-        <div className="flex justify-center">
+      {/* Main Content */}
+      <main className="flex-1 flex items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md">
+          {/* Hero Text */}
+          <div className="text-center mb-8">
+            <h1 className="text-3xl sm:text-4xl font-black text-white mb-3">
+              Welcome Back, <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">Champion</span> 🏓
+            </h1>
+            <p className="text-slate-300 text-lg">
+              Your AI coach is ready when you are.
+            </p>
+          </div>
+          
+          {/* Sign In Form */}
           <SignInForm />
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="p-4 text-center">
+        <p className="text-slate-500 text-sm">
+          © 2026 Mindful Champion. Level up your pickleball game.
+        </p>
+      </footer>
     </div>
   )
 }
