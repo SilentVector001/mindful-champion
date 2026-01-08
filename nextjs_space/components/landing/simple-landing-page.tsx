@@ -53,7 +53,7 @@ export default function SimpleLandingPage() {
         {/* Hero Background Image */}
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=1920&q=80"
+            src="https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/XBVPUTRQVYI6VEYTNS5ITMNZ7M.jpg&w=1600&h=900"
             alt="Pickleball players competing in an intense match"
             fill
             className="object-cover opacity-70"
@@ -171,8 +171,8 @@ export default function SimpleLandingPage() {
                 </motion.div>
                 <div className="relative aspect-video">
                   <Image
-                    src="https://images.unsplash.com/photo-1761644658016-324918bc373c?w=600&q=80"
-                    alt="Pickleball players in action on court"
+                    src="https://www.washingtonpost.com/wp-apps/imrs.php?src=https://arc-anglerfish-washpost-prod-washpost.s3.amazonaws.com/public/XBVPUTRQVYI6VEYTNS5ITMNZ7M.jpg&w=600&h=400"
+                    alt="Female pickleball player in action"
                     fill
                     className="rounded-xl object-cover"
                   />
