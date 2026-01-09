@@ -148,3 +148,4 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 })
   }
 }
+// Rebuild trigger Fri Jan  9 14:00:26 UTC 2026
