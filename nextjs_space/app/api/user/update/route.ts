@@ -17,26 +17,43 @@ export async function PUT(req: NextRequest) {
     const {
       firstName,
       lastName,
+      phone,
       playerRating,
       skillLevel,
       timezone,
       avatarName,
-      avatarVoiceEnabled
+      avatarVoiceEnabled,
+      emailGoalReminders,
+      emailWeeklyProgress,
+      emailTournamentAlerts,
+      emailCoachTips
     } = await req.json()
+
+    // Build update data, only including defined fields
+    const updateData: any = { updatedAt: new Date() }
+    if (firstName !== undefined) updateData.firstName = firstName
+    if (lastName !== undefined) updateData.lastName = lastName
+    if (phone !== undefined) updateData.phone = phone
+    if (playerRating !== undefined) updateData.playerRating = playerRating
+    if (skillLevel !== undefined) updateData.skillLevel = skillLevel
+    if (timezone !== undefined) updateData.timezone = timezone
+    if (avatarName !== undefined) updateData.avatarName = avatarName
+    if (avatarVoiceEnabled !== undefined) updateData.avatarVoiceEnabled = avatarVoiceEnabled
+    // Store email preferences in notificationPreferences JSON field
+    if (emailGoalReminders !== undefined || emailWeeklyProgress !== undefined || 
+        emailTournamentAlerts !== undefined || emailCoachTips !== undefined) {
+      updateData.notificationPreferences = {
+        emailGoalReminders: emailGoalReminders ?? true,
+        emailWeeklyProgress: emailWeeklyProgress ?? true,
+        emailTournamentAlerts: emailTournamentAlerts ?? true,
+        emailCoachTips: emailCoachTips ?? true
+      }
+    }
 
     // Update user profile
     const updatedUser = await prisma.user.update({
       where: { id: session.user.id },
-      data: {
-        firstName: firstName || undefined,
-        lastName: lastName || undefined,
-        playerRating: playerRating || undefined,
-        skillLevel: skillLevel || undefined,
-        timezone: timezone || undefined,
-        avatarName: avatarName || undefined,
-        avatarVoiceEnabled: avatarVoiceEnabled !== undefined ? avatarVoiceEnabled : undefined,
-        updatedAt: new Date()
-      }
+      data: updateData
     })
 
     return NextResponse.json({ 
