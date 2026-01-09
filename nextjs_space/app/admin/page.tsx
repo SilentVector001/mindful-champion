@@ -117,11 +117,24 @@ export default async function AdminPage() {
   const revenueTrend = calculatePercentChange(totalRevenue, previousRevenue)
   const matchesTrend = calculatePercentChange(matches, previousMatches)
 
-  // Fetch email logs
-  const emailLogs = await prisma.emailLog.findMany({
-    orderBy: { sentAt: 'desc' },
-    take: 50
-  })
+  // Fetch email notifications (email logs)
+  let emailLogs: any[] = []
+  try {
+    emailLogs = await prisma.emailNotification.findMany({
+      orderBy: { sentAt: 'desc' },
+      take: 50,
+      select: {
+        id: true,
+        type: true,
+        status: true,
+        sentAt: true,
+        userId: true,
+        metadata: true
+      }
+    })
+  } catch (e) {
+    console.error('Failed to fetch email logs:', e)
+  }
 
   const adminData = {
     stats: {
