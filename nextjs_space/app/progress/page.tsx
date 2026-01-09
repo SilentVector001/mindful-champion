@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import ProgressPage from "@/components/pages/progress-page"
+import EnhancedProgressPage from "@/components/pages/enhanced-progress-page"
 
 export default async function Progress() {
   const session = await getServerSession(authOptions)
@@ -28,6 +28,13 @@ export default async function Progress() {
       MentalSession: {
         orderBy: { createdAt: 'desc' },
         take: 10
+      },
+      Goal: {
+        include: { Milestone: true },
+        orderBy: { createdAt: 'desc' }
+      },
+      UserAchievement: {
+        include: { Achievement: true }
       }
     }
   })
@@ -36,5 +43,5 @@ export default async function Progress() {
     redirect("/auth/signin")
   }
 
-  return <ProgressPage user={userData} />
+  return <EnhancedProgressPage user={userData} />
 }
