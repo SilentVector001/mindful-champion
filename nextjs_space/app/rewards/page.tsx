@@ -102,7 +102,7 @@ const marketplaceRewards = [
     description: '6-pack of indoor/outdoor pickleballs',
     points: 500,
     tier: 'BRONZE',
-    image: 'https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=400&h=300&fit=crop',
     available: true
   },
   {
@@ -111,7 +111,7 @@ const marketplaceRewards = [
     description: 'Premium overgrip for better control',
     points: 750,
     tier: 'BRONZE',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=300&fit=crop',
     available: true
   },
   {
@@ -120,7 +120,7 @@ const marketplaceRewards = [
     description: 'Moisture-wicking performance wristbands',
     points: 1000,
     tier: 'SILVER',
-    image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&h=300&fit=crop',
     available: true
   },
   {
@@ -129,7 +129,7 @@ const marketplaceRewards = [
     description: 'Spacious bag for all your gear',
     points: 2000,
     tier: 'GOLD',
-    image: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1622260614153-03223fb72052?w=400&h=300&fit=crop',
     available: false,
     comingSoon: true
   },
@@ -139,7 +139,7 @@ const marketplaceRewards = [
     description: '1-hour with certified coach',
     points: 5000,
     tier: 'PLATINUM',
-    image: 'https://images.unsplash.com/photo-1526232761682-d26e03ac148e?w=400&h=300&fit=crop',
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
     available: false,
     comingSoon: true
   },

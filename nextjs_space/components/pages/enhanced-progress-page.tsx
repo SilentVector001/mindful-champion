@@ -406,95 +406,197 @@ export default function EnhancedProgressPage({ user }: EnhancedProgressPageProps
 
         {/* Achievements Tab */}
         {activeTab === 'achievements' && (
-          <div>
-            <div className="flex justify-between items-center mb-4">
-              <div>
-                <h2 className="text-xl font-bold text-white">Achievement Gallery</h2>
-                <p className="text-slate-400 text-sm">{unlockedAchievements} of {achievements.length} unlocked</p>
-              </div>
-              <Link href="/progress/achievements">
-                <Button variant="outline" className="border-cyan-500 text-cyan-400 hover:bg-cyan-500/10">
-                  View Full Gallery
-                </Button>
-              </Link>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {achievements.slice(0, 8).map((achievement: any) => (
-                <motion.div
-                  key={achievement.id}
-                  whileHover={{ scale: 1.02 }}
-                  className={`p-4 rounded-xl border-2 text-center ${
-                    achievement.unlocked 
-                      ? 'bg-slate-800 border-amber-500/50' 
-                      : 'bg-slate-800/50 border-slate-700 opacity-60'
-                  }`}
-                >
-                  <div className="text-4xl mb-2">{achievement.icon || '🏆'}</div>
-                  <p className={`font-medium text-sm ${achievement.unlocked ? 'text-white' : 'text-slate-500'}`}>
-                    {achievement.name}
+          <div className="space-y-6">
+            {/* Header with Explanation */}
+            <div className="bg-gradient-to-r from-purple-900/30 via-slate-800 to-amber-900/30 rounded-xl p-5 border border-purple-500/20">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <span className="text-3xl">🏆</span> Achievement Gallery
+                  </h2>
+                  <p className="text-purple-300 mt-1">{unlockedAchievements} of {achievements.length} unlocked</p>
+                  <p className="text-slate-400 text-sm mt-2 max-w-xl">
+                    Achievements are badges you earn by completing specific milestones like uploading videos, 
+                    winning matches, or maintaining streaks. Each achievement awards <span className="text-amber-400 font-semibold">Reward Points</span> you can 
+                    spend in the <Link href="/rewards" className="text-cyan-400 hover:underline">Rewards Marketplace</Link>!
                   </p>
-                  <p className="text-xs text-slate-400 mt-1">{achievement.points} pts</p>
-                  {achievement.unlocked && (
-                    <Badge className="mt-2 bg-emerald-500/20 text-emerald-400 text-xs">Unlocked</Badge>
-                  )}
-                </motion.div>
-              ))}
+                </div>
+                <Link href="/progress/achievements">
+                  <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-500/30">
+                    View Full Gallery →
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            {/* Achievement Grid - Enhanced with Colors */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {achievements.slice(0, 8).map((achievement: any, index: number) => {
+                const tierGradients: Record<string, string> = {
+                  BRONZE: 'from-orange-600/20 to-amber-700/20 border-orange-500/50',
+                  SILVER: 'from-slate-400/20 to-gray-500/20 border-slate-400/50',
+                  GOLD: 'from-yellow-500/20 to-amber-500/20 border-yellow-500/50',
+                  PLATINUM: 'from-cyan-400/20 to-purple-500/20 border-cyan-400/50',
+                };
+                const tier = achievement.tier || 'BRONZE';
+                const gradient = tierGradients[tier] || tierGradients.BRONZE;
+                
+                return (
+                  <motion.div
+                    key={achievement.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.05, y: -4 }}
+                    className={`relative p-4 rounded-xl border-2 text-center transition-all ${
+                      achievement.unlocked 
+                        ? `bg-gradient-to-br ${gradient} shadow-lg` 
+                        : 'bg-slate-800/30 border-slate-700/50 opacity-50'
+                    }`}
+                  >
+                    {achievement.unlocked && (
+                      <motion.div
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                        className="absolute -top-2 -right-2 w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center"
+                      >
+                        <span className="text-white text-xs">✓</span>
+                      </motion.div>
+                    )}
+                    <motion.div 
+                      className="text-5xl mb-3"
+                      animate={achievement.unlocked ? { rotate: [0, 5, -5, 0] } : {}}
+                      transition={{ duration: 3, repeat: Infinity }}
+                    >
+                      {achievement.icon || '🏆'}
+                    </motion.div>
+                    <p className={`font-semibold text-sm ${achievement.unlocked ? 'text-white' : 'text-slate-500'}`}>
+                      {achievement.name}
+                    </p>
+                    <p className={`text-xs mt-1 font-bold ${achievement.unlocked ? 'text-amber-400' : 'text-slate-600'}`}>
+                      +{achievement.points} pts
+                    </p>
+                    {achievement.tier && achievement.unlocked && (
+                      <span className={`inline-block mt-2 text-xs px-2 py-0.5 rounded-full ${
+                        tier === 'GOLD' ? 'bg-yellow-500/30 text-yellow-300' :
+                        tier === 'SILVER' ? 'bg-slate-400/30 text-slate-200' :
+                        tier === 'PLATINUM' ? 'bg-cyan-500/30 text-cyan-300' :
+                        'bg-orange-500/30 text-orange-300'
+                      }`}>
+                        {tier}
+                      </span>
+                    )}
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
         )}
 
         {/* Rewards Tab */}
         {activeTab === 'rewards' && (
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Gift className="w-5 h-5 text-purple-400" />
-                Rewards & Milestones
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="mb-6">
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-slate-400">Your Points</p>
-                  <p className="text-2xl font-bold text-amber-400">{totalPoints.toLocaleString()}</p>
+          <div className="space-y-6">
+            {/* Header with Explanation */}
+            <div className="bg-gradient-to-r from-amber-900/30 via-slate-800 to-orange-900/30 rounded-xl p-5 border border-amber-500/20">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-white flex items-center gap-2">
+                    <span className="text-3xl">🎁</span> Rewards & Milestones
+                  </h2>
+                  <p className="text-amber-300 mt-1">Your Points: <span className="font-bold text-2xl">{totalPoints.toLocaleString()}</span></p>
+                  <p className="text-slate-400 text-sm mt-2 max-w-xl">
+                    Earn points by unlocking achievements, completing training, and logging matches. 
+                    Redeem your points for exclusive pickleball gear and perks in the Marketplace!
+                  </p>
                 </div>
-                <Progress value={progressToNextReward} className="h-3 bg-slate-700" />
-                <p className="text-slate-500 text-sm mt-2">Next: {nextReward?.name} ({nextReward?.points.toLocaleString()} pts)</p>
+                <Link href="/rewards">
+                  <Button className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white shadow-lg shadow-amber-500/30">
+                    Visit Rewards Hub →
+                  </Button>
+                </Link>
               </div>
-              
-              <div className="space-y-3">
-                {rewards.map((reward, i) => (
-                  <div 
-                    key={reward.id}
-                    className={`flex items-center gap-4 p-4 rounded-lg border-2 ${
-                      reward.unlocked 
-                        ? 'bg-gradient-to-r from-amber-500/10 to-orange-500/10 border-amber-500/50' 
-                        : 'bg-slate-700/30 border-slate-700'
-                    }`}
+            </div>
+
+            {/* Progress to Next Milestone */}
+            <Card className="bg-slate-800/50 border-slate-700">
+              <CardContent className="pt-6">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-white font-medium">Progress to Next Milestone</p>
+                  <p className="text-amber-400 font-bold">{progressToNextReward.toFixed(0)}%</p>
+                </div>
+                <div className="h-4 bg-slate-700 rounded-full overflow-hidden">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progressToNextReward}%` }}
+                    className="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"
+                  />
+                </div>
+                <p className="text-slate-400 text-sm mt-2">
+                  Next: <span className="text-white">{nextReward?.name}</span> ({nextReward?.points.toLocaleString()} pts)
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Point Milestones */}
+            <div className="space-y-3">
+              {rewards.map((reward, i) => (
+                <motion.div 
+                  key={reward.id}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.1 }}
+                  className={`flex items-center gap-4 p-4 rounded-xl border-2 transition-all ${
+                    reward.unlocked 
+                      ? 'bg-gradient-to-r from-amber-500/15 to-orange-500/15 border-amber-500/50 shadow-lg shadow-amber-500/10' 
+                      : 'bg-slate-800/30 border-slate-700/50'
+                  }`}
+                >
+                  <motion.div 
+                    className={`text-4xl ${!reward.unlocked && 'grayscale opacity-40'}`}
+                    animate={reward.unlocked ? { scale: [1, 1.1, 1] } : {}}
+                    transition={{ duration: 2, repeat: Infinity }}
                   >
-                    <div className={`text-3xl ${!reward.unlocked && 'grayscale opacity-50'}`}>
-                      {reward.icon}
-                    </div>
-                    <div className="flex-1">
-                      <p className={`font-medium ${reward.unlocked ? 'text-white' : 'text-slate-400'}`}>
-                        {reward.name}
-                      </p>
-                      <p className="text-slate-500 text-sm">{reward.points.toLocaleString()} points</p>
-                    </div>
-                    {reward.unlocked ? (
-                      <Badge className="bg-emerald-500/20 text-emerald-400">
-                        <CheckCircle2 className="w-3 h-3 mr-1" /> Claimed
-                      </Badge>
-                    ) : (
-                      <Badge className="bg-slate-600 text-slate-300">
-                        {(reward.points - totalPoints).toLocaleString()} to go
-                      </Badge>
-                    )}
+                    {reward.icon}
+                  </motion.div>
+                  <div className="flex-1">
+                    <p className={`font-semibold ${reward.unlocked ? 'text-white' : 'text-slate-400'}`}>
+                      {reward.name}
+                    </p>
+                    <p className={`text-sm ${reward.unlocked ? 'text-amber-400' : 'text-slate-500'}`}>
+                      {reward.points.toLocaleString()} points
+                    </p>
                   </div>
-                ))}
+                  {reward.unlocked ? (
+                    <Badge className="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1">
+                      <CheckCircle2 className="w-4 h-4 mr-1" /> Unlocked
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-slate-700/50 text-slate-300 px-3 py-1">
+                      {(reward.points - totalPoints).toLocaleString()} to go
+                    </Badge>
+                  )}
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Link to Goals */}
+            <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Target className="w-6 h-6 text-cyan-400" />
+                <div>
+                  <p className="text-white font-medium">Want to track specific goals?</p>
+                  <p className="text-slate-400 text-sm">Set custom goals in the Goals tab</p>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+              <Button 
+                variant="outline" 
+                onClick={() => setActiveTab('goals')}
+                className="border-cyan-500/50 text-cyan-400 hover:bg-cyan-500/10"
+              >
+                Go to Goals →
+              </Button>
+            </div>
+          </div>
         )}
       </div>
     </div>
