@@ -2471,7 +2471,7 @@ model VideoAnalysis {
   description                                String?
   fileName                                   String
   fileSize                                   Int
-  duration                                   Int
+  duration                                   Int                    @default(0)
   uploadedAt                                 DateTime               @default(now())
   analyzedAt                                 DateTime?
   analysisStatus                             VideoAnalysisStatus    @default(PENDING)
