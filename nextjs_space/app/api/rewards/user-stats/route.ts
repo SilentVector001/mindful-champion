@@ -41,6 +41,7 @@ export async function GET() {
       },
       // Keep backward compatibility
       points: user.rewardPoints,
+      lifetimePoints: user.rewardPoints || 0, // For tier calculation
       achievements: user.achievementStats?.totalAchievements || 0,
     });
   } catch (error) {
