@@ -30,6 +30,7 @@ import {
   Map,
   CalendarDays,
   X,
+  Sparkles,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,11 +38,11 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { formatPrizeMoney } from "@/lib/utils/currency"
+import { ALL_TOURNAMENTS, calculateTournamentStats } from "@/lib/tournaments-data"
 
 // SWR fetcher
 const fetcher = (url: string) => fetch(url).then(res => res.json())
 
-// State type
 interface StateData {
   abbr: string
   name: string
@@ -68,42 +69,60 @@ interface Tournament {
   skillLevels?: string[]
 }
 
-interface TournamentStats {
-  totalTournaments: number
-  totalPrize: number
-  statesCovered: number
-  majorEvents?: number
-}
-
 // US States for the map
-const US_STATES: { abbr: string; name: string }[] = [
-  { abbr: 'AL', name: 'Alabama' }, { abbr: 'AK', name: 'Alaska' }, { abbr: 'AZ', name: 'Arizona' },
-  { abbr: 'AR', name: 'Arkansas' }, { abbr: 'CA', name: 'California' }, { abbr: 'CO', name: 'Colorado' },
-  { abbr: 'CT', name: 'Connecticut' }, { abbr: 'DE', name: 'Delaware' }, { abbr: 'FL', name: 'Florida' },
-  { abbr: 'GA', name: 'Georgia' }, { abbr: 'HI', name: 'Hawaii' }, { abbr: 'ID', name: 'Idaho' },
-  { abbr: 'IL', name: 'Illinois' }, { abbr: 'IN', name: 'Indiana' }, { abbr: 'IA', name: 'Iowa' },
-  { abbr: 'KS', name: 'Kansas' }, { abbr: 'KY', name: 'Kentucky' }, { abbr: 'LA', name: 'Louisiana' },
-  { abbr: 'ME', name: 'Maine' }, { abbr: 'MD', name: 'Maryland' }, { abbr: 'MA', name: 'Massachusetts' },
-  { abbr: 'MI', name: 'Michigan' }, { abbr: 'MN', name: 'Minnesota' }, { abbr: 'MS', name: 'Mississippi' },
-  { abbr: 'MO', name: 'Missouri' }, { abbr: 'MT', name: 'Montana' }, { abbr: 'NE', name: 'Nebraska' },
-  { abbr: 'NV', name: 'Nevada' }, { abbr: 'NH', name: 'New Hampshire' }, { abbr: 'NJ', name: 'New Jersey' },
-  { abbr: 'NM', name: 'New Mexico' }, { abbr: 'NY', name: 'New York' }, { abbr: 'NC', name: 'North Carolina' },
-  { abbr: 'ND', name: 'North Dakota' }, { abbr: 'OH', name: 'Ohio' }, { abbr: 'OK', name: 'Oklahoma' },
-  { abbr: 'OR', name: 'Oregon' }, { abbr: 'PA', name: 'Pennsylvania' }, { abbr: 'RI', name: 'Rhode Island' },
-  { abbr: 'SC', name: 'South Carolina' }, { abbr: 'SD', name: 'South Dakota' }, { abbr: 'TN', name: 'Tennessee' },
-  { abbr: 'TX', name: 'Texas' }, { abbr: 'UT', name: 'Utah' }, { abbr: 'VT', name: 'Vermont' },
-  { abbr: 'VA', name: 'Virginia' }, { abbr: 'WA', name: 'Washington' }, { abbr: 'WV', name: 'West Virginia' },
-  { abbr: 'WI', name: 'Wisconsin' }, { abbr: 'WY', name: 'Wyoming' }
-]
-
-// Helper for registration URLs
-const getRegistrationUrl = (tournament?: Tournament) => {
-  if (tournament?.registrationUrl) return tournament.registrationUrl
-  if (tournament?.type?.startsWith('app')) return "https://www.theapp.global/tour"
-  return "https://ppatour.com/schedule/"
+const US_STATES_MAP: Record<string, string> = {
+  'AL': 'Alabama', 'AK': 'Alaska', 'AZ': 'Arizona', 'AR': 'Arkansas', 'CA': 'California',
+  'CO': 'Colorado', 'CT': 'Connecticut', 'DE': 'Delaware', 'FL': 'Florida', 'GA': 'Georgia',
+  'HI': 'Hawaii', 'ID': 'Idaho', 'IL': 'Illinois', 'IN': 'Indiana', 'IA': 'Iowa',
+  'KS': 'Kansas', 'KY': 'Kentucky', 'LA': 'Louisiana', 'ME': 'Maine', 'MD': 'Maryland',
+  'MA': 'Massachusetts', 'MI': 'Michigan', 'MN': 'Minnesota', 'MS': 'Mississippi', 'MO': 'Missouri',
+  'MT': 'Montana', 'NE': 'Nebraska', 'NV': 'Nevada', 'NH': 'New Hampshire', 'NJ': 'New Jersey',
+  'NM': 'New Mexico', 'NY': 'New York', 'NC': 'North Carolina', 'ND': 'North Dakota', 'OH': 'Ohio',
+  'OK': 'Oklahoma', 'OR': 'Oregon', 'PA': 'Pennsylvania', 'RI': 'Rhode Island', 'SC': 'South Carolina',
+  'SD': 'South Dakota', 'TN': 'Tennessee', 'TX': 'Texas', 'UT': 'Utah', 'VT': 'Vermont',
+  'VA': 'Virginia', 'WA': 'Washington', 'WV': 'West Virginia', 'WI': 'Wisconsin', 'WY': 'Wyoming'
 }
 
-// Format date nicely
+// Tour colors for branding
+const TOUR_COLORS: Record<string, { bg: string; text: string; border: string; gradient: string; name: string }> = {
+  'ppa': { bg: 'bg-orange-500/20', text: 'text-orange-400', border: 'border-orange-500/40', gradient: 'from-orange-500 to-amber-500', name: 'PPA Tour' },
+  'app': { bg: 'bg-cyan-500/20', text: 'text-cyan-400', border: 'border-cyan-500/40', gradient: 'from-cyan-500 to-blue-500', name: 'APP Tour' },
+  'mlp': { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/40', gradient: 'from-purple-500 to-pink-500', name: 'MLP' },
+  'usap': { bg: 'bg-red-500/20', text: 'text-red-400', border: 'border-red-500/40', gradient: 'from-red-500 to-rose-500', name: 'USA Pickleball' },
+}
+
+// Get tour info from type
+const getTourInfo = (type?: string) => {
+  if (!type) return { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/40', gradient: 'from-slate-500 to-gray-500', name: 'Event' }
+  const tour = type.split('-')[0].toLowerCase()
+  return TOUR_COLORS[tour] || { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/40', gradient: 'from-slate-500 to-gray-500', name: 'Event' }
+}
+
+// Get tier badge
+const getTierBadge = (tier?: string, type?: string) => {
+  if (tier === 'major' || type?.includes('major')) {
+    return { bg: 'bg-yellow-500/30', text: 'text-yellow-300', border: 'border-yellow-400/50', label: '🏆 Major', glow: 'shadow-yellow-500/30' }
+  }
+  if (tier === 'open' || type?.includes('open')) {
+    return { bg: 'bg-emerald-500/20', text: 'text-emerald-400', border: 'border-emerald-500/40', label: 'Open', glow: '' }
+  }
+  if (tier === 'challenger' || type?.includes('challenger')) {
+    return { bg: 'bg-violet-500/20', text: 'text-violet-400', border: 'border-violet-500/40', label: 'Challenger', glow: '' }
+  }
+  if (type?.includes('nextgen')) {
+    return { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/40', label: 'Next Gen', glow: '' }
+  }
+  return { bg: 'bg-slate-500/20', text: 'text-slate-400', border: 'border-slate-500/40', label: 'Event', glow: '' }
+}
+
+// Helper to extract state from location
+const extractState = (location?: string) => {
+  if (!location) return null
+  const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/)
+  return match ? match[1] : null
+}
+
+// Format date
 const formatDate = (startDate: string, endDate?: string) => {
   if (!startDate) return 'Date TBA'
   const start = new Date(startDate)
@@ -121,21 +140,11 @@ const formatDate = (startDate: string, endDate?: string) => {
   return `${month} ${day}, ${year}`
 }
 
-// Get tier badge color
-const getTierBadge = (tier?: string, type?: string) => {
-  if (tier === 'major' || type?.includes('major')) {
-    return { bg: 'bg-yellow-500/20', text: 'text-yellow-400', border: 'border-yellow-500/30', label: 'Major' }
-  }
-  if (tier === 'open' || type?.includes('open')) {
-    return { bg: 'bg-blue-500/20', text: 'text-blue-400', border: 'border-blue-500/30', label: 'Open' }
-  }
-  if (tier === 'challenger' || type?.includes('challenger')) {
-    return { bg: 'bg-purple-500/20', text: 'text-purple-400', border: 'border-purple-500/30', label: 'Challenger' }
-  }
-  if (type?.includes('nextgen')) {
-    return { bg: 'bg-pink-500/20', text: 'text-pink-400', border: 'border-pink-500/30', label: 'Next Gen' }
-  }
-  return { bg: 'bg-gray-500/20', text: 'text-gray-400', border: 'border-gray-500/30', label: 'Event' }
+// Registration URL helper
+const getRegistrationUrl = (tournament?: Tournament) => {
+  if (tournament?.registrationUrl) return tournament.registrationUrl
+  if (tournament?.type?.startsWith('app')) return "https://www.theapp.global/tour"
+  return "https://ppatour.com/schedule/"
 }
 
 export function TournamentHubRedesign() {
@@ -145,69 +154,58 @@ export function TournamentHubRedesign() {
   const [searchQuery, setSearchQuery] = useState("")
   const [showAllStates, setShowAllStates] = useState(false)
 
-  // SWR for state data with refresh
-  const { data: stateDataResponse, error: stateError, isLoading: statesLoading, mutate: refreshStates } = useSWR(
-    '/api/tournaments/by-state',
-    fetcher,
-    { refreshInterval: 300000, revalidateOnFocus: true } // 5 min refresh
-  )
+  // Use static data for states (more reliable)
+  const computeStateData = useCallback(() => {
+    const stateCounts: Record<string, number> = {}
+    ALL_TOURNAMENTS.forEach(t => {
+      const state = extractState(t.location)
+      if (state && US_STATES_MAP[state]) {
+        stateCounts[state] = (stateCounts[state] || 0) + 1
+      }
+    })
+    return Object.entries(stateCounts)
+      .map(([abbr, count]) => ({ abbr, name: US_STATES_MAP[abbr], events: count }))
+      .filter(s => s.events > 0)
+      .sort((a, b) => b.events - a.events)
+  }, [])
 
-  // SWR for tournaments with refresh
-  const { data: tournamentsResponse, error: tournamentsError, isLoading: tournamentsLoading, mutate: refreshTournaments } = useSWR(
-    '/api/tournaments/all-upcoming',
-    fetcher,
-    { refreshInterval: 300000, revalidateOnFocus: true }
-  )
+  const stateData = computeStateData()
+  const tournaments = ALL_TOURNAMENTS
+  const stats = calculateTournamentStats()
 
-  // SWR for stats
-  const { data: statsResponse } = useSWR('/api/tournaments/stats', fetcher, { refreshInterval: 600000 })
+  // Display states
+  const displayStates = showAllStates ? stateData : stateData.slice(0, 12)
 
-  const stateData: StateData[] = stateDataResponse?.states || []
-  const tournaments: Tournament[] = tournamentsResponse?.tournaments || []
-  const stats: TournamentStats = statsResponse || { totalTournaments: 0, totalPrize: 0, statesCovered: 0 }
-  const lastUpdated = stateDataResponse?.lastUpdated || tournamentsResponse?.lastUpdated || new Date().toISOString()
-
-  // Filter states with events only
-  const activeStates = stateData.filter(s => s.events > 0).sort((a, b) => b.events - a.events)
-  const displayStates = showAllStates ? activeStates : activeStates.slice(0, 12)
-
-  // Gradient calculation
-  const minEvents = activeStates.length > 0 ? Math.min(...activeStates.map(s => s.events)) : 1
-  const maxEvents = activeStates.length > 0 ? Math.max(...activeStates.map(s => s.events)) : 1
+  // Gradient based on event count
+  const maxEvents = stateData.length > 0 ? Math.max(...stateData.map(s => s.events)) : 1
+  const minEvents = stateData.length > 0 ? Math.min(...stateData.map(s => s.events)) : 1
 
   const getStateGradient = useCallback((eventCount: number) => {
     const normalized = maxEvents > minEvents ? (eventCount - minEvents) / (maxEvents - minEvents) : 0.5
     
     if (normalized < 0.25) {
-      return { from: "from-indigo-600/80", to: "to-blue-500/80", ring: "ring-indigo-500/30" }
+      return { from: "from-indigo-600", to: "to-blue-500", ring: "ring-indigo-500/40" }
     } else if (normalized < 0.5) {
-      return { from: "from-cyan-500/80", to: "to-teal-500/80", ring: "ring-cyan-500/30" }
+      return { from: "from-cyan-500", to: "to-teal-500", ring: "ring-cyan-500/40" }
     } else if (normalized < 0.75) {
-      return { from: "from-emerald-500/80", to: "to-green-500/80", ring: "ring-emerald-500/40" }
+      return { from: "from-emerald-500", to: "to-green-400", ring: "ring-emerald-500/50" }
     } else {
-      return { from: "from-amber-500/90", to: "to-orange-500/90", ring: "ring-orange-500/50" }
+      return { from: "from-amber-400", to: "to-orange-500", ring: "ring-orange-500/60" }
     }
   }, [minEvents, maxEvents])
 
-  // Helper to extract state from location
-  const extractStateFromLocation = (location?: string) => {
-    if (!location) return null
-    const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/)
-    return match ? match[1] : null
-  }
-
   // Filter tournaments
   const filteredTournaments = tournaments.filter(t => {
-    // State filter - use state field or extract from location (same as API)
+    // State filter
     if (selectedState) {
-      const tournamentState = (t.state || extractStateFromLocation(t.location))?.toUpperCase()
+      const tournamentState = extractState(t.location)
       if (tournamentState !== selectedState) return false
     }
     // Type filter
     if (selectedType !== 'all') {
-      if (selectedType === 'pro' && !['major', 'open'].includes(t.tier || '')) return false
-      if (selectedType === 'amateur' && !['amateur', 'challenger'].includes(t.tier || '')) return false
-      if (selectedType === 'junior' && !t.type?.includes('nextgen')) return false
+      if (selectedType === 'ppa' && !t.type?.startsWith('ppa')) return false
+      if (selectedType === 'app' && !t.type?.startsWith('app')) return false
+      if (selectedType === 'major' && t.tier !== 'major') return false
     }
     // Search filter
     if (searchQuery) {
@@ -217,7 +215,7 @@ export function TournamentHubRedesign() {
              t.venue?.toLowerCase().includes(query)
     }
     return true
-  })
+  }).sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime())
 
   const handleStateClick = (abbr: string) => {
     setSelectedState(abbr === selectedState ? null : abbr)
@@ -226,80 +224,117 @@ export function TournamentHubRedesign() {
     }, 100)
   }
 
-  const handleRefresh = () => {
-    refreshStates()
-    refreshTournaments()
-  }
-
   return (
     <div className="min-h-screen pb-20">
-      {/* Hero Section with Map */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-950">
-        {/* Background effects */}
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+        {/* Animated background effects */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-champion-green/10 rounded-full blur-[100px]" />
-          <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-champion-gold/10 rounded-full blur-[100px]" />
+          <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 rounded-full blur-[120px] animate-pulse" />
+          <div className="absolute bottom-0 right-1/4 w-[400px] h-[400px] bg-gradient-to-r from-orange-500/15 to-amber-500/15 rounded-full blur-[100px] animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-[150px] animate-pulse" style={{ animationDelay: '2s' }} />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 pt-8 pb-12">
-          {/* Header with Last Updated */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-            <div className="text-center sm:text-left">
-              <div className="flex items-center gap-2 justify-center sm:justify-start mb-2">
-                <Badge className="bg-champion-green/20 text-champion-green border-champion-green/30">
-                  <Map className="w-3 h-3 mr-1" />
-                  Interactive Map
-                </Badge>
-                <Badge variant="outline" className="border-white/20 text-gray-400">
-                  <Clock className="w-3 h-3 mr-1" />
-                  Updated {new Date(lastUpdated).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </Badge>
-              </div>
-              <h1 className="text-3xl md:text-5xl font-bold text-white">
-                Tournament <span className="bg-gradient-to-r from-champion-green to-champion-gold bg-clip-text text-transparent">Hub</span>
-              </h1>
-              <p className="text-gray-400 mt-2">Click a state to explore upcoming tournaments</p>
-            </div>
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm"
-              className="border-white/20 text-gray-300 hover:bg-white/10"
+          {/* Header */}
+          <div className="text-center mb-10">
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center justify-center gap-3 mb-4"
             >
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Refresh
-            </Button>
+              <Badge className="bg-gradient-to-r from-cyan-500/20 to-emerald-500/20 text-cyan-400 border-cyan-500/30 px-4 py-1.5">
+                <Sparkles className="w-4 h-4 mr-2 animate-pulse" />
+                {stats.totalTournaments} Events Nationwide
+              </Badge>
+            </motion.div>
+            <h1 className="text-4xl md:text-6xl font-black text-white mb-3">
+              Tournament{' '}
+              <span className="bg-gradient-to-r from-cyan-400 via-emerald-400 to-amber-400 bg-clip-text text-transparent animate-gradient">
+                Hub
+              </span>
+            </h1>
+            <p className="text-lg text-gray-400 max-w-2xl mx-auto">
+              Discover professional and amateur pickleball tournaments across the nation
+            </p>
           </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {/* Stats Row - Enhanced */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
             {[
-              { label: "Events", value: stats.totalTournaments || tournaments.length, icon: Calendar },
-              { label: "States", value: activeStates.length, icon: Globe },
-              { label: "Prize Pool", value: stats.totalPrize ? formatPrizeMoney(stats.totalPrize) : "$2M+", icon: DollarSign },
-              { label: "Majors", value: stats.majorEvents || tournaments.filter(t => t.tier === 'major').length, icon: Trophy },
-            ].map((stat) => (
-              <div key={stat.label} className="bg-white/5 backdrop-blur rounded-xl p-3 border border-white/10 text-center">
-                <stat.icon className="w-4 h-4 text-champion-green mx-auto mb-1" />
-                <div className="text-xl md:text-2xl font-bold text-white">{stat.value}</div>
-                <div className="text-xs text-gray-500">{stat.label}</div>
-              </div>
+              { 
+                label: "Total Events", 
+                value: stats.totalTournaments, 
+                icon: Calendar, 
+                gradient: "from-cyan-500 to-blue-600",
+                glow: "shadow-cyan-500/30"
+              },
+              { 
+                label: "States", 
+                value: stateData.length, 
+                icon: Globe, 
+                gradient: "from-emerald-500 to-teal-600",
+                glow: "shadow-emerald-500/30"
+              },
+              { 
+                label: "Prize Pool", 
+                value: "$2.5M+", 
+                icon: DollarSign, 
+                gradient: "from-amber-400 to-orange-500",
+                glow: "shadow-amber-500/30",
+                blink: true
+              },
+              { 
+                label: "Major Events", 
+                value: stats.majorEvents, 
+                icon: Trophy, 
+                gradient: "from-yellow-400 to-amber-500",
+                glow: "shadow-yellow-500/30",
+                blink: true
+              },
+            ].map((stat, i) => (
+              <motion.div 
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
+                className={`relative group`}
+              >
+                <div className={`absolute inset-0 bg-gradient-to-r ${stat.gradient} rounded-2xl blur-xl opacity-30 group-hover:opacity-50 transition-opacity ${stat.blink ? 'animate-pulse' : ''}`} />
+                <div className={`relative bg-slate-900/80 backdrop-blur-xl rounded-2xl p-5 border border-white/10 hover:border-white/20 transition-all shadow-lg ${stat.glow}`}>
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mb-3 shadow-lg`}>
+                    <stat.icon className="w-6 h-6 text-white" />
+                  </div>
+                  <div className="text-3xl font-black text-white mb-1">{stat.value}</div>
+                  <div className="text-sm text-gray-400 font-medium">{stat.label}</div>
+                  {stat.blink && (
+                    <div className="absolute top-3 right-3">
+                      <span className="relative flex h-3 w-3">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </motion.div>
             ))}
           </div>
 
-          {/* Interactive State Map - HERO */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-2xl border border-white/10 p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-champion-green" />
-                States with Upcoming Events
+          {/* Interactive State Map */}
+          <div className="bg-slate-900/60 backdrop-blur-xl rounded-3xl border border-white/10 p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                Browse by State
               </h2>
               {selectedState && (
                 <Button
                   size="sm"
                   variant="ghost"
                   onClick={() => setSelectedState(null)}
-                  className="text-gray-400 hover:text-white"
+                  className="text-gray-400 hover:text-white bg-white/5 hover:bg-white/10"
                 >
                   <X className="w-4 h-4 mr-1" />
                   Clear: {selectedState}
@@ -307,298 +342,236 @@ export function TournamentHubRedesign() {
               )}
             </div>
 
-            {statesLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="w-8 h-8 text-champion-green animate-spin" />
-              </div>
-            ) : activeStates.length === 0 ? (
-              <div className="text-center py-12 text-gray-400">
-                <Globe className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p>No upcoming events found. Check back soon!</p>
-              </div>
-            ) : (
-              <>
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
-                  {displayStates.map((state) => {
-                    const gradient = getStateGradient(state.events)
-                    const isSelected = selectedState === state.abbr
-                    return (
-                      <motion.button
-                        key={state.abbr}
-                        onClick={() => handleStateClick(state.abbr)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className={`relative p-3 rounded-xl border-2 transition-all ${
-                          isSelected
-                            ? "bg-champion-green border-champion-green ring-2 ring-champion-green/50"
-                            : `bg-gradient-to-br ${gradient.from} ${gradient.to} border-white/10 hover:border-white/30 ${gradient.ring} hover:ring-2`
-                        }`}
-                      >
-                        <div className={`text-lg font-bold ${isSelected ? 'text-white' : 'text-white'}`}>
-                          {state.abbr}
-                        </div>
-                        <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-white/70'}`}>
-                          {state.events} event{state.events !== 1 ? 's' : ''}
-                        </div>
-                        {state.events >= maxEvents * 0.8 && (
-                          <div className="absolute -top-1 -right-1">
-                            <span className="relative flex h-3 w-3">
-                              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
-                              <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
-                            </span>
-                          </div>
-                        )}
-                      </motion.button>
-                    )
-                  })}
-                </div>
+            <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3">
+              {displayStates.map((state, i) => {
+                const gradient = getStateGradient(state.events)
+                const isSelected = selectedState === state.abbr
+                const isHotspot = state.events >= maxEvents * 0.7
+                return (
+                  <motion.button
+                    key={state.abbr}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.02 }}
+                    onClick={() => handleStateClick(state.abbr)}
+                    whileHover={{ scale: 1.08, y: -4 }}
+                    whileTap={{ scale: 0.95 }}
+                    className={`relative p-4 rounded-xl border-2 transition-all shadow-lg ${
+                      isSelected
+                        ? "bg-gradient-to-br from-cyan-500 to-emerald-500 border-white/50 ring-4 ring-cyan-500/30 shadow-cyan-500/40"
+                        : `bg-gradient-to-br ${gradient.from} ${gradient.to} border-white/20 hover:border-white/40 ${gradient.ring} hover:ring-2 hover:shadow-xl`
+                    }`}
+                  >
+                    <div className="text-xl font-black text-white drop-shadow-md">
+                      {state.abbr}
+                    </div>
+                    <div className="text-xs font-semibold text-white/80">
+                      {state.events} event{state.events !== 1 ? 's' : ''}
+                    </div>
+                    {isHotspot && !isSelected && (
+                      <div className="absolute -top-1.5 -right-1.5">
+                        <span className="relative flex h-4 w-4">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-4 w-4 bg-gradient-to-r from-amber-400 to-orange-500 shadow-lg"></span>
+                        </span>
+                      </div>
+                    )}
+                  </motion.button>
+                )
+              })}
+            </div>
 
-                {activeStates.length > 12 && (
-                  <div className="mt-4 text-center">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setShowAllStates(!showAllStates)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      {showAllStates ? 'Show Less' : `Show All ${activeStates.length} States`}
-                      <ChevronDown className={`w-4 h-4 ml-1 transition-transform ${showAllStates ? 'rotate-180' : ''}`} />
-                    </Button>
-                  </div>
-                )}
-
-                {/* Color Legend */}
-                <div className="mt-4 flex items-center justify-center gap-4 text-xs text-gray-400">
-                  <span className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-indigo-600 to-blue-500" />
-                    Few Events
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-emerald-500 to-green-500" />
-                    Many Events
-                  </span>
-                  <span className="flex items-center gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-gradient-to-r from-amber-500 to-orange-500" />
-                    Hotspot
-                  </span>
-                </div>
-              </>
+            {stateData.length > 12 && (
+              <div className="mt-6 text-center">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowAllStates(!showAllStates)}
+                  className="text-gray-300 hover:text-white bg-white/5 hover:bg-white/10"
+                >
+                  {showAllStates ? 'Show Less' : `Show All ${stateData.length} States`}
+                  <ChevronDown className={`w-4 h-4 ml-2 transition-transform ${showAllStates ? 'rotate-180' : ''}`} />
+                </Button>
+              </div>
             )}
+
+            {/* Legend */}
+            <div className="mt-6 flex items-center justify-center gap-6 text-sm">
+              <span className="flex items-center gap-2 text-gray-400">
+                <div className="w-4 h-4 rounded-md bg-gradient-to-r from-indigo-600 to-blue-500" />
+                1-2 Events
+              </span>
+              <span className="flex items-center gap-2 text-gray-400">
+                <div className="w-4 h-4 rounded-md bg-gradient-to-r from-emerald-500 to-green-400" />
+                3-5 Events
+              </span>
+              <span className="flex items-center gap-2 text-gray-400">
+                <div className="w-4 h-4 rounded-md bg-gradient-to-r from-amber-400 to-orange-500" />
+                <Sparkles className="w-3 h-3 text-amber-400" />
+                Hotspot
+              </span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Tournaments Section */}
-      <section ref={eventsRef} className="max-w-7xl mx-auto px-4 sm:px-6 py-8 scroll-mt-4">
-        {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <Input
-              placeholder="Search tournaments..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white/5 border-white/20 text-white placeholder:text-gray-500 h-11"
-            />
-          </div>
-          <Select value={selectedType} onValueChange={setSelectedType}>
-            <SelectTrigger className="w-full md:w-44 bg-white/5 border-white/20 text-white h-11">
-              <SelectValue placeholder="All Levels" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Levels</SelectItem>
-              <SelectItem value="pro">Pro / Major</SelectItem>
-              <SelectItem value="amateur">Amateur / Challenger</SelectItem>
-              <SelectItem value="junior">Junior / Next Gen</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
+      <section ref={eventsRef} className="max-w-7xl mx-auto px-4 sm:px-6 py-10 scroll-mt-4">
         {/* Section Header */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-2xl font-bold text-white">
-              {selectedState 
-                ? `Events in ${stateData.find(s => s.abbr === selectedState)?.name || selectedState}`
-                : 'Upcoming Tournaments'
-              }
+            <h2 className="text-3xl font-black text-white mb-2">
+              {selectedState ? `${US_STATES_MAP[selectedState]} Events` : 'All Tournaments'}
             </h2>
-            <p className="text-gray-400 text-sm">
-              {filteredTournaments.length} event{filteredTournaments.length !== 1 ? 's' : ''} found
+            <p className="text-gray-400">
+              {filteredTournaments.length} events {selectedState ? `in ${selectedState}` : 'nationwide'}
             </p>
           </div>
+          
+          {/* Filters */}
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <div className="relative flex-1 md:w-64">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <Input
+                placeholder="Search tournaments..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 bg-slate-900/60 border-white/20 text-white placeholder:text-gray-500 h-11 rounded-xl"
+              />
+            </div>
+            <Select value={selectedType} onValueChange={setSelectedType}>
+              <SelectTrigger className="w-full sm:w-40 bg-slate-900/60 border-white/20 text-white h-11 rounded-xl">
+                <SelectValue placeholder="Filter" />
+              </SelectTrigger>
+              <SelectContent className="bg-slate-900 border-white/20">
+                <SelectItem value="all">All Events</SelectItem>
+                <SelectItem value="ppa">PPA Tour</SelectItem>
+                <SelectItem value="app">APP Tour</SelectItem>
+                <SelectItem value="major">Majors Only</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
-        {/* Tournament Cards */}
-        {tournamentsLoading ? (
-          <div className="flex items-center justify-center py-16">
-            <Loader2 className="w-10 h-10 text-champion-green animate-spin" />
-          </div>
-        ) : filteredTournaments.length === 0 ? (
-          <div className="text-center py-16 bg-white/5 rounded-2xl border border-white/10">
-            <Trophy className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <h3 className="text-xl font-semibold text-gray-300 mb-2">No tournaments found</h3>
-            <p className="text-gray-500 mb-4">Try adjusting your filters or check official tour sites</p>
-            <div className="flex flex-wrap justify-center gap-3">
-              <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="border-yellow-500/50 text-yellow-400 hover:bg-yellow-500/10">
-                  <ExternalLink className="w-4 h-4 mr-2" /> PPA Tour
-                </Button>
-              </a>
-              <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
-                <Button variant="outline" className="border-orange-500/50 text-orange-400 hover:bg-orange-500/10">
-                  <ExternalLink className="w-4 h-4 mr-2" /> APP Tour
-                </Button>
-              </a>
-            </div>
-          </div>
-        ) : (
-          <div className="grid gap-4">
-            {filteredTournaments.slice(0, 20).map((tournament, index) => {
-              const tierBadge = getTierBadge(tournament.tier, tournament.type)
-              const prize = tournament.prizePool || (tournament.points ? tournament.points * 100 : 0)
+        {/* Tournaments Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          <AnimatePresence mode="popLayout">
+            {filteredTournaments.map((tournament, i) => {
+              const tourInfo = getTourInfo(tournament.type)
+              const tierInfo = getTierBadge(tournament.tier, tournament.type)
+              const isMajor = tournament.tier === 'major'
               
               return (
                 <motion.div
                   key={tournament.id}
-                  initial={{ opacity: 0, y: 10 }}
+                  layout
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.03 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: i * 0.03 }}
+                  className="group"
                 >
-                  <Card className="bg-white/5 border-white/10 hover:border-champion-green/50 transition-all group overflow-hidden">
-                    <CardContent className="p-4 md:p-5">
-                      <div className="flex flex-col md:flex-row md:items-center gap-4">
-                        {/* Main Info */}
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-2">
-                            <Badge className={`${tierBadge.bg} ${tierBadge.text} ${tierBadge.border} text-xs`}>
-                              {tierBadge.label}
-                            </Badge>
-                            {tournament.featured && (
-                              <Badge className="bg-champion-gold/20 text-champion-gold border-champion-gold/30 text-xs">
-                                <Star className="w-3 h-3 mr-1" /> Featured
-                              </Badge>
-                            )}
-                            {tournament.type?.includes('ppa') && (
-                              <span className="text-xs text-yellow-500/70">PPA</span>
-                            )}
-                            {tournament.type?.includes('app') && (
-                              <span className="text-xs text-orange-500/70">APP</span>
-                            )}
-                          </div>
-                          <h3 className="text-lg font-semibold text-white mb-1 truncate group-hover:text-champion-green transition-colors">
-                            {tournament.name}
-                          </h3>
-                          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-gray-400">
-                            <span className="flex items-center gap-1">
-                              <MapPin className="w-4 h-4 shrink-0" />
-                              {tournament.venue ? `${tournament.venue}, ${tournament.location}` : tournament.location}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <CalendarDays className="w-4 h-4 shrink-0" />
-                              {formatDate(tournament.startDate, tournament.endDate)}
-                            </span>
-                          </div>
-                          {tournament.description && (
-                            <p className="text-xs text-gray-500 mt-1 line-clamp-1">{tournament.description}</p>
-                          )}
+                  <Card className={`relative overflow-hidden bg-slate-900/70 backdrop-blur border-white/10 hover:border-white/25 transition-all duration-300 hover:shadow-2xl ${
+                    isMajor ? 'ring-2 ring-yellow-500/30 shadow-yellow-500/10' : ''
+                  }`}>
+                    {/* Tour color accent bar */}
+                    <div className={`absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r ${tourInfo.gradient}`} />
+                    
+                    {/* Major badge pulse */}
+                    {isMajor && (
+                      <div className="absolute top-4 right-4">
+                        <span className="relative flex">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-50"></span>
+                          <span className="relative inline-flex items-center gap-1 bg-gradient-to-r from-yellow-400 to-amber-500 text-yellow-900 text-xs font-bold px-2.5 py-1 rounded-full shadow-lg">
+                            <Trophy className="w-3 h-3" />
+                            MAJOR
+                          </span>
+                        </span>
+                      </div>
+                    )}
+                    
+                    <CardContent className="p-5">
+                      {/* Tour Badge */}
+                      <div className="flex items-center gap-2 mb-3">
+                        <Badge className={`${tourInfo.bg} ${tourInfo.text} border ${tourInfo.border} font-semibold text-xs`}>
+                          {tourInfo.name}
+                        </Badge>
+                        {!isMajor && tournament.tier && (
+                          <Badge className={`${tierInfo.bg} ${tierInfo.text} border ${tierInfo.border} text-xs`}>
+                            {tierInfo.label}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {/* Tournament Name */}
+                      <h3 className="text-lg font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors line-clamp-2">
+                        {tournament.name}
+                      </h3>
+                      
+                      {/* Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <MapPin className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                          <span className="truncate">{tournament.location}</span>
                         </div>
-
-                        {/* Prize & Action */}
-                        <div className="flex items-center gap-4 md:flex-col md:items-end">
-                          {prize > 0 && (
-                            <div className="text-right">
-                              <div className="text-lg font-bold text-champion-gold flex items-center gap-1">
-                                <DollarSign className="w-4 h-4" />
-                                {formatPrizeMoney(prize)}
-                              </div>
-                              <div className="text-xs text-gray-500">Prize Pool</div>
-                            </div>
-                          )}
-                          <a href={getRegistrationUrl(tournament)} target="_blank" rel="noopener noreferrer">
-                            <Button size="sm" className="bg-champion-green hover:bg-champion-green/90 whitespace-nowrap">
-                              <ExternalLink className="w-3 h-3 mr-1" />
-                              Details
-                            </Button>
-                          </a>
+                        <div className="flex items-center gap-2 text-gray-400 text-sm">
+                          <Calendar className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                          <span>{formatDate(tournament.startDate, tournament.endDate)}</span>
                         </div>
+                        {tournament.venue && (
+                          <div className="flex items-center gap-2 text-gray-400 text-sm">
+                            <Target className="w-4 h-4 text-violet-400 flex-shrink-0" />
+                            <span className="truncate">{tournament.venue}</span>
+                          </div>
+                        )}
+                        {/* Prize Pool */}
+                        {(tournament.prizePool || tournament.points) && (
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                            <span className="text-amber-400 font-bold text-sm">
+                              {tournament.prizePool 
+                                ? `$${(tournament.prizePool / 1000).toFixed(0)}K Prize Pool` 
+                                : tournament.points 
+                                  ? `${tournament.points} PPA Points`
+                                  : ''}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Actions */}
+                      <div className="flex items-center gap-2">
+                        <a 
+                          href={getRegistrationUrl(tournament)}
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="flex-1"
+                        >
+                          <Button 
+                            className={`w-full bg-gradient-to-r ${tourInfo.gradient} hover:opacity-90 text-white font-semibold shadow-lg transition-all`}
+                            size="sm"
+                          >
+                            View Details
+                            <ExternalLink className="w-4 h-4 ml-2" />
+                          </Button>
+                        </a>
                       </div>
                     </CardContent>
                   </Card>
                 </motion.div>
               )
             })}
+          </AnimatePresence>
+        </div>
+
+        {filteredTournaments.length === 0 && (
+          <div className="text-center py-16">
+            <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4">
+              <Search className="w-10 h-10 text-gray-500" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-2">No tournaments found</h3>
+            <p className="text-gray-400">Try adjusting your search or filters</p>
           </div>
         )}
-
-        {filteredTournaments.length > 20 && (
-          <div className="mt-6 text-center">
-            <p className="text-gray-500 mb-4">Showing 20 of {filteredTournaments.length} tournaments</p>
-            <Link href="/tournaments/calendar">
-              <Button variant="outline" className="border-champion-green/50 text-champion-green hover:bg-champion-green/10">
-                View All Events <ArrowRight className="w-4 h-4 ml-2" />
-              </Button>
-            </Link>
-          </div>
-        )}
-      </section>
-
-      {/* Quick Category Links */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        <h3 className="text-lg font-semibold text-white mb-4">Browse by Category</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          {[
-            { title: "Championship", href: "/tournaments/championship", icon: Trophy, color: "from-yellow-500 to-orange-500" },
-            { title: "Amateur", href: "/tournaments/amateur", icon: Target, color: "from-blue-500 to-cyan-500" },
-            { title: "Junior", href: "/tournaments/rising-stars", icon: Star, color: "from-purple-500 to-pink-500" },
-            { title: "Community", href: "/tournaments/community-leagues", icon: Users, color: "from-green-500 to-emerald-500" },
-          ].map((cat) => (
-            <Link key={cat.title} href={cat.href}>
-              <Card className="bg-white/5 border-white/10 hover:border-white/30 transition-all group cursor-pointer">
-                <CardContent className="p-4 flex items-center gap-3">
-                  <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${cat.color} flex items-center justify-center shrink-0`}>
-                    <cat.icon className="w-5 h-5 text-white" />
-                  </div>
-                  <div className="min-w-0">
-                    <h4 className="font-medium text-white truncate">{cat.title}</h4>
-                    <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-champion-green group-hover:translate-x-1 transition-all" />
-                  </div>
-                </CardContent>
-              </Card>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      {/* Official Tour Links */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
-        <div className="bg-white/5 rounded-xl border border-white/10 p-5">
-          <h3 className="text-sm font-medium text-gray-300 mb-3 text-center">Official Tour Sites</h3>
-          <div className="flex flex-wrap gap-3 justify-center">
-            <a href="https://ppatour.com/schedule/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="border-yellow-500/40 text-yellow-400 hover:bg-yellow-500/10">
-                <ExternalLink className="w-3 h-3 mr-2" /> PPA Tour
-              </Button>
-            </a>
-            <a href="https://www.theapp.global/tour" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="border-orange-500/40 text-orange-400 hover:bg-orange-500/10">
-                <ExternalLink className="w-3 h-3 mr-2" /> APP Tour
-              </Button>
-            </a>
-            <a href="https://usapickleball.org/events/" target="_blank" rel="noopener noreferrer">
-              <Button variant="outline" size="sm" className="border-purple-500/40 text-purple-400 hover:bg-purple-500/10">
-                <ExternalLink className="w-3 h-3 mr-2" /> USA Pickleball
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
-        <p className="text-center text-xs text-gray-600">
-          Data from official pickleball organizations • Auto-refreshes every 5 minutes
-        </p>
       </section>
     </div>
   )
