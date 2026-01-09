@@ -157,6 +157,9 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <span className="text-base lg:text-lg font-bold bg-gradient-to-r from-champion-green via-champion-gold to-champion-blue bg-clip-text text-transparent whitespace-nowrap">
                     Mindful Champion
                   </span>
+                  <span className="ml-2 px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white animate-pulse">
+                    v1.50 BETA
+                  </span>
                 </div>
               </Link>
             </InfoTooltip>

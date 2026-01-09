@@ -21,7 +21,7 @@ export async function GET() {
       include: {
         ProgramVideo: {
           include: {
-            video: true
+            TrainingVideo: true
           }
         },
         UserProgram: {
