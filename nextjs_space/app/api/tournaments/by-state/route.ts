@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/db'
+import { ALL_TOURNAMENTS } from '@/lib/tournaments-data'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,27 +35,31 @@ export async function GET() {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    // Fetch ALL upcoming tournaments to properly extract states
-    const upcomingTournaments = await prisma.tournament.findMany({
-      where: {
-        startDate: {
-          gte: new Date()
-        }
-      },
-      select: {
-        id: true,
-        state: true,
-        location: true,
-      }
+    const now = new Date()
+    
+    // Fetch from DB first
+    let upcomingTournaments = await prisma.tournament.findMany({
+      where: { startDate: { gte: now } },
+      select: { id: true, state: true, location: true }
     })
 
-    // Count tournaments by state (using extracted state from location if state field is null)
+    // Fallback to static data if no DB tournaments
+    if (!upcomingTournaments?.length) {
+      upcomingTournaments = ALL_TOURNAMENTS
+        .filter(t => new Date(t.startDate) >= now)
+        .map(t => ({
+          id: t.id,
+          state: extractState(t.location),
+          location: t.location
+        }))
+    }
+
+    // Count tournaments by state
     const stateCounts: Record<string, number> = {}
     
     upcomingTournaments.forEach(tournament => {
-      // Use state field if available, otherwise extract from location
       const state = (tournament.state || extractState(tournament.location))?.toUpperCase()
-      if (state) {
+      if (state && US_STATES_MAP[state]) {
         stateCounts[state] = (stateCounts[state] || 0) + 1
       }
     })

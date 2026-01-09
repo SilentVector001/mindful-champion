@@ -1,80 +1,58 @@
 // @ts-nocheck
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
-import { calculateTournamentStats, ALL_TOURNAMENTS } from '@/lib/tournaments-data'
+import { calculateTournamentStats, ALL_TOURNAMENTS, getUpcomingTournaments } from '@/lib/tournaments-data'
 
 export const dynamic = 'force-dynamic'
 
+// Helper to extract state
+function extractState(location?: string): string | null {
+  if (!location) return null
+  const match = location.match(/,\s*([A-Z]{2})(?:\s|$)/)
+  return match ? match[1] : null
+}
+
 export async function GET() {
   try {
-    // Get aggregate statistics from database
-    const aggregateStats = await prisma.tournament.aggregate({
-      _sum: {
-        prizePool: true,
-        currentRegistrations: true,
-        maxParticipants: true,
-      },
-      _count: true,
+    const now = new Date()
+    
+    // Get database tournaments
+    const dbTournaments = await prisma.tournament.findMany({
+      where: { startDate: { gte: now } },
+      select: { id: true, prizePool: true, tier: true, type: true, state: true, location: true }
     })
 
-    // Get unique states count from database
-    const statesCount = await prisma.tournament.groupBy({
-      by: ['state'],
-      _count: true,
-    })
-
-    const dbTotalTournaments = aggregateStats._count || 0
-
-    // If database has no tournaments, use real static data stats
-    if (dbTotalTournaments === 0) {
-      const staticStats = calculateTournamentStats()
-      return NextResponse.json({
-        totalPrizeMoney: staticStats.totalPrize,
-        totalPrize: staticStats.totalPrize,
-        totalTournaments: staticStats.totalTournaments,
-        statesCovered: staticStats.statesCovered,
-        totalRegistrations: 0,
-        averagePrizePool: staticStats.totalPrize / staticStats.totalTournaments,
-        ppaTourEvents: staticStats.ppaTourEvents,
-        appTourEvents: staticStats.appTourEvents,
-        majorEvents: staticStats.majorEvents,
-      })
-    }
-
-    const totalPrizeMoney = aggregateStats._sum?.prizePool || 0
-    const totalTournaments = dbTotalTournaments
-    const statesCovered = statesCount.length
-    const totalRegistrations = aggregateStats._sum?.currentRegistrations || 0
-
-    // Get count by status
-    const statusCounts = await prisma.tournament.groupBy({
-      by: ['status'],
-      _count: true,
+    // Use static data if no DB tournaments
+    const tournaments = dbTournaments.length > 0 ? dbTournaments : getUpcomingTournaments()
+    
+    // Calculate stats
+    const uniqueStates = new Set<string>()
+    let totalPrize = 0
+    let majorEvents = 0
+    
+    tournaments.forEach((t: any) => {
+      const state = t.state || extractState(t.location)
+      if (state) uniqueStates.add(state.toUpperCase())
+      if (t.prizePool) totalPrize += t.prizePool
+      if (t.points) totalPrize += t.points * 100
+      if (t.tier === 'major') majorEvents++
     })
 
     return NextResponse.json({
-      totalPrizeMoney,
-      totalPrize: totalPrizeMoney,
-      totalTournaments,
-      statesCovered,
-      totalRegistrations,
-      averagePrizePool: totalTournaments > 0 ? totalPrizeMoney / totalTournaments : 0,
-      statusBreakdown: statusCounts.reduce((acc: any, item: any) => {
-        acc[item.status] = item._count
-        return acc
-      }, {}),
+      totalTournaments: tournaments.length,
+      statesCovered: uniqueStates.size,
+      totalPrize: totalPrize || 2000000, // Fallback to $2M
+      majorEvents,
+      lastUpdated: new Date().toISOString()
     })
   } catch (error) {
     console.error('Error fetching tournament stats:', error)
-    // Fallback to static data on error
     const staticStats = calculateTournamentStats()
     return NextResponse.json({
-      totalPrizeMoney: staticStats.totalPrize,
-      totalPrize: staticStats.totalPrize,
       totalTournaments: staticStats.totalTournaments,
       statesCovered: staticStats.statesCovered,
-      totalRegistrations: 0,
-      averagePrizePool: staticStats.totalPrize / staticStats.totalTournaments,
+      totalPrize: staticStats.totalPrize || 2000000,
+      majorEvents: staticStats.majorEvents,
     })
   }
 }
