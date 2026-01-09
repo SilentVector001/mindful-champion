@@ -385,14 +385,20 @@ export default function VideoAnalysisHub() {
           <StatCard icon={Target} value={libraryStats.avgScore || '—'} label="Avg Score" gradient="from-amber-500 to-orange-500" delay={0.3} />
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - Large & Prominent */}
         <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-6">
-          <TabsList className="bg-slate-900/50 border border-slate-700/50 p-1">
-            <TabsTrigger value="upload" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20">
-              <Upload className="w-4 h-4 mr-2" /> Upload
+          <TabsList className="bg-slate-800 border-2 border-slate-600 p-2 gap-3 h-auto">
+            <TabsTrigger 
+              value="upload" 
+              className="px-8 py-4 text-lg font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:text-white transition-all"
+            >
+              <Upload className="w-5 h-5 mr-2" /> Upload New Video
             </TabsTrigger>
-            <TabsTrigger value="library" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20">
-              <MonitorPlay className="w-4 h-4 mr-2" /> Library ({libraryStats.totalVideos})
+            <TabsTrigger 
+              value="library" 
+              className="px-8 py-4 text-lg font-bold rounded-xl data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-pink-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=inactive]:text-slate-400 data-[state=inactive]:hover:text-white transition-all"
+            >
+              <MonitorPlay className="w-5 h-5 mr-2" /> My Videos ({libraryStats.totalVideos})
             </TabsTrigger>
           </TabsList>
 
@@ -597,42 +603,25 @@ export default function VideoAnalysisHub() {
                       {/* Video Thumbnail - Always visible */}
                       <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900">
                         {/* Show video element with poster/thumbnail */}
-                        {video.videoUrl ? (
-                          <video
-                            src={video.videoUrl}
-                            className="w-full h-full object-cover"
-                            muted
-                            loop
-                            playsInline
-                            preload="metadata"
-                            poster={video.thumbnailUrl}
-                            ref={(el) => {
-                              if (el && hoveredVideo === video.id) el.play()
-                              if (el && hoveredVideo !== video.id) el.pause()
-                            }}
-                          />
-                        ) : (
-                          /* Placeholder with skeleton pose */
-                          <div className="absolute inset-0">
-                            <svg viewBox="0 0 100 100" className="w-full h-full opacity-60">
-                              <defs>
-                                <linearGradient id={`grad-${video.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
-                                  <stop offset="0%" stopColor="#06b6d4" />
-                                  <stop offset="100%" stopColor="#10b981" />
-                                </linearGradient>
-                              </defs>
-                              {/* Skeleton */}
-                              {[[50,15,50,25],[50,25,35,30],[50,25,65,30],[35,30,25,45],[65,30,78,38],[25,45,20,58],[78,38,85,28],[50,25,50,48],[50,48,40,55],[50,48,60,55],[40,55,35,72],[60,55,65,72],[35,72,32,90],[65,72,68,90]].map(([x1,y1,x2,y2], idx) => (
-                                <line key={idx} x1={x1} y1={y1} x2={x2} y2={y2} stroke={`url(#grad-${video.id})`} strokeWidth="1.5" strokeLinecap="round" />
-                              ))}
-                              {[[50,15,4],[35,30,2],[65,30,2],[25,45,2],[78,38,2.5],[20,58,2],[85,28,2],[40,55,2],[60,55,2],[35,72,2],[65,72,2]].map(([cx,cy,r], idx) => (
-                                <circle key={idx} cx={cx} cy={cy} r={r} fill="#22d3ee" />
-                              ))}
-                              <rect x="82" y="20" width="6" height="12" rx="1" fill="none" stroke="#10b981" strokeWidth="1" />
-                            </svg>
-                            <div className="absolute bottom-3 left-3 right-3">
-                              <p className="text-slate-400 text-xs truncate">{video.fileName || video.title}</p>
-                            </div>
+                        {/* Video with thumbnail - uses first frame as poster */}
+                        <video
+                          src={video.videoUrl}
+                          className="w-full h-full object-cover"
+                          muted
+                          loop
+                          playsInline
+                          preload="metadata"
+                          poster={video.thumbnailUrl}
+                          ref={(el) => {
+                            if (el && hoveredVideo === video.id) el.play()
+                            if (el && hoveredVideo !== video.id) el.pause()
+                          }}
+                        />
+                        {/* Fallback gradient overlay if no video */}
+                        {!video.videoUrl && (
+                          <div className="absolute inset-0 bg-gradient-to-br from-slate-700 to-slate-800 flex flex-col items-center justify-center">
+                            <Video className="w-12 h-12 text-slate-500 mb-2" />
+                            <p className="text-slate-400 text-xs">{video.fileName || 'Video'}</p>
                           </div>
                         )}
                         
