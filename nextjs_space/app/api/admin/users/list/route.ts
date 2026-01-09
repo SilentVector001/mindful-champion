@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
           email: true,
           firstName: true,
           lastName: true,
+          role: true,
           skillLevel: true,
           playerRating: true,
           subscriptionTier: true,
@@ -80,14 +81,16 @@ export async function GET(request: NextRequest) {
           lastActiveDate: true,
           loginCount: true,
           stripeCustomerId: true,
+          welcomeEmailSent: true,
+          welcomeEmailSentAt: true,
           // Aggregated data
           _count: {
             select: {
-              matches: true,
-              goals: true,
-              userAchievements: true,
-              payments: true,
-              securityLogs: true,
+              Match: true,
+              Goal: true,
+              UserAchievement: true,
+              Payment: true,
+              SecurityLog: true,
             }
           }
         },

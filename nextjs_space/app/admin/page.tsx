@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth"
 import { authOptions } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/db"
-import ComprehensiveAdmin from "@/components/admin/comprehensive-admin"
+import StreamlinedAdmin from "@/components/admin/streamlined-admin"
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions)
@@ -139,6 +139,6 @@ export default async function AdminPage() {
     conversionRate: users > 0 ? ((premiumUsers + proUsers) / users * 100) : 0
   }
 
-  return <ComprehensiveAdmin initialData={adminData} />
+  return <StreamlinedAdmin initialData={adminData} />
 }
 // Rebuild 1767916612
