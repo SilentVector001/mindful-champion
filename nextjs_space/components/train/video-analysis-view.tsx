@@ -294,20 +294,22 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
     ? new Date(analysis.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
     : 'Jan 9, 2026'
 
-  // Rally data
-  const rallies = [
-    { number: 1, timestamp: '0:08', shotCount: 12, outcome: '3rd shot drive winner', won: true },
-    { number: 2, timestamp: '0:24', shotCount: 8, outcome: 'Dink into net', won: false },
-    { number: 3, timestamp: '0:45', shotCount: 15, outcome: 'Overhead smash', won: true },
-    { number: 4, timestamp: '1:12', shotCount: 6, outcome: 'Return error', won: false },
-    { number: 5, timestamp: '1:38', shotCount: 22, outcome: 'ATP winner', won: true },
+  // Technique moments - clear feedback on specific shots
+  const techniqueMoments = [
+    { timestamp: '0:08', shot: 'Forehand Drive', quality: 'good', feedback: 'Great paddle angle and follow-through. Keep this up!' },
+    { timestamp: '0:24', shot: 'Third Shot Drop', quality: 'good', feedback: 'Soft hands, nice arc. Landed in the kitchen.' },
+    { timestamp: '0:45', shot: 'Backhand Dink', quality: 'improve', feedback: 'Paddle face opened too early - caused the pop-up.' },
+    { timestamp: '1:02', shot: 'Serve', quality: 'good', feedback: 'Deep placement with good spin. Opponent was pushed back.' },
+    { timestamp: '1:18', shot: 'Volley', quality: 'improve', feedback: 'Step into the shot more - you were reaching.' },
+    { timestamp: '1:35', shot: 'Reset Shot', quality: 'good', feedback: 'Nice soft reset under pressure. Smart play.' },
   ]
 
-  // Key patterns identified
-  const keyPatterns = [
-    { title: 'Strong kitchen presence', description: '73% of points won at the NVZ', positive: true },
-    { title: 'Missing backhand dinks', description: 'Curious why you\'re missing those backhand dinks?', positive: false },
-    { title: 'Effective 3rd shot drops', description: 'Your positioning and efficiency in reaching the kitchen', positive: true },
+  // AI Insights - actionable coaching feedback
+  const aiInsights = [
+    { type: 'strength', title: 'Strong Kitchen Presence', detail: 'You won 73% of points when at the non-volley zone. Keep getting there!' },
+    { type: 'strength', title: 'Effective Third Shot Drops', detail: 'Your drops are landing consistently in the kitchen with good arc.' },
+    { type: 'improve', title: 'Backhand Dink Control', detail: 'Focus on keeping paddle face closed longer to avoid pop-ups.' },
+    { type: 'improve', title: 'Footwork on Volleys', detail: 'Step forward into volleys instead of reaching - adds power and control.' },
   ]
 
   const togglePlay = () => {
@@ -373,20 +375,21 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
           <div className="lg:col-span-2 space-y-4">
             {/* Video Player */}
             <Card className="bg-slate-900/60 border-slate-700/50 overflow-hidden">
-              <div className="relative aspect-video bg-black">
+              <div className="relative aspect-video bg-slate-900">
                 {analysis?.videoUrl ? (
                   <video
                     ref={videoRef}
                     src={analysis.videoUrl}
                     className="w-full h-full object-contain"
-                    poster={analysis.thumbnailUrl}
+                    poster={analysis.thumbnailUrl || "https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=1200&q=80"}
                     onTimeUpdate={(e) => setCurrentTime((e.target as HTMLVideoElement).currentTime)}
                     onLoadedMetadata={(e) => setDuration((e.target as HTMLVideoElement).duration)}
                   />
                 ) : (
+                  /* Show pickleball action shot as placeholder */
                   <Image
-                    src="https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=1200"
-                    alt="Match footage"
+                    src="https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=1200&q=80"
+                    alt="Pickleball match footage"
                     fill
                     className="object-cover"
                   />
@@ -395,7 +398,7 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                 {/* Play button overlay */}
                 <button
                   onClick={togglePlay}
-                  className="absolute inset-0 flex items-center justify-center bg-black/20 hover:bg-black/30 transition-colors"
+                  className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/40 transition-colors"
                 >
                   <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur flex items-center justify-center">
                     {isPlaying ? (
@@ -405,6 +408,13 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                     )}
                   </div>
                 </button>
+                
+                {/* Video info badge */}
+                <div className="absolute top-3 left-3">
+                  <Badge className="bg-slate-900/80 text-white border-0 text-xs">
+                    <Video className="w-3 h-3 mr-1" /> Your Uploaded Video
+                  </Badge>
+                </div>
                 
                 {/* Timeline */}
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
@@ -426,8 +436,8 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="bg-slate-900/50 border border-slate-700/50 p-1 w-full">
                 <TabsTrigger value="overview" className="flex-1">Overview</TabsTrigger>
-                <TabsTrigger value="rallies" className="flex-1">Shot Explorer</TabsTrigger>
-                <TabsTrigger value="patterns" className="flex-1">Key Patterns</TabsTrigger>
+                <TabsTrigger value="rallies" className="flex-1">Technique</TabsTrigger>
+                <TabsTrigger value="patterns" className="flex-1">AI Insights</TabsTrigger>
               </TabsList>
 
               {/* Overview Tab */}
@@ -456,47 +466,60 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                 </Card>
               </TabsContent>
 
-              {/* Rallies/Shot Explorer Tab */}
+              {/* Technique Moments Tab */}
               <TabsContent value="rallies" className="mt-4">
                 <Card className="bg-slate-900/60 border-slate-700/50">
                   <CardContent className="p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h4 className="text-white font-medium text-sm flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-cyan-400" />
-                        Rally Breakdown
-                      </h4>
-                      <Button variant="ghost" size="sm" className="text-slate-400 text-xs">
-                        <Filter className="w-3 h-3 mr-1" /> Filter
-                      </Button>
-                    </div>
+                    <h4 className="text-white font-medium text-sm mb-4 flex items-center gap-2">
+                      <Layers className="w-4 h-4 text-cyan-400" />
+                      Key Technique Moments
+                    </h4>
+                    <p className="text-slate-400 text-xs mb-4">
+                      Click any moment to jump to that point in the video and see the AI feedback.
+                    </p>
                     <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2">
-                      {rallies.map((rally, i) => (
-                        <RallyCard
-                          key={rally.number}
-                          rally={rally}
-                          index={i}
-                          isActive={selectedRally === rally.number}
-                          onClick={() => setSelectedRally(rally.number)}
-                        />
+                      {techniqueMoments.map((moment, i) => (
+                        <motion.button
+                          key={i}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: i * 0.05 }}
+                          className={cn(
+                            "w-full p-3 rounded-xl border text-left transition-all",
+                            selectedRally === i
+                              ? "bg-cyan-500/20 border-cyan-500"
+                              : "bg-slate-800/50 border-slate-700/50 hover:border-slate-600"
+                          )}
+                          onClick={() => setSelectedRally(i)}
+                        >
+                          <div className="flex items-center justify-between mb-1">
+                            <Badge variant="outline" className={cn(
+                              "text-[10px]",
+                              moment.quality === 'good' ? "border-emerald-500 text-emerald-400" : "border-amber-500 text-amber-400"
+                            )}>
+                              {moment.quality === 'good' ? '✓ Good Form' : '⚠ Needs Work'}
+                            </Badge>
+                            <span className="text-xs text-slate-500">{moment.timestamp}</span>
+                          </div>
+                          <p className="text-white text-sm font-medium">{moment.shot}</p>
+                          <p className="text-slate-400 text-xs mt-1">{moment.feedback}</p>
+                        </motion.button>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
               </TabsContent>
 
-              {/* Patterns Tab */}
+              {/* AI Insights Tab */}
               <TabsContent value="patterns" className="mt-4">
                 <Card className="bg-slate-900/60 border-slate-700/50">
                   <CardContent className="p-4">
                     <h4 className="text-white font-medium text-sm mb-4 flex items-center gap-2">
                       <Sparkles className="w-4 h-4 text-cyan-400" />
-                      Uncover the <span className="text-cyan-400 font-semibold">key patterns</span> driving your play
+                      AI Coaching Insights
                     </h4>
-                    <p className="text-slate-400 text-xs mb-4">
-                      Trends helps you easily analyze your rally outcomes, shot distribution, playing tendencies, and more over time.
-                    </p>
                     <div className="space-y-3">
-                      {keyPatterns.map((pattern, i) => (
+                      {aiInsights.map((insight, i) => (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0, x: -10 }}
@@ -504,7 +527,7 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                           transition={{ delay: i * 0.1 }}
                           className={cn(
                             "p-3 rounded-lg border",
-                            pattern.positive
+                            insight.type === 'strength'
                               ? "bg-emerald-500/10 border-emerald-500/30"
                               : "bg-amber-500/10 border-amber-500/30"
                           )}
@@ -512,17 +535,17 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                           <div className="flex items-start gap-3">
                             <div className={cn(
                               "p-1.5 rounded-lg",
-                              pattern.positive ? "bg-emerald-500/20" : "bg-amber-500/20"
+                              insight.type === 'strength' ? "bg-emerald-500/20" : "bg-amber-500/20"
                             )}>
-                              {pattern.positive ? (
+                              {insight.type === 'strength' ? (
                                 <TrendingUp className="w-4 h-4 text-emerald-400" />
                               ) : (
                                 <Target className="w-4 h-4 text-amber-400" />
                               )}
                             </div>
                             <div>
-                              <p className="text-white text-sm font-medium">{pattern.title}</p>
-                              <p className="text-slate-400 text-xs mt-0.5">{pattern.description}</p>
+                              <p className="text-white text-sm font-medium">{insight.title}</p>
+                              <p className="text-slate-400 text-xs mt-0.5">{insight.detail}</p>
                             </div>
                           </div>
                         </motion.div>
