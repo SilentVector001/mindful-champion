@@ -51,7 +51,7 @@ async function checkVideoCounts() {
     })
     
     // 6. Check for Video Analysis (uploaded user videos)
-    const videoAnalyses = await prisma.videoAnalysis.count().catch(() => 0)
+    const videoAnalyses = await prisma.VideoAnalysis.count().catch(() => 0)
     console.log(`\n🎥 VIDEO ANALYSIS:`)
     console.log(`   User Uploaded Videos: ${videoAnalyses}`)
     

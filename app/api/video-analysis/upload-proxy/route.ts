@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
     console.log("[Upload Proxy] Upload successful:", cloudStoragePath);
 
     // Create video analysis record
-    const videoAnalysis = await prisma.videoAnalysis.create({
+    const videoAnalysis = await prisma.VideoAnalysis.create({
       data: {
         userId: user.id,
         videoUrl: cloudStoragePath,

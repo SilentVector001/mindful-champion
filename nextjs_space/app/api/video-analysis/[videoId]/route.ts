@@ -40,7 +40,7 @@ export async function GET(
     const { videoId } = params;
 
     // Get video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId }
     });
 
@@ -128,7 +128,7 @@ export async function DELETE(
     const { videoId } = params;
 
     // Get video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId }
     });
 
@@ -159,7 +159,7 @@ export async function DELETE(
     }
 
     // Delete from database
-    await prisma.videoAnalysis.delete({
+    await prisma.VideoAnalysis.delete({
       where: { id: videoId }
     });
 
@@ -217,7 +217,7 @@ export async function PATCH(
     const { videoId } = params;
 
     // Get video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId }
     });
 
@@ -241,7 +241,7 @@ export async function PATCH(
     const { title, description } = body;
 
     // Update video metadata
-    const updatedVideo = await prisma.videoAnalysis.update({
+    const updatedVideo = await prisma.VideoAnalysis.update({
       where: { id: videoId },
       data: {
         ...(title && { title }),

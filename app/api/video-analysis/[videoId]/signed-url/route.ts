@@ -39,7 +39,7 @@ export async function GET(
     const { videoId } = params;
 
     // Get video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId },
       select: {
         id: true,

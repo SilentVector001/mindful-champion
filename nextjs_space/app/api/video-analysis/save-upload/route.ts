@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if video record already exists (may have been created by onUploadCompleted callback)
-    const existingVideo = await prisma.videoAnalysis.findFirst({
+    const existingVideo = await prisma.VideoAnalysis.findFirst({
       where: {
         userId: user.id,
         videoUrl: url
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create video analysis record
-    const videoAnalysis = await prisma.videoAnalysis.create({
+    const videoAnalysis = await prisma.VideoAnalysis.create({
       data: {
         userId: user.id,
         videoUrl: url,

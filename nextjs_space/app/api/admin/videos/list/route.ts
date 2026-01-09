@@ -69,10 +69,10 @@ export async function GET(request: NextRequest) {
     }
 
     // Get total count
-    const totalCount = await prisma.videoAnalysis.count({ where });
+    const totalCount = await prisma.VideoAnalysis.count({ where });
 
     // Get videos
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       where,
       include: {
         user: {
@@ -103,18 +103,18 @@ export async function GET(request: NextRequest) {
     });
 
     // Get summary stats
-    const stats = await prisma.videoAnalysis.aggregate({
+    const stats = await prisma.VideoAnalysis.aggregate({
       where: { adminUpload: true },
       _count: {
         id: true
       }
     });
 
-    const flaggedCount = await prisma.videoAnalysis.count({
+    const flaggedCount = await prisma.VideoAnalysis.count({
       where: { flaggedForReview: true }
     });
 
-    const pendingReviewCount = await prisma.videoAnalysis.count({
+    const pendingReviewCount = await prisma.VideoAnalysis.count({
       where: { reviewStatus: 'PENDING', adminUpload: true }
     });
 

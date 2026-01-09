@@ -14,7 +14,7 @@ async function testVideoAccessibility() {
     console.log('🔍 Testing Video Accessibility...\n');
     
     // Get recent videos with different storage types
-    const s3Videos = await prisma.videoAnalysis.findMany({
+    const s3Videos = await prisma.VideoAnalysis.findMany({
       where: { cloud_storage_path: { not: null } },
       take: 3,
       orderBy: { uploadedAt: 'desc' },
@@ -27,7 +27,7 @@ async function testVideoAccessibility() {
       }
     });
     
-    const localVideos = await prisma.videoAnalysis.findMany({
+    const localVideos = await prisma.VideoAnalysis.findMany({
       where: { cloud_storage_path: null },
       take: 3,
       orderBy: { uploadedAt: 'desc' },
@@ -89,11 +89,11 @@ async function testVideoAccessibility() {
     console.log('\n\n📈 Storage Summary:');
     console.log('=' .repeat(60));
     
-    const totalS3 = await prisma.videoAnalysis.count({
+    const totalS3 = await prisma.VideoAnalysis.count({
       where: { cloud_storage_path: { not: null } }
     });
     
-    const totalLocal = await prisma.videoAnalysis.count({
+    const totalLocal = await prisma.VideoAnalysis.count({
       where: { cloud_storage_path: null }
     });
     

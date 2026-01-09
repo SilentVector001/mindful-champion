@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     // Get all achievements (gracefully handle missing table)
     let allAchievements = []
     try {
-      allAchievements = await prisma.videoAnalysisAchievement.findMany({
+      allAchievements = await prisma.VideoAnalysisAchievement.findMany({
         orderBy: [{ category: 'asc' }, { threshold: 'asc' }]
       })
     } catch (error) {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     // Get user's unlocked achievements
     let userAchievements = []
     try {
-      userAchievements = await prisma.videoAnalysisUserAchievement.findMany({
+      userAchievements = await prisma.VideoAnalysisUserAchievement.findMany({
         where: { userId: user.id },
         select: { achievementId: true, unlockedAt: true, value: true }
       })

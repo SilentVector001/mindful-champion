@@ -83,10 +83,10 @@ export async function GET(
     ranks.training = drillRank.length + 1
 
     // Video Rank
-    const videoCount = await prisma.videoAnalysis.count({
+    const videoCount = await prisma.VideoAnalysis.count({
       where: { userId: targetUserId, analysisStatus: { in: ['ANALYZED', 'COMPLETED'] } }
     })
-    const videoRank = await prisma.videoAnalysis.groupBy({
+    const videoRank = await prisma.VideoAnalysis.groupBy({
       by: ['userId'],
       _count: { id: true },
       where: { analysisStatus: { in: ['ANALYZED', 'COMPLETED'] } },

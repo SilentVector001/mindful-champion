@@ -28,7 +28,7 @@ async function migrateVideosToPublic() {
     console.log(`✅ AWS Config: bucket=${bucketName}, region=${region}\n`)
     
     // Find all videos with cloud_storage_path
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       where: {
         cloud_storage_path: {
           not: null
@@ -72,7 +72,7 @@ async function migrateVideosToPublic() {
         const publicUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${video.cloud_storage_path}`
         
         // Update video record
-        await prisma.videoAnalysis.update({
+        await prisma.VideoAnalysis.update({
           where: { id: video.id },
           data: {
             videoUrl: publicUrl,

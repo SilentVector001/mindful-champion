@@ -5,7 +5,7 @@ export const dynamic = "force-dynamic"
 
 export async function GET() {
   try {
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       select: {
         id: true,
         title: true,

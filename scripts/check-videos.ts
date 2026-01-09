@@ -7,7 +7,7 @@ const prisma = new PrismaClient()
 
 async function checkVideos() {
   try {
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       orderBy: { uploadedAt: 'desc' },
       take: 10,
       select: {

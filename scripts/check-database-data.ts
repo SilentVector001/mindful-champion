@@ -40,11 +40,11 @@ async function checkDatabaseData() {
     });
 
     // 3. Count video analyses
-    const totalVideos = await prisma.videoAnalysis.count();
+    const totalVideos = await prisma.VideoAnalysis.count();
     console.log(`\n🎥 TOTAL VIDEO ANALYSES: ${totalVideos}`);
 
     // 4. Get recent video analyses
-    const recentVideos = await prisma.videoAnalysis.findMany({
+    const recentVideos = await prisma.VideoAnalysis.findMany({
       take: 10,
       orderBy: { uploadedAt: 'desc' },
       include: {
@@ -99,7 +99,7 @@ async function checkDatabaseData() {
     console.log(`\n📚 TOTAL USER TRAINING PROGRAMS: ${totalUserPrograms}`);
 
     // 9. Check video analysis status distribution
-    const videoStatusCounts = await prisma.videoAnalysis.groupBy({
+    const videoStatusCounts = await prisma.VideoAnalysis.groupBy({
       by: ['analysisStatus'],
       _count: true,
     });

@@ -43,7 +43,7 @@ export async function GET(request: NextRequest) {
 
     // Recent video uploads
     try {
-      const recentVideos = await prisma.videoAnalysis.findMany({
+      const recentVideos = await prisma.VideoAnalysis.findMany({
         orderBy: { createdAt: 'desc' },
         take: 15,
         include: {

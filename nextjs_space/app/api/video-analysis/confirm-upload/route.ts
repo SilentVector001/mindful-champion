@@ -46,7 +46,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create video analysis record
-    const videoAnalysis = await prisma.videoAnalysis.create({
+    const videoAnalysis = await prisma.VideoAnalysis.create({
       data: {
         userId: user.id,
         videoUrl: key,

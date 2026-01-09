@@ -85,7 +85,7 @@ async function runDiagnosis() {
   console.log('=' .repeat(70))
   
   try {
-    const videosWithS3 = await prisma.videoAnalysis.findMany({
+    const videosWithS3 = await prisma.VideoAnalysis.findMany({
       where: {
         cloud_storage_path: {
           not: null

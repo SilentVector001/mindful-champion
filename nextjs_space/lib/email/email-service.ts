@@ -122,7 +122,7 @@ export const emailService = {
 
       // Update video analysis record if applicable
       if (videoAnalysisId) {
-        await prisma.videoAnalysis.update({
+        await prisma.VideoAnalysis.update({
           where: { id: videoAnalysisId },
           data: {
             emailNotificationSent: true,
@@ -161,7 +161,7 @@ export const emailService = {
 
         // Update video analysis record if applicable
         if (params.videoAnalysisId) {
-          await prisma.videoAnalysis.update({
+          await prisma.VideoAnalysis.update({
             where: { id: params.videoAnalysisId },
             data: {
               emailNotificationStatus: 'FAILED',
@@ -246,7 +246,7 @@ export const emailService = {
 
       // Update video analysis if applicable
       if (notification.videoAnalysisId) {
-        await prisma.videoAnalysis.update({
+        await prisma.VideoAnalysis.update({
           where: { id: notification.videoAnalysisId },
           data: {
             emailNotificationSent: true,

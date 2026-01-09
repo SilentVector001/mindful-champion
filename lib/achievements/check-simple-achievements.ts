@@ -39,7 +39,7 @@ const simpleAchievements: SimpleAchievement[] = [
     points: 10,
     category: 'video',
     checkFunction: async (userId: string) => {
-      const count = await prisma.videoAnalysis.count({
+      const count = await prisma.VideoAnalysis.count({
         where: { userId }
       });
       return count >= 1;
@@ -53,7 +53,7 @@ const simpleAchievements: SimpleAchievement[] = [
     points: 50,
     category: 'video',
     checkFunction: async (userId: string) => {
-      const count = await prisma.videoAnalysis.count({
+      const count = await prisma.VideoAnalysis.count({
         where: { userId }
       });
       return count >= 5;
@@ -67,7 +67,7 @@ const simpleAchievements: SimpleAchievement[] = [
     points: 100,
     category: 'video',
     checkFunction: async (userId: string) => {
-      const count = await prisma.videoAnalysis.count({
+      const count = await prisma.VideoAnalysis.count({
         where: { userId }
       });
       return count >= 10;

@@ -18,7 +18,7 @@ export default async function VideoAnalysisDetailPage({
   }
 
   // Fetch the video analysis
-  const analysis = await prisma.videoAnalysis.findUnique({
+  const analysis = await prisma.VideoAnalysis.findUnique({
     where: { id: params.analysisId },
     include: {
       user: {

@@ -768,7 +768,7 @@ async function checkMilestoneCriteria(
       const goalCount = await prisma.goal.count({ where: { userId } });
       return goalCount === 1;
     case 'first_video':
-      const videoCount = await prisma.videoAnalysis.count({ where: { userId } });
+      const videoCount = await prisma.VideoAnalysis.count({ where: { userId } });
       return videoCount === 1;
     case 'first_post':
       const postCount = await prisma.communityPost.count({ where: { authorId: userId } });
@@ -818,7 +818,7 @@ async function checkVideoAnalysisCriteria(
   criteria: any
 ): Promise<boolean> {
   const { videosAnalyzed } = criteria;
-  const count = await prisma.videoAnalysis.count({
+  const count = await prisma.VideoAnalysis.count({
     where: { userId, status: 'COMPLETED' },
   });
   return count >= videosAnalyzed;

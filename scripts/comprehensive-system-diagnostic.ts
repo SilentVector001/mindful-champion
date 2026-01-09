@@ -187,7 +187,7 @@ async function runComprehensiveDiagnostic() {
     
     // 5. VIDEO ANALYSES
     console.log('\n🎥 Checking Video Analyses...');
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       orderBy: { uploadedAt: 'desc' },
       take: 10,
       select: {
@@ -205,8 +205,8 @@ async function runComprehensiveDiagnostic() {
       }
     });
     
-    const totalVideos = await prisma.videoAnalysis.count();
-    const allVideos = await prisma.videoAnalysis.findMany({
+    const totalVideos = await prisma.VideoAnalysis.count();
+    const allVideos = await prisma.VideoAnalysis.findMany({
       select: {
         cloud_storage_path: true,
         videoUrl: true

@@ -188,8 +188,8 @@ async function runComprehensiveFix() {
     console.log('\n🔧 FIX 5: Video Analysis System');
     console.log('-'.repeat(60));
     
-    const totalVideos = await prisma.videoAnalysis.count();
-    const leeVideos = await prisma.videoAnalysis.count({
+    const totalVideos = await prisma.VideoAnalysis.count();
+    const leeVideos = await prisma.VideoAnalysis.count({
       where: { user: { email: 'lee@onesoulpickleball.com' } }
     });
     
@@ -202,7 +202,7 @@ async function runComprehensiveFix() {
       fixLog.warnings.push('Lee Rosenthal has no video analyses - may need to upload videos');
     }
     
-    const recentVideo = await prisma.videoAnalysis.findFirst({
+    const recentVideo = await prisma.VideoAnalysis.findFirst({
       orderBy: { uploadedAt: 'desc' },
       select: {
         fileName: true,

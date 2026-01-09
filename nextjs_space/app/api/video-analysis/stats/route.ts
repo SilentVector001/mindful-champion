@@ -35,25 +35,25 @@ export async function GET(request: NextRequest) {
 
     // Get statistics
     const [totalVideos, completedVideos, pendingVideos, processingVideos, failedVideos] = await Promise.all([
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: { userId: user.id }
       }),
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: { userId: user.id, analysisStatus: "COMPLETED" }
       }),
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: { userId: user.id, analysisStatus: "PENDING" }
       }),
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: { userId: user.id, analysisStatus: "PROCESSING" }
       }),
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: { userId: user.id, analysisStatus: "FAILED" }
       })
     ]);
 
     // Get average score for completed videos
-    const completedVideosWithScores = await prisma.videoAnalysis.findMany({
+    const completedVideosWithScores = await prisma.VideoAnalysis.findMany({
       where: {
         userId: user.id,
         analysisStatus: "COMPLETED",
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       : null;
 
     // Calculate storage used (sum of file sizes in MB)
-    const storageResult = await prisma.videoAnalysis.aggregate({
+    const storageResult = await prisma.VideoAnalysis.aggregate({
       where: { userId: user.id },
       _sum: { fileSize: true }
     });
@@ -76,7 +76,7 @@ export async function GET(request: NextRequest) {
     // Calculate average improvement (compare earliest vs latest scores)
     let avgImprovement = 0;
     if (completedVideosWithScores.length >= 2) {
-      const sortedVideos = await prisma.videoAnalysis.findMany({
+      const sortedVideos = await prisma.VideoAnalysis.findMany({
         where: { userId: user.id, analysisStatus: "COMPLETED", overallScore: { not: null } },
         orderBy: { uploadedAt: "asc" },
         select: { overallScore: true }
@@ -89,7 +89,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get recent videos
-    const recentVideos = await prisma.videoAnalysis.findMany({
+    const recentVideos = await prisma.VideoAnalysis.findMany({
       where: { userId: user.id },
       take: 5,
       orderBy: { uploadedAt: "desc" },

@@ -12,7 +12,7 @@ async function checkRecentVideo() {
     // Get the most recent video analysis (uploaded in last hour)
     const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
     
-    const recentVideo = await prisma.videoAnalysis.findFirst({
+    const recentVideo = await prisma.VideoAnalysis.findFirst({
       where: {
         uploadedAt: {
           gte: oneHourAgo
@@ -36,7 +36,7 @@ async function checkRecentVideo() {
       console.log('❌ No videos uploaded in the last hour');
       
       // Get the most recent video regardless of time
-      const latestVideo = await prisma.videoAnalysis.findFirst({
+      const latestVideo = await prisma.VideoAnalysis.findFirst({
         orderBy: {
           uploadedAt: 'desc'
         },

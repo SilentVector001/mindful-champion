@@ -25,30 +25,30 @@ export default async function AdminVideoAnalyticsPage() {
     avgProcessingTime
   ] = await Promise.all([
     // Total videos uploaded
-    prisma.videoAnalysis.count(),
+    prisma.VideoAnalysis.count(),
     
     // Successfully analyzed videos
-    prisma.videoAnalysis.count({
+    prisma.VideoAnalysis.count({
       where: { analysisStatus: 'COMPLETED' }
     }),
     
     // Pending analyses
-    prisma.videoAnalysis.count({
+    prisma.VideoAnalysis.count({
       where: { analysisStatus: { in: ['PENDING', 'PROCESSING'] } }
     }),
     
     // Failed analyses
-    prisma.videoAnalysis.count({
+    prisma.VideoAnalysis.count({
       where: { analysisStatus: 'FAILED' }
     }),
     
     // Total storage used (in bytes)
-    prisma.videoAnalysis.aggregate({
+    prisma.VideoAnalysis.aggregate({
       _sum: { fileSize: true }
     }),
     
     // Recent 10 videos
-    prisma.videoAnalysis.findMany({
+    prisma.VideoAnalysis.findMany({
       take: 10,
       orderBy: { uploadedAt: 'desc' },
       include: {
@@ -64,7 +64,7 @@ export default async function AdminVideoAnalyticsPage() {
     }),
     
     // User video stats
-    prisma.videoAnalysis.groupBy({
+    prisma.VideoAnalysis.groupBy({
       by: ['userId'],
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
@@ -72,7 +72,7 @@ export default async function AdminVideoAnalyticsPage() {
     }),
     
     // Average processing time (for completed videos)
-    prisma.videoAnalysis.findMany({
+    prisma.VideoAnalysis.findMany({
       where: {
         analysisStatus: 'COMPLETED',
         analyzedAt: { not: null }

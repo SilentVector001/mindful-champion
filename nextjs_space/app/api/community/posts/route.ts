@@ -133,7 +133,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify user owns the video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoAnalysisId }
     })
 

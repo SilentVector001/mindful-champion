@@ -18,7 +18,7 @@ export async function GET(req: Request) {
     let videos: any[] = []
     
     try {
-      videos = await prisma.videoAnalysis.findMany({
+      videos = await prisma.VideoAnalysis.findMany({
         include: { user: { select: { id: true, email: true, firstName: true, name: true } } },
         orderBy: { createdAt: 'desc' },
         take: 100,

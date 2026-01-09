@@ -21,13 +21,13 @@ async function checkDbS3Match() {
   
   try {
     // Get total video count
-    const totalCount = await prisma.videoAnalysis.count();
+    const totalCount = await prisma.VideoAnalysis.count();
     console.log(`📊 Total videos in database: ${totalCount}\n`);
     
     // Check each S3 file
     console.log('🔎 Checking if S3 files have database records:\n');
     for (const s3Key of s3Files) {
-      const record = await prisma.videoAnalysis.findFirst({
+      const record = await prisma.VideoAnalysis.findFirst({
         where: {
           cloud_storage_path: s3Key
         },
@@ -59,7 +59,7 @@ async function checkDbS3Match() {
     
     // Get most recent 5 videos from database
     console.log('📹 Most Recent 5 Videos in Database:\n');
-    const recentVideos = await prisma.videoAnalysis.findMany({
+    const recentVideos = await prisma.VideoAnalysis.findMany({
       orderBy: {
         uploadedAt: 'desc'
       },

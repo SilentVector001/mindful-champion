@@ -28,7 +28,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Fetch videos
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       where,
       take: limit,
       orderBy: { uploadedAt: 'desc' },
@@ -46,11 +46,11 @@ export async function GET(req: NextRequest) {
 
     // Fetch updated stats
     const [totalVideos, totalAnalyzed, pendingAnalyses, failedAnalyses, storageUsed] = await Promise.all([
-      prisma.videoAnalysis.count(),
-      prisma.videoAnalysis.count({ where: { analysisStatus: 'COMPLETED' } }),
-      prisma.videoAnalysis.count({ where: { analysisStatus: { in: ['PENDING', 'PROCESSING'] } } }),
-      prisma.videoAnalysis.count({ where: { analysisStatus: 'FAILED' } }),
-      prisma.videoAnalysis.aggregate({ _sum: { fileSize: true } })
+      prisma.VideoAnalysis.count(),
+      prisma.VideoAnalysis.count({ where: { analysisStatus: 'COMPLETED' } }),
+      prisma.VideoAnalysis.count({ where: { analysisStatus: { in: ['PENDING', 'PROCESSING'] } } }),
+      prisma.VideoAnalysis.count({ where: { analysisStatus: 'FAILED' } }),
+      prisma.VideoAnalysis.aggregate({ _sum: { fileSize: true } })
     ])
 
     const stats = {

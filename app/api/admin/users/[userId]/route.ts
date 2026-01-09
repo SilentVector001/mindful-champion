@@ -213,7 +213,7 @@ export async function GET(
     ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()).slice(0, 50)
 
     // Get video analysis count for user
-    const videoAnalysisCount = await prisma.videoAnalysis.count({ where: { userId } })
+    const videoAnalysisCount = await prisma.VideoAnalysis.count({ where: { userId } })
 
     return NextResponse.json({
       user,

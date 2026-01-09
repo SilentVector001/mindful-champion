@@ -18,7 +18,7 @@ async function checkVideoAnalysis() {
     console.log('=====================================\n');
     
     for (const id of analysisIds) {
-      const analysis = await prisma.videoAnalysis.findUnique({
+      const analysis = await prisma.VideoAnalysis.findUnique({
         where: { id },
         select: {
           id: true,
@@ -62,7 +62,7 @@ async function checkVideoAnalysis() {
     console.log('\n📊 Checking recent VideoAnalysis records (last 10):');
     console.log('==================================================\n');
     
-    const recentAnalyses = await prisma.videoAnalysis.findMany({
+    const recentAnalyses = await prisma.VideoAnalysis.findMany({
       take: 10,
       orderBy: { uploadedAt: 'desc' },
       select: {
@@ -103,20 +103,20 @@ async function checkVideoAnalysis() {
     console.log('\n📈 Statistics:');
     console.log('===============\n');
     
-    const total = await prisma.videoAnalysis.count();
-    const withS3Path = await prisma.videoAnalysis.count({
+    const total = await prisma.VideoAnalysis.count();
+    const withS3Path = await prisma.VideoAnalysis.count({
       where: { 
         cloud_storage_path: { 
           not: null
         } 
       }
     });
-    const withLocalPath = await prisma.videoAnalysis.count({
+    const withLocalPath = await prisma.VideoAnalysis.count({
       where: {
         cloud_storage_path: null
       }
     });
-    const withShotDetection = await prisma.videoAnalysis.count({
+    const withShotDetection = await prisma.VideoAnalysis.count({
       where: { 
         detectedShots: { 
           not: null

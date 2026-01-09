@@ -14,7 +14,7 @@ async function testUploadFlow() {
     // Try to create a test video record
     console.log('📝 Attempting to create test video record...');
     
-    const testVideo = await prisma.videoAnalysis.create({
+    const testVideo = await prisma.VideoAnalysis.create({
       data: {
         userId: 'test-user-id',
         videoUrl: '6482/uploads/test-video.mp4',
@@ -37,7 +37,7 @@ async function testUploadFlow() {
     
     // Now try to delete it
     console.log('🗑️  Cleaning up test record...');
-    await prisma.videoAnalysis.delete({
+    await prisma.VideoAnalysis.delete({
       where: {
         id: testVideo.id
       }

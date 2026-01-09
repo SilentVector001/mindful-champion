@@ -21,7 +21,7 @@ export async function POST(
     }
 
     // Fetch analysis data
-    const analysis = await prisma.videoAnalysis.findUnique({
+    const analysis = await prisma.VideoAnalysis.findUnique({
       where: { id: params.analysisId },
       select: {
         id: true,

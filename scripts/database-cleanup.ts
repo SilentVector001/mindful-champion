@@ -64,7 +64,7 @@ async function cleanupDatabase() {
       where: { role: { not: UserRole.ADMIN } }
     })
 
-    const videoAnalyses = await prisma.videoAnalysis.count({
+    const videoAnalyses = await prisma.VideoAnalysis.count({
       where: { userId: { notIn: adminIds } }
     })
 

@@ -20,7 +20,7 @@ export default async function VideoAnalysisDetailPage({
   // Fetch the video analysis
   let analysis = null
   try {
-    analysis = await prisma.videoAnalysis.findUnique({
+    analysis = await prisma.VideoAnalysis.findUnique({
       where: { id: params.analysisId }
     })
   } catch (error) {

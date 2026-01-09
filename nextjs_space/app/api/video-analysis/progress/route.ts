@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get all video analyses with shots
-    const analyses = await prisma.videoAnalysis.findMany({
+    const analyses = await prisma.VideoAnalysis.findMany({
       where: { userId: user.id, analysisStatus: 'COMPLETED' },
       orderBy: { uploadedAt: 'desc' },
       select: {
@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
     // Get skill progress (gracefully handle missing table)
     let skillProgress = []
     try {
-      skillProgress = await prisma.videoAnalysisProgress.findMany({
+      skillProgress = await prisma.VideoAnalysisProgress.findMany({
         where: { userId: user.id },
         orderBy: { averageScore: 'desc' }
       })
@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
     // Get achievements (gracefully handle missing table)
     let achievements = []
     try {
-      achievements = await prisma.videoAnalysisUserAchievement.findMany({
+      achievements = await prisma.VideoAnalysisUserAchievement.findMany({
         where: { userId: user.id },
         include: { achievement: true },
         orderBy: { unlockedAt: 'desc' }

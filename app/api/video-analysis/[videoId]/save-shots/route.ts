@@ -38,7 +38,7 @@ export async function POST(
     const { videoId } = params;
 
     // Get video analysis
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId }
     });
 
@@ -69,7 +69,7 @@ export async function POST(
     }
 
     // Update video analysis with detected shots
-    const updatedVideo = await prisma.videoAnalysis.update({
+    const updatedVideo = await prisma.VideoAnalysis.update({
       where: { id: videoId },
       data: {
         detectedShots: detectedShots

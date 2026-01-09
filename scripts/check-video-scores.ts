@@ -9,7 +9,7 @@ const prisma = new PrismaClient()
 
 async function checkScores() {
   try {
-    const videos = await prisma.videoAnalysis.findMany({
+    const videos = await prisma.VideoAnalysis.findMany({
       where: {
         analysisStatus: 'COMPLETED'
       },

@@ -44,10 +44,10 @@ export async function GET(request: NextRequest) {
       securityEvents
     ] = await Promise.all([
       // Total videos count
-      prisma.videoAnalysis.count({ where: whereClause }),
+      prisma.VideoAnalysis.count({ where: whereClause }),
 
       // All videos for detailed analysis
-      prisma.videoAnalysis.findMany({
+      prisma.VideoAnalysis.findMany({
         where: whereClause,
         select: {
           id: true,
@@ -63,14 +63,14 @@ export async function GET(request: NextRequest) {
       }),
 
       // Status breakdown
-      prisma.videoAnalysis.groupBy({
+      prisma.VideoAnalysis.groupBy({
         by: ['analysisStatus'],
         where: whereClause,
         _count: true
       }),
 
       // Flagged videos count
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: {
           ...whereClause,
           flaggedForReview: true
@@ -78,7 +78,7 @@ export async function GET(request: NextRequest) {
       }),
 
       // Videos with admin notes
-      prisma.videoAnalysis.count({
+      prisma.VideoAnalysis.count({
         where: {
           ...whereClause,
           adminNotes: { not: null }

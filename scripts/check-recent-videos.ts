@@ -11,7 +11,7 @@ async function checkRecentVideos() {
     console.log('\n🔍 Checking Recent Video Uploads...\n')
 
     // Get the 10 most recent video uploads
-    const recentVideos = await prisma.videoAnalysis.findMany({
+    const recentVideos = await prisma.VideoAnalysis.findMany({
       take: 10,
       orderBy: {
         uploadedAt: 'desc'

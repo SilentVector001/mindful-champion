@@ -20,7 +20,7 @@ export async function GET(
 
     const { videoId } = await params;
 
-    const video = await prisma.videoAnalysis.findUnique({
+    const video = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId },
       include: {
         user: {
@@ -124,7 +124,7 @@ export async function PATCH(
       updateData.adminPriority = adminPriority;
     }
 
-    const updatedVideo = await prisma.videoAnalysis.update({
+    const updatedVideo = await prisma.VideoAnalysis.update({
       where: { id: videoId },
       data: updateData,
       include: {
@@ -242,7 +242,7 @@ export async function DELETE(
     const { videoId } = await params;
 
     // Get video details before deletion for logging
-    const video = await prisma.videoAnalysis.findUnique({
+    const video = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId },
       select: {
         id: true,
@@ -258,7 +258,7 @@ export async function DELETE(
     }
 
     // Delete the video record
-    await prisma.videoAnalysis.delete({
+    await prisma.VideoAnalysis.delete({
       where: { id: videoId }
     });
 

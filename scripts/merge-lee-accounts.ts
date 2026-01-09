@@ -59,7 +59,7 @@ async function mergeLeeAccounts() {
     
     // 1. Transfer video analyses
     if (duplicateAccount.videoAnalyses.length > 0) {
-      const videoCount = await prisma.videoAnalysis.updateMany({
+      const videoCount = await prisma.VideoAnalysis.updateMany({
         where: { userId: duplicateAccount.id },
         data: { userId: primaryAccount.id }
       });

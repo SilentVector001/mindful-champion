@@ -12,11 +12,11 @@ async function checkVideoStorage() {
 
   try {
     // Get total count
-    const totalCount = await prisma.videoAnalysis.count()
+    const totalCount = await prisma.VideoAnalysis.count()
     console.log(`📊 Total VideoAnalysis records: ${totalCount}`)
 
     // Get recent videos (last 10)
-    const recentVideos = await prisma.videoAnalysis.findMany({
+    const recentVideos = await prisma.VideoAnalysis.findMany({
       take: 10,
       orderBy: {
         uploadedAt: 'desc'
@@ -69,7 +69,7 @@ async function checkVideoStorage() {
     }
 
     // Count videos with cloud_storage_path
-    const s3VideoCount = await prisma.videoAnalysis.count({
+    const s3VideoCount = await prisma.VideoAnalysis.count({
       where: {
         cloud_storage_path: {
           not: null
@@ -77,7 +77,7 @@ async function checkVideoStorage() {
       }
     })
 
-    const nullStorageCount = await prisma.videoAnalysis.count({
+    const nullStorageCount = await prisma.VideoAnalysis.count({
       where: {
         cloud_storage_path: null
       }

@@ -55,7 +55,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Get video analysis record
-    const videoAnalysis = await prisma.videoAnalysis.findUnique({
+    const videoAnalysis = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId }
     });
 
@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update status to PROCESSING
-    await prisma.videoAnalysis.update({
+    await prisma.VideoAnalysis.update({
       where: { id: videoId },
       data: {
         analysisStatus: "PROCESSING"
@@ -175,7 +175,7 @@ export async function POST(request: NextRequest) {
     console.log("[Analyze] Calculated overall score:", overallScore);
 
     // Update video analysis with results
-    const updatedVideo = await prisma.videoAnalysis.update({
+    const updatedVideo = await prisma.VideoAnalysis.update({
       where: { id: videoId },
       data: {
         analysisStatus: "COMPLETED",
@@ -284,7 +284,7 @@ export async function POST(request: NextRequest) {
     // Update video status to FAILED if we have the videoId
     const body = await request.json().catch(() => ({}));
     if (body.videoId) {
-      await prisma.videoAnalysis.update({
+      await prisma.VideoAnalysis.update({
         where: { id: body.videoId },
         data: { analysisStatus: "FAILED" }
       }).catch(() => {});

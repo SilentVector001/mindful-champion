@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     // Get video count
     let videoCount = 0
     try {
-      videoCount = await prisma.videoAnalysis.count()
+      videoCount = await prisma.VideoAnalysis.count()
     } catch (e) {}
 
     // Calculate estimated revenue

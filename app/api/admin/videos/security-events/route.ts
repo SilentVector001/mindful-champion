@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify video exists
-    const video = await prisma.videoAnalysis.findUnique({
+    const video = await prisma.VideoAnalysis.findUnique({
       where: { id: videoId },
       select: { 
         id: true, 

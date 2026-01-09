@@ -14,7 +14,7 @@ export async function GET(req: NextRequest) {
     const userId = session?.user?.id
 
     // Get video analysis counts
-    const videoAnalysis = await prisma.videoAnalysis.groupBy({
+    const videoAnalysis = await prisma.VideoAnalysis.groupBy({
       by: ['userId'],
       _count: {
         id: true
@@ -72,7 +72,7 @@ export async function GET(req: NextRequest) {
     let userPosition = null
 
     if (userId) {
-      const userVideoCount = await prisma.videoAnalysis.count({
+      const userVideoCount = await prisma.VideoAnalysis.count({
         where: {
           userId,
           analysisStatus: { in: ['ANALYZED', 'COMPLETED'] }
@@ -80,7 +80,7 @@ export async function GET(req: NextRequest) {
       })
 
       if (userVideoCount > 0) {
-        const usersAbove = await prisma.videoAnalysis.groupBy({
+        const usersAbove = await prisma.VideoAnalysis.groupBy({
           by: ['userId'],
           _count: { id: true },
           where: {

@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     console.log(`Generated public URL: ${videoUrl}`);
     
     // Create video analysis record with admin flags
-    const videoAnalysis = await prisma.videoAnalysis.create({
+    const videoAnalysis = await prisma.VideoAnalysis.create({
       data: {
         userId: userId,
         videoUrl: videoUrl,

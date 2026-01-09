@@ -11,12 +11,12 @@ async function testDatabase() {
     console.log('✅ Database connection successful');
     
     // Test VideoAnalysis table
-    const count = await prisma.videoAnalysis.count();
+    const count = await prisma.VideoAnalysis.count();
     console.log(`✅ VideoAnalysis table accessible - Total records: ${count}`);
     
     // Test fetching one record (if any)
     if (count > 0) {
-      const sample = await prisma.videoAnalysis.findFirst({
+      const sample = await prisma.VideoAnalysis.findFirst({
         select: {
           id: true,
           analysisStatus: true,

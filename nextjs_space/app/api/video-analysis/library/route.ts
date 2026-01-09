@@ -47,7 +47,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get videos
-    const rawVideos = await prisma.videoAnalysis.findMany({
+    const rawVideos = await prisma.VideoAnalysis.findMany({
       where,
       take: limit,
       skip: offset,
@@ -80,7 +80,7 @@ export async function GET(request: NextRequest) {
     }));
 
     // Get total count
-    const totalCount = await prisma.videoAnalysis.count({ where });
+    const totalCount = await prisma.VideoAnalysis.count({ where });
 
     console.log("[Library] Retrieved videos:", {
       userId: user.id,

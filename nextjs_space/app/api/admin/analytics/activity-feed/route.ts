@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
       }),
 
       // Recent video uploads
-      prisma.videoAnalysis.findMany({
+      prisma.VideoAnalysis.findMany({
         where: { uploadedAt: { gte: sevenDaysAgo } },
         orderBy: { uploadedAt: 'desc' },
         take: 20,

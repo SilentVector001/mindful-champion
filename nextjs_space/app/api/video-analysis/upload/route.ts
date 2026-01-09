@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
 
       // Create pending video record
       const videoId = `vid_${timestamp}_${Math.random().toString(36).substr(2, 9)}`
-      await prisma.videoAnalysis.create({
+      await prisma.VideoAnalysis.create({
         data: {
           id: videoId,
           userId: user.id,
@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
     const videoUrl2 = `https://${bucketName}.s3.us-west-2.amazonaws.com/${s3Key2}`
     const videoId2 = `vid_${timestamp2}_${Math.random().toString(36).substr(2, 9)}`
 
-    await prisma.videoAnalysis.create({
+    await prisma.VideoAnalysis.create({
       data: {
         id: videoId2,
         userId: user.id,

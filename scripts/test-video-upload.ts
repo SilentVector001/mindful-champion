@@ -134,12 +134,12 @@ async function testDatabaseConnection() {
     
     // Check VideoAnalysis table schema
     console.log('\n   Checking VideoAnalysis table...')
-    const count = await prisma.videoAnalysis.count()
+    const count = await prisma.VideoAnalysis.count()
     console.log(`   Total video analyses in database: ${count}`)
     
     // Try to create a test record
     console.log('\n   Testing record creation...')
-    const testRecord = await prisma.videoAnalysis.create({
+    const testRecord = await prisma.VideoAnalysis.create({
       data: {
         userId: testUser.id,
         videoUrl: 'https://test.example.com/test.mp4',
@@ -153,7 +153,7 @@ async function testDatabaseConnection() {
     console.log(`   ✅ Test record created: ${testRecord.id}`)
     
     // Clean up test record
-    await prisma.videoAnalysis.delete({ where: { id: testRecord.id } })
+    await prisma.VideoAnalysis.delete({ where: { id: testRecord.id } })
     console.log('   ✅ Test record cleaned up')
     
     return { success: true, user: testUser }
@@ -212,7 +212,7 @@ async function simulateFullUpload(credentials: Credentials, user: any) {
     
     // Create database record
     console.log('\n   Creating database record...')
-    const videoAnalysis = await prisma.videoAnalysis.create({
+    const videoAnalysis = await prisma.VideoAnalysis.create({
       data: {
         userId: user.id,
         videoUrl,
@@ -229,7 +229,7 @@ async function simulateFullUpload(credentials: Credentials, user: any) {
     
     // Cleanup
     console.log('\n   Cleaning up test data...')
-    await prisma.videoAnalysis.delete({ where: { id: videoAnalysis.id } })
+    await prisma.VideoAnalysis.delete({ where: { id: videoAnalysis.id } })
     console.log('   ✅ Test record deleted')
     
     return { success: true }
