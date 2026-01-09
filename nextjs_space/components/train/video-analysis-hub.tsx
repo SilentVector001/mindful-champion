@@ -594,8 +594,9 @@ export default function VideoAnalysisHub() {
                     className="group"
                   >
                     <Card className="bg-slate-900/60 border-slate-700/50 overflow-hidden hover:border-cyan-500/50 transition-all duration-300">
-                      {/* Video Thumbnail */}
-                      <div className="relative aspect-video bg-slate-800">
+                      {/* Video Thumbnail - Always visible */}
+                      <div className="relative aspect-video bg-gradient-to-br from-slate-800 to-slate-900">
+                        {/* Show video element with poster/thumbnail */}
                         {video.videoUrl ? (
                           <video
                             src={video.videoUrl}
@@ -603,13 +604,47 @@ export default function VideoAnalysisHub() {
                             muted
                             loop
                             playsInline
-                            autoPlay={hoveredVideo === video.id}
+                            preload="metadata"
+                            poster={video.thumbnailUrl}
+                            ref={(el) => {
+                              if (el && hoveredVideo === video.id) el.play()
+                              if (el && hoveredVideo !== video.id) el.pause()
+                            }}
                           />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <Video className="w-12 h-12 text-slate-600" />
+                          /* Placeholder with skeleton pose */
+                          <div className="absolute inset-0">
+                            <svg viewBox="0 0 100 100" className="w-full h-full opacity-60">
+                              <defs>
+                                <linearGradient id={`grad-${video.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                  <stop offset="0%" stopColor="#06b6d4" />
+                                  <stop offset="100%" stopColor="#10b981" />
+                                </linearGradient>
+                              </defs>
+                              {/* Skeleton */}
+                              {[[50,15,50,25],[50,25,35,30],[50,25,65,30],[35,30,25,45],[65,30,78,38],[25,45,20,58],[78,38,85,28],[50,25,50,48],[50,48,40,55],[50,48,60,55],[40,55,35,72],[60,55,65,72],[35,72,32,90],[65,72,68,90]].map(([x1,y1,x2,y2], idx) => (
+                                <line key={idx} x1={x1} y1={y1} x2={x2} y2={y2} stroke={`url(#grad-${video.id})`} strokeWidth="1.5" strokeLinecap="round" />
+                              ))}
+                              {[[50,15,4],[35,30,2],[65,30,2],[25,45,2],[78,38,2.5],[20,58,2],[85,28,2],[40,55,2],[60,55,2],[35,72,2],[65,72,2]].map(([cx,cy,r], idx) => (
+                                <circle key={idx} cx={cx} cy={cy} r={r} fill="#22d3ee" />
+                              ))}
+                              <rect x="82" y="20" width="6" height="12" rx="1" fill="none" stroke="#10b981" strokeWidth="1" />
+                            </svg>
+                            <div className="absolute bottom-3 left-3 right-3">
+                              <p className="text-slate-400 text-xs truncate">{video.fileName || video.title}</p>
+                            </div>
                           </div>
                         )}
+                        
+                        {/* Play indicator */}
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className={cn(
+                            "w-12 h-12 rounded-full bg-black/50 flex items-center justify-center transition-opacity",
+                            hoveredVideo === video.id ? "opacity-0" : "opacity-100"
+                          )}>
+                            <Play className="w-5 h-5 text-white ml-0.5" />
+                          </div>
+                        </div>
                         
                         {/* Status Badge */}
                         <div className="absolute top-2 right-2">
