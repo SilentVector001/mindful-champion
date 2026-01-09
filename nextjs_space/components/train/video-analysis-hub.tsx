@@ -1,7 +1,7 @@
 // @ts-nocheck
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useSession } from "next-auth/react"
 import Image from "next/image"
 import Link from "next/link"
@@ -16,7 +16,8 @@ import {
   Upload, Video, Loader2, CheckCircle2, AlertCircle, Play,
   Sparkles, TrendingUp, Target, Zap, Clock, Eye, Activity,
   Brain, Gauge, Trophy, Film, HardDrive, Trash2, ArrowRight,
-  FileVideo, Lightbulb, ChevronRight, X, MoreVertical, Calendar
+  FileVideo, Lightbulb, ChevronRight, X, MoreVertical, Calendar,
+  Scan, Crosshair, Radar, Cpu, Waves, BarChart3, Camera, MonitorPlay
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import MainNavigation from "@/components/navigation/main-navigation"
@@ -29,6 +30,7 @@ interface VideoItem {
   analysisStatus: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
   overallScore?: number
   thumbnailUrl?: string
+  videoUrl?: string
   duration?: number
   fileSize?: number
 }
@@ -39,9 +41,141 @@ interface LibraryStats {
   avgScore: number
 }
 
+// Floating Particle System
+function ParticleField() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {Array.from({ length: 40 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 rounded-full bg-cyan-400/30"
+          initial={{
+            x: Math.random() * 100 + '%',
+            y: Math.random() * 100 + '%',
+            scale: Math.random() * 0.5 + 0.5
+          }}
+          animate={{
+            y: [null, '-20%'],
+            opacity: [0, 0.8, 0],
+            scale: [0.5, 1, 0.5]
+          }}
+          transition={{
+            duration: 4 + Math.random() * 4,
+            repeat: Infinity,
+            delay: Math.random() * 4
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+// Scanning Animation Overlay
+function ScanningOverlay({ isActive }: { isActive: boolean }) {
+  if (!isActive) return null
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+      <motion.div
+        className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-lg shadow-cyan-400/50"
+        animate={{ top: ['0%', '100%'] }}
+        transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+      />
+      <div className="absolute inset-0 bg-[linear-gradient(transparent_0%,rgba(34,211,238,0.03)_50%,transparent_100%)]" />
+    </div>
+  )
+}
+
+// AI Processing Visualization
+function AIProcessingViz({ stage }: { stage: string }) {
+  return (
+    <motion.div 
+      className="flex flex-col items-center gap-4"
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+    >
+      {/* Central Brain/Processor */}
+      <div className="relative w-24 h-24">
+        <motion.div 
+          className="absolute inset-0 rounded-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 2, repeat: Infinity }}
+        />
+        <motion.div 
+          className="absolute inset-2 rounded-full bg-gradient-to-br from-cyan-500/30 to-purple-500/30"
+          animate={{ scale: [1, 1.15, 1] }}
+          transition={{ duration: 2, repeat: Infinity, delay: 0.2 }}
+        />
+        <div className="absolute inset-4 rounded-full bg-slate-900 flex items-center justify-center">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+          >
+            <Brain className="w-8 h-8 text-cyan-400" />
+          </motion.div>
+        </div>
+        
+        {/* Orbiting Elements */}
+        {['Posture', 'Motion', 'Form'].map((label, i) => (
+          <motion.div
+            key={label}
+            className="absolute w-3 h-3 rounded-full bg-cyan-400 flex items-center justify-center"
+            style={{ top: '50%', left: '50%' }}
+            animate={{
+              x: [0, Math.cos(i * 2.09) * 40, 0],
+              y: [0, Math.sin(i * 2.09) * 40, 0]
+            }}
+            transition={{ duration: 2, repeat: Infinity, delay: i * 0.3 }}
+          >
+            <div className="absolute -top-6 whitespace-nowrap text-[8px] text-cyan-400 font-medium">
+              {label}
+            </div>
+          </motion.div>
+        ))}
+      </div>
+      
+      <div className="text-center">
+        <p className="text-cyan-400 font-semibold text-sm">{stage}</p>
+        <p className="text-slate-500 text-xs mt-1">AI Neural Processing</p>
+      </div>
+    </motion.div>
+  )
+}
+
+// Animated Stats Card
+function StatCard({ icon: Icon, value, label, gradient, delay = 0 }: any) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay }}
+      className="relative group"
+    >
+      <div className={cn(
+        "absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500",
+        gradient
+      )} style={{ filter: 'blur(20px)' }} />
+      <Card className="relative bg-slate-900/60 border-slate-700/50 backdrop-blur-sm overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-white/[0.02] to-transparent" />
+        <CardContent className="p-4 flex items-center gap-3">
+          <div className={cn("p-2.5 rounded-lg bg-gradient-to-br", gradient)}>
+            <Icon className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <p className="text-2xl font-bold text-white">{value}</p>
+            <p className="text-xs text-slate-400">{label}</p>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  )
+}
+
 export default function VideoAnalysisHub() {
   const { data: session } = useSession() || {}
   const router = useRouter()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const dropZoneRef = useRef<HTMLDivElement>(null)
+  
   const [activeTab, setActiveTab] = useState<'upload' | 'library'>('upload')
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
@@ -52,9 +186,11 @@ export default function VideoAnalysisHub() {
   const [libraryStats, setLibraryStats] = useState<LibraryStats>({ totalVideos: 0, totalAnalyzed: 0, avgScore: 0 })
   const [errorMessage, setErrorMessage] = useState('')
   const [isLoading, setIsLoading] = useState(true)
+  const [isDragging, setIsDragging] = useState(false)
+  const [hoveredVideo, setHoveredVideo] = useState<string | null>(null)
 
   const userTier = (session?.user as any)?.subscriptionTier || 'FREE'
-  const isPro = userTier === 'PRO'
+  const isPro = userTier === 'PRO' || userTier === 'PREMIUM'
   const userName = (session?.user as any)?.firstName || session?.user?.name?.split(' ')[0] || 'Champion'
 
   // Fetch video library
@@ -73,7 +209,6 @@ export default function VideoAnalysisHub() {
         const videos = data.analyses || data.videos || []
         setVideoLibrary(videos)
         
-        // Calculate stats
         const analyzed = videos.filter((v: any) => v.analysisStatus === 'COMPLETED')
         const avgScore = analyzed.length > 0 
           ? analyzed.reduce((sum: number, v: any) => sum + (v.overallScore || 0), 0) / analyzed.length 
@@ -100,7 +235,25 @@ export default function VideoAnalysisHub() {
     return () => clearInterval(interval)
   }, [session, videoLibrary])
 
-  // File selection handler
+  // Drag and drop handlers
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+  
+  const handleDragLeave = () => setIsDragging(false)
+  
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const file = e.dataTransfer.files?.[0]
+    if (file && file.type.startsWith('video/')) {
+      setSelectedFile(file)
+      setVideoPreview(URL.createObjectURL(file))
+      setErrorMessage('')
+    }
+  }
+
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
@@ -110,7 +263,6 @@ export default function VideoAnalysisHub() {
     }
   }
 
-  // Upload and analyze
   const handleUpload = async () => {
     if (!selectedFile) return
     
@@ -120,7 +272,6 @@ export default function VideoAnalysisHub() {
     setErrorMessage('')
 
     try {
-      // Get presigned URL
       const presignRes = await fetch('/api/video-analysis/upload', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -134,16 +285,22 @@ export default function VideoAnalysisHub() {
       if (!presignRes.ok) throw new Error('Failed to get upload URL')
       const { uploadUrl, cloud_storage_path, videoId } = await presignRes.json()
 
-      // Upload to S3
-      setUploadProgress(20)
+      // Simulated progress
+      const progressInterval = setInterval(() => {
+        setUploadProgress(p => Math.min(p + 5, 90))
+      }, 200)
+
       const uploadRes = await fetch(uploadUrl, {
         method: 'PUT',
         body: selectedFile,
         headers: { 'Content-Type': selectedFile.type }
       })
 
+      clearInterval(progressInterval)
       if (!uploadRes.ok) throw new Error('Upload failed')
-      setUploadProgress(60)
+      
+      setUploadProgress(100)
+      setAnalysisStatus('analyzing')
 
       // Confirm upload
       await fetch('/api/video-analysis/confirm-upload', {
@@ -152,378 +309,369 @@ export default function VideoAnalysisHub() {
         body: JSON.stringify({ videoId, cloud_storage_path })
       })
 
-      setUploadProgress(80)
-      setAnalysisStatus('analyzing')
-
-      // Start analysis
+      // Trigger analysis
       await fetch('/api/video-analysis/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ videoId })
       })
 
-      setUploadProgress(100)
       setAnalysisStatus('complete')
-      
-      // Reset and refresh
       setTimeout(() => {
-        setSelectedFile(null)
-        setVideoPreview(null)
-        setAnalysisStatus('idle')
-        setUploadProgress(0)
-        setActiveTab('library')
-        fetchVideoLibrary()
+        router.push(`/train/analysis/${videoId}`)
       }, 1500)
 
-    } catch (error) {
-      console.error('Upload error:', error)
-      setErrorMessage(error instanceof Error ? error.message : 'Upload failed')
+    } catch (error: any) {
       setAnalysisStatus('error')
+      setErrorMessage(error.message || 'Upload failed')
     } finally {
       setUploading(false)
     }
   }
 
-  // Delete video
-  const handleDelete = async (videoId: string) => {
-    if (!confirm('Delete this video analysis?')) return
+  const handleDeleteVideo = async (videoId: string) => {
     try {
       await fetch(`/api/video-analysis/${videoId}`, { method: 'DELETE' })
-      fetchVideoLibrary()
+      setVideoLibrary(prev => prev.filter(v => v.id !== videoId))
     } catch (error) {
-      console.error('Delete error:', error)
+      console.error('Delete failed:', error)
     }
   }
 
-  // View analysis
-  const handleViewAnalysis = (videoId: string) => {
-    router.push(`/train/analysis/${videoId}`)
-  }
-
-  // Format date
   const formatDate = (dateStr: string) => {
-    const date = new Date(dateStr)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-  }
-
-  // Format file size
-  const formatSize = (bytes?: number) => {
-    if (!bytes) return ''
-    const mb = bytes / (1024 * 1024)
-    return mb >= 1 ? `${mb.toFixed(1)} MB` : `${(bytes / 1024).toFixed(0)} KB`
-  }
-
-  // Get score color
-  const getScoreColor = (score?: number) => {
-    if (!score) return 'text-gray-400'
-    if (score >= 80) return 'text-emerald-400'
-    if (score >= 60) return 'text-cyan-400'
-    if (score >= 40) return 'text-amber-400'
-    return 'text-red-400'
-  }
-
-  const getScoreBg = (score?: number) => {
-    if (!score) return 'bg-slate-700'
-    if (score >= 80) return 'bg-emerald-500/20 border-emerald-500/30'
-    if (score >= 60) return 'bg-cyan-500/20 border-cyan-500/30'
-    if (score >= 40) return 'bg-amber-500/20 border-amber-500/30'
-    return 'bg-red-500/20 border-red-500/30'
+    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950">
-      <MainNavigation user={session?.user} />
+    <div className="min-h-screen bg-slate-950">
+      <MainNavigation />
       
-      <main className="max-w-6xl mx-auto px-4 py-8">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none">
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-[120px]" />
+      </div>
+      
+      <div className="relative pt-20 pb-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         {/* Header */}
         <motion.div 
+          className="text-center mb-8"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="mb-8"
         >
-          <div className="flex items-center gap-4 mb-2">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <Video className="w-7 h-7 text-white" />
+          <div className="inline-flex items-center gap-3 mb-4">
+            <div className="relative">
+              <motion.div
+                className="absolute inset-0 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-500"
+                animate={{ rotate: 360 }}
+                transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+                style={{ filter: 'blur(8px)' }}
+              />
+              <div className="relative bg-slate-900 p-3 rounded-xl">
+                <Scan className="w-8 h-8 text-cyan-400" />
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-white">Video Analysis Lab</h1>
-              <p className="text-gray-400">AI-powered technique analysis with Coach Kai</p>
+            <div className="text-left">
+              <h1 className="text-3xl font-bold text-white">AI Video Analysis</h1>
+              <p className="text-slate-400">Biomechanical breakdown powered by AI</p>
             </div>
           </div>
         </motion.div>
 
         {/* Stats Row */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="grid grid-cols-3 gap-4 mb-8"
-        >
-          {[
-            { label: 'Videos', value: libraryStats.totalVideos, icon: Film, color: 'from-cyan-500 to-blue-500' },
-            { label: 'Analyzed', value: libraryStats.totalAnalyzed, icon: Brain, color: 'from-emerald-500 to-teal-500' },
-            { label: 'Avg Score', value: libraryStats.avgScore || '-', icon: Target, color: 'from-amber-500 to-orange-500' },
-          ].map((stat, i) => (
-            <div key={stat.label} className="bg-slate-900/60 backdrop-blur rounded-xl p-4 border border-slate-700/50">
-              <div className="flex items-center gap-3">
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${stat.color} flex items-center justify-center`}>
-                  <stat.icon className="w-5 h-5 text-white" />
-                </div>
-                <div>
-                  <div className="text-2xl font-bold text-white">{stat.value}</div>
-                  <div className="text-xs text-gray-400">{stat.label}</div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </motion.div>
+        <div className="grid grid-cols-3 gap-4 mb-8">
+          <StatCard icon={Film} value={libraryStats.totalVideos} label="Videos" gradient="from-cyan-500 to-blue-500" delay={0.1} />
+          <StatCard icon={CheckCircle2} value={libraryStats.totalAnalyzed} label="Analyzed" gradient="from-emerald-500 to-teal-500" delay={0.2} />
+          <StatCard icon={Target} value={libraryStats.avgScore || '—'} label="Avg Score" gradient="from-amber-500 to-orange-500" delay={0.3} />
+        </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as any)} className="space-y-6">
-          <TabsList className="bg-slate-800/50 border border-slate-700/50 p-1 rounded-xl">
-            <TabsTrigger value="upload" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white rounded-lg px-6">
+        <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="space-y-6">
+          <TabsList className="bg-slate-900/50 border border-slate-700/50 p-1">
+            <TabsTrigger value="upload" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20">
               <Upload className="w-4 h-4 mr-2" /> Upload
             </TabsTrigger>
-            <TabsTrigger value="library" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500 data-[state=active]:to-emerald-500 data-[state=active]:text-white rounded-lg px-6">
-              <Film className="w-4 h-4 mr-2" /> Library ({libraryStats.totalVideos})
+            <TabsTrigger value="library" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/20 data-[state=active]:to-purple-500/20">
+              <MonitorPlay className="w-4 h-4 mr-2" /> Library ({libraryStats.totalVideos})
             </TabsTrigger>
           </TabsList>
 
           {/* Upload Tab */}
-          <TabsContent value="upload" className="space-y-6">
-            <div className="grid lg:grid-cols-2 gap-6">
-              {/* Upload Area */}
-              <motion.div
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur overflow-hidden">
-                  <CardContent className="p-6">
-                    {!selectedFile ? (
-                      <label className="block cursor-pointer">
-                        <input
-                          type="file"
-                          accept="video/*"
-                          onChange={handleFileSelect}
-                          className="hidden"
+          <TabsContent value="upload" className="mt-0">
+            <div className="grid lg:grid-cols-5 gap-6">
+              {/* Upload Zone - 3 columns */}
+              <div className="lg:col-span-3">
+                <motion.div
+                  ref={dropZoneRef}
+                  className={cn(
+                    "relative rounded-2xl border-2 border-dashed transition-all duration-300 overflow-hidden",
+                    isDragging ? "border-cyan-400 bg-cyan-400/10" : "border-slate-700 hover:border-slate-600",
+                    selectedFile ? "h-auto" : "h-[400px]"
+                  )}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <ParticleField />
+                  <ScanningOverlay isActive={isDragging} />
+                  
+                  {!selectedFile ? (
+                    <div className="absolute inset-0 flex flex-col items-center justify-center p-8">
+                      {/* Animated Upload Icon */}
+                      <motion.div
+                        className="relative mb-6"
+                        animate={{ y: [0, -8, 0] }}
+                        transition={{ duration: 2, repeat: Infinity }}
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-purple-500 rounded-full blur-xl opacity-40" />
+                        <div className="relative bg-slate-900/80 p-6 rounded-full border border-slate-700">
+                          <Upload className="w-12 h-12 text-cyan-400" />
+                        </div>
+                      </motion.div>
+                      
+                      <h3 className="text-xl font-semibold text-white mb-2">Drop your video here</h3>
+                      <p className="text-slate-400 mb-4">or click to browse files</p>
+                      <p className="text-slate-500 text-sm mb-6">MP4, MOV, AVI • Max 500MB</p>
+                      
+                      <Button
+                        onClick={() => fileInputRef.current?.click()}
+                        className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600"
+                      >
+                        <Camera className="w-4 h-4 mr-2" /> Select Video
+                      </Button>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="video/*"
+                        onChange={handleFileSelect}
+                        className="hidden"
+                      />
+                    </div>
+                  ) : (
+                    <div className="p-6">
+                      {/* Video Preview */}
+                      <div className="relative aspect-video rounded-xl overflow-hidden bg-black mb-4">
+                        <video
+                          src={videoPreview || undefined}
+                          className="w-full h-full object-contain"
+                          controls={analysisStatus === 'idle'}
                         />
-                        <div className="border-2 border-dashed border-slate-600 hover:border-cyan-500/50 rounded-2xl p-12 text-center transition-all group">
-                          <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500/20 to-emerald-500/20 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform">
-                            <Upload className="w-10 h-10 text-cyan-400" />
-                          </div>
-                          <h3 className="text-xl font-semibold text-white mb-2">Drop your video here</h3>
-                          <p className="text-gray-400 mb-4">or click to browse files</p>
-                          <p className="text-xs text-gray-500">MP4, MOV, AVI up to 500MB</p>
-                        </div>
-                      </label>
-                    ) : (
-                      <div className="space-y-4">
-                        {/* Video Preview */}
-                        <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                          {videoPreview && (
-                            <video src={videoPreview} className="w-full h-full object-contain" controls />
-                          )}
-                          <button
-                            onClick={() => { setSelectedFile(null); setVideoPreview(null) }}
-                            className="absolute top-3 right-3 w-8 h-8 bg-black/60 hover:bg-red-500 rounded-full flex items-center justify-center transition-colors"
-                          >
-                            <X className="w-4 h-4 text-white" />
-                          </button>
-                        </div>
-                        
-                        {/* File Info */}
-                        <div className="flex items-center justify-between p-3 bg-slate-800/50 rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <FileVideo className="w-5 h-5 text-cyan-400" />
-                            <div>
-                              <div className="text-white font-medium truncate max-w-[200px]">{selectedFile.name}</div>
-                              <div className="text-xs text-gray-400">{formatSize(selectedFile.size)}</div>
-                            </div>
-                          </div>
-                          <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                            Ready
-                          </Badge>
-                        </div>
-
-                        {/* Progress */}
                         {analysisStatus !== 'idle' && (
-                          <div className="space-y-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-gray-400">
-                                {analysisStatus === 'uploading' ? 'Uploading...' : 
-                                 analysisStatus === 'analyzing' ? 'AI Analyzing...' : 
-                                 analysisStatus === 'complete' ? 'Complete!' : 'Error'}
-                              </span>
-                              <span className="text-cyan-400">{uploadProgress}%</span>
-                            </div>
-                            <Progress value={uploadProgress} className="h-2" />
+                          <div className="absolute inset-0 bg-slate-900/80 flex items-center justify-center">
+                            <AIProcessingViz stage={
+                              analysisStatus === 'uploading' ? 'Uploading Video...' :
+                              analysisStatus === 'analyzing' ? 'AI Analyzing Form...' :
+                              analysisStatus === 'complete' ? 'Analysis Complete!' :
+                              'Error'
+                            } />
                           </div>
                         )}
-
-                        {/* Error */}
-                        {errorMessage && (
-                          <div className="flex items-center gap-2 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
-                            <AlertCircle className="w-4 h-4" />
-                            {errorMessage}
-                          </div>
-                        )}
-
-                        {/* Upload Button */}
-                        <Button
-                          onClick={handleUpload}
-                          disabled={uploading || analysisStatus === 'complete'}
-                          className="w-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-semibold py-6 text-lg shadow-lg"
-                        >
-                          {uploading ? (
-                            <><Loader2 className="w-5 h-5 mr-2 animate-spin" /> Processing...</>
-                          ) : analysisStatus === 'complete' ? (
-                            <><CheckCircle2 className="w-5 h-5 mr-2" /> Analysis Complete!</>
-                          ) : (
-                            <><Brain className="w-5 h-5 mr-2" /> Analyze with AI</>
-                          )}
-                        </Button>
                       </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </motion.div>
+                      
+                      {/* Progress */}
+                      {analysisStatus !== 'idle' && analysisStatus !== 'error' && (
+                        <div className="mb-4">
+                          <div className="flex justify-between text-sm mb-2">
+                            <span className="text-slate-400">
+                              {analysisStatus === 'uploading' ? 'Uploading...' :
+                               analysisStatus === 'analyzing' ? 'AI Processing...' :
+                               'Complete!'}
+                            </span>
+                            <span className="text-cyan-400">{uploadProgress}%</span>
+                          </div>
+                          <Progress value={uploadProgress} className="h-2 bg-slate-800" />
+                        </div>
+                      )}
+                      
+                      {/* File Info & Actions */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-white font-medium truncate max-w-xs">{selectedFile.name}</p>
+                          <p className="text-slate-500 text-sm">{(selectedFile.size / 1024 / 1024).toFixed(1)} MB</p>
+                        </div>
+                        <div className="flex gap-2">
+                          {analysisStatus === 'idle' && (
+                            <>
+                              <Button variant="ghost" onClick={() => {
+                                setSelectedFile(null)
+                                setVideoPreview(null)
+                              }}>
+                                <X className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                onClick={handleUpload}
+                                className="bg-gradient-to-r from-cyan-500 to-emerald-500"
+                              >
+                                <Brain className="w-4 h-4 mr-2" /> Analyze with AI
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {errorMessage && (
+                        <p className="text-red-400 text-sm mt-2">{errorMessage}</p>
+                      )}
+                    </div>
+                  )}
+                </motion.div>
+              </div>
 
-              {/* Tips Panel */}
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-              >
-                <Card className="bg-gradient-to-br from-slate-900/80 to-slate-800/50 border-slate-700/50 backdrop-blur h-full">
+              {/* Tips Panel - 2 columns */}
+              <div className="lg:col-span-2">
+                <Card className="bg-slate-900/60 border-slate-700/50 h-full">
                   <CardContent className="p-6">
                     <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-500 flex items-center justify-center">
-                        <Lightbulb className="w-6 h-6 text-white" />
+                      <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500">
+                        <Lightbulb className="w-5 h-5 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-white">Pro Recording Tips</h3>
-                        <p className="text-sm text-gray-400">For best AI analysis results</p>
+                        <h3 className="font-semibold text-white">Pro Recording Tips</h3>
+                        <p className="text-slate-400 text-sm">For best AI analysis</p>
                       </div>
                     </div>
-
+                    
                     <div className="space-y-4">
                       {[
-                        { icon: '🎥', title: 'Side-On View', desc: 'Film from baseline, perpendicular to court' },
-                        { icon: '☀️', title: 'Good Lighting', desc: 'Natural daylight works best for AI tracking' },
-                        { icon: '📱', title: 'Stable Camera', desc: 'Use tripod or steady surface, 10-15ft away' },
-                        { icon: '⏱️', title: 'Short Clips', desc: '10-30 seconds showing 1-3 shots per video' },
-                        { icon: '🎯', title: '1080p Quality', desc: 'Higher resolution = better pose detection' },
+                        { icon: '📐', title: 'Side-On View', desc: 'Film perpendicular to court' },
+                        { icon: '☀️', title: 'Good Lighting', desc: 'Natural daylight is best' },
+                        { icon: '📱', title: 'Stable Camera', desc: 'Use tripod, 10-15ft away' },
+                        { icon: '⏱️', title: 'Short Clips', desc: '10-30 sec, 1-3 shots' },
+                        { icon: '🎬', title: '1080p Quality', desc: 'Higher res = better tracking' }
                       ].map((tip, i) => (
-                        <div key={i} className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/30 hover:bg-slate-800/50 transition-colors">
-                          <span className="text-2xl">{tip.icon}</span>
+                        <motion.div
+                          key={tip.title}
+                          initial={{ opacity: 0, x: 20 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: i * 0.1 }}
+                          className="flex items-start gap-3 p-3 rounded-lg bg-slate-800/50 hover:bg-slate-800 transition-colors"
+                        >
+                          <span className="text-xl">{tip.icon}</span>
                           <div>
-                            <div className="text-white font-medium">{tip.title}</div>
-                            <div className="text-sm text-gray-400">{tip.desc}</div>
+                            <p className="font-medium text-white text-sm">{tip.title}</p>
+                            <p className="text-slate-400 text-xs">{tip.desc}</p>
                           </div>
-                        </div>
+                        </motion.div>
                       ))}
                     </div>
                   </CardContent>
                 </Card>
-              </motion.div>
+              </div>
             </div>
           </TabsContent>
 
           {/* Library Tab */}
-          <TabsContent value="library">
+          <TabsContent value="library" className="mt-0">
             {isLoading ? (
               <div className="flex items-center justify-center py-20">
                 <Loader2 className="w-8 h-8 text-cyan-400 animate-spin" />
               </div>
             ) : videoLibrary.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="w-20 h-20 rounded-full bg-slate-800 flex items-center justify-center mx-auto mb-4">
-                  <Film className="w-10 h-10 text-gray-500" />
+              <motion.div 
+                className="text-center py-20"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+              >
+                <div className="mb-4">
+                  <Film className="w-16 h-16 text-slate-600 mx-auto" />
                 </div>
                 <h3 className="text-xl font-semibold text-white mb-2">No videos yet</h3>
-                <p className="text-gray-400 mb-6">Upload your first video to get started</p>
-                <Button onClick={() => setActiveTab('upload')} className="bg-cyan-500 hover:bg-cyan-600">
+                <p className="text-slate-400 mb-6">Upload your first video to get AI-powered analysis</p>
+                <Button onClick={() => setActiveTab('upload')} className="bg-gradient-to-r from-cyan-500 to-purple-500">
                   <Upload className="w-4 h-4 mr-2" /> Upload Video
                 </Button>
-              </div>
+              </motion.div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {videoLibrary.map((video, i) => (
                   <motion.div
                     key={video.id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.05 }}
+                    onMouseEnter={() => setHoveredVideo(video.id)}
+                    onMouseLeave={() => setHoveredVideo(null)}
+                    className="group"
                   >
-                    <Card className="bg-slate-900/60 border-slate-700/50 backdrop-blur overflow-hidden group hover:border-cyan-500/30 transition-all">
-                      {/* Thumbnail */}
+                    <Card className="bg-slate-900/60 border-slate-700/50 overflow-hidden hover:border-cyan-500/50 transition-all duration-300">
+                      {/* Video Thumbnail */}
                       <div className="relative aspect-video bg-slate-800">
-                        {video.thumbnailUrl ? (
-                          <Image src={video.thumbnailUrl} alt={video.title} fill className="object-cover" />
+                        {video.videoUrl ? (
+                          <video
+                            src={video.videoUrl}
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            playsInline
+                            autoPlay={hoveredVideo === video.id}
+                          />
                         ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
+                          <div className="absolute inset-0 flex items-center justify-center">
                             <Video className="w-12 h-12 text-slate-600" />
                           </div>
                         )}
                         
                         {/* Status Badge */}
-                        <div className="absolute top-3 left-3">
-                          {video.analysisStatus === 'COMPLETED' ? (
-                            <Badge className="bg-emerald-500/90 text-white border-0">
-                              <CheckCircle2 className="w-3 h-3 mr-1" /> Analyzed
-                            </Badge>
-                          ) : video.analysisStatus === 'PROCESSING' ? (
-                            <Badge className="bg-amber-500/90 text-white border-0 animate-pulse">
-                              <Loader2 className="w-3 h-3 mr-1 animate-spin" /> Processing
-                            </Badge>
-                          ) : video.analysisStatus === 'FAILED' ? (
-                            <Badge className="bg-red-500/90 text-white border-0">
-                              <AlertCircle className="w-3 h-3 mr-1" /> Failed
-                            </Badge>
-                          ) : (
-                            <Badge className="bg-slate-600/90 text-white border-0">
-                              <Clock className="w-3 h-3 mr-1" /> Pending
-                            </Badge>
-                          )}
+                        <div className="absolute top-2 right-2">
+                          <Badge className={cn(
+                            "text-xs",
+                            video.analysisStatus === 'COMPLETED' ? 'bg-emerald-500/90' :
+                            video.analysisStatus === 'PROCESSING' ? 'bg-cyan-500/90 animate-pulse' :
+                            video.analysisStatus === 'FAILED' ? 'bg-red-500/90' :
+                            'bg-slate-600/90'
+                          )}>
+                            {video.analysisStatus === 'COMPLETED' ? 'Analyzed' :
+                             video.analysisStatus === 'PROCESSING' ? 'Processing...' :
+                             video.analysisStatus === 'FAILED' ? 'Failed' : 'Pending'}
+                          </Badge>
                         </div>
-
+                        
                         {/* Score Badge */}
                         {video.analysisStatus === 'COMPLETED' && video.overallScore && (
-                          <div className="absolute top-3 right-3">
-                            <div className={cn("px-3 py-1 rounded-lg border font-bold text-lg", getScoreBg(video.overallScore), getScoreColor(video.overallScore))}>
-                              {video.overallScore}
+                          <div className="absolute bottom-2 left-2">
+                            <div className="bg-slate-900/90 backdrop-blur px-2 py-1 rounded-lg flex items-center gap-1">
+                              <Target className="w-3 h-3 text-cyan-400" />
+                              <span className="text-white font-bold text-sm">{video.overallScore}</span>
                             </div>
                           </div>
                         )}
-
+                        
                         {/* Hover Overlay */}
-                        {video.analysisStatus === 'COMPLETED' && (
-                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Button
-                              onClick={() => handleViewAnalysis(video.id)}
-                              className="bg-gradient-to-r from-cyan-500 to-emerald-500 text-white"
+                        <AnimatePresence>
+                          {hoveredVideo === video.id && video.analysisStatus === 'COMPLETED' && (
+                            <motion.div
+                              initial={{ opacity: 0 }}
+                              animate={{ opacity: 1 }}
+                              exit={{ opacity: 0 }}
+                              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center"
                             >
-                              <Eye className="w-4 h-4 mr-2" /> View Analysis
-                            </Button>
-                          </div>
-                        )}
+                              <Link href={`/train/analysis/${video.id}`}>
+                                <Button className="bg-gradient-to-r from-cyan-500 to-emerald-500">
+                                  <Eye className="w-4 h-4 mr-2" /> View Analysis
+                                </Button>
+                              </Link>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
                       </div>
-
-                      {/* Info */}
-                      <CardContent className="p-4">
-                        <h3 className="text-white font-medium truncate mb-2">
-                          {video.title || video.fileName || 'Untitled Video'}
-                        </h3>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-gray-400 flex items-center gap-1">
-                            <Calendar className="w-3 h-3" />
-                            {formatDate(video.uploadedAt)}
-                          </span>
-                          <button
-                            onClick={() => handleDelete(video.id)}
-                            className="text-gray-500 hover:text-red-400 transition-colors"
+                      
+                      {/* Card Footer */}
+                      <CardContent className="p-3">
+                        <div className="flex items-center justify-between">
+                          <div className="min-w-0">
+                            <p className="text-white font-medium text-sm truncate">
+                              {video.title || video.fileName || 'Video'}
+                            </p>
+                            <p className="text-slate-500 text-xs">{formatDate(video.uploadedAt)}</p>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteVideo(video.id)}
+                            className="text-slate-400 hover:text-red-400"
                           >
                             <Trash2 className="w-4 h-4" />
-                          </button>
+                          </Button>
                         </div>
                       </CardContent>
                     </Card>
@@ -533,7 +681,7 @@ export default function VideoAnalysisHub() {
             )}
           </TabsContent>
         </Tabs>
-      </main>
+      </div>
     </div>
   )
 }
