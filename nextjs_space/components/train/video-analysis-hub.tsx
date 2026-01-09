@@ -282,8 +282,13 @@ export default function VideoAnalysisHub() {
         })
       })
 
-      if (!presignRes.ok) throw new Error('Failed to get upload URL')
+      if (!presignRes.ok) {
+        const errData = await presignRes.json().catch(() => ({}))
+        console.error('[Upload] Presign failed:', errData)
+        throw new Error(errData.error || 'Failed to get upload URL')
+      }
       const { uploadUrl, cloud_storage_path, videoId } = await presignRes.json()
+      console.log('[Upload] Got presigned URL, videoId:', videoId)
 
       // Simulated progress
       const progressInterval = setInterval(() => {
@@ -297,7 +302,11 @@ export default function VideoAnalysisHub() {
       })
 
       clearInterval(progressInterval)
-      if (!uploadRes.ok) throw new Error('Upload failed')
+      if (!uploadRes.ok) {
+        console.error('[Upload] S3 upload failed, status:', uploadRes.status)
+        throw new Error(`Upload to storage failed (${uploadRes.status})`)
+      }
+      console.log('[Upload] S3 upload successful')
       
       setUploadProgress(100)
       setAnalysisStatus('analyzing')
