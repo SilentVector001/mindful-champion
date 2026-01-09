@@ -1,787 +1,492 @@
 // @ts-nocheck
-'use client';
+'use client'
 
-import { useState, useEffect } from 'react';
-import { useSession } from 'next-auth/react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Link from 'next/link';
-import Image from 'next/image';
-import MainNavigation from '@/components/navigation/main-navigation';
+import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
+import { motion, AnimatePresence } from 'framer-motion'
+import Link from 'next/link'
+import Image from 'next/image'
+import MainNavigation from '@/components/navigation/main-navigation'
+import { Card, CardContent } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button } from '@/components/ui/button'
 import {
-  Trophy, Star, Crown, Medal, Shield, Gift,
-  TrendingUp, Target, Flame, Video, Users,
-  Calendar, Zap, ChevronRight, Sparkles, Lock,
-  Award, Gem, Clock, ArrowRight, CheckCircle, Info
-} from 'lucide-react';
-
-interface Achievement {
-  id: string;
-  achievementId: string;
-  name: string;
-  description: string;
-  tier: string;
-  category: string;
-  icon: string;
-  points: number;
-  rarity: string;
-  unlocked?: boolean;
-  unlockedAt?: string;
-  progress?: { currentValue: number; targetValue: number; percentage: number };
-}
+  Trophy, Star, Crown, Gift, TrendingUp, Target,
+  Flame, Sparkles, Award, Gem, ChevronRight, CheckCircle,
+  ShoppingBag, Zap, Heart, Tag, Package, ArrowRight,
+  Lock, Medal, Users, Video
+} from 'lucide-react'
+import { cn } from '@/lib/utils'
 
 interface UserStats {
-  totalPoints: number;
-  totalAchievements: number;
-  bronzeMedals: number;
-  silverMedals: number;
-  goldMedals: number;
-  badges: number;
-  hasCrown: boolean;
-  rank: string;
-  currentStreak: number;
-  rewardPoints: number;
+  totalPoints: number
+  totalAchievements: number
+  bronzeMedals: number
+  silverMedals: number
+  goldMedals: number
+  rewardPoints: number
+  currentStreak: number
 }
 
-// Enhanced tier config with vibrant, readable colors
-const tierConfig = {
-  BRONZE: { 
-    color: 'from-orange-600 via-amber-500 to-yellow-600', 
-    bg: 'bg-gradient-to-br from-orange-900/40 to-amber-900/40',
-    border: 'border-orange-500/50',
-    icon: '🥉', 
-    textColor: 'text-orange-300',
-    glow: 'shadow-orange-500/30'
-  },
-  SILVER: { 
-    color: 'from-slate-300 via-gray-200 to-slate-400', 
-    bg: 'bg-gradient-to-br from-slate-700/50 to-gray-800/50',
-    border: 'border-slate-400/50',
-    icon: '🥈', 
-    textColor: 'text-slate-200',
-    glow: 'shadow-slate-400/30'
-  },
-  GOLD: { 
-    color: 'from-yellow-400 via-amber-300 to-yellow-500', 
-    bg: 'bg-gradient-to-br from-yellow-900/40 to-amber-900/40',
-    border: 'border-yellow-500/50',
-    icon: '🥇', 
-    textColor: 'text-yellow-300',
-    glow: 'shadow-yellow-500/40'
-  },
-  PLATINUM: { 
-    color: 'from-cyan-300 via-blue-200 to-purple-300', 
-    bg: 'bg-gradient-to-br from-cyan-900/40 to-purple-900/40',
-    border: 'border-cyan-400/50',
-    icon: '💎', 
-    textColor: 'text-cyan-200',
-    glow: 'shadow-cyan-400/40'
-  },
-  BADGE: { 
-    color: 'from-indigo-400 via-purple-400 to-pink-400', 
-    bg: 'bg-gradient-to-br from-indigo-900/40 to-purple-900/40',
-    border: 'border-purple-500/50',
-    icon: '🛡️', 
-    textColor: 'text-purple-300',
-    glow: 'shadow-purple-500/30'
-  },
-  CROWN: { 
-    color: 'from-fuchsia-400 via-pink-400 to-rose-400', 
-    bg: 'bg-gradient-to-br from-fuchsia-900/40 to-pink-900/40',
-    border: 'border-pink-500/50',
-    icon: '👑', 
-    textColor: 'text-pink-300',
-    glow: 'shadow-pink-500/40'
-  },
-};
-
-// Sample rewards data for marketplace
-const marketplaceRewards = [
+// Vibrant marketplace rewards with partner branding
+const featuredRewards = [
   {
     id: '1',
-    name: 'Pickleball Training Ball Set',
-    description: '6-pack of indoor/outdoor pickleballs',
+    name: 'Premium Pickleball 6-Pack',
+    brand: 'Franklin Sports',
+    description: 'Tournament-grade indoor/outdoor balls used by the pros',
     points: 500,
-    tier: 'BRONZE',
-    image: 'https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=400&h=300&fit=crop',
-    available: true
+    retailValue: 24.99,
+    image: 'https://images.unsplash.com/photo-1609710228159-0fa9bd7c0827?w=600&q=80',
+    category: 'Equipment',
+    inStock: true,
+    hot: true
   },
   {
-    id: '2', 
-    name: 'Pro Paddle Grip Tape',
-    description: 'Premium overgrip for better control',
-    points: 750,
-    tier: 'BRONZE',
-    image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=400&h=300&fit=crop',
-    available: true
+    id: '2',
+    name: 'Pro Overgrip 3-Pack',
+    brand: 'Selkirk',
+    description: 'Maximum tackiness and sweat absorption',
+    points: 350,
+    retailValue: 14.99,
+    image: 'https://images.unsplash.com/photo-1626224583764-f87db24ac4ea?w=600&q=80',
+    category: 'Accessories',
+    inStock: true
   },
   {
     id: '3',
-    name: 'Champion Wristbands',
-    description: 'Moisture-wicking performance wristbands',
-    points: 1000,
-    tier: 'SILVER',
-    image: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=400&h=300&fit=crop',
-    available: true
+    name: 'Performance Wristbands',
+    brand: 'Nike',
+    description: 'Moisture-wicking comfort during intense play',
+    points: 400,
+    retailValue: 18.00,
+    image: 'https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=600&q=80',
+    category: 'Apparel',
+    inStock: true
   },
   {
     id: '4',
-    name: 'Court Bag',
-    description: 'Spacious bag for all your gear',
-    points: 2000,
-    tier: 'GOLD',
-    image: 'https://images.unsplash.com/photo-1622260614153-03223fb72052?w=400&h=300&fit=crop',
-    available: false,
-    comingSoon: true
+    name: 'Pickleball Sling Bag',
+    brand: 'HEAD',
+    description: 'Stylish bag fits 2 paddles + accessories',
+    points: 1200,
+    retailValue: 49.99,
+    image: 'https://images.unsplash.com/photo-1622260614153-03223fb72052?w=600&q=80',
+    category: 'Bags',
+    inStock: true,
+    popular: true
   },
   {
     id: '5',
-    name: 'Private Coaching Session',
-    description: '1-hour with certified coach',
-    points: 5000,
-    tier: 'PLATINUM',
-    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=400&h=300&fit=crop',
-    available: false,
-    comingSoon: true
+    name: 'Cooling Towel Set',
+    brand: 'Mission',
+    description: 'Instant cooling technology for hot court days',
+    points: 600,
+    retailValue: 29.99,
+    image: 'https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=600&q=80',
+    category: 'Accessories',
+    inStock: true
   },
-];
+  {
+    id: '6',
+    name: '1-Hour Pro Coaching',
+    brand: 'Mindful Champion',
+    description: 'Private session with a certified coach',
+    points: 3000,
+    retailValue: 150.00,
+    image: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=600&q=80',
+    category: 'Experiences',
+    inStock: true,
+    premium: true
+  }
+]
 
-const categoryConfig: Record<string, { name: string; icon: any; color: string }> = {
-  GENERAL: { name: 'General', icon: Trophy, color: 'emerald' },
-  PRACTICE: { name: 'Practice & Streaks', icon: Flame, color: 'orange' },
-  VIDEO: { name: 'Video Analysis', icon: Video, color: 'blue' },
-  SERVING: { name: 'Serving', icon: Target, color: 'teal' },
-  DINKING: { name: 'Dinking', icon: Target, color: 'cyan' },
-  THIRD_SHOT: { name: 'Third Shot', icon: Target, color: 'green' },
-  VOLLEY: { name: 'Volleys', icon: Target, color: 'indigo' },
-  FOOTWORK: { name: 'Footwork', icon: Target, color: 'pink' },
-  STRATEGY: { name: 'Strategy', icon: Target, color: 'violet' },
-  RETURN_OF_SERVE: { name: 'Return of Serve', icon: Target, color: 'rose' },
-  MENTAL_GAME: { name: 'Mental Game', icon: Target, color: 'amber' },
-  MULTI_SECTION: { name: 'Multi-Section', icon: Award, color: 'purple' },
-  ULTIMATE: { name: 'Ultimate', icon: Crown, color: 'yellow' },
-};
+const categories = [
+  { id: 'all', name: 'All Rewards', icon: Gift, count: 6 },
+  { id: 'equipment', name: 'Equipment', icon: Target, count: 1 },
+  { id: 'accessories', name: 'Accessories', icon: Sparkles, count: 2 },
+  { id: 'apparel', name: 'Apparel', icon: ShoppingBag, count: 1 },
+  { id: 'experiences', name: 'Experiences', icon: Star, count: 1 },
+]
 
-export default function RewardsHubPage() {
-  const { data: session, status } = useSession() || {};
-  const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [stats, setStats] = useState<UserStats | null>(null);
-  const [recentUnlocks, setRecentUnlocks] = useState<Achievement[]>([]);
-  const [nearUnlocks, setNearUnlocks] = useState<Achievement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'overview' | 'marketplace' | 'tiers'>('overview');
-  const [user, setUser] = useState<any>(null);
+export default function RewardsMarketplace() {
+  const { data: session, status } = useSession() || {}
+  const [stats, setStats] = useState<UserStats | null>(null)
+  const [user, setUser] = useState<any>(null)
+  const [loading, setLoading] = useState(true)
+  const [activeCategory, setActiveCategory] = useState('all')
+  const [hoveredReward, setHoveredReward] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchData();
-      fetchUser();
+      fetchData()
     } else if (status === 'unauthenticated') {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [status]);
-
-  const fetchUser = async () => {
-    try {
-      const res = await fetch('/api/user/update');
-      if (res.ok) {
-        const data = await res.json();
-        setUser(data.user);
-      }
-    } catch (e) {
-      console.error('Error fetching user:', e);
-    }
-  };
+  }, [status])
 
   const fetchData = async () => {
     try {
-      const [achRes, statsRes] = await Promise.all([
-        fetch('/api/achievements?userId=current'),
-        fetch('/api/achievements/user'),
-      ]);
-
-      if (achRes.ok) {
-        const achData = await achRes.json();
-        setAchievements(achData.achievements || []);
-        
-        // Get recently unlocked
-        const unlocked = (achData.achievements || []).filter((a: Achievement) => a.unlocked);
-        const sorted = unlocked.sort((a: Achievement, b: Achievement) => 
-          new Date(b.unlockedAt || 0).getTime() - new Date(a.unlockedAt || 0).getTime()
-        );
-        setRecentUnlocks(sorted.slice(0, 5));
-        
-        // Get near unlocks (>50% progress)
-        const near = (achData.achievements || []).filter(
-          (a: Achievement) => !a.unlocked && a.progress && a.progress.percentage >= 50
-        ).sort((a: Achievement, b: Achievement) => 
-          (b.progress?.percentage || 0) - (a.progress?.percentage || 0)
-        );
-        setNearUnlocks(near.slice(0, 4));
+      const [userRes, statsRes] = await Promise.all([
+        fetch('/api/user/update'),
+        fetch('/api/achievements/user')
+      ])
+      if (userRes.ok) {
+        const data = await userRes.json()
+        setUser(data.user)
       }
-
       if (statsRes.ok) {
-        const statsData = await statsRes.json();
-        setStats(statsData.stats);
+        const data = await statsRes.json()
+        setStats(data.stats)
       }
     } catch (e) {
-      console.error('Error fetching data:', e);
+      console.error('Error:', e)
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
-  const groupedAchievements = achievements.reduce((acc, ach) => {
-    const cat = ach.category || 'GENERAL';
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(ach);
-    return acc;
-  }, {} as Record<string, Achievement[]>);
+  const userPoints = stats?.rewardPoints || user?.rewardPoints || 0
+
+  const filteredRewards = activeCategory === 'all' 
+    ? featuredRewards 
+    : featuredRewards.filter(r => r.category.toLowerCase() === activeCategory)
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50">
         <div className="flex items-center justify-center h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500" />
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
+            className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full"
+          />
         </div>
       </div>
-    );
+    )
   }
 
-  const totalAchievements = achievements.length;
-  const unlockedCount = achievements.filter(a => a.unlocked).length;
-  const progressPercent = totalAchievements > 0 ? Math.round((unlockedCount / totalAchievements) * 100) : 0;
-
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-cyan-50">
       <MainNavigation user={user} />
       
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
-        {/* Branded Header Section */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-amber-900/30 via-slate-900 to-purple-900/30 border border-amber-500/20 p-6 md:p-8"
-        >
-          {/* Animated Background */}
-          <div className="absolute inset-0 overflow-hidden">
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-              className="absolute -top-1/2 -right-1/2 w-full h-full bg-gradient-conic from-amber-500/10 via-transparent to-purple-500/10"
-            />
-          </div>
-          
-          <div className="relative z-10">
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                  <motion.div
-                    animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }}
-                    transition={{ duration: 3, repeat: Infinity }}
-                    className="text-5xl"
-                  >
-                    🏆
-                  </motion.div>
-                  <div>
-                    <h1 className="text-3xl md:text-4xl font-bold text-white">My Rewards</h1>
-                    <p className="text-amber-300/80 text-sm md:text-base">Earn points, unlock tiers, redeem prizes</p>
-                  </div>
-                </div>
-                <p className="text-slate-300 text-sm max-w-xl">
-                  Complete training sessions, achieve milestones, and climb through Bronze, Silver, Gold, and Platinum tiers. 
-                  Your dedication pays off with exclusive rewards and recognition!
-                </p>
-              </div>
-              
-              {/* Points Display Card */}
-              <motion.div
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                className="bg-gradient-to-br from-amber-500/20 to-yellow-600/20 backdrop-blur-sm rounded-xl p-4 border border-amber-500/30 min-w-[200px]"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/20">
-                    <Star className="w-8 h-8 text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-amber-300/70 text-xs uppercase tracking-wider">Your Points</p>
-                    <p className="text-3xl font-bold text-white">
-                      {(stats?.rewardPoints || user?.rewardPoints || 0).toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Tabs */}
-        <div className="flex justify-center gap-2 flex-wrap">
-          {(['overview', 'marketplace', 'tiers'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab as any)}
-              className={`px-5 py-3 rounded-xl font-semibold transition-all ${
-                activeTab === tab
-                  ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white shadow-lg shadow-amber-500/30'
-                  : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 hover:text-white'
-              }`}
-            >
-              {tab === 'overview' && <Trophy className="w-5 h-5 inline mr-2" />}
-              {tab === 'marketplace' && <Gift className="w-5 h-5 inline mr-2" />}
-              {tab === 'tiers' && <Crown className="w-5 h-5 inline mr-2" />}
-              {tab === 'overview' ? 'Overview' : tab === 'marketplace' ? 'Marketplace' : 'Tier System'}
-            </button>
-          ))}
+      {/* Hero Section */}
+      <section className="relative overflow-hidden pt-20 pb-12">
+        {/* Background decorations */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-20 left-10 w-72 h-72 bg-cyan-400/20 rounded-full blur-[100px]" />
+          <div className="absolute top-40 right-20 w-96 h-96 bg-purple-400/15 rounded-full blur-[120px]" />
+          <div className="absolute bottom-0 left-1/3 w-80 h-80 bg-amber-400/10 rounded-full blur-[100px]" />
         </div>
+        
+        <div className="relative max-w-7xl mx-auto px-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-8"
+          >
+            <Badge className="mb-4 bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 px-4 py-1.5 text-sm">
+              <Gift className="w-4 h-4 mr-2" />
+              Rewards Marketplace
+            </Badge>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              <span className="bg-gradient-to-r from-cyan-600 via-purple-600 to-amber-500 bg-clip-text text-transparent">
+                Turn Your Achievements Into Rewards
+              </span>
+            </h1>
+            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+              You've earned it! Redeem your hard-won points for premium pickleball gear, 
+              exclusive experiences, and partner products.
+            </p>
+          </motion.div>
 
-        {activeTab === 'overview' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <StatCard
-                icon={<Star className="w-6 h-6 text-yellow-400" />}
-                value={stats?.totalPoints || 0}
-                label="Total Points"
-                color="yellow"
-              />
-              <StatCard
-                icon={<Trophy className="w-6 h-6 text-emerald-400" />}
-                value={`${unlockedCount}/${totalAchievements}`}
-                label="Achievements"
-                color="emerald"
-              />
-              <StatCard
-                icon={<Flame className="w-6 h-6 text-orange-400" />}
-                value={stats?.currentStreak || user?.currentStreak || 0}
-                label="Day Streak"
-                color="orange"
-              />
-              <StatCard
-                icon={<Gem className="w-6 h-6 text-purple-400" />}
-                value={stats?.rewardPoints || user?.rewardPoints || 0}
-                label="Reward Points"
-                color="purple"
-              />
-            </div>
-
-            {/* Progress Bar */}
-            <div className="bg-slate-800/50 rounded-2xl p-6 border border-slate-700">
-              <div className="flex justify-between items-center mb-3">
-                <span className="text-white font-semibold">Overall Progress</span>
-                <span className="text-emerald-400 font-bold">{progressPercent}%</span>
-              </div>
-              <div className="h-4 bg-slate-700 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ width: 0 }}
-                  animate={{ width: `${progressPercent}%` }}
-                  transition={{ duration: 1, ease: 'easeOut' }}
-                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full"
-                />
-              </div>
-              <div className="flex justify-between mt-2 text-sm text-gray-400">
-                <span>🥉 {stats?.bronzeMedals || 0} Bronze</span>
-                <span>🥈 {stats?.silverMedals || 0} Silver</span>
-                <span>🥇 {stats?.goldMedals || 0} Gold</span>
-                <span>🛡️ {stats?.badges || 0} Badges</span>
-                {stats?.hasCrown && <span>👑 Crown!</span>}
-              </div>
-            </div>
-
-            {/* Recently Unlocked */}
-            {recentUnlocks.length > 0 && (
-              <div className="space-y-4">
+          {/* Points Balance Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.1 }}
+            className="max-w-md mx-auto"
+          >
+            <Card className="bg-white/80 backdrop-blur-xl border-2 border-amber-200 shadow-xl shadow-amber-500/10 overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-orange-500/5" />
+              <CardContent className="relative p-6">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                    <Sparkles className="w-5 h-5 text-yellow-400" />
-                    Recently Unlocked
-                  </h2>
-                  <Link href="/progress/achievements" className="text-emerald-400 hover:text-emerald-300 text-sm flex items-center">
-                    View All <ChevronRight className="w-4 h-4" />
+                  <div>
+                    <p className="text-slate-500 text-sm mb-1">Your Balance</p>
+                    <div className="flex items-baseline gap-2">
+                      <span className="text-4xl font-bold bg-gradient-to-r from-amber-600 to-orange-500 bg-clip-text text-transparent">
+                        {userPoints.toLocaleString()}
+                      </span>
+                      <span className="text-slate-500 text-lg">points</span>
+                    </div>
+                  </div>
+                  <motion.div
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                    className="w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 flex items-center justify-center shadow-lg shadow-amber-500/30"
+                  >
+                    <Star className="w-8 h-8 text-white" />
+                  </motion.div>
+                </div>
+                <div className="mt-4 flex items-center gap-4 text-sm">
+                  <Link href="/train" className="flex items-center gap-1 text-cyan-600 hover:text-cyan-700 transition-colors">
+                    <Zap className="w-4 h-4" /> Earn More
+                  </Link>
+                  <span className="text-slate-300">•</span>
+                  <Link href="/progress/achievements" className="flex items-center gap-1 text-purple-600 hover:text-purple-700 transition-colors">
+                    <Trophy className="w-4 h-4" /> Achievements
                   </Link>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                  {recentUnlocks.map((ach, i) => (
-                    <AchievementMiniCard key={ach.id} achievement={ach} index={i} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Almost There */}
-            {nearUnlocks.length > 0 && (
-              <div className="space-y-4">
-                <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-400" />
-                  Almost There!
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                  {nearUnlocks.map((ach, i) => (
-                    <NearUnlockCard key={ach.id} achievement={ach} index={i} />
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Quick Links */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <QuickLink
-                href="/progress/achievements"
-                icon={<Medal className="w-8 h-8" />}
-                title="Achievement Gallery"
-                description="View all your unlocked achievements"
-                color="emerald"
-              />
-              <QuickLink
-                href="/rewards/store"
-                icon={<Gift className="w-8 h-8" />}
-                title="Rewards Store"
-                description="Redeem points for exclusive rewards"
-                color="purple"
-              />
-              <QuickLink
-                href="/train"
-                icon={<Target className="w-8 h-8" />}
-                title="Training Hub"
-                description="Complete drills to earn more achievements"
-                color="teal"
-              />
-            </div>
+              </CardContent>
+            </Card>
           </motion.div>
-        )}
+        </div>
+      </section>
 
-        
+      {/* Main Content */}
+      <section className="max-w-7xl mx-auto px-4 pb-20">
+        {/* Category Filters */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex flex-wrap justify-center gap-3 mb-10"
+        >
+          {categories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
+              className={cn(
+                "flex items-center gap-2 px-5 py-2.5 rounded-full font-medium transition-all",
+                activeCategory === cat.id
+                  ? "bg-gradient-to-r from-cyan-500 to-purple-500 text-white shadow-lg shadow-cyan-500/25"
+                  : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+              )}
+            >
+              <cat.icon className="w-4 h-4" />
+              {cat.name}
+            </button>
+          ))}
+        </motion.div>
 
-        {/* Marketplace Tab */}
-        {activeTab === 'marketplace' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-6">
-            <div className="flex items-center justify-between">
-              <h2 className="text-2xl font-bold text-white">Rewards Marketplace</h2>
-              <div className="flex items-center gap-2 bg-amber-500/20 px-4 py-2 rounded-full">
-                <Star className="w-5 h-5 text-amber-400" />
-                <span className="text-amber-300 font-bold">{(stats?.rewardPoints || user?.rewardPoints || 0).toLocaleString()} pts</span>
-              </div>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {marketplaceRewards.map((reward, i) => {
-                const tier = tierConfig[reward.tier as keyof typeof tierConfig] || tierConfig.BRONZE;
-                const canAfford = (stats?.rewardPoints || user?.rewardPoints || 0) >= reward.points;
-                
-                return (
-                  <motion.div
-                    key={reward.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
-                    whileHover={{ y: -4 }}
-                    className={`relative rounded-2xl overflow-hidden ${tier.bg} border ${tier.border} ${reward.comingSoon ? 'opacity-80' : ''}`}
-                  >
-                    {/* Coming Soon Badge */}
-                    {reward.comingSoon && (
-                      <motion.div
-                        animate={{ scale: [1, 1.05, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="absolute top-3 right-3 z-20 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg shadow-purple-500/50"
-                      >
-                        ✨ Coming Soon
-                      </motion.div>
-                    )}
+        {/* Rewards Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <AnimatePresence mode="popLayout">
+            {filteredRewards.map((reward, index) => {
+              const canAfford = userPoints >= reward.points
+              const isHovered = hoveredReward === reward.id
+              
+              return (
+                <motion.div
+                  key={reward.id}
+                  layout
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: index * 0.05 }}
+                  onMouseEnter={() => setHoveredReward(reward.id)}
+                  onMouseLeave={() => setHoveredReward(null)}
+                  className="group"
+                >
+                  <Card className={cn(
+                    "relative overflow-hidden bg-white border-2 transition-all duration-300",
+                    isHovered ? "border-cyan-400 shadow-2xl shadow-cyan-500/20 -translate-y-2" : "border-slate-100 shadow-lg",
+                    reward.premium && "ring-2 ring-amber-400/50"
+                  )}>
+                    {/* Badges */}
+                    <div className="absolute top-3 left-3 z-10 flex flex-col gap-2">
+                      {reward.hot && (
+                        <Badge className="bg-gradient-to-r from-red-500 to-orange-500 text-white border-0">
+                          <Flame className="w-3 h-3 mr-1" /> Hot
+                        </Badge>
+                      )}
+                      {reward.popular && (
+                        <Badge className="bg-gradient-to-r from-purple-500 to-pink-500 text-white border-0">
+                          <Heart className="w-3 h-3 mr-1" /> Popular
+                        </Badge>
+                      )}
+                      {reward.premium && (
+                        <Badge className="bg-gradient-to-r from-amber-500 to-yellow-500 text-white border-0">
+                          <Crown className="w-3 h-3 mr-1" /> Premium
+                        </Badge>
+                      )}
+                    </div>
                     
+                    {/* Points Badge */}
+                    <div className="absolute top-3 right-3 z-10">
+                      <div className={cn(
+                        "px-3 py-1.5 rounded-full text-sm font-bold flex items-center gap-1",
+                        canAfford 
+                          ? "bg-emerald-500 text-white" 
+                          : "bg-slate-800 text-white"
+                      )}>
+                        <Star className="w-3.5 h-3.5" />
+                        {reward.points.toLocaleString()}
+                      </div>
+                    </div>
+
                     {/* Image */}
-                    <div className="relative h-40 bg-slate-800">
+                    <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
                       <Image
                         src={reward.image}
                         alt={reward.name}
                         fill
-                        className={`object-cover ${reward.comingSoon ? 'grayscale' : ''}`}
+                        className={cn(
+                          "object-cover transition-transform duration-500",
+                          isHovered && "scale-110"
+                        )}
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900 to-transparent" />
-                      <div className="absolute bottom-2 left-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${tier.bg} ${tier.textColor} border ${tier.border}`}>
-                          {tier.icon} {reward.tier}
-                        </span>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                     </div>
-                    
+
                     {/* Content */}
-                    <div className="p-4 space-y-3">
-                      <h3 className="text-lg font-bold text-white">{reward.name}</h3>
-                      <p className="text-slate-400 text-sm">{reward.description}</p>
+                    <CardContent className="p-5">
+                      {/* Brand */}
+                      <p className="text-xs font-semibold text-cyan-600 uppercase tracking-wider mb-1">
+                        {reward.brand}
+                      </p>
                       
-                      <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-1">
-                          <Star className="w-4 h-4 text-amber-400" />
-                          <span className="text-amber-300 font-bold">{reward.points.toLocaleString()}</span>
+                      {/* Name */}
+                      <h3 className="text-lg font-bold text-slate-900 mb-2 group-hover:text-cyan-700 transition-colors">
+                        {reward.name}
+                      </h3>
+                      
+                      {/* Description */}
+                      <p className="text-slate-500 text-sm mb-4 line-clamp-2">
+                        {reward.description}
+                      </p>
+
+                      {/* Value & Action */}
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-slate-400">Retail Value</p>
+                          <p className="text-lg font-bold text-slate-700">${reward.retailValue.toFixed(2)}</p>
                         </div>
                         
-                        {reward.comingSoon ? (
-                          <button disabled className="px-4 py-2 bg-slate-700/50 text-slate-400 rounded-lg text-sm cursor-not-allowed">
-                            Coming Soon
-                          </button>
-                        ) : canAfford ? (
-                          <button className="px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-lg text-sm font-semibold hover:shadow-lg hover:shadow-amber-500/30 transition-all">
-                            Redeem
-                          </button>
+                        {canAfford ? (
+                          <Button className="bg-gradient-to-r from-cyan-500 to-purple-500 hover:from-cyan-600 hover:to-purple-600 text-white shadow-lg shadow-cyan-500/25">
+                            Redeem <ArrowRight className="w-4 h-4 ml-1" />
+                          </Button>
                         ) : (
-                          <button disabled className="px-4 py-2 bg-slate-700/50 text-slate-400 rounded-lg text-sm cursor-not-allowed">
-                            Need {(reward.points - (stats?.rewardPoints || user?.rewardPoints || 0)).toLocaleString()} more
-                          </button>
+                          <div className="text-right">
+                            <p className="text-xs text-slate-400">Need</p>
+                            <p className="text-sm font-semibold text-slate-600">
+                              {(reward.points - userPoints).toLocaleString()} more
+                            </p>
+                          </div>
                         )}
                       </div>
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            
-            {/* More Coming Soon */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="text-center py-8"
-            >
-              <motion.div
-                animate={{ y: [0, -5, 0] }}
-                transition={{ duration: 2, repeat: Infinity }}
-                className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-purple-900/50 to-pink-900/50 rounded-full border border-purple-500/30"
-              >
-                <Sparkles className="w-5 h-5 text-purple-400" />
-                <span className="text-purple-300">More exclusive rewards coming soon!</span>
-              </motion.div>
-            </motion.div>
-          </motion.div>
-        )}
-        
-        {/* Tiers Tab */}
-        {activeTab === 'tiers' && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-            <div className="text-center space-y-2">
-              <h2 className="text-2xl font-bold text-white">Tier System</h2>
-              <p className="text-slate-400">Climb the ranks and unlock exclusive rewards at each tier</p>
-            </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {[
-                { tier: 'BRONZE', points: 0, benefits: ['Basic rewards access', '5% bonus on weekly challenges', 'Bronze badge'] },
-                { tier: 'SILVER', points: 1000, benefits: ['All Bronze benefits', '10% bonus on challenges', 'Priority support', 'Silver badge'] },
-                { tier: 'GOLD', points: 5000, benefits: ['All Silver benefits', '20% bonus on challenges', 'Exclusive content', 'Gold badge'] },
-                { tier: 'PLATINUM', points: 15000, benefits: ['All Gold benefits', '30% bonus on challenges', 'VIP events access', 'Platinum badge', 'Custom profile'] },
-              ].map((tierData, i) => {
-                const config = tierConfig[tierData.tier as keyof typeof tierConfig];
-                const userPoints = stats?.rewardPoints || user?.rewardPoints || 0;
-                const isUnlocked = userPoints >= tierData.points;
-                const isCurrentTier = userPoints >= tierData.points && (i === 3 || userPoints < [0, 1000, 5000, 15000][i + 1]);
-                
-                return (
-                  <motion.div
-                    key={tierData.tier}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.15 }}
-                    whileHover={{ scale: 1.02 }}
-                    className={`relative rounded-2xl ${config.bg} border-2 ${isCurrentTier ? config.border + ' shadow-xl ' + config.glow : 'border-slate-700/50'} p-6 ${!isUnlocked ? 'opacity-60' : ''}`}
-                  >
-                    {isCurrentTier && (
-                      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                        <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full">
-                          Current Tier
-                        </span>
-                      </div>
-                    )}
-                    
-                    <div className="text-center space-y-4">
-                      <motion.span
-                        animate={isCurrentTier ? { scale: [1, 1.1, 1] } : {}}
-                        transition={{ duration: 2, repeat: Infinity }}
-                        className="text-5xl block"
-                      >
-                        {config.icon}
-                      </motion.span>
-                      <h3 className={`text-xl font-bold ${config.textColor}`}>{tierData.tier}</h3>
-                      <p className="text-slate-400 text-sm">{tierData.points.toLocaleString()} points required</p>
-                      
-                      <div className="space-y-2 text-left">
-                        {tierData.benefits.map((benefit, j) => (
-                          <div key={j} className="flex items-center gap-2 text-sm">
-                            <CheckCircle className={`w-4 h-4 ${isUnlocked ? 'text-green-400' : 'text-slate-600'}`} />
-                            <span className={isUnlocked ? 'text-slate-300' : 'text-slate-500'}>{benefit}</span>
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {!isUnlocked && (
-                        <div className="pt-2">
-                          <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-                            <div 
-                              className={`h-full bg-gradient-to-r ${config.color}`}
-                              style={{ width: `${Math.min(100, (userPoints / tierData.points) * 100)}%` }}
-                            />
-                          </div>
-                          <p className="text-slate-500 text-xs mt-1">
-                            {(tierData.points - userPoints).toLocaleString()} points to unlock
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </motion.div>
-                );
-              })}
-            </div>
-            
-            {/* How to Earn Points */}
-            <div className="bg-slate-800/50 rounded-2xl border border-slate-700 p-6">
-              <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                <Info className="w-5 h-5 text-amber-400" />
-                How to Earn Points
-              </h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {[
-                  { icon: Target, action: 'Complete Training', points: '+10-50 pts', color: 'text-emerald-400' },
-                  { icon: Video, action: 'Video Analysis', points: '+25 pts', color: 'text-blue-400' },
-                  { icon: Flame, action: 'Daily Streak', points: '+5 pts/day', color: 'text-orange-400' },
-                  { icon: Trophy, action: 'Win Matches', points: '+20 pts', color: 'text-yellow-400' },
-                  { icon: Medal, action: 'Unlock Achievements', points: '+50-500 pts', color: 'text-purple-400' },
-                  { icon: Users, action: 'Refer Friends', points: '+100 pts', color: 'text-pink-400' },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-3 p-3 bg-slate-900/50 rounded-xl">
-                    <item.icon className={`w-5 h-5 ${item.color}`} />
-                    <div>
-                      <p className="text-white text-sm font-medium">{item.action}</p>
-                      <p className="text-amber-400 text-xs font-bold">{item.points}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function StatCard({ icon, value, label, color }: { icon: React.ReactNode; value: number | string; label: string; color: string }) {
-  return (
-    <motion.div
-      whileHover={{ scale: 1.02 }}
-      className={`bg-slate-800/50 border border-${color}-500/30 rounded-xl p-4 text-center`}
-    >
-      <div className="flex justify-center mb-2">{icon}</div>
-      <p className="text-2xl font-bold text-white">{value}</p>
-      <p className="text-sm text-gray-400">{label}</p>
-    </motion.div>
-  );
-}
-
-function AchievementMiniCard({ achievement, index }: { achievement: Achievement; index: number }) {
-  const tier = tierConfig[achievement.tier as keyof typeof tierConfig] || tierConfig.BRONZE;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.1 }}
-      whileHover={{ scale: 1.05 }}
-      className={`bg-gradient-to-br ${tier.color} rounded-xl p-4 text-center shadow-lg`}
-    >
-      <span className="text-4xl block mb-2">{achievement.icon || tier.icon}</span>
-      <p className="text-white font-semibold text-sm truncate">{achievement.name}</p>
-      <p className="text-white/70 text-xs">+{achievement.points} pts</p>
-    </motion.div>
-  );
-}
-
-function NearUnlockCard({ achievement, index }: { achievement: Achievement; index: number }) {
-  const progress = achievement.progress?.percentage || 0;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: index * 0.1 }}
-      className="bg-slate-800/50 border border-slate-700 rounded-xl p-4"
-    >
-      <div className="flex items-center gap-3 mb-3">
-        <span className="text-3xl">{achievement.icon || '🏆'}</span>
-        <div className="flex-1 min-w-0">
-          <p className="text-white font-semibold truncate">{achievement.name}</p>
-          <p className="text-emerald-400 text-sm font-bold">{progress.toFixed(0)}% complete</p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              )
+            })}
+          </AnimatePresence>
         </div>
-      </div>
-      <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
-        <motion.div
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.8 }}
-          className="h-full bg-gradient-to-r from-emerald-500 to-teal-500"
-        />
-      </div>
-      <p className="text-gray-400 text-xs mt-2">
-        {achievement.progress?.currentValue || 0}/{achievement.progress?.targetValue || 0}
-      </p>
-    </motion.div>
-  );
-}
 
-function AchievementCard({ achievement, index }: { achievement: Achievement; index: number }) {
-  const tier = tierConfig[achievement.tier as keyof typeof tierConfig] || tierConfig.BRONZE;
-  const isLocked = !achievement.unlocked;
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ delay: index * 0.03 }}
-      whileHover={{ scale: 1.05, y: -4 }}
-      className={`relative rounded-xl p-4 text-center transition-all ${
-        isLocked
-          ? 'bg-slate-800/30 border border-slate-700/50'
-          : `bg-gradient-to-br ${tier.color} shadow-lg`
-      }`}
-    >
-      {isLocked && (
-        <div className="absolute top-2 right-2">
-          <Lock className="w-4 h-4 text-gray-500" />
-        </div>
-      )}
-      <span className={`text-4xl block mb-2 ${isLocked ? 'grayscale opacity-40' : ''}`}>
-        {achievement.icon || tier.icon}
-      </span>
-      <p className={`font-semibold text-sm truncate ${isLocked ? 'text-gray-500' : 'text-white'}`}>
-        {achievement.name}
-      </p>
-      <p className={`text-xs ${isLocked ? 'text-gray-600' : 'text-white/70'}`}>
-        +{achievement.points} pts
-      </p>
-      {!isLocked && (
+        {/* Partner Sponsors Section */}
         <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1 }}
-          className="absolute -top-1 -right-1"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="mt-16"
         >
-          <Sparkles className="w-4 h-4 text-yellow-300" />
+          <div className="text-center mb-8">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">Our Partner Sponsors</h2>
+            <p className="text-slate-500">Amazing brands that make these rewards possible</p>
+          </div>
+          
+          <div className="flex flex-wrap justify-center items-center gap-8 py-6 px-8 bg-white/60 backdrop-blur-sm rounded-2xl border border-slate-200">
+            {['Franklin Sports', 'Selkirk', 'Nike', 'HEAD', 'Mission'].map((brand, i) => (
+              <motion.div
+                key={brand}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 + i * 0.1 }}
+                className="px-6 py-3 text-slate-400 font-semibold text-lg hover:text-cyan-600 transition-colors cursor-pointer"
+              >
+                {brand}
+              </motion.div>
+            ))}
+          </div>
         </motion.div>
-      )}
-    </motion.div>
-  );
-}
 
-function QuickLink({ href, icon, title, description, color }: {
-  href: string; icon: React.ReactNode; title: string; description: string; color: string;
-}) {
-  return (
-    <Link href={href}>
-      <motion.div
-        whileHover={{ scale: 1.02, y: -4 }}
-        className={`bg-slate-800/50 border border-${color}-500/30 rounded-xl p-6 hover:bg-slate-800/70 transition-all group`}
-      >
-        <div className={`text-${color}-400 mb-3 group-hover:scale-110 transition-transform`}>
-          {icon}
-        </div>
-        <h3 className="text-white font-bold mb-1">{title}</h3>
-        <p className="text-gray-400 text-sm">{description}</p>
-      </motion.div>
-    </Link>
-  );
+        {/* How It Works */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="mt-16"
+        >
+          <div className="text-center mb-10">
+            <h2 className="text-2xl font-bold text-slate-800 mb-2">How to Earn Points</h2>
+            <p className="text-slate-500">Every action on your pickleball journey earns you rewards</p>
+          </div>
+          
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { icon: Target, action: 'Complete Training', points: '+10-50', color: 'from-emerald-500 to-teal-500', bg: 'bg-emerald-50' },
+              { icon: Video, action: 'Video Analysis', points: '+25', color: 'from-blue-500 to-cyan-500', bg: 'bg-blue-50' },
+              { icon: Flame, action: 'Daily Streak', points: '+5/day', color: 'from-orange-500 to-amber-500', bg: 'bg-orange-50' },
+              { icon: Medal, action: 'Achievements', points: '+50-500', color: 'from-purple-500 to-pink-500', bg: 'bg-purple-50' },
+            ].map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 + i * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                className={cn(
+                  "p-6 rounded-2xl text-center transition-all",
+                  item.bg, "border border-slate-100"
+                )}
+              >
+                <div className={cn(
+                  "w-14 h-14 mx-auto mb-4 rounded-xl bg-gradient-to-br flex items-center justify-center",
+                  item.color
+                )}>
+                  <item.icon className="w-7 h-7 text-white" />
+                </div>
+                <p className="font-semibold text-slate-800 mb-1">{item.action}</p>
+                <p className={cn(
+                  "text-lg font-bold bg-gradient-to-r bg-clip-text text-transparent",
+                  item.color
+                )}>
+                  {item.points} pts
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* CTA Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-16 text-center"
+        >
+          <Card className="bg-gradient-to-r from-cyan-500 via-purple-500 to-amber-500 border-0 p-8 text-white">
+            <h2 className="text-2xl font-bold mb-3">Ready to Earn More?</h2>
+            <p className="text-white/80 mb-6 max-w-lg mx-auto">
+              Start your next training session and watch your points grow. 
+              The more you train, the more you earn!
+            </p>
+            <div className="flex flex-wrap justify-center gap-4">
+              <Link href="/train">
+                <Button size="lg" className="bg-white text-slate-900 hover:bg-slate-100 shadow-lg">
+                  <Zap className="w-5 h-5 mr-2" /> Start Training
+                </Button>
+              </Link>
+              <Link href="/progress/achievements">
+                <Button size="lg" variant="outline" className="border-2 border-white text-white hover:bg-white/20">
+                  <Trophy className="w-5 h-5 mr-2" /> View Achievements
+                </Button>
+              </Link>
+            </div>
+          </Card>
+        </motion.div>
+      </section>
+    </div>
+  )
 }
