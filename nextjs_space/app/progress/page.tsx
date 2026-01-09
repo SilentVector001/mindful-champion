@@ -17,15 +17,15 @@ export default async function Progress() {
   const userData = await prisma.user.findUnique({
     where: { id: session.user.id },
     include: {
-      matches: {
+      Match: {
         orderBy: { date: 'desc' },
         take: 20
       },
-      trainingPlans: {
+      TrainingPlan: {
         orderBy: { createdAt: 'desc' },
         take: 10
       },
-      mentalSessions: {
+      MentalSession: {
         orderBy: { createdAt: 'desc' },
         take: 10
       }
