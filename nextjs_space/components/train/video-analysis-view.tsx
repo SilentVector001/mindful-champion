@@ -306,7 +306,7 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Link href="/train/analysis">
+            <Link href="/train/video">
               <Button variant="ghost" className="text-slate-400 hover:text-white">
                 <ArrowLeft className="w-4 h-4 mr-2" /> Back
               </Button>
@@ -341,7 +341,8 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                     onPlay={() => setIsPlaying(true)}
                     onPause={() => setIsPlaying(false)}
                     playsInline
-                    poster="/images/video-poster.jpg"
+                    controls
+                    crossOrigin="anonymous"
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-slate-800 to-slate-900">
@@ -465,7 +466,7 @@ export default function VideoAnalysisView({ analysis, user }: VideoAnalysisViewP
                     </div>
                   ))}
                 </div>
-                <Link href="/train/analysis">
+                <Link href="/train/video">
                   <Button variant="link" className="w-full mt-3 text-cyan-400">
                     View All Videos <ChevronRight className="w-4 h-4 ml-1" />
                   </Button>
