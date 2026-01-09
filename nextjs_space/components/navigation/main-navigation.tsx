@@ -158,7 +158,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     Mindful Champion
                   </span>
                   <span className="ml-2 px-2 py-0.5 text-[10px] font-bold rounded-full bg-gradient-to-r from-cyan-500 to-purple-500 text-white animate-pulse">
-                    v1.50 BETA
+                    v2.0 BETA
                   </span>
                 </div>
               </Link>
