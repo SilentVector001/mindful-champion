@@ -24,6 +24,14 @@ export async function POST(request: NextRequest) {
   console.log('[Video Upload] Starting upload request')
   
   try {
+    const { bucketName, folderPrefix } = getBucketConfig()
+    console.log('[Video Upload] Bucket:', bucketName, 'Prefix:', folderPrefix)
+    
+    if (!bucketName) {
+      console.error('[Video Upload] AWS_BUCKET_NAME not configured')
+      return NextResponse.json({ error: 'Storage not configured' }, { status: 500 })
+    }
+
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
@@ -52,7 +60,6 @@ export async function POST(request: NextRequest) {
 
       const timestamp = Date.now()
       const sanitizedName = fileName.replace(/[^a-zA-Z0-9.-]/g, '_')
-      const { bucketName, folderPrefix } = getBucketConfig()
       const s3Key = `${folderPrefix}videos/${user.id}/${timestamp}-${sanitizedName}`
 
       // Create presigned URL
@@ -63,8 +70,10 @@ export async function POST(request: NextRequest) {
         ContentType: fileContentType || 'video/mp4'
       })
 
+      console.log('[Video Upload] Creating presigned URL for key:', s3Key)
       const uploadUrl = await getSignedUrl(s3Client, command, { expiresIn: 3600 })
-      const videoUrl = `https://${bucketName}.s3.amazonaws.com/${s3Key}`
+      const videoUrl = `https://${bucketName}.s3.us-west-2.amazonaws.com/${s3Key}`
+      console.log('[Video Upload] Presigned URL created successfully')
 
       // Create pending video record
       const videoId = `vid_${timestamp}_${Math.random().toString(36).substr(2, 9)}`
@@ -77,7 +86,8 @@ export async function POST(request: NextRequest) {
           cloudStoragePath: s3Key,
           videoUrl: videoUrl,
           analysisStatus: 'PENDING',
-          overallScore: 0
+          overallScore: 0,
+          fileSize: fileSize || 0
         }
       })
 
@@ -96,10 +106,9 @@ export async function POST(request: NextRequest) {
 
     console.log('[Video Upload] Direct upload:', file.name, 'Size:', file.size)
 
-    const timestamp = Date.now()
-    const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
-    const { bucketName, folderPrefix } = getBucketConfig()
-    const s3Key = `${folderPrefix}videos/${user.id}/${timestamp}-${sanitizedName}`
+    const timestamp2 = Date.now()
+    const sanitizedName2 = file.name.replace(/[^a-zA-Z0-9.-]/g, '_')
+    const s3Key2 = `${folderPrefix}videos/${user.id}/${timestamp2}-${sanitizedName2}`
 
     const s3Client = createS3Client()
     const arrayBuffer = await file.arrayBuffer()
@@ -107,29 +116,30 @@ export async function POST(request: NextRequest) {
 
     await s3Client.send(new PutObjectCommand({
       Bucket: bucketName,
-      Key: s3Key,
+      Key: s3Key2,
       Body: buffer,
       ContentType: file.type || 'video/mp4'
     }))
 
-    const videoUrl = `https://${bucketName}.s3.amazonaws.com/${s3Key}`
-    const videoId = `vid_${timestamp}_${Math.random().toString(36).substr(2, 9)}`
+    const videoUrl2 = `https://${bucketName}.s3.us-west-2.amazonaws.com/${s3Key2}`
+    const videoId2 = `vid_${timestamp2}_${Math.random().toString(36).substr(2, 9)}`
 
     await prisma.videoAnalysis.create({
       data: {
-        id: videoId,
+        id: videoId2,
         userId: user.id,
         title: title,
         fileName: file.name,
-        cloudStoragePath: s3Key,
-        videoUrl: videoUrl,
+        cloudStoragePath: s3Key2,
+        videoUrl: videoUrl2,
         analysisStatus: 'PENDING',
-        overallScore: 0
+        overallScore: 0,
+        fileSize: file.size
       }
     })
 
-    console.log('[Video Upload] Direct upload complete:', videoId)
-    return NextResponse.json({ success: true, videoId, videoUrl, cloud_storage_path: s3Key })
+    console.log('[Video Upload] Direct upload complete:', videoId2)
+    return NextResponse.json({ success: true, videoId: videoId2, videoUrl: videoUrl2, cloud_storage_path: s3Key2 })
 
   } catch (error: any) {
     console.error('[Video Upload] Error:', error)
