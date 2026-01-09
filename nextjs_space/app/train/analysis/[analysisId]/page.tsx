@@ -4,8 +4,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { prisma } from '@/lib/db'
-import VideoAnalysisResults from '@/components/train/video-analysis-results'
-import { ErrorBoundary } from '@/components/error-boundary'
+import VideoAnalysisView from '@/components/train/video-analysis-view'
 
 export default async function VideoAnalysisDetailPage({ 
   params 
@@ -19,18 +18,14 @@ export default async function VideoAnalysisDetailPage({
   }
 
   // Fetch the video analysis
-  const analysis = await prisma.videoAnalysis.findUnique({
-    where: { id: params.analysisId },
-    include: {
-      user: {
-        select: {
-          id: true,
-          name: true,
-          email: true
-        }
-      }
-    }
-  })
+  let analysis = null
+  try {
+    analysis = await prisma.videoAnalysis.findUnique({
+      where: { id: params.analysisId }
+    })
+  } catch (error) {
+    console.error('Error fetching analysis:', error)
+  }
 
   if (!analysis) {
     notFound()
@@ -39,18 +34,27 @@ export default async function VideoAnalysisDetailPage({
   // Check if user owns this analysis
   if (analysis.userId !== session.user.id) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="text-center">
-          <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-          <p className="text-muted-foreground">You don't have permission to view this analysis.</p>
+          <h1 className="text-2xl font-bold text-white mb-4">Access Denied</h1>
+          <p className="text-gray-400">You don't have permission to view this analysis.</p>
         </div>
       </div>
     )
   }
 
-  return (
-    <ErrorBoundary>
-      <VideoAnalysisResults videoId={analysis.id} />
-    </ErrorBoundary>
-  )
+  // Get user data
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: {
+      id: true,
+      name: true,
+      firstName: true,
+      email: true,
+      image: true,
+      subscriptionTier: true
+    }
+  })
+
+  return <VideoAnalysisView analysis={analysis} user={user} />
 }
