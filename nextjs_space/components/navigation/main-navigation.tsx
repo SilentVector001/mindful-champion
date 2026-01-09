@@ -374,17 +374,7 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                     </Link>
                   </DropdownMenuItem>
                 </InfoTooltip>
-                <InfoTooltip content="Celebrate your badges, streaks, and accomplishments" side="right">
-                  <DropdownMenuItem asChild>
-                    <Link href="/progress/achievements" className="flex items-center gap-3 py-3 cursor-pointer">
-                      <Award className="w-4 h-4 text-emotion-warning" />
-                      <div>
-                        <p className="font-medium">Achievement Gallery</p>
-                        <p className="text-xs text-gray-500">Badges & rewards</p>
-                      </div>
-                    </Link>
-                  </DropdownMenuItem>
-                </InfoTooltip>
+                
                 <InfoTooltip content="Redeem your achievement points for exclusive sponsor rewards" side="right">
                   <DropdownMenuItem asChild>
                     <Link href="/marketplace" className="flex items-center gap-3 py-3 cursor-pointer">
@@ -919,13 +909,6 @@ export default function MainNavigation({ user }: MainNavigationProps) {
                   <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
                     <History className="w-5 h-5 text-champion-blue" />
                     Match History
-                  </Button>
-                </Link>
-
-                <Link href="/progress/achievements" onClick={closeMobileMenu}>
-                  <Button variant="ghost" className="w-full justify-start gap-3 h-12 text-base">
-                    <Award className="w-5 h-5 text-orange-500" />
-                    Achievement Gallery
                   </Button>
                 </Link>
 
