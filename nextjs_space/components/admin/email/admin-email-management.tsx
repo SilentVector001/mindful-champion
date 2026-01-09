@@ -706,7 +706,7 @@ export default function AdminEmailManagement() {
                       <SelectValue placeholder="Filter by type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">All Types</SelectItem>
+                      <SelectItem value="all">All Types</SelectItem>
                       <SelectItem value="ADMIN_CUSTOM">Custom</SelectItem>
                       <SelectItem value="ADMIN_TEST">Test</SelectItem>
                       <SelectItem value="SPONSOR_APPLICATION">Sponsor Application</SelectItem>

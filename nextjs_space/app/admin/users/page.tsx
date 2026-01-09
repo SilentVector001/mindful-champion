@@ -14,20 +14,55 @@ export default async function AdminUsersPage() {
 
   const users = await prisma.user.findMany({
     orderBy: { createdAt: 'desc' },
-    include: {
-      SecurityLog: { orderBy: { createdAt: 'desc' }, take: 20 },
-      Payment: { orderBy: { createdAt: 'desc' }, take: 5 },
-      Match: { orderBy: { createdAt: 'desc' }, take: 10 },
-      Goal: true,
-      UserAchievement: true,
-      VideoAnalysis: { orderBy: { createdAt: 'desc' }, take: 5 },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      skillLevel: true,
+      playerRating: true,
+      subscriptionTier: true,
+      subscriptionStatus: true,
+      isTrialActive: true,
+      trialEndDate: true,
+      createdAt: true,
+      lastActiveDate: true,
+      loginCount: true,
+      welcomeEmailSent: true,
+      welcomeEmailSentAt: true,
+      totalMatches: true,
+      totalWins: true,
+      currentStreak: true,
+      _count: {
+        select: {
+          Match: true,
+          Goal: true,
+          UserAchievement: true,
+          Payment: true,
+          SecurityLog: true,
+        }
+      }
     }
   })
 
-  const emailLogs = await prisma.emailLog.findMany({
-    orderBy: { sentAt: 'desc' },
-    take: 100
-  })
+  let emailLogs: any[] = []
+  try {
+    emailLogs = await prisma.emailNotification.findMany({
+      orderBy: { sentAt: 'desc' },
+      take: 100,
+      select: {
+        id: true,
+        type: true,
+        status: true,
+        sentAt: true,
+        userId: true
+      }
+    })
+  } catch (e) {
+    console.error('Failed to fetch email logs:', e)
+  }
 
   return <AdminUsersClient users={users} emailLogs={emailLogs} />
 }

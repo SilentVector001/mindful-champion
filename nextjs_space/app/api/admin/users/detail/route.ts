@@ -32,41 +32,35 @@ export async function GET(request: NextRequest) {
       matches,
       securityLogs,
       pageViews,
-      videoInteractions,
       drillCompletions,
-      userSessions,
       achievementStats,
     ] = await Promise.all([
       // Main user data
       prisma.user.findUnique({
         where: { id: userId },
-        include: {
-          subscriptions: {
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-          },
-          payments: {
-            orderBy: { createdAt: 'desc' },
-            take: 10,
-          },
-          userAchievements: {
-            include: {
-              achievement: true,
-            },
-            orderBy: { unlockedAt: 'desc' },
-            take: 20,
-          },
-          goals: {
-            include: {
-              milestones: true,
-            },
-            orderBy: { createdAt: 'desc' },
-            take: 10,
-          },
-          matches: {
-            orderBy: { date: 'desc' },
-            take: 10,
-          },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          firstName: true,
+          lastName: true,
+          role: true,
+          skillLevel: true,
+          playerRating: true,
+          subscriptionTier: true,
+          subscriptionStatus: true,
+          isTrialActive: true,
+          trialEndDate: true,
+          createdAt: true,
+          lastActiveDate: true,
+          loginCount: true,
+          welcomeEmailSent: true,
+          welcomeEmailSentAt: true,
+          totalMatches: true,
+          totalWins: true,
+          currentStreak: true,
+          image: true,
+          onboardingCompleted: true,
         }
       }),
       
@@ -86,7 +80,7 @@ export async function GET(request: NextRequest) {
       prisma.achievementProgress.findMany({
         where: { userId },
         include: {
-          achievement: true,
+          Achievement: true,
         },
         orderBy: { percentage: 'desc' },
       }),
@@ -95,7 +89,7 @@ export async function GET(request: NextRequest) {
       prisma.goal.findMany({
         where: { userId },
         include: {
-          milestones: true,
+          Milestone: true,
         },
         orderBy: { createdAt: 'desc' },
       }),
@@ -126,13 +120,6 @@ export async function GET(request: NextRequest) {
         take: 100,
       }),
       
-      // Video interactions
-      prisma.videoInteraction.findMany({
-        where: { userId },
-        orderBy: { timestamp: 'desc' },
-        take: 50,
-      }),
-      
       // Drill completions
       prisma.drillCompletion.findMany({
         where: { userId },
@@ -140,18 +127,30 @@ export async function GET(request: NextRequest) {
         take: 50,
       }),
       
-      // User sessions
-      prisma.userSession.findMany({
-        where: { userId: userId },
-        orderBy: { startTime: 'desc' },
-        take: 30,
-      }),
-      
       // Achievement stats
       prisma.userAchievementStats.findUnique({
         where: { userId },
       }),
     ])
+    
+    // Fetch video interactions and sessions separately (may not exist)
+    let videoInteractions: any[] = []
+    let userSessions: any[] = []
+    try {
+      videoInteractions = await prisma.videoInteraction.findMany({
+        where: { userId },
+        orderBy: { timestamp: 'desc' },
+        take: 50,
+      })
+    } catch (e) { console.log('VideoInteraction not available') }
+    
+    try {
+      userSessions = await prisma.userSession.findMany({
+        where: { visitorId: userId },
+        orderBy: { startTime: 'desc' },
+        take: 30,
+      })
+    } catch (e) { console.log('UserSession not available') }
 
     if (!user) {
       return NextResponse.json({ error: "User not found" }, { status: 404 })
