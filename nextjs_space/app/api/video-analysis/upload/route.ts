@@ -87,7 +87,8 @@ export async function POST(request: NextRequest) {
           videoUrl: videoUrl,
           analysisStatus: 'PENDING',
           overallScore: 0,
-          fileSize: fileSize || 0
+          fileSize: fileSize || 0,
+          duration: 0
         }
       })
 
@@ -134,7 +135,8 @@ export async function POST(request: NextRequest) {
         videoUrl: videoUrl2,
         analysisStatus: 'PENDING',
         overallScore: 0,
-        fileSize: file.size
+        fileSize: file.size,
+        duration: 0
       }
     })
 
