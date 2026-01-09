@@ -117,25 +117,31 @@ export default async function AdminPage() {
   const revenueTrend = calculatePercentChange(totalRevenue, previousRevenue)
   const matchesTrend = calculatePercentChange(matches, previousMatches)
 
+  // Fetch email logs
+  const emailLogs = await prisma.emailLog.findMany({
+    orderBy: { sentAt: 'desc' },
+    take: 50
+  })
+
   const adminData = {
     stats: {
       totalUsers: users,
       activeSubscriptions,
-      totalRevenue: totalRevenue / 100, // Convert from cents to dollars
+      totalRevenue: totalRevenue / 100,
       monthlyRevenue: monthlyRevenue / 100,
       totalMatches: matches,
       trialUsers,
       freeUsers,
       premiumUsers,
       proUsers,
-      // Add trend data
       userTrend,
       revenueTrend,
       matchesTrend,
-      subscriptionTrend: calculatePercentChange(activeSubscriptions, 0), // Can be improved with historical data
+      subscriptionTrend: calculatePercentChange(activeSubscriptions, 0),
     },
     recentUsers,
     payments: payments.slice(0, 10),
+    emailLogs,
     conversionRate: users > 0 ? ((premiumUsers + proUsers) / users * 100) : 0
   }
 

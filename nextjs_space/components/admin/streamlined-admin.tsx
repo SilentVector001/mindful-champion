@@ -330,50 +330,90 @@ export default function StreamlinedAdmin({ initialData }: StreamlinedAdminProps)
         )}
 
         {activeView === 'emails' && (
-          <Card className="bg-slate-800 border-slate-700">
-            <CardHeader className="pb-3">
-              <CardTitle className="text-white flex items-center gap-2">
-                <Mail className="w-5 h-5 text-cyan-400" />
-                Pending Welcome Emails
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {filteredUsers.filter(u => !u.welcomeEmailSent).length === 0 ? (
-                  <div className="text-center py-8">
-                    <CheckCircle className="w-12 h-12 text-emerald-400 mx-auto mb-3" />
-                    <p className="text-white font-medium">All welcome emails sent!</p>
-                    <p className="text-slate-400 text-sm">No pending emails</p>
+          <div className="space-y-6">
+            {/* Pending Emails */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Send className="w-5 h-5 text-cyan-400" />
+                  Pending Welcome Emails
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {filteredUsers.filter(u => !u.welcomeEmailSent).length === 0 ? (
+                    <div className="text-center py-4">
+                      <CheckCircle className="w-8 h-8 text-emerald-400 mx-auto mb-2" />
+                      <p className="text-slate-400 text-sm">All welcome emails sent!</p>
+                    </div>
+                  ) : (
+                    filteredUsers.filter(u => !u.welcomeEmailSent).map((user: any) => (
+                      <div key={user.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
+                        <div>
+                          <p className="text-white font-medium">
+                            {user.firstName || user.name || 'User'} {user.lastName || ''}
+                          </p>
+                          <p className="text-slate-400 text-sm">{user.email}</p>
+                        </div>
+                        <Button
+                          onClick={() => sendWelcomeEmail(user.id, user.email)}
+                          disabled={sendingEmail === user.id}
+                          size="sm"
+                          className="bg-cyan-500 hover:bg-cyan-600 text-white"
+                        >
+                          {sendingEmail === user.id ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                        </Button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Email History */}
+            <Card className="bg-slate-800 border-slate-700">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-white flex items-center gap-2">
+                  <Mail className="w-5 h-5 text-cyan-400" />
+                  Email History ({initialData?.emailLogs?.length || 0} sent)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {!initialData?.emailLogs?.length ? (
+                  <div className="text-center py-8 text-slate-400">
+                    <Mail className="w-10 h-10 mx-auto mb-3 opacity-50" />
+                    <p>No emails have been sent yet</p>
                   </div>
                 ) : (
-                  filteredUsers.filter(u => !u.welcomeEmailSent).map((user: any) => (
-                    <div key={user.id} className="flex items-center justify-between p-4 bg-slate-700/50 rounded-lg">
-                      <div>
-                        <p className="text-white font-medium">
-                          {user.firstName || user.name || 'User'} {user.lastName || ''}
-                        </p>
-                        <p className="text-slate-400 text-sm">{user.email}</p>
-                        <p className="text-slate-500 text-xs">
-                          Joined {formatDistanceToNow(new Date(user.createdAt), { addSuffix: true })}
-                        </p>
+                  <div className="space-y-2 max-h-96 overflow-y-auto">
+                    {initialData.emailLogs.map((log: any) => (
+                      <div key={log.id} className="flex items-center justify-between p-3 bg-slate-700/50 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          {log.status === 'SENT' ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-400" />
+                          ) : (
+                            <AlertCircle className="w-4 h-4 text-red-400" />
+                          )}
+                          <div>
+                            <p className="text-white text-sm">{log.type}</p>
+                            <p className="text-slate-400 text-xs">{log.recipientEmail}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <Badge variant="outline" className={log.status === 'SENT' ? 'border-emerald-500/50 text-emerald-400' : 'border-red-500/50 text-red-400'}>
+                            {log.status}
+                          </Badge>
+                          <p className="text-slate-500 text-xs mt-1">
+                            {formatDistanceToNow(new Date(log.sentAt), { addSuffix: true })}
+                          </p>
+                        </div>
                       </div>
-                      <Button
-                        onClick={() => sendWelcomeEmail(user.id, user.email)}
-                        disabled={sendingEmail === user.id}
-                        className="bg-cyan-500 hover:bg-cyan-600 text-white"
-                      >
-                        {sendingEmail === user.id ? (
-                          <><RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Sending...</>
-                        ) : (
-                          <><Send className="w-4 h-4 mr-2" /> Send Welcome Email</>
-                        )}
-                      </Button>
-                    </div>
-                  ))
+                    ))}
+                  </div>
                 )}
-              </div>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </div>
         )}
       </div>
     </div>

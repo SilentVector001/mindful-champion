@@ -30,18 +30,18 @@ function extractState(location?: string | null): string | null {
 
 export async function GET() {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session?.user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const now = new Date()
     
     // Fetch from DB first
-    let upcomingTournaments = await prisma.tournament.findMany({
-      where: { startDate: { gte: now } },
-      select: { id: true, state: true, location: true }
-    })
+    let upcomingTournaments: any[] = []
+    try {
+      upcomingTournaments = await prisma.tournament.findMany({
+        where: { startDate: { gte: now } },
+        select: { id: true, state: true, location: true }
+      })
+    } catch (dbError) {
+      console.log('[by-state] DB query failed, using static data')
+    }
 
     // Fallback to static data if no DB tournaments
     if (!upcomingTournaments?.length) {
@@ -52,6 +52,7 @@ export async function GET() {
           state: extractState(t.location),
           location: t.location
         }))
+      console.log(`[by-state] Using ${upcomingTournaments.length} static tournaments`)
     }
 
     // Count tournaments by state
@@ -93,7 +94,8 @@ export async function GET() {
     return NextResponse.json({
       states: allStates,
       totalEvents,
-      statesWithTournaments
+      statesWithTournaments,
+      lastUpdated: new Date().toISOString()
     })
   } catch (error) {
     console.error('Error fetching tournaments by state:', error)
