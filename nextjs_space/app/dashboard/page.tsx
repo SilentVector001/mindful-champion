@@ -14,7 +14,7 @@ async function getUserPrograms(userId: string) {
     return await db.userProgram.findMany({
       where: { userId },
       include: {
-        program: true
+        TrainingProgram: true
       },
       orderBy: { createdAt: 'desc' }
     })

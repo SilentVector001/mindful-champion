@@ -31,7 +31,7 @@ export default async function AdminPage() {
   // Fetch secondary data in smaller batches
   const [payments, matches, recentUsers] = await Promise.all([
     prisma.payment.findMany({
-      include: { user: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } },
+      include: { User: { select: { id: true, name: true, firstName: true, lastName: true, email: true } } },
       orderBy: { createdAt: 'desc' },
       take: 20
     }),
